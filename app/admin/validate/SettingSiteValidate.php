@@ -16,14 +16,14 @@ use think\Validate;
 class SettingSiteValidate extends Validate
 {
     protected $rule = [
-        'options.site_name'             => 'require',
-        'admin_settings.admin_password' => 'alphaNum|checkAlias'
+        'name'             => 'require',
+        'admin' => 'alphaNum|checkAlias'
     ];
 
     protected $message = [
-        'options.site_name.require'                => '网站名称不能为空',
-        'admin_settings.admin_password.alphaNum'   => '后台加密码只能是英文字母和数字',
-        'admin_settings.admin_password.checkAlias' => '此加密码不能使用!',
+        'name.require'                => '网站名称不能为空',
+        'admin.alphaNum'   => '后台加密码只能是英文字母和数字',
+        'admin.checkAlias' => '此加密码不能使用!',
     ];
 
 

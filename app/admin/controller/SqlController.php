@@ -198,7 +198,7 @@ class SqlController extends AdminbaseController {
      * )
      */
     public function query(){
-        $data=$this->request->param();
+        $data=$this->request->param('','','trim');
         if(empty($data['type'])){
             $data['type']=0;
         }
@@ -230,6 +230,7 @@ class SqlController extends AdminbaseController {
         return $this->fetch();
         
     }
+     
     /**
      * 数据字典导出
      * @adminMenu(
@@ -245,68 +246,71 @@ class SqlController extends AdminbaseController {
      */
     public function export()
     {
-        //PHP_EOL不行
-        //$line=PHP_EOL;
+        header("Content-type:text/html;charset=utf-8");
         $line="\n";
         $filename='数据字典'.date('Y-m-d-H-i-s').'.xls';
         $phpexcel = new PHPExcel();
-        
-        //设置文本格式
-        $str=PHPExcel_Cell_DataType::TYPE_STRING;
+        //链接数据库
+        $db=config('database'); 
         $dname='genele';
-        
         $m= mysqli_init();
         $m->options(MYSQLI_OPT_CONNECT_TIMEOUT, 2);//设置超时时间
-        $m->real_connect('localhost','root','root',$dname,'3306');
-        // $m=mysqli_connect('localhost','root','root',$dname,'3306');
+        $m=mysqli_connect($db['hostname'],$db['username'],$db['password'],$dname,$db['hostport']);
+          
         //查询表
+        mysqli_set_charset($m,'utf8');
         $tables=$m->query("show tables");
         $j=0;
-        //         $data = $tables->fetch_all(MYSQLI_ASSOC);
         while($tmp=($tables->fetch_assoc())){
             $table=$tmp['Tables_in_'.$dname];
-            //外键还是有问题
-            //             $table='sp_xunpan';
             $creat=$m->query('show create table '.$table);
-            
             $tmp_sql=$creat->fetch_assoc();
             if(empty($tmp_sql)){
                 zz_log('empty$table'.$table);
                 continue;
             }
-            
             //创建数据库表结构语句
             $sql=$tmp_sql['Create Table'];
-            
-            /*  //"CREATE TABLE `sheet1` ( `id` int(4) DEFAULT NULL, `pid` int(3)
-             NOT NULL DEFAULT '0' COMMENT 'sgf', `area_name` varchar(45) DEFAULT NULL,
-             `area_type` int(1) DEFAULT NULL, `area_code` int(4) DEFAULT NULL,
-             `area_postcode` int(6) DEFAULT NULL, `sort` int(2) DEFAULT NULL )
-             ENGINE=MyISAM DEFAULT CHARSET=utf8 */
-            //设置sheet
-            
             $phpexcel->createSheet();
             $phpexcel->setActiveSheetIndex($j);
             $sheet= $phpexcel->getActiveSheet();
-            //设置sheet表名
+            //设置sheet表名2
             $sheet->setTitle($table);
-            
             // 所有单元格默认高度
             $sheet->getDefaultRowDimension()->setRowHeight(20);
             $sheet->getDefaultColumnDimension()->setWidth(20);
             //单个宽度设置
             $sheet->getColumnDimension('C')->setWidth(30);
             $sheet->getColumnDimension('D')->setWidth(30);
-            
             //截取需要的字符串
+            //
             $first=strpos($sql,'(')+1;
-            $end=strrpos($sql,')');
-            $sql_end=trim(substr($sql,$end));
+            $end=strrpos($sql,')')+1;
+            $end0=strrpos($sql,'utf8')+4;
+            $sql_end=trim(substr($sql,$end,$end0-$end));
+            //截取外键字段
+            $first1=stripos($sql,'PRIMARY');
+            $end1=strripos($sql,')')-1;
+            $sql_end1=trim(substr($sql,$first1,$end1-$first1));
+            //截取数据表引擎字段
+            $first2=strrpos($sql,'utf8')+4;
+            $end2=strlen($sql);
+            $sql_end2=trim(substr($sql,$first2,$end2-$first2));
             
             $i=1;
+            $j++;
             $sheet
+            ->mergeCells('B1:D1')
             ->setCellValue('A'.$i, $j.'表'.$table)
-            ->setCellValue('B'.$i, $sql_end);
+            ->setCellValue('B'.$i,$sql_end2);
+            $i=2;
+            $sheet
+            ->mergeCells('A2:D2')
+            ->setCellValue('A'.$i,$sql_end);
+            $i=3;
+            $sheet
+            ->mergeCells('A3:D3')
+            ->setCellValue('A'.$i,$sql_end1);
             $i++;
             $sheet
             ->setCellValue('A'.$i, '字段名')
@@ -314,11 +318,10 @@ class SqlController extends AdminbaseController {
             ->setCellValue('C'.$i, '是否为空和默认值')
             ->setCellValue('D'.$i, '备注说明');
             
-            
-            $sql=trim(substr($sql,$first,$end-$first));
-            
+            //截取字段名 类型 是否为空 备注说明
+            $sql=trim(substr($sql,$first,$first1-$first-4));
             $fields=explode(",".$line,$sql);
-            
+            //遍历对应的字段名 类型 是否为空 备注说明
             foreach($fields as $k=>$v){
                 $v=trim($v);
                 
@@ -343,9 +346,10 @@ class SqlController extends AdminbaseController {
                 ->setCellValue('C'.$i, $default)
                 ->setCellValue('D'.$i, $comment);
             }
-            $j++;
+           
             
         }
+        
         //$m->colse();
         //在浏览器输出
         header('Content-Type: application/vnd.ms-excel');
@@ -361,7 +365,141 @@ class SqlController extends AdminbaseController {
         
         exit('index');
     }
-    
+    /**
+     * 数据字典导出1
+     * @adminMenu(
+     *     'name'   => ' 数据字典导出1',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '数据字典导出1',
+     *     'param'  => ''
+     * )
+     */
+    public function export1()
+    {
+        header("Content-type:text/html;charset=utf-8");
+        $line="\n";
+        $filename='数据字典部分'.date('Y-m-d-H-i-s').'.xls';
+        $phpexcel = new PHPExcel();
+        //链接数据库
+        $db=config('database');
+        $dname='genele';
+        $m= mysqli_init();
+        $m->options(MYSQLI_OPT_CONNECT_TIMEOUT, 2);//设置超时时间
+        $m=mysqli_connect($db['hostname'],$db['username'],$db['password'],$dname,$db['hostport']);
+        
+        //查询表
+        mysqli_set_charset($m,'utf8');
+        //需要导出的表
+        $tables=['sp_category2','sp_codegoods','sp_goods_photo'];
+        $j=0;
+        foreach($tables as $k=>$table){
+            
+            $creat=$m->query('show create table '.$table);
+            $tmp_sql=$creat->fetch_assoc();
+            if(empty($tmp_sql)){
+                zz_log('empty$table'.$table);
+                continue;
+            }
+            //创建数据库表结构语句
+            $sql=$tmp_sql['Create Table'];
+            $phpexcel->createSheet();
+            $phpexcel->setActiveSheetIndex($j);
+            $sheet= $phpexcel->getActiveSheet();
+            //设置sheet表名2
+            $sheet->setTitle($table);
+            // 所有单元格默认高度
+            $sheet->getDefaultRowDimension()->setRowHeight(20);
+            $sheet->getDefaultColumnDimension()->setWidth(20);
+            //单个宽度设置
+            $sheet->getColumnDimension('C')->setWidth(30);
+            $sheet->getColumnDimension('D')->setWidth(30);
+            //截取需要的字符串
+            //
+            $first=strpos($sql,'(')+1;
+            $end=strrpos($sql,')')+1;
+            $end0=strrpos($sql,'utf8')+4;
+            $sql_end=trim(substr($sql,$end,$end0-$end));
+            //截取外键字段
+            $first1=stripos($sql,'PRIMARY');
+            $end1=strripos($sql,')')-1;
+            $sql_end1=trim(substr($sql,$first1,$end1-$first1));
+            //截取数据表引擎字段
+            $first2=strrpos($sql,'utf8')+4;
+            $end2=strlen($sql);
+            $sql_end2=trim(substr($sql,$first2,$end2-$first2));
+            
+            $i=1;
+            $j++;
+            $sheet
+            ->mergeCells('B1:D1')
+            ->setCellValue('A'.$i, $j.'表'.$table)
+            ->setCellValue('B'.$i,$sql_end2);
+            $i=2;
+            $sheet
+            ->mergeCells('A2:D2')
+            ->setCellValue('A'.$i,$sql_end);
+            $i=3;
+            $sheet
+            ->mergeCells('A3:D3')
+            ->setCellValue('A'.$i,$sql_end1);
+            $i++;
+            $sheet
+            ->setCellValue('A'.$i, '字段名')
+            ->setCellValue('B'.$i, '类型')
+            ->setCellValue('C'.$i, '是否为空和默认值')
+            ->setCellValue('D'.$i, '备注说明');
+            
+            //截取字段名 类型 是否为空 备注说明
+            $sql=trim(substr($sql,$first,$first1-$first-4));
+            $fields=explode(",".$line,$sql);
+            //遍历对应的字段名 类型 是否为空 备注说明
+            foreach($fields as $k=>$v){
+                $v=trim($v);
+                
+                $field_end=strpos($v,'`',1);
+                $field=trim(substr($v,1,$field_end-1));
+                
+                $type_end=strpos($v,')');
+                $type=trim(substr($v,$field_end+1,$type_end-$field_end));
+                
+                $comment_start=strpos($v,'COMMENT');
+                if($comment_start=== false){
+                    $default=trim(substr($v,$type_end+1));
+                    $comment='';
+                }else{
+                    $default=trim(substr($v,$type_end+1,$comment_start-$type_end-1));
+                    $comment=trim(substr($v,$comment_start+8));
+                }
+                $i++;
+                $sheet
+                ->setCellValue('A'.$i, $field)
+                ->setCellValue('B'.$i, $type)
+                ->setCellValue('C'.$i, $default)
+                ->setCellValue('D'.$i, $comment);
+            }
+           
+            
+        }
+        
+        //$m->colse();
+        //在浏览器输出
+        header('Content-Type: application/vnd.ms-excel');
+        header("Content-Disposition: attachment;filename=$filename");
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+        
+        $objwriter = PHPExcel_IOFactory::createWriter($phpexcel, 'Excel5');
+        $objwriter->save('php://output');
+        
+        exit('index');
+    }
     
 }
 

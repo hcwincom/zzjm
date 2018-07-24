@@ -1,0 +1,44 @@
+<include file="public@header" />
+</head>
+<body>
+
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:url('index')}">数据同步列表</a></li>
+			 
+		</ul>
+		<form method="post" class="js-ajax-form margin-top-20" action="">
+
+			 
+			<table class="table table-hover table-bordered table-list">
+				<thead>
+					<tr>
+					 
+						<th>备份文件名</th>
+
+						<th>操作</th>
+
+					</tr>
+				</thead>
+				<tbody>
+					<foreach name="list" item="vo">
+					<tr>
+					 
+						<td>{$key}</td>
+
+						<td>
+							<a href="{$vo}">同步</a>
+						</td>
+
+					</tr>
+					</foreach>
+				</tbody>
+
+			</table>
+
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>

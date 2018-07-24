@@ -11,10 +11,10 @@
 namespace cmf\controller;
 
 use think\Db;
-
+use think\View;
 class AdminBaseController extends BaseController
 {
-
+    protected $admin;
     public function _initialize()
     {
         // 监听admin_init
@@ -23,7 +23,7 @@ class AdminBaseController extends BaseController
         $session_admin_id = session('ADMIN_ID');
         if (!empty($session_admin_id)) {
             $user = Db::name('user')->where(['id' => $session_admin_id])->find();
-
+            $this->admin=$user;
             if (!$this->checkAccess($session_admin_id)) {
                 $this->error("您没有访问权限！");
             }
@@ -36,6 +36,8 @@ class AdminBaseController extends BaseController
                 exit();
             }
         }
+        View::share('zzsite', config('zzsite'));
+        View::share('zzajax', config('zzajax'));
     }
 
     public function _initializeView()

@@ -24,8 +24,8 @@ class HomeBaseController extends BaseController
         // 监听home_init
         hook('home_init');
         parent::_initialize();
-        $siteInfo = cmf_get_site_info();
-        View::share('site_info', $siteInfo);
+       
+        View::share('zzsite', config('zzsite'));
     }
 
     public function _initializeView()

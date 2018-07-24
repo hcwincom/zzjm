@@ -5,13 +5,19 @@
 		<ul class="nav nav-tabs">
 			<li><a href="{:url('user/index')}">{:lang('ADMIN_USER_INDEX')}</a></li>
 			<li><a href="{:url('user/add')}">{:lang('ADMIN_USER_ADD')}</a></li>
-			<li class="active"><a>编辑管理员</a></li>
+			<li class="active"><a href="{:url('user/edit',['id'=>$id])}">编辑管理员</a></li>
 		</ul>
-		<form method="post" class="form-horizontal js-ajax-form margin-top-20" action="{:url('User/editPost')}">
+		<form method="post" class="form-horizontal js-ajax-form{$zzajax} margin-top-20" action="{:url('User/editPost')}">
 			<div class="form-group">
 				<label for="input-user_login" class="col-sm-2 control-label"><span class="form-required">*</span>{:lang('USERNAME')}</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" id="input-user_login" name="user_login" value="{$user_login}">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-nickname" class="col-sm-2 control-label">昵称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-nickname" name="user_nickname" value="{$user_nickname}">
 				</div>
 			</div>
 			<div class="form-group">
@@ -24,6 +30,24 @@
 				<label for="input-user_email" class="col-sm-2 control-label"><span class="form-required">*</span>{:lang('EMAIL')}</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" id="input-user_email" name="user_email" value="{$user_email}">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-user_mobile" class="col-sm-2 control-label"><span class="form-required">*</span>手机号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-user_mobile" name="mobile" value="{$mobile}">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-department" class="col-sm-2 control-label"><span class="form-required">*</span>所属部门</label>
+				<div class="col-md-6 col-sm-10">
+					<select name="department" id="input-department">
+						 
+					<foreach name="departments" item="vo">
+						<option value="{$key}" <if condition="$key eq $department"></if>>{$vo}</option>
+					</foreach>
+					</select>
+					 
 				</div>
 			</div>
 			<div class="form-group">

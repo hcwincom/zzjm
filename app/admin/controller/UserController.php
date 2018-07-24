@@ -44,25 +44,38 @@ class UserController extends AdminBaseController
      */
     public function index()
     {
-        $where = ["user_type" => 1];
+        $types=[
+            'user_nickname'=>'昵称',
+            'user_login'=>'用户名', 
+            'user_email'=>'邮箱',
+            'mobile'=>'手机',
+            
+        ];
+        $where = ["p.user_type" => ['eq',1]];
         /**搜索条件**/
-        $userLogin = $this->request->param('user_login');
-        $userEmail = trim($this->request->param('user_email'));
-
-        if ($userLogin) {
-            $where['user_login'] = ['like', "%$userLogin%"];
-        }
-
-        if ($userEmail) {
-            $where['user_email'] = ['like', "%$userEmail%"];;
+        $data = $this->request->param();
+        if(empty($data['name'])){
+            $data['name']='';
+            $data['type1']='user_nickname';
+            $data['type2']=1;
+        }else{
+            if($data['type2']==1){
+                $where['p.'.$data['type1']]=['eq',$data['name']];
+            }else{
+                $where['p.'.$data['type1']]=['like','%'.$data['name'].'%'];
+            }
         }
         $users = Db::name('user')
-            ->where($where)
-            ->order("id DESC")
-            ->paginate(10);
-        $users->appends(['user_login' => $userLogin, 'user_email' => $userEmail]);
+        ->field('p.*,shop.name as shop_name,dt.name as dt_name')
+        ->alias('p')
+        ->join('cmf_shop shop','shop.id=p.shop')
+        ->join('cmf_department dt','dt.id=p.department')
+        ->where($where)
+        ->order("id DESC")
+        ->paginate();
+        
         // 获取分页显示
-        $page = $users->render();
+        $page = $users->appends($data)->render();
 
         $rolesSrc = Db::name('role')->select();
         $roles    = [];
@@ -73,6 +86,8 @@ class UserController extends AdminBaseController
         $this->assign("page", $page);
         $this->assign("roles", $roles);
         $this->assign("users", $users);
+        $this->assign("data", $data);
+        $this->assign("types", $types);
         return $this->fetch();
     }
 
@@ -91,7 +106,38 @@ class UserController extends AdminBaseController
      */
     public function add()
     {
-        $roles = Db::name('role')->where(['status' => 1])->order("id DESC")->select();
+        
+        $where=[
+            'status'=>['eq',1], 
+        ];
+        //只能添加比自己权限小的角色 ，即list_order>=自己
+        $admin=session('admin');
+        $aid=$admin['id'];
+        if($aid!=1){
+            $roles=Db::name('role_user')
+            ->field('r.list_order')
+            ->alias('ru')
+            ->join('cmf_role r','ru.role_id=r.id')
+            ->where('ru.user_id',$aid)
+            ->order('r.list_order asc')
+            ->find();
+            $where['list_order']=['egt',$roles['list_order']];
+        }
+        $roles = Db::name('role')->where($where)->order("list_order asc,id asc")->select();
+        //商家
+        $m_shop=Db::name('shop');
+        $where_shop=['status'=>1];
+        if($admin['shop']==1){ 
+            $shops=$m_shop->where($where_shop)->column('id,name'); 
+        }else{
+            $shops=[];
+        }
+        //部门
+        $where_dt=['status'=>1];
+        $departments=db('department')->where($where_dt)->column('id,name');
+        
+        $this->assign("shops", $shops);
+        $this->assign("departments", $departments);
         $this->assign("roles", $roles);
         return $this->fetch();
     }
@@ -111,6 +157,31 @@ class UserController extends AdminBaseController
      */
     public function addPost()
     {
+        //zz添加验证添加角色权限小于自己
+        $where=[
+            'status'=>['eq',1], 
+        ];
+        $admin=session('admin');
+        $aid=$admin['id'];
+        if($aid!=1){
+            $roles=Db::name('role_user')
+            ->field('r.list_order')
+            ->alias('ru')
+            ->join('cmf_role r','ru.role_id=r.id')
+            ->where('ru.user_id',$aid)
+            ->order('r.list_order asc')
+            ->find();
+            $where['list_order']=['egt',$roles['list_order']];
+        }
+        $roles = Db::name('role')->where($where)->column('id');
+        $role_ids = $_POST['role_id'];
+        //对比数组得到在$role_ids中却不在$roles中的值，如果有就错误了
+        $result = array_diff($role_ids, $roles);
+        if(!empty($result)){
+            $this->error('数据错误');
+        }
+        unset($where);
+        //原程序
         if ($this->request->isPost()) {
             if (!empty($_POST['role_id']) && is_array($_POST['role_id'])) {
                 $role_ids = $_POST['role_id'];
@@ -119,8 +190,31 @@ class UserController extends AdminBaseController
                 if ($result !== true) {
                     $this->error($result);
                 } else {
-                    $_POST['user_pass'] = cmf_password($_POST['user_pass']);
-                    $result             = DB::name('user')->insertGetId($_POST);
+                    //zz添加默认昵称,添加用户
+                    $data=$this->request->param();
+                    $reg=config('reg');
+                    if(preg_match($reg['user_login'][0], $data['user_login'])!=1){
+                        $this->error($reg['user_login'][1]);
+                    }
+                    if(empty($data['user_nickname'])){
+                        $data['user_nickname']=$data['user_login'];
+                    }
+                    if(preg_match($reg['mobile'][0], $data['mobile'])!=1){
+                        $this->error($reg['mobile'][1]);
+                    }
+                    
+                    $data_user=[
+                        'user_login'=>$data['user_login'],
+                        'user_nickname'=>$data['user_nickname'],
+                        'user_email'=>$data['user_email'],
+                        'user_pass'=>cmf_password($data['user_pass']),
+                        'mobile'=>$data['mobile'],
+                        //判断是总站添加还是分站添加
+                        'shop'=>(($admin['shop']==1)?$data['shop']:$admin['shop']),
+                        'department'=>$data['department'],
+                    ];
+                    
+                    $result = DB::name('user')->insertGetId($data_user);
                     if ($result !== false) {
                         //$role_user_model=M("RoleUser");
                         foreach ($role_ids as $role_id) {
@@ -161,7 +255,11 @@ class UserController extends AdminBaseController
         $this->assign("roles", $roles);
         $role_ids = DB::name('RoleUser')->where(["user_id" => $id])->column("role_id");
         $this->assign("role_ids", $role_ids);
-
+        //部门
+        $where_dt=['status'=>1];
+        $departments=db('department')->where($where_dt)->column('id,name');
+         
+        $this->assign("departments", $departments);
         $user = DB::name('user')->where(["id" => $id])->find();
         $this->assign($user);
         return $this->fetch();
@@ -197,7 +295,31 @@ class UserController extends AdminBaseController
                     // 验证失败 输出错误信息
                     $this->error($result);
                 } else {
-                    $result = DB::name('user')->update($_POST);
+                    //zz添加默认昵称,逐个添加用户
+                    $data=$this->request->param();
+                    $reg=config('reg');
+                    if(preg_match($reg['user_login'][0], $data['user_login'])!=1){
+                        $this->error($reg['user_login'][1]);
+                    }
+                    
+                    if(empty($data['user_nickname'])){
+                        $data['user_nickname']=$data['user_login'];
+                    }
+                    if(preg_match($reg['mobile'][0], $data['mobile'])!=1){
+                        $this->error($reg['mobile'][1]);
+                    }
+                    $data_user=[
+                        'id'=>$data['id'],
+                        'user_login'=>$data['user_login'],
+                        'user_nickname'=>$data['user_nickname'],
+                        'user_email'=>$data['user_email'], 
+                        'mobile'=>$data['mobile'], 
+                        'department'=>$data['department'],
+                    ];
+                    if(!empty($_POST['user_pass'])){
+                        $data_user['user_pass']=$_POST['user_pass'];
+                    }
+                    $result = DB::name('user')->update($data_user);
                     if ($result !== false) {
                         $uid = $this->request->param('id', 0, 'intval');
                         DB::name("RoleUser")->where(["user_id" => $uid])->delete();
@@ -236,7 +358,10 @@ class UserController extends AdminBaseController
     {
         $id   = cmf_get_current_admin_id();
         $user = Db::name('user')->where(["id" => $id])->find();
+         
+        $dt=db('department')->where('id',$user['department'])->value('name');
         $this->assign($user);
+        $this->assign('dt',$dt);
         return $this->fetch();
     }
 
@@ -260,6 +385,21 @@ class UserController extends AdminBaseController
             $data             = $this->request->post();
             $data['birthday'] = strtotime($data['birthday']);
             $data['id']       = cmf_get_current_admin_id();
+            $reg=config('reg');
+            if(empty($data['user_nickname'])){
+                $data['user_nickname']=$data['user_login'];
+            }
+            if(preg_match($reg['mobile'][0], $data['mobile'])!=1){
+                $this->error($reg['mobile'][1]);
+            }
+            $data_user=[
+                'id'=>$data['id'], 
+                'user_nickname'=>$data['user_nickname'], 
+                'mobile'=>$data['mobile'],
+                'birthday'=>$data['birthday'],
+                'sex'=>$data['sex'],
+            ];
+            
             $create_result    = Db::name('user')->update($data);;
             if ($create_result !== false) {
                 $this->success("保存成功！");

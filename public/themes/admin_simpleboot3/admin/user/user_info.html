@@ -6,7 +6,26 @@
 			<li class="active"><a href="{:url('user/userInfo')}">{:lang('ADMIN_USER_USERINFO')}</a></li>
 			<li><a href="{:url('setting/password')}">{:lang('ADMIN_SETTING_PASSWORD')}</a></li>
 		</ul>
-		<form class="form-horizontal js-ajax-form margin-top-20" role="form" method="post" action="{:url('User/userinfoPost')}">
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('User/userinfoPost')}">
+			<div class="form-group">
+				<label for="input-user_login" class="col-sm-2 control-label">{:lang('USERNAME')}</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-user_login" name="user_login" value="{$user_login}" readonly/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-user_email" class="col-sm-2 control-label">{:lang('EMAIL')}</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-user_email" value="{$user_email}" readonly/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-department" class="col-sm-2 control-label">所属部门</label>
+				<div class="col-md-6 col-sm-10">
+					 <input type="text" class="form-control" id="input-department" value="{$dt}" readonly/>
+					 
+				</div>
+			</div>
 			<div class="form-group">
 				<label for="input-user-nickname" class="col-sm-2 control-label">{:lang('NICKNAME')}</label>
 				<div class="col-md-6 col-sm-10">
@@ -31,18 +50,15 @@
 					<input type="text" class="form-control js-bootstrap-date" id="input-birthday" name="birthday" value="{:date('Y-m-d',$birthday)}" placeholder="2013-01-04">
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="input-user_url" class="col-sm-2 control-label">{:lang('WEBSITE')}</label>
+			
+			 <div class="form-group">
+				<label for="input-user_mobile" class="col-sm-2 control-label"><span class="form-required">*</span>手机号</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" id="input-user_url" name="user_url" value="{$user_url}" placeholder="http://thinkcmf.com">
+					<input type="text" class="form-control" id="input-user_mobile" name="mobile" value="{$mobile}">
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="input-signature" class="col-sm-2 control-label">{:lang('SIGNATURE')}</label>
-				<div class="col-md-6 col-sm-10">
-					<textarea class="form-control" id="input-signature" name="signature" placeholder="{:lang('SIGNATURE')}">{$signature}</textarea>
-				</div>
-			</div>
+			
+			 
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>

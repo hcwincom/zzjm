@@ -56,7 +56,7 @@ class AdminIndexController extends AdminBaseController
      */
     public function index()
     {
-        $where   = [];
+        $where   = ['user_type'=>2];
         $request = input('request.');
 
         if (!empty($request['uid'])) {

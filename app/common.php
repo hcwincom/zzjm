@@ -17,9 +17,27 @@ function zz_log($content, $file = "log.txt")
 {
     file_put_contents('log/'.$file, date('Y-m-d H:i:s').' '.$content."\r\n",FILE_APPEND);
 }
+/**
+ * 数字补0
+ * @param $num 传入的数字
+ * @param $limit 补足的位数
+ */
+function zz_num($num, $limit=2)
+{
+    $len=$limit-strlen($num);
+    if($len>0){ 
+        for($i=0;$i<=$len;$i++){
+            $num='0'.$num;
+        }
+    }
+    return $num;
+}
 
-
-/* 密码输入 */
+/**
+ * 判断密码输入
+ * @param $uid 用户id
+ * @param string $psw 密码
+ */
 function zz_psw($uid,$psw){
     $psw_count=config('psw_count');
     $m_user=Db::name('user');
@@ -43,8 +61,11 @@ function zz_psw($uid,$psw){
     }
     
 }
-/* 发送微信信息 */
-/*  cURL函数简单封装 */
+/**
+ * curl函数封装
+ * @param $url 网址
+ * @param $data 数据
+ */
 function zz_curl($url, $data = null)
 {
     $curl = curl_init();
@@ -61,7 +82,12 @@ function zz_curl($url, $data = null)
     return $output;
 }
 
-/* 过滤HTML得到纯文本 */
+
+/**
+ *过滤HTML得到纯文本
+ * @param $list 列表
+ * @param $len 截取文本长度
+ */
 function zz_get_content($list,$len=100){
     //过滤富文本
     $tmp=[];
@@ -78,10 +104,12 @@ function zz_get_content($list,$len=100){
     return $tmp;
 }
 
-
-/*制作缩略图
- * zz_set_image(原图名,新图名,新宽度,新高度,缩放类型)
- *  */
+ 
+/**
+ *制作缩略图
+ * @param $pic 原图片
+ * @param $pic_new 新图片名
+ */
 function zz_set_image($pic,$pic_new,$width,$height,$thump=6){
     /* 缩略图相关常量定义 */
     //     const THUMB_SCALING   = 1; //常量，标识缩略图等比例缩放类型
@@ -109,7 +137,11 @@ function zz_set_image($pic,$pic_new,$width,$height,$thump=6){
     return $pic_new;
 }
 
-/* 组装图片 */
+/**
+ *组装图片
+ * @param $pic  
+ * @param $pic_old  
+ */
 function zz_picid($pic,$pic_old,$type,$id){
     $path=getcwd().'/upload/';
     //logo处理
@@ -134,7 +166,10 @@ function zz_picid($pic,$pic_old,$type,$id){
     return $pic_new;
     
 }
-/* 为网址补加http:// */
+/** 
+ * 为网址补加http://
+ * @param $link   网址
+ */
 function zz_link($link){
     //处理网址，补加http://
     $exp='/^(http|ftp|https):\/\//';

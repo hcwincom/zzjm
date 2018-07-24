@@ -17,6 +17,7 @@ class PublicController extends AdminBaseController
 {
     public function _initialize()
     {
+        
     }
 
     /**
@@ -24,6 +25,7 @@ class PublicController extends AdminBaseController
      */
     public function login()
     {
+        $this->assign('zzsite',config('zzsite'));
         $loginAllowed = session("__LOGIN_BY_CMF_ADMIN_PW__");
         if (empty($loginAllowed)) {
             //$this->error('非法登录!', cmf_get_root() . '/');
@@ -59,14 +61,14 @@ class PublicController extends AdminBaseController
             $this->error('非法登录!', cmf_get_root() . '/');
         }
 
-        $captcha = $this->request->param('captcha');
+       /*  $captcha = $this->request->param('captcha');
         if (empty($captcha)) {
             $this->error(lang('CAPTCHA_REQUIRED'));
         }
         //验证码
         if (!cmf_captcha_check($captcha)) {
             $this->error(lang('CAPTCHA_NOT_RIGHT'));
-        }
+        } */
 
         $name = $this->request->param("username");
         if (empty($name)) {
@@ -97,6 +99,7 @@ class PublicController extends AdminBaseController
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);
                 session('name', $result["user_login"]);
+                 
                 $result['last_login_ip']   = get_client_ip(0, true);
                 $result['last_login_time'] = time();
                 $token                     = cmf_generate_user_token($result["id"], 'web');
