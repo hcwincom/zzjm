@@ -98,9 +98,7 @@
 		 alert('未选择审核结果');
 		 return false;
 	 }
-	 if(!confirm('请确认，审核结果不可逆！')){
-		 return false;
-	 }
+	 
 	 $(this).parents('form').attr('action',"{:url('review_edit')}");
  });
  </script>

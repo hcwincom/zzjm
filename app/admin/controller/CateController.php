@@ -135,7 +135,7 @@ class CateController extends AdminInfoController
         }
         //如果一级分类要更新配置中记录的最大编码，如果是2级要更新一级中的最大编码
         if($fid==0){
-            cmf_set_dynamic_config(['cate_max'=>$max_code]);
+            cmf_set_dynamic_config(['cate_max'=>$data_add['code_num']]);
         }else{
             $m->where(['id'=>$fid])->update(['max_num'=>$data_add['code_num']]); 
         }

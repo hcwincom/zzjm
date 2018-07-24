@@ -32,7 +32,8 @@ function zz_num($num, $limit=2)
     }
     return $num;
 }
-
+ 
+ 
 /**
  * 判断密码输入
  * @param $uid 用户id

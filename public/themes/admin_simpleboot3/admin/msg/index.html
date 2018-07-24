@@ -4,24 +4,33 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-			<li class="active"><a href="{:url('index')}">所有{$flag}</a></li> 
+			<include file="admin@msg/nav" /> 
 		</ul>
 		<form class="well form-inline margin-top-20" method="post"
 			action="{:url('index')}">
-			操作类型: 
-			<select class="form-control" name="type" style="width: 140px;">
+			信息状态: 
+			<select class="form-control" name="status"  >
 				<option value='0'>全部</option> 
+				 <foreach name="msg_status" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
+				{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;  
+			信息分类: 
+			<select class="form-control" name="type"  >
+				<option value='no'>全部</option> 
 				 <foreach name="types" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.type">selected</if>> 
 				{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-			 操作人: 
+			 发信人: 
 			<select class="form-control" name="aid" style="width: 140px;">
 				<option value='0'>全部</option> 
 				 <foreach name="admins" item="vo" k="key">
-				<option value="{$vo.id}" <if condition="$vo.id eq $data.aid">selected</if>>{$vo.user_nickname|default=$vo.user_login}
+				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
@@ -39,12 +48,14 @@
 					<tr>
 						<th width="50">ID</th>
 						 
-						<th>操作类型</th> 
-						<th>操作人</th>
-						<th>操作人IP</th>
-						<th>操作时间</th>
+						<th>信息类型</th> 
+						<th>发送人</th>
+					 	<th>信息内容</th>
+					  
+						<th>发送时间</th>
+						<th>信息状态</th>
 						
-						<th>操作内容</th>  
+						 
 					</tr>
 				</thead>
 				<tbody>
@@ -53,15 +64,10 @@
 
 						<td>{$vo.id}</td>
 						<td>{$types[$vo.type]}</td>
-						<td>{$vo.uname1|default=$vo.uname0}</td>
-						<td>{$vo.ip}</td> 
-						<td>{$vo.time|date='Y-m-d H:i:s',###}</td> 
-						<td>
-						<notempty name="vo.link">
-							<a href="{$vo.link}" target="_blank">快捷链接</a>
-						</notempty>
-							{$vo.action}
-						</td>
+						<td>{$vo.aname}</td>
+					 	<td><a href="{$vo.link}" target="_blank">快捷链接</a>{$vo.dsc}</td>
+						<td>{$vo.time|date='Y-m-d H:i',###}</td> 
+						<td>{$msg_status[$vo.status]}</td>
 						 
 					</tr>
 					</foreach>

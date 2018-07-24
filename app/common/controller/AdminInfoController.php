@@ -46,11 +46,18 @@ class AdminInfoController extends AdminBaseController
             $this->error('信息错误');
         }
         $m=$this->m;
-        $info=$m->where('id',$id)->find();
+        //查找信息
+        $info=$m->where('id',$id)->find(); 
         if(empty($info)){
             $this->error('信息不存在');
         }
         $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
         $time=time();
         $update=[
             'rid'=>$admin['id'],
@@ -59,11 +66,40 @@ class AdminInfoController extends AdminBaseController
             'time'=>$time,
         ];
         $row=$m->where('id',$id)->update($update);
-        if($row===1){
-            $this->success('审核成功');
-        }else{
+         
+        if($row!==1){
+            $m->rollback();
             $this->error('审核失败，请刷新后重试');
-        }
+        } 
+        //审核成功，记录操作记录,发送审核信息
+        $flag=$this->flag;
+        $review_status=$this->review_status;
+        $table=$this->table;
+        //记录操作记录
+        $link=url('admin/'.$table.'/edit',['id'=>$info['id']]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'审核'.$flag.$info['id'].'-'.$info['name'].'的状态为'.$review_status[$status],
+            'type'=>$table,
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        //发送审核信息
+        $data_msg=[
+            'aid'=>1,
+            'time'=>$time,
+            'uid'=>$info['aid'],
+            'dsc'=>'对'.$flag.$info['id'].'-'.$info['name'].'已审核，结果为'.$review_status[$status],
+            'type'=>'review',
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        db('msg')->insert($data_msg);
+        $m->commit();
+        $this->success('审核成功');
     }
     /**
      * 信息状态批量同意
@@ -91,18 +127,64 @@ class AdminInfoController extends AdminBaseController
             'id'=>['in',$ids],
             'status'=>['eq',1],
         ];
+        //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
+        if($admin['shop']!=1){
+            $tmp=$m->where($where)->find();
+            if(empty($tmp['shop']) || $tmp['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }else{
+                $where['shop']=['eq',$admin['shop']];
+            }
+        }
+        
         $update=[
             'status'=>2,
             'time'=>$time,
             'rid'=>$admin['id'],
             'rtime'=>$time,
         ];
-        $rows=$m->where($where)->update($update);
-        if($rows>0){
-            $this->success('审核成功'.$rows.'条数据');
-        }else{
-            $this->error('没有数据审核成功，批量审核只能把未审核的数据审核为正常');
+        //得到要更改的数据
+        $list=$m->where($where)->column('id,aid,name');
+        $ids=implode(',',array_keys($list));
+        
+        //审核成功，记录操作记录,发送审核信息
+        $flag=$this->flag;
+        $review_status=$this->review_status;
+        $table=$this->table;
+        //记录操作记录
+       
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'批量同意'.$flag.'('.$ids.')',
+            'type'=>$table,
+            'link'=>'',
+            'shop'=>$admin['shop'],
+        ];
+        $link0=url('admin/'.$table.'/edit','',false,false);
+        foreach($list as $k=>$v){
+            //发送审核信息
+            $data_msg[]=[
+                'aid'=>1,
+                'time'=>$time,
+                'uid'=>$v['aid'],
+                'dsc'=>'对'.$flag.$v['id'].'-'.$v['name'].'已批量审核，结果为同意',
+                'type'=>'review',
+                'link'=>$link0.'/id/'.$v['id'],
+                'shop'=>$admin['shop'],
+            ];
         }
+        $m->startTrans();
+        $rows=$m->where($where)->update($update);
+        if($rows<=0){
+            $m->rollback();
+            $this->error('没有数据审核成功，批量审核只能把未审核的数据审核为正常');
+        } 
+        db('action')->insert($data_action);
+        db('msg')->insertAll($data_msg);
+        $m->commit();
+        $this->success('审核成功'.$rows.'条数据');
     }
     
     /**
@@ -173,8 +255,7 @@ class AdminInfoController extends AdminBaseController
             $where['id']=['in',$ids];
         }
         
-        $m=$this->m;
-        
+        $m=$this->m; 
         $update=['status'=>2];
         $rows=$m->where($where)->update($update);
         
@@ -347,14 +428,26 @@ class AdminInfoController extends AdminBaseController
         $m=$this->m;
         $table=$this->table;
         $m_edit=db($table.'_edit');
-        $info=$m_edit->where('id',$id)->find();
+        $info=$m_edit
+        ->field('e.*,p.name as pname,a.user_login as aname')
+        ->alias('e')
+        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->join('cmf_user a','a.id=e.aid')
+        ->where('e.id',$id)
+        ->find();
         if(empty($info)){
-            $this->error('信息不存在');
+            $this->error('无效信息');
         }
         if($info['rstatus']!=1){
             $this->error('编辑信息已被审核！不能重复审核');
         }
         $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
         $time=time();
         //组装数据
         $update_info=[ 
@@ -363,11 +456,24 @@ class AdminInfoController extends AdminBaseController
         //得到修改的字段
         $change=explode(',', $info['change']);
         array_shift($change);
+       
         foreach($change as $v){
             $update_info[$v]=$info[$v];
             //如果是父类变化，编码也会变化
-            if($v=='fid'){
-                 
+            if($table=='cate' && $v=='fid'){
+                $fid=$info[$v];
+                if($fid==0){
+                    //一级分类处理
+                    $max_code=config('cate_max');
+                    $update_info['code_num']=$max_code+1;
+                    $update_info['code']=(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
+                }else{
+                    //比较父类中记录的最大值和查找到的最大值
+                    $fcate=$m->where(['id'=>$fid])->find();
+                    $max_num=$m->where('fid',$fid)->order('code_num desc')->value('code_num');
+                    $update_info['code_num']=(($max_num>=$fcate['max_num'])?$max_num:$fcate['max_num'])+1;
+                    $update_info['code']=$fcate['code'].'-'.(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
+                }
             }
         }
         $m->startTrans();
@@ -384,13 +490,46 @@ class AdminInfoController extends AdminBaseController
         ];
         $row=$m_edit->where($where)->update($update);
         
-        if($row===1){
-            $m->commit();
-            $this->success('审核成功');
-        }else{
+        if($row!==1){
             $m->rollback();
             $this->error('审核失败，请刷新后重试');
+        } 
+        //审核成功，记录操作记录,发送审核信息
+        $flag=$this->flag;
+        $review_status=$this->review_status;
+        //记录操作记录
+        $link=url('admin/'.$table.'/edit_info',['id'=>$info['id']]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['name'].'的编辑为'.$review_status[$status],
+            'type'=>$table,
+            'link'=>$link,
+            'shop'=>$admin['shop'], 
+        ];
+        //发送审核信息
+        $data_msg=[
+            'aid'=>1,
+            'time'=>$time,
+            'uid'=>$info['aid'],
+            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['name'].'的编辑已审核，结果为'.$review_status[$status],
+            'type'=>'review',
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        db('msg')->insert($data_msg);
+        //如果是修改了分类编码的要保存最新编码
+        if($table=='cate' && !empty($update_info['code_num'])){
+            if($fid==0){
+                cmf_set_dynamic_config(['cate_max'=>$update_info['code_num']]);
+            }else{
+                $m->where(['id'=>$fid])->update(['max_num'=>$update_info['code_num']]);
+            } 
         }
+        $m->commit();
+        $this->success('审核成功');
     }
     
 }
