@@ -51,13 +51,15 @@
 			   <a class="btn btn-danger" href="{:url('create')}">清空</a>
 		</form>
 		 
-		<form method="post" class="js-ajax-form{zzajax} margin-top-20" action="">
+		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
 				 
 				<button type="button" class="add btn-sm btn-primary ">添加分类</button> 
 				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
+			 
 			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
-			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button> 
+			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
+			 	 
 			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
 			 	<p class='error'></p>
 			</div>
@@ -98,12 +100,12 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}">{$vo.name}</a></td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="_blank">{$vo.name}</a></td>
 						<td>
 						<eq name="vo.fid" value="0">
 						一级分类
 						<else/>
-						<a href="{:url('edit',['id'=>$vo.fid])}">{$vo.fname|default='未找到父类'}</a>
+						<a href="{:url('edit',['id'=>$vo.fid])}"  target="_blank">{$vo.fname|default='未找到父类'}</a>
 						</eq> 
 						</td>
 						<td>{$vo.code}</td>

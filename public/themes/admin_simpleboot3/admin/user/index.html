@@ -28,8 +28,9 @@
 					<th width="50">ID</th>
 					<th>商家</th>
 					<th>部门</th>
+					<th>身份</th>
 					<th>用户名</th>
-					<th>昵称</th>
+					<th>姓名</th>
 					<th>最后登录ip</th>
 					<th>最后登录时间</th>
 					<th>邮箱</th>
@@ -45,6 +46,7 @@
 					<td>{$vo.id}</td>
 					<td>{$vo.shop_name}</td>
 					<td>{$vo.dt_name}</td>
+					<th>{$jobs[$vo.job]}</th>
 					<td>{$vo.user_login}</td>
 					<td>{$vo.user_nickname}</td>
 					<td>{$vo.last_login_ip}</td>
@@ -67,7 +69,7 @@
 								<font color="#cccccc">{:lang('ACTIVATE_USER')}</font>
 							</if>
 						<else />
-							<a href='{:url("user/edit",array("id"=>$vo["id"]))}'>{:lang('EDIT')}</a>
+							<a href='{:url("user/edit",array("id"=>$vo["id"]))}' target="_blank">{:lang('EDIT')}</a>
 							<a class="js-ajax-delete" href="{:url('user/delete',array('id'=>$vo['id']))}">{:lang('DELETE')}</a>
 							<if condition="$vo['user_status'] eq 1">
 								<a href="{:url('user/ban',array('id'=>$vo['id']))}" class="js-ajax-dialog-btn" data-msg="{:lang('BLOCK_USER_CONFIRM_MESSAGE')}">{:lang('BLOCK_USER')}</a>

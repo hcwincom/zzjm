@@ -126,4 +126,23 @@ class PublicController extends AdminBaseController
         session('ADMIN_ID', null);
         return redirect(url('/', [], false, true));
     }
+    /**
+     * 消息提醒
+     */
+    public function msg_new()
+    {
+        $uid=session('ADMIN_ID');
+        $m=db('msg');
+        $where=[
+            'uid'=>$uid,
+            'status'=>1,
+        ];
+        $list=$m->where($where)->column('id,dsc,link');
+        if(empty($list)){
+            return null;
+        }else{
+            return json_encode($list);
+        }
+       
+    }
 }

@@ -151,8 +151,7 @@ class AdminInfoController extends AdminBaseController
         $flag=$this->flag;
         $review_status=$this->review_status;
         $table=$this->table;
-        //记录操作记录
-       
+        //记录操作记录 
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -377,7 +376,7 @@ class AdminInfoController extends AdminBaseController
         ->field('e.*,p.name as pname')
         ->join('cmf_'.$table.' p','e.pid=p.id','left')
         ->where($where)
-        ->order('p.status asc,p.time desc')
+        ->order('e.rstatus asc,e.atime desc')
         ->paginate();
         // 获取分页显示
         $page = $list->appends($data)->render();
@@ -417,7 +416,7 @@ class AdminInfoController extends AdminBaseController
      *     'param'  => ''
      * )
      */
-    public function review_edit()
+    public function edit_review()
     {
         //审核编辑的信息
         $status=$this->request->param('rstatus',0,'intval');
@@ -429,7 +428,7 @@ class AdminInfoController extends AdminBaseController
         $table=$this->table;
         $m_edit=db($table.'_edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,a.user_login as aname')
+        ->field('e.*,p.name as pname,a.user_nickname as aname')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
@@ -514,7 +513,7 @@ class AdminInfoController extends AdminBaseController
             'time'=>$time,
             'uid'=>$info['aid'],
             'dsc'=>'对'.$flag.$info['pid'].'-'.$info['name'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'review',
+            'type'=>'edit_review',
             'link'=>$link,
             'shop'=>$admin['shop'],
         ];
@@ -530,6 +529,100 @@ class AdminInfoController extends AdminBaseController
         }
         $m->commit();
         $this->success('审核成功');
+    }
+    /**
+     * 编辑记录批量删除
+     * @adminMenu(
+     *     'name'   => '编辑记录批量删除',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '编辑记录批量删除',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_del_all()
+    {
+        if(empty($_POST['ids'])){
+            $this->error('未选中信息');
+        }
+        $ids=$_POST['ids'];
+        
+        $admin=$this->admin;
+        $table=$this->table;
+        $m_edit=db($table.'_edit');
+        $time=time();
+        $where=[
+            'e.id'=>['in',$ids], 
+        ];
+        
+        //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
+        if($admin['shop']!=1){
+            
+            $tmp=$m_edit
+            ->field('e.*,p.name as pname')
+            ->alias('e')
+            ->join('cmf_'.$table.' p','p.id=e.pid')
+            ->where($where)
+            ->find();
+            if(empty($tmp['shop']) || $tmp['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }else{
+                $where['e.shop']=['eq',$admin['shop']];
+            }
+        }
+        
+        //得到要删除的数据
+        $list=$m_edit 
+        ->alias('e')
+        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->where($where)
+        ->column('e.*,p.name as pname');
+        $ids=implode(',',array_keys($list));
+        
+        //审核成功，记录操作记录,发送审核信息
+        $flag=$this->flag;
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'批量删除'.$flag.'编辑记录('.$ids.')',
+            'type'=>$table,
+            'link'=>'',
+            'shop'=>$admin['shop'],
+        ];
+        
+        foreach($list as $k=>$v){
+             
+            //发送审核信息
+            $data_msg[]=[
+                'aid'=>1,
+                'time'=>$time,
+                'uid'=>$v['aid'],
+                'dsc'=>date('Y-m-d H:i',$v['atime']).'对'.$flag.$v['pid'].'-'.$v['pname'].'的编辑记录已批量删除',
+                'type'=>'edit_del',
+                'link'=>'',
+                'shop'=>$admin['shop'],
+            ];
+        }
+        $m_edit->startTrans();
+        //id 删除
+        $where=[
+            'id'=>['in',$ids],
+        ];
+        $rows=$m_edit->where($where)->delete();
+        if($rows<=0){
+            $m_edit->rollback();
+            $this->error('没有删除数据');
+        }
+        db('action')->insert($data_action);
+        db('msg')->insertAll($data_msg);
+        $m_edit->commit();
+        $this->success('已批量删除'.$rows.'条数据');
     }
     
 }

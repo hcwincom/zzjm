@@ -58,21 +58,52 @@ class MsgController extends AdminBaseController
             'p.status'=>['neq',4]
         ];
         $data=$this->request->param();
+        //状态
         if(empty($data['status'])){
             $data['status']=0;
         }else{
             $where['p.status']=$data['status'];
         }
+        //类型
         if(empty($data['type']) || $data['type']=='no'){
             $data['type']='no';
         }else{
             $where['p.type']=$data['type'];
         }
+        //发送者
         if(empty($data['aid'])){
             $data['aid']=0;
         }else{
             $where['p.aid']=$data['aid'];
         }
+        //时间处理
+        if(empty($data['datetime1'])){
+            $data['datetime1']='';
+            $time1=0;
+            if(empty($data['datetime2'])){
+                $data['datetime2']=''; 
+                $time2=0;
+            }else{
+                //只有结束时间
+                $time2=strtotime($data['datetime2']);
+                $where['p.time']=['elt',$time2];
+            }
+        }else{
+            //有开始时间
+            $time1=strtotime($data['datetime1']);
+            if(empty($data['datetime2'])){
+                $data['datetime2']=''; 
+                $where['p.time']=['egt',$time1];
+            }else{
+                //有结束时间有开始时间between
+                $time2=strtotime($data['datetime2']);
+                if($time2<=$time1){
+                    $this->error('结束时间必须大于起始时间');
+                }
+                $where['p.time']=['between',[$time1,$time2]];
+            }
+        }
+       
         $list= $m
         ->alias('p')
         ->field('p.*,u.user_nickname as aname')

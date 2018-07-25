@@ -9,14 +9,12 @@ use think\Db;
 class ActionController extends AdminBaseController
 {
     private $m;
-    private $order;
-   
+    
     public function _initialize()
     {
         parent::_initialize();
         $this->m=Db::name('action');
-        $this->order='id desc';
-       
+        
         $this->assign('flag','管理员操作记录');
         
         $this->assign('types', config('action_types'));
@@ -43,20 +41,47 @@ class ActionController extends AdminBaseController
         if(empty($data['type'])){
             $data['type']='';
         }else{
-            $where['a.type']=$data['type'];
+            $where['p.type']=$data['type'];
         }
         if(empty($data['aid'])){
             $data['aid']=0;
         }else{
-            $where['a.aid']=$data['aid'];
+            $where['p.aid']=$data['aid'];
+        }
+        //时间处理
+        if(empty($data['datetime1'])){
+            $data['datetime1']='';
+            $time1=0;
+            if(empty($data['datetime2'])){
+                $data['datetime2']='';
+                $time2=0;
+            }else{
+                //只有结束时间
+                $time2=strtotime($data['datetime2']);
+                $where['p.time']=['elt',$time2];
+            }
+        }else{
+            //有开始时间
+            $time1=strtotime($data['datetime1']);
+            if(empty($data['datetime2'])){
+                $data['datetime2']='';
+                $where['p.time']=['egt',$time1];
+            }else{
+                //有结束时间有开始时间between
+                $time2=strtotime($data['datetime2']);
+                if($time2<=$time1){
+                    $this->error('结束时间必须大于起始时间');
+                }
+                $where['p.time']=['between',[$time1,$time2]];
+            }
         }
         $list= $m
-        ->alias('a')
-        ->field('a.*,u.user_login as uname0,u.user_nickname as uname1')
-        ->join('cmf_user u','u.id = a.aid','left')
+        ->alias('p')
+        ->field('p.*,u.user_login as uname0,u.user_nickname as uname1')
+        ->join('cmf_user u','u.id = p.aid','left')
         ->where($where)
-        ->order($this->order)
-        ->paginate(10);
+        ->order('p.time desc')
+        ->paginate();
        
         // 获取分页显示
         $page = $list->render(); 

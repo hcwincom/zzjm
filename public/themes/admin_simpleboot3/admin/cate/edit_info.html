@@ -80,7 +80,7 @@
 					<eq name="info1.rstatus" value="1">
 					<button type="submit" class="review_edit btn btn-primary js-ajax-submit"  >审核</button> 
 					 </eq> 
-					<a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+					 
 					 <p> </p>
 				</div>
 				
@@ -99,6 +99,6 @@
 		 return false;
 	 }
 	 
-	 $(this).parents('form').attr('action',"{:url('review_edit')}");
+	 $(this).parents('form').attr('action',"{:url('edit_review')}");
  });
  </script>

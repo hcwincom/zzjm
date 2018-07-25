@@ -18,7 +18,7 @@ class OldController extends AdminBaseController
             'user'=>$db['username'],
             'psw'=>$db['password'],
             'dbname'=>'genele',
-            'port'=>$db['hostport']
+            'port'=>$db['hostport'],
         ];
         parent::_initialize();
          

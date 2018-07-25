@@ -51,10 +51,9 @@
 			   <a class="btn btn-danger" href="{:url('create')}">清空</a>
 		</form>
 		 
-		<form method="post" class="js-ajax-form{zzajax} margin-top-20" action="">
+		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
-				 
-			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button> 
+				  
 			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
 			 	<p class='error'></p>
 			</div>
@@ -121,13 +120,7 @@
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
- var id=0;
- var fid=0;
- var hideall=0;
  
-$('.review_all').click(function(){
-	$(this).parents('form').attr('action',"{:url('edit_review_all')}");
-});
 $('.del_all').click(function(){
 	$(this).parents('form').attr('action',"{:url('edit_del_all')}");
 });

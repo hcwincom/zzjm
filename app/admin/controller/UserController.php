@@ -28,6 +28,12 @@ use think\Db;
  */
 class UserController extends AdminBaseController
 {
+    public function _initialize()
+    {
+        parent::_initialize();
+         
+        $this->assign('jobs',[1=>'经理',2=>'员工']);
+    }
 
     /**
      * 管理员列表
@@ -45,11 +51,11 @@ class UserController extends AdminBaseController
     public function index()
     {
         $types=[
-            'user_nickname'=>'昵称',
+            'user_nickname'=>'姓名',
             'user_login'=>'用户名', 
             'user_email'=>'邮箱',
             'mobile'=>'手机',
-            
+            'id'=>'用户id', 
         ];
         $where = ["p.user_type" => ['eq',1]];
         /**搜索条件**/
@@ -111,7 +117,7 @@ class UserController extends AdminBaseController
             'status'=>['eq',1], 
         ];
         //只能添加比自己权限小的角色 ，即list_order>=自己
-        $admin=session('admin');
+        $admin=$this->admin;
         $aid=$admin['id'];
         if($aid!=1){
             $roles=Db::name('role_user')
@@ -386,15 +392,12 @@ class UserController extends AdminBaseController
             $data['birthday'] = strtotime($data['birthday']);
             $data['id']       = cmf_get_current_admin_id();
             $reg=config('reg');
-            if(empty($data['user_nickname'])){
-                $data['user_nickname']=$data['user_login'];
-            }
+             
             if(preg_match($reg['mobile'][0], $data['mobile'])!=1){
                 $this->error($reg['mobile'][1]);
             }
             $data_user=[
-                'id'=>$data['id'], 
-                'user_nickname'=>$data['user_nickname'], 
+                'id'=>$data['id'],  
                 'mobile'=>$data['mobile'],
                 'birthday'=>$data['birthday'],
                 'sex'=>$data['sex'],
