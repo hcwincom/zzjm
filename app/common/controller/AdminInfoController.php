@@ -371,6 +371,44 @@ class AdminInfoController extends AdminBaseController
                 $where['p.'.$data['type1']]=['like','%'.$data['name'].'%'];
             }
         }
+        //时间类别
+        $times=[
+            'atime'=>'创建时间',
+            'rtime'=>'审核时间', 
+        ];
+        if(empty($data['time'])){
+            $data['time']='atime';
+            $data['datetime1']='';
+            $data['datetime2']='';
+        }else{
+            //时间处理
+            if(empty($data['datetime1'])){
+                $data['datetime1']='';
+                $time1=0;
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $time2=0;
+                }else{
+                    //只有结束时间
+                    $time2=strtotime($data['datetime2']);
+                    $where['e.'.$data['time']]=['elt',$time2];
+                }
+            }else{
+                //有开始时间
+                $time1=strtotime($data['datetime1']);
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $where['e.'.$data['time']]=['egt',$time1];
+                }else{
+                    //有结束时间有开始时间between
+                    $time2=strtotime($data['datetime2']);
+                    if($time2<=$time1){
+                        $this->error('结束时间必须大于起始时间');
+                    }
+                    $where['e.'.$data['time']]=['between',[$time1,$time2]];
+                }
+            }
+        }
         $list=$m_edit
         ->alias('e')
         ->field('e.*,p.name as pname')
@@ -400,6 +438,7 @@ class AdminInfoController extends AdminBaseController
         $this->assign('rids',$rids);
         $this->assign('data',$data);
         $this->assign('types',$types);
+        $this->assign('times',$times);
         return $this->fetch();
          
     }
