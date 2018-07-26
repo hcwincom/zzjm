@@ -196,7 +196,15 @@ class MsgController extends AdminBaseController
      */
     public function add()
     {
-        exit();
+        $admin=$this->admin();
+        //如果是总站可以选择发给分站,分站只能发给自己
+        $shops=[];
+        if($admin['shop']==1){
+           $shops=db('shop')->column('id,name');
+        }
+        $types=config('user_search');
+        
+        $this->assign('shops',$shops);
         
     }
     /**

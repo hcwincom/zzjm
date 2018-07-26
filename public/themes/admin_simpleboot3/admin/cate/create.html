@@ -40,9 +40,11 @@
 	        </foreach> 
 	        </select>
 	        <select class="form-control" name="type2" id=""> 
-	        	<option value="1" <eq name="data.type2" value="1">selected</eq>>精准</option>
-	        	<option value="2" <eq name="data.type2" value="2">selected</eq>>模糊</option>
+	         <foreach name="search_types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.type2">selected</if>>{$vo}</option>
+	        </foreach>  
 	        </select> 
+	        
             <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">

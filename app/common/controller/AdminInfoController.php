@@ -355,29 +355,27 @@ class AdminInfoController extends AdminBaseController
         }else{
             $where['e.rid']=['eq',$data['rid']];
         }
-        $types=[
-            'name'=>$flag.'名称',
-            'code'=>$flag.'编码',
-            'id'=>$flag.'id', 
-        ];
+        //查询字段
+        $types=config($table.'_search');
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        } 
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        //检查拼接搜索语句
         if(empty($data['name'])){
             $data['name']='';
-            $data['type1']='name';
-            $data['type2']=1;
         }else{
-            if($data['type2']==1){ 
-                $where['p.'.$data['type1']]=['eq',$data['name']];
-            }else{
-                $where['p.'.$data['type1']]=['like','%'.$data['name'].'%'];
-            }
+            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
         }
         //时间类别
-        $times=[
-            'atime'=>'创建时间',
-            'rtime'=>'审核时间', 
-        ];
+        $times=config('time2_search');
         if(empty($data['time'])){
-            $data['time']='atime';
+            $data['time']=key($times);
             $data['datetime1']='';
             $data['datetime2']='';
         }else{
@@ -439,6 +437,7 @@ class AdminInfoController extends AdminBaseController
         $this->assign('data',$data);
         $this->assign('types',$types);
         $this->assign('times',$times);
+        $this->assign("search_types", $search_types);
         return $this->fetch();
          
     }

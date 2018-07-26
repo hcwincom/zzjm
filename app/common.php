@@ -32,7 +32,24 @@ function zz_num($num, $limit=2)
     }
     return $num;
 }
- 
+/**
+ * 根据选择的条件拼接搜索
+ * @param $num 传入的数字
+ * @param $limit 补足的位数
+ */
+function zz_search($type,$name)
+{ 
+    switch ($type){
+        case 1:
+            return ['eq',$name]; 
+        case 2:
+            return ['like',$name.'%']; 
+        case 3:
+            return ['like','%'.$name];  
+        default:
+            return ['like','%'.$name.'%']; 
+    }
+}
  
 /**
  * 判断密码输入

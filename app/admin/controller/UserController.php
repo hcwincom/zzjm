@@ -50,26 +50,21 @@ class UserController extends AdminBaseController
      */
     public function index()
     {
-        $types=[
-            'user_nickname'=>'姓名',
-            'user_login'=>'用户名', 
-            'user_email'=>'邮箱',
-            'mobile'=>'手机',
-            'id'=>'用户id', 
-        ];
+        $types=config('user_search');
+        $search_types=config('search_types');
         $where = ["p.user_type" => ['eq',1]];
         /**搜索条件**/
         $data = $this->request->param();
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        }
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
         if(empty($data['name'])){
-            $data['name']='';
-            $data['type1']='user_nickname';
-            $data['type2']=1;
+            $data['name']=''; 
         }else{
-            if($data['type2']==1){
-                $where['p.'.$data['type1']]=['eq',$data['name']];
-            }else{
-                $where['p.'.$data['type1']]=['like','%'.$data['name'].'%'];
-            }
+            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']); 
         }
         $users = Db::name('user')
         ->field('p.*,shop.name as shop_name,dt.name as dt_name')
@@ -94,6 +89,7 @@ class UserController extends AdminBaseController
         $this->assign("users", $users);
         $this->assign("data", $data);
         $this->assign("types", $types);
+        $this->assign("search_types", $search_types);
         return $this->fetch();
     }
 
@@ -167,7 +163,7 @@ class UserController extends AdminBaseController
         $where=[
             'status'=>['eq',1], 
         ];
-        $admin=session('admin');
+        $admin=$this->admin;
         $aid=$admin['id'];
         if($aid!=1){
             $roles=Db::name('role_user')
