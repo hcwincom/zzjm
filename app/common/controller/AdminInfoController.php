@@ -343,7 +343,7 @@ class AdminInfoController extends AdminBaseController
         if(empty($data['status'])){
             $data['status']=0;
         }else{
-            $where['e.status']=['eq',$data['status']];
+            $where['e.rstatus']=['eq',$data['status']];
         }
         if(empty($data['aid'])){
             $data['aid']=0;
