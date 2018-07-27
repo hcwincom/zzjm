@@ -110,11 +110,16 @@ class CateController extends AdminInfoController
         }
         $url=url('index');
         $fid=intval($data['fid']);
+        $time=time();
+        $admin=$this->admin;
         $data_add=[
             'name'=>$data['name'],
             'fid'=>$fid,
             'sort'=>intval($data['sort']),
-            'status'=>2,
+            'status'=>1,
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'time'=>$time,
         ];
         
         if($fid==0){
@@ -129,7 +134,7 @@ class CateController extends AdminInfoController
             $data_add['code']=$fcate['code'].'-'.(str_pad($data_add['code_num'],2,'0',STR_PAD_LEFT));
         }
         try {
-            $m->insert($data_add);
+            $id=$m->insertGetId($data_add);
         } catch (\Exception $e) {
             $this->error('操作失败，请重试');
         }
@@ -139,6 +144,21 @@ class CateController extends AdminInfoController
         }else{
             $m->where(['id'=>$fid])->update(['max_num'=>$data_add['code_num']]); 
         }
+        //记录操作记录
+        $flag=$this->flag;
+        $table=$this->table; 
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'添加'.$flag.$id.'-'.$data['name'],
+            'table'=>$table,
+            'type'=>'add',
+            'pid'=>$id,
+            'link'=>url('admin/'.$table.'/edit',['id'=>$id]),
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
         
         $this->success('添加成功',$url);
     }
@@ -306,18 +326,20 @@ class CateController extends AdminInfoController
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
         $table=$this->table;
-        $m_edit=db($table.'_edit');
+        //获取编辑信息
+        $m_edit=db('edit');
         $info1=$m_edit->where('id',$id)->find(); 
-        //得到修改的字段
-        $change=array_flip(explode(',', $info1['change'])); 
-        
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
+        //获取原信息
         $info=$m->where('id',$info1['pid'])->find();
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
         }
+        //获取改变的信息  
+        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=json_decode($change,true);
         $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
         
         $this->assign('info',$info);
@@ -363,8 +385,33 @@ class CateController extends AdminInfoController
         }
         //彻底删除
         $where=['id'=>['in',$ids]];
+        $m->startTrans();
         $tmp=$m->where($where)->delete();
         if($tmp>0){
+            //记录操作记录
+            $flag=$this->flag;
+            $table=$this->table;
+            $admin=$this->admin;
+            $time=time();
+            $ids=implode(',',$ids);
+            $data_action=[
+                'aid'=>$admin['id'],
+                'time'=>$time,
+                'ip'=>get_client_ip(),
+                'action'=>'批量删除'.$flag.'('.$ids.')',
+                'table'=>$table,
+                'type'=>'del',
+                'link'=>'', 
+                'shop'=>$admin['shop'],
+            ];
+            db('action')->insert($data_action);
+            //删除关联编辑记录
+            $where_edit=[
+                'table'=>['eq',$table],
+                'pid'=>['in',$ids],
+            ];
+            db('edit')->where($where_edit)->delete();
+            $m->commit();
             $this->success('成功删除数据'.$tmp.'条');
         }else{
             $this->error('没有删除数据');

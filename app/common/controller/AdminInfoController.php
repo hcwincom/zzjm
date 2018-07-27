@@ -26,6 +26,39 @@ class AdminInfoController extends AdminBaseController
         $this->assign('html',$this->request->action());
     }
     /**
+     * 信息详情
+     * @adminMenu(
+     *     'name'   => '信息详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '信息详情',
+     *     'param'  => ''
+     * )
+     */
+    public function edit()
+    {
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        
+        $this->assign('info',$info);
+        
+        return $this->fetch();
+    }
+    
+    /**
      * 信息状态审核
      * @adminMenu(
      *     'name'   => '信息状态审核',
@@ -82,7 +115,9 @@ class AdminInfoController extends AdminBaseController
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'审核'.$flag.$info['id'].'-'.$info['name'].'的状态为'.$review_status[$status],
-            'type'=>$table,
+            'table'=>$table,
+            'type'=>'review',
+            'pid'=>$info['id'],
             'link'=>$link,
             'shop'=>$admin['shop'],
         ];
@@ -157,7 +192,8 @@ class AdminInfoController extends AdminBaseController
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'批量同意'.$flag.'('.$ids.')',
-            'type'=>$table,
+            'table'=>$table,
+            'type'=>'review_all',
             'link'=>'',
             'shop'=>$admin['shop'],
         ];
@@ -220,6 +256,7 @@ class AdminInfoController extends AdminBaseController
         $rows=$m->where($where)->update($update);
          
         if($rows>=1){
+             
             $this->success('已禁用'.$rows.'条数据');
         }else{
             $this->error('没有成功禁用数据，禁用是指将状态为正常改为禁用');
@@ -264,7 +301,7 @@ class AdminInfoController extends AdminBaseController
             $this->error('没有成功恢复数据,恢复是指将状态为禁用改为正常');
         }
     }
-    
+     
     /**
      * 编辑提交
      * @adminMenu(
@@ -283,6 +320,7 @@ class AdminInfoController extends AdminBaseController
         
         $m=$this->m;
         $table=$this->table;
+        $flag=$this->flag;
         $data=$this->request->param();
         $info=$m->where('id',$data['id'])->find();
         if(empty($info)){
@@ -290,32 +328,88 @@ class AdminInfoController extends AdminBaseController
         }
         $time=time();
         $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能编辑其他店铺的信息');
+            }
+        }
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
-            'atime'=>$time,
-            'change'=>'',
+            'atime'=>$time, 
+            'table'=>$table,
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
         ];
        
-        $fields=config('fields_edit_'.$table);
+        $fields=config($table.'_edit');
+        $content=[];
         //检测改变了哪些字段
         foreach($fields as $k=>$v){
-            //给update赋值
-            if(isset($data[$k])){
-                $update[$k]=$data[$k];
-            }else{
-                //如果编辑结果为空
-                $update[$k]=$v;
+            //如果编辑结果为空 赋值
+            if(!isset($data[$k])){ 
+                //如果编辑结果为空 
+                $data[$k]=$v;
             }
-            //如果原信息和update信息相同就未改变，不为空就记录，？null测试
-            if($info[$k]!=$update[$k]){
-                $update['change'].=','.$k;
+            //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+            if($info[$k]!=$data[$k]){ 
+                $content[$k]=$data[$k];
             }
         }
-        if($update['change']==''){
+       
+        //处理图片
+        if($table=='brand'){
+            $path=getcwd().'/upload/'; 
+            if(!empty($content['pic'])){
+                if(is_file($path.$content['pic'])){
+                    if(!is_dir($path.$info['path'])){
+                        mkdir($path.$info['path']);
+                    } 
+                    $pic_conf=config('pic_'.$table);
+                    $content['pic']=$info['path'].'/'.$admin['id'].'-'.$time.'.jpg';
+                    zz_set_image($data['pic'], $content['pic'], $pic_conf[0], $pic_conf[1],$pic_conf[2]);
+                    unlink($path.$data['pic']);
+                }else{
+                    unset($content['pic']);
+                }
+                
+            }
+        }
+        if(empty($content)){
             $this->error('未修改');
         }
-        db('cate_edit')->insert($update);
+        //保存更改 
+        $m_edit=db('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            db('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        //记录操作记录
+        $link=url('admin/'.$table.'/edit_info',['id'=>$eid]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'编辑'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>$table,
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        $m_edit->commit();
         $this->success('已提交修改');
     }
     /**
@@ -335,11 +429,11 @@ class AdminInfoController extends AdminBaseController
     {
          
         $table=$this->table;
-        $m_edit=db($table.'_edit');
+        $m_edit=db('edit');
         $flag=$this->flag;
         $data=$this->request->param();
-       
-        $where=[];
+       //查找当前表的编辑
+        $where=['e.table'=>['eq',$table]];
         if(empty($data['status'])){
             $data['status']=0;
         }else{
@@ -357,6 +451,9 @@ class AdminInfoController extends AdminBaseController
         }
         //查询字段
         $types=config($table.'_search');
+        if(empty($types)){
+            $types=config('base_search');
+        }
         //选择查询字段
         if(empty($data['type1'])){
             $data['type1']=key($types);
@@ -407,13 +504,21 @@ class AdminInfoController extends AdminBaseController
                 }
             }
         }
+        $field='e.*,p.name as pname';
+        $join=[['cmf_'.$table.' p','e.pid=p.id','left']];
+        if($table=='cate'){
+            $field='e.*,p.name as pname,p.fid,f.name as fname';
+            $join[]=['cmf_cate f','p.fid=f.id','left'];
+        } 
+         
         $list=$m_edit
         ->alias('e')
-        ->field('e.*,p.name as pname')
-        ->join('cmf_'.$table.' p','e.pid=p.id','left')
+        ->field($field)
+        ->join($join)
         ->where($where)
         ->order('e.rstatus asc,e.atime desc')
         ->paginate();
+         
         // 获取分页显示
         $page = $list->appends($data)->render();
         $m_user=db('user');
@@ -429,7 +534,7 @@ class AdminInfoController extends AdminBaseController
             'shop'=>1,
         ];
         $rids=$m_user->where($where_rid)->column('id,user_nickname');
-        
+       
         $this->assign('page',$page);
         $this->assign('list',$list);
         $this->assign('aids',$aids);
@@ -441,6 +546,46 @@ class AdminInfoController extends AdminBaseController
         return $this->fetch();
          
     }
+    /**
+     * 编辑审核详情
+     * @adminMenu(
+     *     'name'   => '编辑审核详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '编辑审核详情',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_info()
+    {
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $table=$this->table;
+        //获取编辑信息
+        $m_edit=db('edit');
+        $info1=$m_edit->where('id',$id)->find();
+        if(empty($info1)){
+            $this->error('编辑信息不存在');
+        }
+        //获取原信息
+        $info=$m->where('id',$info1['pid'])->find();
+        if(empty($info)){
+            $this->error('编辑关联的信息不存在');
+        }
+        //获取改变的信息
+        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=json_decode($change,true);
+        
+        $this->assign('info',$info);
+        $this->assign('info1',$info1);
+       
+        $this->assign('change',$change);
+        return $this->fetch();
+    }
+    
     /**
      * 信息编辑审核
      * @adminMenu(
@@ -464,7 +609,7 @@ class AdminInfoController extends AdminBaseController
         }
         $m=$this->m;
         $table=$this->table;
-        $m_edit=db($table.'_edit');
+        $m_edit=db('edit');
         $info=$m_edit
         ->field('e.*,p.name as pname,a.user_nickname as aname')
         ->alias('e')
@@ -478,6 +623,7 @@ class AdminInfoController extends AdminBaseController
         if($info['rstatus']!=1){
             $this->error('编辑信息已被审核！不能重复审核');
         }
+       
         $admin=$this->admin;
         //其他店铺的审核判断
         if($admin['shop']!=1){
@@ -491,14 +637,14 @@ class AdminInfoController extends AdminBaseController
             'time'=>$time, 
         ];
         //得到修改的字段
-        $change=explode(',', $info['change']);
-        array_shift($change);
+        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=json_decode($change,true);
        
-        foreach($change as $v){
-            $update_info[$v]=$info[$v];
+        foreach($change as $k=>$v){
+            $update_info[$k]=$v;
             //如果是父类变化，编码也会变化
-            if($table=='cate' && $v=='fid'){
-                $fid=$info[$v];
+            if($table=='cate' && $k=='fid'){
+                $fid=$v;
                 if($fid==0){
                     //一级分类处理
                     $max_code=config('cate_max');
@@ -540,8 +686,10 @@ class AdminInfoController extends AdminBaseController
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['name'].'的编辑为'.$review_status[$status],
-            'type'=>$table,
+            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'table'=>$table,
+            'type'=>'edit_review',
+            'pid'=>$info['pid'],
             'link'=>$link,
             'shop'=>$admin['shop'], 
         ];
@@ -550,7 +698,7 @@ class AdminInfoController extends AdminBaseController
             'aid'=>1,
             'time'=>$time,
             'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['name'].'的编辑已审核，结果为'.$review_status[$status],
+            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
             'type'=>'edit_review',
             'link'=>$link,
             'shop'=>$admin['shop'],
@@ -590,22 +738,22 @@ class AdminInfoController extends AdminBaseController
         
         $admin=$this->admin;
         $table=$this->table;
-        $m_edit=db($table.'_edit');
+        $m_edit=db('edit');
         $time=time();
         $where=[
             'e.id'=>['in',$ids], 
+            'e.table'=>['eq',$table],
         ];
         
         //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
         if($admin['shop']!=1){
             
             $tmp=$m_edit
-            ->field('e.*,p.name as pname')
-            ->alias('e')
-            ->join('cmf_'.$table.' p','p.id=e.pid')
+            ->field('e.*')
+            ->alias('e') 
             ->where($where)
             ->find();
-            if(empty($tmp['shop']) || $tmp['shop']!=$admin['shop']){
+            if($tmp['shop']!=$admin['shop']){
                 $this->error('不能审核其他店铺的信息');
             }else{
                 $where['e.shop']=['eq',$admin['shop']];
@@ -615,9 +763,13 @@ class AdminInfoController extends AdminBaseController
         //得到要删除的数据
         $list=$m_edit 
         ->alias('e')
-        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->join('cmf_'.$table.' p','p.id=e.pid','left')
         ->where($where)
         ->column('e.*,p.name as pname');
+        
+        if(empty($list)){
+            $this->error('没有要删除的数据');
+        }
         $ids=implode(',',array_keys($list));
         
         //审核成功，记录操作记录,发送审核信息
@@ -629,7 +781,8 @@ class AdminInfoController extends AdminBaseController
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'批量删除'.$flag.'编辑记录('.$ids.')',
-            'type'=>$table,
+            'table'=>$table,
+            'type'=>'edit_del',
             'link'=>'',
             'shop'=>$admin['shop'],
         ];

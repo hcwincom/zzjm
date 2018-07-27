@@ -9,7 +9,15 @@
 		<form class="well form-inline margin-top-20" method="post"
 			action="{:url('index')}">
 			操作类型: 
-			<select class="form-control" name="type" style="width: 140px;">
+			<select class="form-control" name="table"  >
+				<option value='0'>全部</option> 
+				 <foreach name="tables" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.table">selected</if>> 
+				{$vo}
+				</option>
+				</foreach>
+			</select>
+			<select class="form-control" name="type" >
 				<option value='0'>全部</option> 
 				 <foreach name="types" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.type">selected</if>> 
@@ -29,11 +37,11 @@
 			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
 			--
 			<input class="js-datetime form-control" type="text" id="datetime2" name="datetime2" value="{$data.datetime2}">
+			关联id:<input class=" form-control" type="text" name="pid" value="{$data.pid}">
 			
 			<input type="submit"
 				class="btn btn-primary" value="搜索" />
-				&nbsp;&nbsp; &nbsp;&nbsp;  
-			  
+			   
 		</form>
 		 
 		<form method="post" class="js-ajax-form margin-top-20" action="">
@@ -44,7 +52,8 @@
 					<tr>
 						<th width="50">ID</th>
 						 
-						<th>操作类型</th> 
+						<th>操作类型</th>
+						<th>关联id</th> 
 						<th>操作人</th>
 						<th>操作人IP</th>
 						<th>操作时间</th>
@@ -57,8 +66,9 @@
 					<tr>
 
 						<td>{$vo.id}</td>
-						<td>{$types[$vo.type]}</td>
-						<td>{$vo.uname1|default=$vo.uname0}</td>
+						<td>{$tables[$vo.table]}-{$types[$vo.type]}</td>
+						<td>{$vo.pid}</td> 
+						<td>{$vo.uname1|default=$vo.aid}</td>
 						<td>{$vo.ip}</td> 
 						<td>{$vo.time|date='Y-m-d H:i:s',###}</td> 
 						<td>

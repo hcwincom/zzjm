@@ -50,7 +50,26 @@ function zz_search($type,$name)
             return ['like','%'.$name.'%']; 
     }
 }
- 
+/**
+ * 根据目录删除文件和目录,
+ * @param $dir 传入的目录
+ * @param $rate 目录深度，暂时1级
+ */
+ function zz_dirdel($dir,$rate=1){
+     return 1;
+     $files=scandir($dir,1); 
+     foreach($files as $v){
+         if($v[0]=='.'){
+             break;
+         }
+         if(is_file($dir.$v)){
+             unlink($dir.$v);
+         }
+     }
+     //报错？没权限?
+     unlink($dir);
+     return 1; 
+}
 /**
  * 判断密码输入
  * @param $uid 用户id

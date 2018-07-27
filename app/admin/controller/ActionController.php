@@ -17,7 +17,8 @@ class ActionController extends AdminBaseController
         
         $this->assign('flag','管理员操作记录');
         
-        $this->assign('types', config('action_types'));
+        $this->assign('types', config('types'));
+        $this->assign('tables', config('tables'));
     }
      
     /**
@@ -43,6 +44,18 @@ class ActionController extends AdminBaseController
         }else{
             $where['p.type']=$data['type'];
         }
+        if(empty($data['table'])){
+            $data['table']='';
+        }else{
+            $where['p.table']=$data['table'];
+        }
+        //关联id
+        if(empty($data['pid'])){
+            $data['pid']='';
+        }else{
+            $where['p.pid']=$data['pid'];
+        }
+        //操作人
         if(empty($data['aid'])){
             $data['aid']=0;
         }else{
