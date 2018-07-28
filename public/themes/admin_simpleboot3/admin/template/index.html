@@ -5,7 +5,8 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@cate/nav" /> 
+		<include file="admin@param/nav" />
+	 
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
@@ -14,6 +15,15 @@
 				<option value='0'>全部</option> 
 				 <foreach name="statuss" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;  
+			所属大类: 
+			<select class="form-control" name="cid" >
+				<option value='0'>全部</option> 
+				 <foreach name="cates" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.cid">selected</if>> 
 				 {$vo}
 				</option>
 				</foreach>
@@ -62,7 +72,7 @@
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
 				 
-				<button type="button" class="add btn-sm btn-primary ">添加分类</button> 
+				<button type="button" class="add btn-sm btn-primary ">添加</button> 
 				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
 			 
 			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
@@ -81,11 +91,10 @@
 								data-checklist="js-check-x">
 						</label>
 						</th>
-						<th width="100">ID</th>
+						<th width="100">{$flag}ID</th>
 						 
-						<th>分类名</th> 
-						<th>父级分类</th> 
-						<th>分类编码</th>
+						<th>{$flag}名</th> 
+						 
 						<th>创建人</th>
 						<th>创建时间</th>
 						<th>审核人</th>
@@ -99,7 +108,7 @@
 				<tbody>
 					<foreach name="list" item="vo">
 				 
-					<tr class="cate cate{$vo.fid}">
+					<tr class="status{$vo.status}">
 						<td>
 							<input type="checkbox" class="js-check"
 							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
@@ -109,14 +118,7 @@
 						{$vo.id}
 						</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="_blank">{$vo.name}</a></td>
-						<td>
-						<eq name="vo.fid" value="0">
-						一级分类
-						<else/>
-						<a href="{:url('edit',['id'=>$vo.fid])}"  target="_blank">{$vo.fname|default='未找到父类'}</a>
-						</eq> 
-						</td>
-						<td>{$vo.code}</td>
+						 
 						<td>{$aids[$vo.aid]|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">
@@ -140,9 +142,7 @@
 
 		</form>
 	 	<div class="pagination">{$page}</div>
-	 	 
 	</div>
-	 
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
  var id=0;

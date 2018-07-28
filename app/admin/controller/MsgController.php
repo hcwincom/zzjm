@@ -196,6 +196,7 @@ class MsgController extends AdminBaseController
      */
     public function add()
     {
+        exit('add');
         $admin=$this->admin();
         //如果是总站可以选择发给分站,分站只能发给自己
         $shops=[];

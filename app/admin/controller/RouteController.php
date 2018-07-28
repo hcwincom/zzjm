@@ -24,7 +24,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 路由规则列表
-     * @adminMenu(
+     * zz(
      *     'name'   => 'URL美化',
      *     'parent' => 'admin/Setting/default',
      *     'display'=> true,
@@ -46,7 +46,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 添加路由规则
-     * @adminMenu(
+     * zz(
      *     'name'   => '添加路由规则',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -64,7 +64,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 添加路由规则提交
-     * @adminMenu(
+     * zz(
      *     'name'   => '添加路由规则提交',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -89,7 +89,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 路由规则编辑
-     * @adminMenu(
+     * zz(
      *     'name'   => '路由规则编辑',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -110,7 +110,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 路由规则编辑提交
-     * @adminMenu(
+     * zz(
      *     'name'   => '路由规则编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -135,7 +135,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 路由规则删除
-     * @adminMenu(
+     * zz(
      *     'name'   => '路由规则删除',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -156,7 +156,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 路由规则禁用
-     * @adminMenu(
+     * zz(
      *     'name'   => '路由规则禁用',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -181,7 +181,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 路由规则启用
-     * @adminMenu(
+     * zz(
      *     'name'   => '路由规则启用',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -206,7 +206,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 路由规则排序
-     * @adminMenu(
+     * zz(
      *     'name'   => '路由规则排序',
      *     'parent' => 'index',
      *     'display'=> false,
@@ -226,7 +226,7 @@ class RouteController extends AdminBaseController
 
     /**
      * 选择 URL
-     * @adminMenu(
+     * zz(
      *     'name'   => '选择URL',
      *     'parent' => 'index',
      *     'display'=> false,

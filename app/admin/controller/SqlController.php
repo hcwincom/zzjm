@@ -24,7 +24,10 @@ class SqlController extends AdminbaseController {
         $this->dir=getcwd().'/data/';
         $this->line="\r\n";
         $this->log="sql.txt";
-        
+        $aid=session('ADMIN_ID');
+        if($aid!=1){
+            $this->error('开发者功能，不要操作');
+        }
     }
     
     /**

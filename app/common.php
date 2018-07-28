@@ -71,6 +71,23 @@ function zz_search($type,$name)
      return 1; 
 }
 /**
+ * 清除不规范分隔符输入
+ * @param $dsc 输入内容
+ * @param $delimiter 分隔符
+ */
+function zz_delimiter($dsc,$delimiter=','){
+    //清除不规范输入导致的空格
+    $tmp=explode($delimiter, $dsc);
+    foreach($tmp as $k=>$v){ 
+        $tmp[$k]=trim($v);
+        if($tmp[$k]===''){
+            unset($tmp[$k]);
+        }
+    }
+    
+    return implode($delimiter, $tmp);
+}
+/**
  * 判断密码输入
  * @param $uid 用户id
  * @param string $psw 密码

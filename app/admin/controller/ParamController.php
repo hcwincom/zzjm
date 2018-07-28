@@ -6,31 +6,31 @@ namespace app\admin\controller;
 use app\common\controller\AdminInfoController; 
 use think\Db; 
  
-class BrandController extends AdminInfoController
+class ParamController extends AdminInfoController
 {
     
     public function _initialize()
     {
         parent::_initialize();
        
-        $this->flag='产品品牌';
-        $this->table='brand';
-        $this->m=Db::name('brand');
+        $this->flag='技术参数';
+        $this->table='param';
+        $this->m=Db::name('param');
           
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
-         
+        $this->assign('param_types',[1=>'单选',2=>'多选',3=>'输入']);
     }
     /**
-     * 产品品牌列表
+     * 技术参数列表
      * @adminMenu(
-     *     'name'   => '产品品牌列表',
+     *     'name'   => '技术参数列表',
      *     'parent' => 'admin/Goods/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌列表',
+     *     'remark' => '技术参数列表',
      *     'param'  => ''
      * )
      */
@@ -40,20 +40,29 @@ class BrandController extends AdminInfoController
         $m=$this->m;
         $data=$this->request->param();
         $where=[];
+        //状态
         if(empty($data['status'])){
             $data['status']=0;
         }else{
             $where['p.status']=['eq',$data['status']];
         }
+        //添加人
         if(empty($data['aid'])){
             $data['aid']=0;
         }else{
             $where['p.aid']=['eq',$data['aid']];
         }
+        //审核人
         if(empty($data['rid'])){
             $data['rid']=0;
         }else{
             $where['p.rid']=['eq',$data['rid']];
+        }
+        //类型
+        if(empty($data['type'])){
+            $data['type']=0;
+        }else{
+            $where['p.type']=['eq',$data['type']];
         }
         //查询字段
         $types=config($table.'_search');
@@ -145,33 +154,34 @@ class BrandController extends AdminInfoController
      
    
     /**
-     * 产品品牌添加
+     * 技术参数添加
      * @adminMenu(
-     *     'name'   => '产品品牌添加',
+     *     'name'   => '技术参数添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌添加',
+     *     'remark' => '技术参数添加',
      *     'param'  => ''
      * )
      */
     public function add()
     {
        
-        return $this->fetch();
+        return $this->fetch();  
+        
     }
     /**
-     * 产品品牌添加do
+     * 技术参数添加do
      * @adminMenu(
-     *     'name'   => '产品品牌添加do',
+     *     'name'   => '技术参数添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌添加do',
+     *     'remark' => '技术参数添加do',
      *     'param'  => ''
      * )
      */
@@ -182,6 +192,20 @@ class BrandController extends AdminInfoController
         if(empty($data['name'])){
             $this->error('名称不能为空');
         }
+        if(empty($data['type'])){
+            $this->error('类型必须选择');
+        }
+        //清除不规范输入导致的空格
+        if(!empty($data['content'])){
+            //3是自由输入
+            if($data['type']==3){
+                $data['content']='';
+            }else{
+                //清除不规范输入导致的空格
+                $data['content']=zz_delimiter($data['content']); 
+            }
+        }
+       
         $url=url('index');
         //处理图片
         $pic='';
@@ -192,7 +216,8 @@ class BrandController extends AdminInfoController
         $data_add=[
             'name'=>$data['name'],
             'dsc'=>$data['dsc'],
-            'pic'=>'',
+            'type'=>$data['type'],
+            'content'=>$data['content'],
             'sort'=>intval($data['sort']),
             'status'=>1,
             'aid'=>$admin['id'],
@@ -201,23 +226,7 @@ class BrandController extends AdminInfoController
         ];
         $m->startTrans();
         $id=$m->insertGetId($data_add);
-        //处理图片
-        $path=getcwd().'/upload/';
-        $path1=$table.'/'.$id.'/';
-        $data_update=[
-            'path'=>$path1, 
-        ];
-        if(!empty($data['pic']) && is_file($path.$data['pic'])){
-            if(!is_dir($path.$path1)){
-                mkdir($path.$path1);
-            } 
-            $pic_conf=config('pic_'.$table);
-            $data_update['pic']=$path1.'/'.$admin['id'].'-'.$time.'.jpg';
-            zz_set_image($data['pic'], $data_update['pic'], $pic_conf[0], $pic_conf[1],$pic_conf[2]);
-            unlink($path.$data['pic']);
-        }
-        
-        $m->where('id',$id)->update($data_update);
+         
         //记录操作记录
         $flag=$this->flag;
         $table=$this->table;
@@ -237,15 +246,15 @@ class BrandController extends AdminInfoController
         $this->success('添加成功',$url);
     }
     /**
-     * 产品品牌详情
+     * 技术参数详情
      * @adminMenu(
-     *     'name'   => '产品品牌详情',
+     *     'name'   => '技术参数详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌详情',
+     *     'remark' => '技术参数详情',
      *     'param'  => ''
      * )
      */
@@ -255,15 +264,15 @@ class BrandController extends AdminInfoController
         return $this->fetch();  
     }
     /**
-     * 产品品牌状态审核
+     * 技术参数状态审核
      * @adminMenu(
-     *     'name'   => '产品品牌状态审核',
+     *     'name'   => '技术参数状态审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌状态审核',
+     *     'remark' => '技术参数状态审核',
      *     'param'  => ''
      * )
      */
@@ -272,15 +281,15 @@ class BrandController extends AdminInfoController
         parent::review();
     }
     /**
-     * 产品品牌状态批量同意
+     * 技术参数状态批量同意
      * @adminMenu(
-     *     'name'   => '产品品牌状态批量同意',
+     *     'name'   => '技术参数状态批量同意',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌状态批量同意',
+     *     'remark' => '技术参数状态批量同意',
      *     'param'  => ''
      * )
      */
@@ -289,7 +298,7 @@ class BrandController extends AdminInfoController
         parent::review_all();
     }
     /**
-     * 产品品牌禁用
+     * 技术参数禁用
      * @adminMenu(
      *     'name'   => '信息状态禁用',
      *     'parent' => 'index',
@@ -306,15 +315,15 @@ class BrandController extends AdminInfoController
         parent::ban();
     }
     /**
-     * 产品品牌信息状态恢复
+     * 技术参数信息状态恢复
      * @adminMenu(
-     *     'name'   => '产品品牌信息状态恢复',
+     *     'name'   => '技术参数信息状态恢复',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌信息状态恢复',
+     *     'remark' => '技术参数信息状态恢复',
      *     'param'  => ''
      * )
      */
@@ -323,15 +332,15 @@ class BrandController extends AdminInfoController
         parent::cancel_ban();
     }
     /**
-     * 产品品牌编辑提交
+     * 技术参数编辑提交
      * @adminMenu(
-     *     'name'   => '产品品牌编辑提交',
+     *     'name'   => '技术参数编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌编辑提交',
+     *     'remark' => '技术参数编辑提交',
      *     'param'  => ''
      * )
      */
@@ -340,15 +349,15 @@ class BrandController extends AdminInfoController
         parent::edit_do();
     }
     /**
-     * 产品品牌编辑列表
+     * 技术参数编辑列表
      * @adminMenu(
-     *     'name'   => '产品品牌编辑列表',
+     *     'name'   => '技术参数编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌编辑列表',
+     *     'remark' => '技术参数编辑列表',
      *     'param'  => ''
      * )
      */
@@ -358,15 +367,15 @@ class BrandController extends AdminInfoController
     }
     
     /**
-     * 产品品牌审核详情
+     * 技术参数审核详情
      * @adminMenu(
-     *     'name'   => '产品品牌审核详情',
+     *     'name'   => '技术参数审核详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌审核详情',
+     *     'remark' => '技术参数审核详情',
      *     'param'  => ''
      * )
      */
@@ -376,15 +385,15 @@ class BrandController extends AdminInfoController
         return $this->fetch();  
     }
     /**
-     * 产品品牌信息编辑审核
+     * 技术参数信息编辑审核
      * @adminMenu(
-     *     'name'   => '产品品牌编辑审核',
+     *     'name'   => '技术参数编辑审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌编辑审核',
+     *     'remark' => '技术参数编辑审核',
      *     'param'  => ''
      * )
      */
@@ -393,15 +402,15 @@ class BrandController extends AdminInfoController
         parent::edit_review();
     }
     /**
-     * 产品品牌编辑记录批量删除
+     * 技术参数编辑记录批量删除
      * @adminMenu(
-     *     'name'   => '产品品牌编辑记录批量删除',
+     *     'name'   => '技术参数编辑记录批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌编辑记录批量删除',
+     *     'remark' => '技术参数编辑记录批量删除',
      *     'param'  => ''
      * )
      */
@@ -411,15 +420,15 @@ class BrandController extends AdminInfoController
     }
     
     /**
-     * 产品品牌批量删除
+     * 技术参数批量删除
      * @adminMenu(
-     *     'name'   => '产品品牌批量删除',
+     *     'name'   => '技术参数批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '产品品牌批量删除',
+     *     'remark' => '技术参数批量删除',
      *     'param'  => ''
      * )
      */
@@ -436,11 +445,7 @@ class BrandController extends AdminInfoController
         $admin=$this->admin;
         $time=time();
         //检查是否有产品
-        $where=['brand'=>['in',$ids]];
-        $tmp=db('goods')->where($where)->find();
-        if(!empty($tmp)){
-            $this->error($flag.$tmp['brand'].'下有产品'.$tmp['name'].$tmp['code']);
-        }
+        
         //彻底删除
         $where=['id'=>['in',$ids]];
         $m->startTrans();

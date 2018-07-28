@@ -21,7 +21,10 @@ class OldController extends AdminBaseController
             'port'=>$db['hostport'],
         ];
         parent::_initialize();
-         
+        $aid=session('ADMIN_ID');
+        if($aid!=1){
+            $this->error('开发者功能，不要操作');
+        }
     }
      
     /**

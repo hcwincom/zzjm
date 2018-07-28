@@ -3,7 +3,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@cate/nav" /> 
+			<include file="admin@param/nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
@@ -15,40 +15,49 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">名称</label>
+				<label  class="col-sm-2 control-label">名称</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="name" value="{$info.name}" />
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">父级分类</label>
+			  <div class="form-group">
+				<label for="" class="col-sm-2 control-label">类型</label>
 				<div class="col-md-6 col-sm-10">
-					<select name="fid" id="">
-						<option value="0">作为一级分类</option>
-					<foreach name="cates" item="vo">
-						<option value="{$key}" <if condition="$info.fid eq $key">selected</if>>{$vo}</option>
+					<foreach name="param_types" item="vo"> 
+					 <label class="radio-inline">
+	                    <input type="radio" name="type" value="{$key}" <if condition="$key eq $info.type">checked</if> />
+	                    {$vo}
+	                </label>
 					</foreach>
-					</select>
 				</div>
 			</div>
 			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">编码</label>
+				<label for="" class="col-sm-2 control-label">可选数据(用,分隔)</label>
+				<div class="col-md-6 col-sm-10"> 
+					<textarea class="form-control" name="content" rows="5"  maxlength="250">{$info.content}</textarea>
+				</div>
+			</div>
+			 <div class="form-group">
+				<label class="col-sm-2 control-label">简介</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="code" value="{$info.code}" readonly/>
+					 
+					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
 				</div>
 			</div>
 			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">排序</label>
+				<label class="col-sm-2 control-label">排序</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="sort" value="{$info.sort}" />
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">审核状态</label>
+				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
 				 
 				 <foreach name="statuss" item="vo">
+				  	<label class="radio-inline">
 				 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+				 	</label>
 				 </foreach>
 				</div>
 			</div>

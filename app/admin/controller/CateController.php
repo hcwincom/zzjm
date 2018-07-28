@@ -207,7 +207,7 @@ class CateController extends AdminInfoController
         if(empty($data['type2'])){
             $data['type2']=key($search_types);
         }
-        if(empty($data['name'])){
+        if(!isset($data['name']) || $data['name']==''){
             $data['name']='';
         }else{
             $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
@@ -309,6 +309,109 @@ class CateController extends AdminInfoController
         return $this->fetch();
     }
     /**
+     * 产品分类状态审核
+     * @adminMenu(
+     *     'name'   => '产品分类状态审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '产品分类状态审核',
+     *     'param'  => ''
+     * )
+     */
+    public function review()
+    {
+        parent::review();
+    }
+    /**
+     * 产品分类状态批量同意
+     * @adminMenu(
+     *     'name'   => '产品分类状态批量同意',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '产品分类状态批量同意',
+     *     'param'  => ''
+     * )
+     */
+    public function review_all()
+    {
+        parent::review_all();
+    }
+    /**
+     * 产品分类禁用
+     * @adminMenu(
+     *     'name'   => '信息状态禁用',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '信息状态禁用',
+     *     'param'  => ''
+     * )
+     */
+    public function ban()
+    {
+        parent::ban();
+    }
+    /**
+     * 产品分类信息状态恢复
+     * @adminMenu(
+     *     'name'   => '产品分类信息状态恢复',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '产品分类信息状态恢复',
+     *     'param'  => ''
+     * )
+     */
+    public function cancel_ban()
+    {
+        parent::cancel_ban();
+    }
+    /**
+     * 产品分类编辑提交
+     * @adminMenu(
+     *     'name'   => '产品分类编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '产品分类编辑提交',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_do()
+    {
+        parent::edit_do();
+    }
+    /**
+     * 产品分类编辑列表
+     * @adminMenu(
+     *     'name'   => '产品分类编辑列表',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '产品分类编辑列表',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_list(){
+        parent::edit_list();
+        return $this->fetch();  
+    }
+    
+    /**
      * 产品分类审核详情
      * @adminMenu(
      *     'name'   => '产品分类审核详情',
@@ -348,8 +451,40 @@ class CateController extends AdminInfoController
         $this->assign('change',$change);
         return $this->fetch();
     }
-    
-    
+    /**
+     * 产品分类信息编辑审核
+     * @adminMenu(
+     *     'name'   => '产品分类编辑审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '产品分类编辑审核',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_review()
+    {
+        parent::edit_review();
+    }
+    /**
+     * 产品分类编辑记录批量删除
+     * @adminMenu(
+     *     'name'   => '产品分类编辑记录批量删除',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '产品分类编辑记录批量删除',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_del_all()
+    {
+        parent::edit_del_all();
+    }
     /**
      * 产品分类批量删除
      * @adminMenu(

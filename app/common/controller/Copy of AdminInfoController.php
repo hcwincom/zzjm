@@ -5,7 +5,7 @@ namespace app\common\controller;
 use cmf\controller\AdminBaseController;
  
 
-class AdminInfoController extends AdminBaseController
+class AdminInfossController extends AdminBaseController
 {
     protected $m;
     protected $statuss;
@@ -28,14 +28,23 @@ class AdminInfoController extends AdminBaseController
     /**
      * 信息公共类 
      */
-     public function index()
+    public function index()
     {
-        exit('index');
-    } 
-   
+        
+    }
     /**
-     * 信息详情 
-     */ 
+     * 信息详情
+     * @adminMenu(
+     *     'name'   => '信息详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '信息详情',
+     *     'param'  => ''
+     * )
+     */
     public function edit()
     {
         $m=$this->m;
@@ -50,9 +59,10 @@ class AdminInfoController extends AdminBaseController
         if(empty($info)){
             $this->error('数据不存在');
         }
-       
-        $this->assign('info',$info); 
-       
+        
+        $this->assign('info',$info);
+        
+        return $this->fetch();
     }
     
     //信息审核
@@ -122,7 +132,17 @@ class AdminInfoController extends AdminBaseController
         $this->success('审核成功');
     }
     /**
-     * 信息状态批量同意 
+     * 信息状态批量同意
+     * @adminMenu(
+     *     'name'   => '信息状态批量同意',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '信息状态批量同意',
+     *     'param'  => ''
+     * )
      */
     public function review_all()
     { 
@@ -198,7 +218,17 @@ class AdminInfoController extends AdminBaseController
     }
     
     /**
-     * 信息状态禁用 
+     * 信息状态禁用
+     * @adminMenu(
+     *     'name'   => '信息状态禁用',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '信息状态禁用',
+     *     'param'  => ''
+     * )
      */
     public function ban()
     {
@@ -228,7 +258,17 @@ class AdminInfoController extends AdminBaseController
         }
     }
     /**
-     * 信息状态恢复 
+     * 信息状态恢复
+     * @adminMenu(
+     *     'name'   => '信息状态恢复',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '信息状态恢复',
+     *     'param'  => ''
+     * )
      */
     public function cancel_ban()
     {
@@ -258,7 +298,17 @@ class AdminInfoController extends AdminBaseController
     }
      
     /**
-     * 编辑提交 
+     * 编辑提交
+     * @adminMenu(
+     *     'name'   => '编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '编辑提交',
+     *     'param'  => ''
+     * )
      */
     public function edit_do()
     {
@@ -304,46 +354,25 @@ class AdminInfoController extends AdminBaseController
                 $content[$k]=$data[$k];
             }
         }
-        switch ($table){
-            case 'brand':
-                //处理图片
-                $path=getcwd().'/upload/';
-                if(!empty($content['pic'])){
-                    if(is_file($path.$content['pic'])){
-                        if(!is_dir($path.$info['path'])){
-                            mkdir($path.$info['path']);
-                        }
-                        $pic_conf=config('pic_'.$table);
-                        $content['pic']=$info['path'].'/'.$admin['id'].'-'.$time.'.jpg';
-                        zz_set_image($data['pic'], $content['pic'], $pic_conf[0], $pic_conf[1],$pic_conf[2]);
-                        unlink($path.$data['pic']);
-                    }else{
-                        unset($content['pic']);
-                    }
-                    
+       
+        //处理图片
+        if($table=='brand'){
+            $path=getcwd().'/upload/'; 
+            if(!empty($content['pic'])){
+                if(is_file($path.$content['pic'])){
+                    if(!is_dir($path.$info['path'])){
+                        mkdir($path.$info['path']);
+                    } 
+                    $pic_conf=config('pic_'.$table);
+                    $content['pic']=$info['path'].'/'.$admin['id'].'-'.$time.'.jpg';
+                    zz_set_image($data['pic'], $content['pic'], $pic_conf[0], $pic_conf[1],$pic_conf[2]);
+                    unlink($path.$data['pic']);
+                }else{
+                    unset($content['pic']);
                 }
-                break;
-            case 'brand':
-                //清除不规范输入导致的空格
-                if(!empty($content['content'])){
-                    //3是自由输入
-                    if($info['type']==3){
-                        unset($content['content']);
-                    }else{
-                        //清除不规范输入导致的空格
-                        $content['content']=zz_delimiter($content['content']);
-                    }
-                }
-                break;
-            case 'template':
-                //关联的参数
-                $ids=$_POST['ids'];
-                if(!empty($ids)){
-                    $content['content']=implode(',', $ids);
-                }
-                break;
+                
+            }
         }
-        
         if(empty($content)){
             $this->error('未修改');
         }
@@ -379,7 +408,17 @@ class AdminInfoController extends AdminBaseController
         $this->success('已提交修改');
     }
     /**
-     * 编辑列表 
+     * 编辑列表
+     * @adminMenu(
+     *     'name'   => '编辑列表',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '编辑列表',
+     *     'param'  => ''
+     * )
      */
     public function edit_list()
     {
@@ -499,10 +538,21 @@ class AdminInfoController extends AdminBaseController
         $this->assign('types',$types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
-       
+        return $this->fetch();
+         
     }
     /**
-     * 编辑审核详情 
+     * 编辑审核详情
+     * @adminMenu(
+     *     'name'   => '编辑审核详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '编辑审核详情',
+     *     'param'  => ''
+     * )
      */
     public function edit_info()
     {
@@ -528,11 +578,21 @@ class AdminInfoController extends AdminBaseController
         $this->assign('info1',$info1);
        
         $this->assign('change',$change);
-       
+        return $this->fetch();
     }
     
     /**
-     * 信息编辑审核 
+     * 信息编辑审核
+     * @adminMenu(
+     *     'name'   => '信息编辑审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '信息编辑审核',
+     *     'param'  => ''
+     * )
      */
     public function edit_review()
     {
@@ -567,9 +627,35 @@ class AdminInfoController extends AdminBaseController
             }
         }
         $time=time();
-        
+        //组装数据
+        $update_info=[ 
+            'time'=>$time, 
+        ];
+        //得到修改的字段
+        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=json_decode($change,true);
+       
+        foreach($change as $k=>$v){
+            $update_info[$k]=$v;
+            //如果是父类变化，编码也会变化
+            if($table=='cate' && $k=='fid'){
+                $fid=$v;
+                if($fid==0){
+                    //一级分类处理
+                    $max_code=config('cate_max');
+                    $update_info['code_num']=$max_code+1;
+                    $update_info['code']=(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
+                }else{
+                    //比较父类中记录的最大值和查找到的最大值
+                    $fcate=$m->where(['id'=>$fid])->find();
+                    $max_num=$m->where('fid',$fid)->order('code_num desc')->value('code_num');
+                    $update_info['code_num']=(($max_num>=$fcate['max_num'])?$max_num:$fcate['max_num'])+1;
+                    $update_info['code']=$fcate['code'].'-'.(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
+                }
+            }
+        }
         $m->startTrans();
-        
+        $row=$m->where('id',$info['pid'])->update($update_info);
         $update=[
             'rid'=>$admin['id'],
             'rtime'=>$time,
@@ -581,47 +667,11 @@ class AdminInfoController extends AdminBaseController
             'rstatus'=>1,
         ];
         $row=$m_edit->where($where)->update($update);
+        
         if($row!==1){
             $m->rollback();
             $this->error('审核失败，请刷新后重试');
         } 
-        //是否更新,2同意，3不同意
-        if($status===2){
-            //组装更新数据
-            $update_info=[
-                'time'=>$time,
-            ];
-            //得到修改的字段
-            $change=db('edit_info')->where('eid',$id)->value('content');
-            $change=json_decode($change,true);
-            
-            foreach($change as $k=>$v){
-                $update_info[$k]=$v;
-                //如果是父类变化，编码也会变化
-                if($table=='cate' && $k=='fid'){
-                    $fid=$v;
-                    if($fid==0){
-                        //一级分类处理
-                        $max_code=config('cate_max');
-                        $update_info['code_num']=$max_code+1;
-                        $update_info['code']=(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
-                    }else{
-                        //比较父类中记录的最大值和查找到的最大值
-                        $fcate=$m->where(['id'=>$fid])->find();
-                        $max_num=$m->where('fid',$fid)->order('code_num desc')->value('code_num');
-                        $update_info['code_num']=(($max_num>=$fcate['max_num'])?$max_num:$fcate['max_num'])+1;
-                        $update_info['code']=$fcate['code'].'-'.(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
-                    }
-                }
-                
-            }
-            $row=$m->where('id',$info['pid'])->update($update_info);
-            if($row!==1){
-                $m->rollback();
-                $this->error('信息更新失败，请刷新后重试');
-            } 
-        }
-       
         //审核成功，记录操作记录,发送审核信息
         $flag=$this->flag;
         $review_status=$this->review_status;
@@ -651,7 +701,7 @@ class AdminInfoController extends AdminBaseController
         db('action')->insert($data_action);
         db('msg')->insert($data_msg);
         //如果是修改了分类编码的要保存最新编码
-        if($table=='cate' && $status==2 && !empty($update_info['code_num'])){
+        if($table=='cate' && !empty($update_info['code_num'])){
             if($fid==0){
                 cmf_set_dynamic_config(['cate_max'=>$update_info['code_num']]);
             }else{
@@ -662,7 +712,17 @@ class AdminInfoController extends AdminBaseController
         $this->success('审核成功');
     }
     /**
-     * 编辑记录批量删除 
+     * 编辑记录批量删除
+     * @adminMenu(
+     *     'name'   => '编辑记录批量删除',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '编辑记录批量删除',
+     *     'param'  => ''
+     * )
      */
     public function edit_del_all()
     {

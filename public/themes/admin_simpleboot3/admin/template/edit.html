@@ -3,7 +3,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@brand/nav" />
+			<include file="admin@param/nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
@@ -20,20 +20,23 @@
 					<input type="text" class="form-control" name="name" value="{$info.name}" />
 				</div>
 			</div>
+			  
 			 <div class="form-group">
-				<label class="col-sm-2 control-label">图片</label>
+				<label for="" class="col-sm-2 control-label">所属大类: </label>
 				<div class="col-md-6 col-sm-10">
-					<input type="hidden" class="form-control" id="photo" name="pic" value="{$info.pic}">
-				 	<a href="javascript:uploadOneImage('图片上传','#photo');">上传图片</a>
-					<img id="photo-preview" src="{:cmf_get_image_url($info.pic)}">
-					
+					<select   name="cid" id="">
+					<foreach name="cates" item="vo">  
+					 	<option value="{$key}" <if condition="$key eq $info.cid">selected</if> >{$vo}</option> 
+					</foreach>
+					</select>
 				</div>
 			</div>
+			 
 			 <div class="form-group">
 				<label class="col-sm-2 control-label">简介</label>
 				<div class="col-md-6 col-sm-10">
 					 
-					<textarea class="form-control" name="dsc" rows="5">{$info.dsc}</textarea>
+					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
 				</div>
 			</div>
 			 <div class="form-group">
@@ -42,12 +45,85 @@
 					<input type="text" class="form-control" name="sort" value="{$info.sort}" />
 				</div>
 			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">参数项</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list">
+						<thead>
+							<tr>
+							 	<th width="15">
+							 	 
+								</th>
+								<th >参数id-名</th>
+								<th >类型</th>
+								<th >可选值</th>
+								<th width="15">
+							  
+								</th>
+								<th >参数id-名</th>
+								<th >类型</th>
+								<th >可选值</th>
+							</tr>
+						</thead>
+						<tbody>
+					  
+					 	 <for start="0" end="$end" step="2" name="i" >
+  
+						 	<tr >
+								<td>
+									<input type="checkbox" class="js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$i]['id']}" <if condition="in_array($params[$i]['id'],$ids)">checked</if>> 
+								</td> 
+								<td>{$params[$i]['id']}-{$params[$i]['name']}</td> 
+								<td>{$param_types[$params[$i]['type']]}</td> 
+								<td>{$params[$i]['content']}</td>
+								 
+								<td>
+									<input type="checkbox" class="js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$i+1]['id']}" <if condition="in_array($params[$i+1]['id'],$ids)">checked</if>>
+								</td> 
+								<td>{$params[$i+1]['id']}-{$params[$i+1]['name']}</td> 
+								<td>{$param_types[$params[$i+1]['type']]}</td> 
+								<td>{$params[$i+1]['content']}</td>
+								 
+							 </tr>
+							 
+					 	</for>
+					 	<if condition="$end eq $i">
+					 		<tr >
+								<td>
+									<input type="checkbox" class="js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$end]['id']}" <if condition="in_array($params[$end]['id'],$ids)">checked</if>> 
+								</td> 
+								<td>{$params[$end]['id']}-{$params[$end]['name']}</td> 
+								<td>{$param_types[$params[$end]['type']]}</td> 
+								<td>{$params[$end]['content']}</td>
+								 
+								<td>
+									 
+								</td> 
+								<td> </td> 
+								<td> </td> 
+								<td> </td>
+								 
+							 </tr>
+						</if>
+						</tbody>
+					</table>
+					 
+				</div>
+			</div>
 			<div class="form-group">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
 				 
 				 <foreach name="statuss" item="vo">
+				  	<label class="radio-inline">
 				 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+				 	</label>
 				 </foreach>
 				</div>
 			</div>
