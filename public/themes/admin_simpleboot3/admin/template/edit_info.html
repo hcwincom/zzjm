@@ -25,7 +25,7 @@
 				</div>
 			</div>
 			 
-			  <div class="form-group">
+			<div class="form-group">
 				<label class="col-sm-2 control-label">简介</label>
 				<div class="col-md-6 col-sm-10"> 
 					<textarea class="form-control"  rows="5" readonly>{$info.dsc}</textarea>
@@ -64,8 +64,60 @@
 							</tr>
 						</thead>
 						<tbody>
-					  
+					   <present name='change.content'>
 					 	 <for start="0" end="$end" step="2" name="i" >
+  
+						 	<tr >
+								<td>
+									<input type="checkbox" class="js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$i]['id']}" <if condition="in_array($params[$i]['id'],$ids)">checked</if> /> 
+									<input type="checkbox" class="red js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$i]['id']}" <if condition="in_array($params[$i]['id'],$change.content)">checked</if> /> 
+								</td> 
+								<td>{$params[$i]['id']}-{$params[$i]['name']}</td> 
+								<td>{$param_types[$params[$i]['type']]}</td> 
+								<td>{$params[$i]['content']}</td>
+								 
+								<td>
+									<input type="checkbox" class="js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$i+1]['id']}" <if condition="in_array($params[$i+1]['id'],$ids)">checked</if> />
+									<input type="checkbox" class="red js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$i+1]['id']}" <if condition="in_array($params[$i+1]['id'],$change.content)">checked</if> /> 
+								</td> 
+								<td>{$params[$i+1]['id']}-{$params[$i+1]['name']}</td> 
+								<td>{$param_types[$params[$i+1]['type']]}</td> 
+								<td>{$params[$i+1]['content']}</td>
+								 
+							 </tr>
+							 
+					 	</for>
+					 	<if condition="$end eq $i">
+					 		<tr >
+								<td>
+									<input type="checkbox" class="js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$end]['id']}" <if condition="in_array($params[$end]['id'],$ids)">checked</if> /> 
+									<input type="checkbox" class="red js-check"
+									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+									value="{$params[$i]['id']}" <if condition="in_array($params[$i]['id'],$change.content)">checked</if> /> 
+								</td> 
+								<td>{$params[$end]['id']}-{$params[$end]['name']}</td> 
+								<td>{$param_types[$params[$end]['type']]}</td> 
+								<td>{$params[$end]['content']}</td>
+								 
+								<td></td> 
+								<td> </td> 
+								<td> </td> 
+								<td> </td>
+								 
+							 </tr>
+						</if>
+					 	<else/>
+					 	<for start="0" end="$end" step="2" name="i" >
   
 						 	<tr >
 								<td>
@@ -94,26 +146,28 @@
 								<td>
 									<input type="checkbox" class="js-check"
 									data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
-									value="{$params[$end]['id']}" <if condition="in_array($params[$end]['id'],$ids)">checked</if>> 
+									value="{$params[$end]['id']}" <if condition="in_array($params[$end]['id'],$ids)">checked</if> /> 
 								</td> 
 								<td>{$params[$end]['id']}-{$params[$end]['name']}</td> 
 								<td>{$param_types[$params[$end]['type']]}</td> 
 								<td>{$params[$end]['content']}</td>
 								 
-								<td>
-									 
-								</td> 
+								<td></td> 
 								<td> </td> 
 								<td> </td> 
 								<td> </td>
 								 
 							 </tr>
 						</if>
+					 	
+						</present>
 						</tbody>
+						
 					</table>
-					 
+					  
 				</div>
 			</div>
+			 
 			<div class="form-group">
 				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
 				<div class="col-md-6 col-sm-10">

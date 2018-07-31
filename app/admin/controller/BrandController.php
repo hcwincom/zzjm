@@ -36,111 +36,9 @@ class BrandController extends AdminInfoController
      */
     public function index()
     {
-        $table=$this->table;
-        $m=$this->m;
-        $data=$this->request->param();
-        $where=[];
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
-        if(empty($data['aid'])){
-            $data['aid']=0;
-        }else{
-            $where['p.aid']=['eq',$data['aid']];
-        }
-        if(empty($data['rid'])){
-            $data['rid']=0;
-        }else{
-            $where['p.rid']=['eq',$data['rid']];
-        }
-        //查询字段
-        $types=config($table.'_search');
-        if(empty($types)){
-            $types=config('base_search');
-        }
-        //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
-        //搜索类型
-        $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(!isset($data['name']) || $data['name']==''){
-            $data['name']='';
-        }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
-        
-        //时间类别
-        $times=config('time1_search');
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where['p.'.$data['time']]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where['p.'.$data['time']]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
-                }
-            }
-        }
-        $list=$m
-        ->alias('p')
-        ->field('p.*')
-        ->where($where)
-        ->order('p.status asc,p.time desc')
-        ->paginate();
-        // 获取分页显示
-        $page = $list->appends($data)->render();
-        $m_user=db('user');
-        //创建人
-        $where_aid=[
-            'user_type'=>1,
-            'shop'=>1,
-        ];
-        $aids=$m_user->where($where_aid)->column('id,user_nickname');
-        //审核人
-        $where_rid=[
-            'user_type'=>1,
-            'shop'=>1,
-        ];
-        $rids=$m_user->where($where_rid)->column('id,user_nickname');
-        
-        $this->assign('page',$page);
-        $this->assign('list',$list);
-        $this->assign('aids',$aids);
-        $this->assign('rids',$rids);
-        $this->assign('data',$data);
-        $this->assign('types',$types);
-        $this->assign('times',$times);
-        $this->assign("search_types", $search_types);
+        parent::index();
         return $this->fetch();
+       
     }
      
    
@@ -441,42 +339,7 @@ class BrandController extends AdminInfoController
         if(!empty($tmp)){
             $this->error($flag.$tmp['brand'].'下有产品'.$tmp['name'].$tmp['code']);
         }
-        //彻底删除
-        $where=['id'=>['in',$ids]];
-        $m->startTrans();
-        $tmp=$m->where($where)->delete();
-        if($tmp>0){
-            //记录操作记录 
-            $idss=implode(',',$ids);
-            $data_action=[
-                'aid'=>$admin['id'],
-                'time'=>$time,
-                'ip'=>get_client_ip(),
-                'action'=>'批量删除'.$flag.'('.$idss.')',
-                'table'=>$table,
-                'type'=>'del',
-                'link'=>'',
-                'shop'=>$admin['shop'],
-            ];
-            db('action')->insert($data_action);
-            
-            //删除关联编辑记录
-            $where_edit=[
-                'table'=>['eq',$table],
-                'pid'=>['in',$ids],
-            ];
-            db('edit')->where($where_edit)->delete();
-            $m->commit();
-            //删除图片
-            $path=getcwd().'/upload/';
-            foreach($ids as $v){
-                $path1=$path.$table.'/'.$v;
-                zz_dirdel($path1);
-            }
-            $this->success('成功删除数据'.$tmp.'条');
-        }else{
-            $this->error('没有删除数据');
-        }
+        parent::del_all();
         
     }
    

@@ -1,0 +1,45 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="admin@cate/nav" /> 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
+			 <div class="form-group">
+				<label for="input-gender" class="col-sm-2 control-label">父级分类</label>
+				<div class="col-md-6 col-sm-10">
+					<select name="fid" id="">
+						<option value="0">作为一级分类</option>
+					<foreach name="cates" item="vo">
+						<option value="{$key}" <if condition="$fid eq $key">selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-gender" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="name" value="" required/>
+				</div>
+			</div>
+			 
+			 <div class="form-group">
+				<label for="input-gender" class="col-sm-2 control-label">排序</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="sort" value="10" />
+				</div>
+			</div>
+			 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+					<a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+	 
+</body>
+</html>

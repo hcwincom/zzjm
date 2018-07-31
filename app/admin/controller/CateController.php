@@ -518,39 +518,7 @@ class CateController extends AdminInfoController
         if(!empty($tmp)){
             $this->error('分类'.$tmp['cid'].'下有产品'.$tmp['name'].$tmp['code']);
         }
-        //彻底删除
-        $where=['id'=>['in',$ids]];
-        $m->startTrans();
-        $tmp=$m->where($where)->delete();
-        if($tmp>0){
-            //记录操作记录
-            $flag=$this->flag;
-            $table=$this->table;
-            $admin=$this->admin;
-            $time=time();
-            $ids=implode(',',$ids);
-            $data_action=[
-                'aid'=>$admin['id'],
-                'time'=>$time,
-                'ip'=>get_client_ip(),
-                'action'=>'批量删除'.$flag.'('.$ids.')',
-                'table'=>$table,
-                'type'=>'del',
-                'link'=>'', 
-                'shop'=>$admin['shop'],
-            ];
-            db('action')->insert($data_action);
-            //删除关联编辑记录
-            $where_edit=[
-                'table'=>['eq',$table],
-                'pid'=>['in',$ids],
-            ];
-            db('edit')->where($where_edit)->delete();
-            $m->commit();
-            $this->success('成功删除数据'.$tmp.'条');
-        }else{
-            $this->error('没有删除数据');
-        }
+        parent::del_all();
         
     }
 }

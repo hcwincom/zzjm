@@ -3,7 +3,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@param/nav" />
+			<include file="public@cate_nav" />
 			<li class="active"><a href="{:url('edit_info',['id'=>$info1.id])}">审核{$flag}</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('review_edit')}">
@@ -24,24 +24,7 @@
 					
 				</div>
 			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">类型</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$param_types[$info.type]}"  readonly/>
-					<present name='change.type'>
-					<input type="text" class="red form-control"  value="{$param_types[$change.type]}" readonly />
-					</present>
-				</div>
-			 </div>
-			  <div class="form-group">
-				<label class="col-sm-2 control-label">可选数据(用,分隔)</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control"  rows="5" readonly>{$info.content}</textarea>
-				<present name='change.content'>
-				 	<textarea class="red form-control" rows="5" readonly>{$change.content}</textarea>
-				</present>
-				</div>
-			</div>
+		  
 			  <div class="form-group">
 				<label class="col-sm-2 control-label">简介</label>
 				<div class="col-md-6 col-sm-10"> 

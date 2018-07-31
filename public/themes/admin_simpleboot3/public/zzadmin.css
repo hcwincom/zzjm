@@ -1,4 +1,5 @@
 @CHARSET "UTF-8";
 .red{
 	color:red !important;
+	border:1px solid red;
 }
