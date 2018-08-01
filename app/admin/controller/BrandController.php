@@ -6,6 +6,20 @@ namespace app\admin\controller;
 use app\common\controller\AdminInfoController; 
 use think\Db; 
  
+/**
+ * Class BrandController
+ * @package app\admin\controller
+ *
+ * @adminMenuRoot(
+ *     'name'   =>'产品品牌',
+ *     'action' =>'ii',
+ *     'parent' =>'admin/Goods/default',
+ *     'display'=> true,
+ *     'order'  => 40,
+ *     'icon'   =>'',
+ *     'remark' =>'产品品牌'
+ * )
+ */
 class BrandController extends AdminInfoController
 {
     
@@ -25,7 +39,7 @@ class BrandController extends AdminInfoController
      * 产品品牌列表
      * @adminMenu(
      *     'name'   => '产品品牌列表',
-     *     'parent' => 'admin/Goods/default',
+     *     'parent' => 'ii',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10,
@@ -57,7 +71,7 @@ class BrandController extends AdminInfoController
      */
     public function add()
     {
-       
+        parent::add();
         return $this->fetch();
     }
     /**
@@ -90,6 +104,7 @@ class BrandController extends AdminInfoController
         $data_add=[
             'name'=>$data['name'],
             'dsc'=>$data['dsc'],
+            'cid'=>$data['cid'],
             'pic'=>'',
             'sort'=>intval($data['sort']),
             'status'=>1,

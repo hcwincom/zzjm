@@ -26,7 +26,7 @@ class CateController extends AdminInfoController
      * 产品分类
      * @adminMenu(
      *     'name'   => '产品分类',
-     *     'parent' => 'admin/Goods/default',
+     *     'parent' => 'admin/Goods/default1',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10,

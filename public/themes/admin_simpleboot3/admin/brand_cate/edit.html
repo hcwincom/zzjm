@@ -3,7 +3,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@brand/nav" />
+			<include file="public@cate_nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
@@ -20,38 +20,19 @@
 					<input type="text" class="form-control" name="name" value="{$info.name}" />
 				</div>
 			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">分类</label>
-				<div class="col-md-6 col-sm-10">
-					 <select class="" name="cid" > 
-						 <foreach name="cates" item="vo" k="key">
-						<option value="{$key}" <if condition="$key eq $info.cid">selected</if>> 
-						 {$vo}
-						</option>
-						</foreach>
-					</select>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">图片</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="hidden" class="form-control" id="photo" name="pic" value="{$info.pic}">
-				 	<a href="javascript:uploadOneImage('图片上传','#photo');">上传图片</a>
-					<img id="photo-preview" src="{:cmf_get_image_url($info.pic)}">
-					
-				</div>
-			</div>
+			 
 			 <div class="form-group">
 				<label class="col-sm-2 control-label">简介</label>
 				<div class="col-md-6 col-sm-10">
 					 
-					<textarea class="form-control" name="dsc" rows="5">{$info.dsc}</textarea>
+					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
 				</div>
 			</div>
 			 <div class="form-group">
 				<label class="col-sm-2 control-label">排序</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="sort" value="{$info.sort}" />
+					 
 				</div>
 			</div>
 			<div class="form-group">
@@ -59,7 +40,9 @@
 				<div class="col-md-6 col-sm-10">
 				 
 				 <foreach name="statuss" item="vo">
+				  	<label class="radio-inline">
 				 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+				 	</label>
 				 </foreach>
 				</div>
 			</div>

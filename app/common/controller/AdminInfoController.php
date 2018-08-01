@@ -1001,6 +1001,9 @@ class AdminInfoController extends AdminBaseController
             case 'template':
                 db('template_param')->where(['t_id'=>['in',$ids]])->delete();
                 break;
+            case 'price':
+                db('price_fee')->where(['t_id'=>['in',$ids]])->delete();
+                break;
         }
         $m->commit(); 
         $this->success('成功删除数据'.$tmp.'条');
@@ -1019,8 +1022,9 @@ class AdminInfoController extends AdminBaseController
             case 'price':
                 break;
             case 'fee': 
+            case 'brand': 
                 $where_cate['table']=$table;
-                $cates=db('cate_any')->where($where_cate)->column('id,name');
+                $cates=db('cate_any')->where($where_cate)->order('sort asc,name asc')->column('id,name');
                 $this->assign('cates',$cates);
                 break;
             case 'template':

@@ -15,8 +15,7 @@ class PriceController extends AdminInfoController
        
         $this->flag='价格模板';
         $this->table='price';
-        $this->m=Db::name('price');
-         
+        $this->m=Db::name('price'); 
         $this->assign('param_types',[1=>'固定值',2=>'比例']);
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
