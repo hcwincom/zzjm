@@ -17,7 +17,8 @@ class FeeCateController extends AdminCateController
         $this->flag='价格参数分类';
         $this->table='fee';
         $this->m=Db::name('cate_any');
-        
+        $prices=config('prices');
+        $this->assign('prices',$prices);
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
        
@@ -26,7 +27,7 @@ class FeeCateController extends AdminCateController
      * 价格参数分类列表
      * @adminMenu(
      *     'name'   => '价格参数分类列表',
-     *     'parent' => 'ii',
+     *     'parent' => 'admin/fee/ii',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10,

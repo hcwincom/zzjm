@@ -25,6 +25,11 @@
 				<label for="" class="col-sm-2 control-label">排序</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="sort" value="10" />
+					<p>排序和价格计算关联， 
+					<foreach name="prices" item="vo">
+					排序为{$key*10-1}-{$key*10+9}的归于{$key}-{$vo}计算，
+					</foreach>  
+					</p>
 				</div>
 			</div>
 			 

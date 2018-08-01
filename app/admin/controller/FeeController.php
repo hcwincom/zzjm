@@ -16,7 +16,7 @@ use Dompdf\Positioner\Fixed;
  *     'action' =>'ii',
  *     'parent' =>'admin/Goods/default',
  *     'display'=> true,
- *     'order'  => 10,
+ *     'order'  => 30,
  *     'icon'   =>'',
  *     'remark' =>'价格参数'
  * )
@@ -112,7 +112,7 @@ class FeeController extends AdminInfoController
             'dsc'=>$data['dsc'],
             'type'=>$data['type'],
             'cid'=>$data['cid'],
-            'fee'=>$data['fee'],
+            'fee'=>round($data['fee'],4),
             'sort'=>intval($data['sort']),
             'status'=>1,
             'aid'=>$admin['id'],

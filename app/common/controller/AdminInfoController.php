@@ -123,7 +123,7 @@ class AdminInfoController extends AdminBaseController
         ->alias('p')
         ->field('p.*')
         ->where($where)
-        ->order('p.status asc,p.time desc')
+        ->order('p.status asc,p.sort asc,p.time desc')
         ->paginate();
         // 获取分页显示
         $page = $list->appends($data)->render();
@@ -420,6 +420,9 @@ class AdminInfoController extends AdminBaseController
         ];
        
         $fields=config($table.'_edit');
+        if(empty($fields)){
+            $fields=config('base_edit');
+        }
         $content=[];
         //检测改变了哪些字段
         foreach($fields as $k=>$v){
@@ -474,6 +477,43 @@ class AdminInfoController extends AdminBaseController
                     $content['content']=implode(',', $ids);
                 }
                 break;
+            case 'fee':
+                //过滤费用值
+                if(isset($content['fee'])){
+                    $content['fee']=round($content['fee'],4);
+                }
+                break;
+            case 'price':
+                    $fee1=$data['fee1']; 
+                    $type1=$data['type1']; 
+                    $dsc1=$data['dsc1']; 
+                    //获取所有价格参数来比较，暂时获取全部
+                    $prices=config('prices');
+                    //模板关联，获取全部，多点也没关系
+                    $where=['pf.t_id'=>['eq',$data['id']]];
+                    
+                    $fees0=db('price_fee')
+                    ->alias('pf')
+                    ->where($where)
+                    ->column('pf.p_id,pf.fee,pf.type,pf.dsc');
+                    //循环比较
+                    $data_fees=[];
+                    foreach($fee1 as $k=>$vv){
+                        $v=$fees0[$k];
+                        $vv=round($vv,4);
+                        if($vv!=$v['fee'] || $type1[$k]!=$v['type'] || $dsc1[$k]!=$v['dsc']){
+                            $data_fees[$k]=[
+                                'p_id'=>$k,
+                                'fee'=>$vv,
+                                'type'=>$type1[$k],
+                                'dsc'=>$dsc1[$k],
+                            ];
+                        }
+                    }
+                    if(!empty($data_fees)){
+                        $content['content']=json_encode($data_fees);
+                    }
+                    break;
         }
         
         if(empty($content)){
@@ -975,9 +1015,10 @@ class AdminInfoController extends AdminBaseController
         $table=$this->table; 
         $where_cate=['status'=>2];
         switch($table){
-            case 'fee':
-            case 'param':
+            case 'param': 
             case 'price':
+                break;
+            case 'fee': 
                 $where_cate['table']=$table;
                 $cates=db('cate_any')->where($where_cate)->column('id,name');
                 $this->assign('cates',$cates);
@@ -987,6 +1028,8 @@ class AdminInfoController extends AdminBaseController
                 $where_cate['fid']=0;
                 $cates=db('cate')->where($where_cate)->order('sort asc,code asc')->column('id,name');
                 $this->assign('cates',$cates);
+                break;
+            default:
                 break;
         }
     }
