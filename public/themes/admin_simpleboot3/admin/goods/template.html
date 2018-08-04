@@ -1,0 +1,131 @@
+<div class="form-group">
+	<label for="" class="col-sm-2 control-label">技术参数模板</label>
+	<div class="col-md-6 col-sm-10">
+		 <select name="template" id="template">
+		 	<option value="0">未选择技术模板</option>
+		 </select>
+		 <button type="button" id="get_templates">获取匹配模板</button>
+		  <button type="button" id="set_template">确认匹配模板</button>
+	</div>
+</div>
+
+<div class="form-group" id="param">
+	<label for="" class="col-sm-2 control-label">技术参数填写</label>
+	<div class="col-md-6 col-sm-10">
+		<table class="table table-hover table-bordered table-list">
+		 
+			<thead>
+				<tr> 
+					<th >参数</th>
+					<th >值</th>
+					<th >备注说明</th> 
+				</tr>
+			</thead>
+			<tbody>
+		    <tr> 
+					<th >dfdf参数</th>
+					<th >值dfd</th>
+					<th >备dfd注说明</th> 
+				</tr>
+		 	 
+			</tbody>
+			 
+		</table>
+		 
+	</div>
+</div>
+<script>
+$('#template').change(function(){
+	var tid=$(this).val();
+	console.log(tid);
+});
+template_set(0);
+$('#get_templates').click(function(){
+	var cid=$('.cate0').val();
+	template_set(cid);
+	return false;
+});
+function template_set(cid){
+	console.log('cid'+cid);
+	$.post("{:url('template_set')}",{'cid':cid},function(data){
+		console.log(data);
+		if(data.code!=1){
+			$('#template').parents('.form-group').hide();
+			$('#param').hide();
+			return false;
+		}
+		
+		$('#param table tbody').html('');
+		if(data.msg=='no'){ 
+			return false;
+		}
+		$('#param').show();
+		var list=data.data.list;
+		 
+		$('#template').html('');
+		var options='';
+		for(var i in list){
+			options+='<option value="'+i+'">'+list[i]+'</option>'; 
+		}
+		 
+		$('#template').append(options);
+	},'json');
+}
+$('#set_template').click(function(){
+	var t_id=$('#template').val();
+	 
+	$.post("{:url('param_set')}",{'t_id':t_id},function(data){
+		console.log(data);
+		 $('#param table tbody').html('');
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		if(data.msg=='no'){
+			alert('该模板还未选择参数');
+			return false;
+		}
+		 
+		var list=data.data.list;
+		 
+		var tr='';
+		var type=1;
+		var value='';
+		 
+		for(var i in list){
+			
+			type=parseInt(list[i]['type']);
+			value='';
+			var content=list[i]['content'];
+			 
+			switch(type){
+			case 1:
+				for(var j in content){
+					value+='<label class="radio-inline">'+
+					'<input type="radio" name="value['+i+']" value="'+content[j]+'"/>'+content[j]+
+					'</label>';
+				}
+				break;
+			case 2:
+				for(var j in content){
+					value+='<label class="checkbox-inline">'+
+					'<input type="checkbox" name="value['+i+']" value="'+content[j]+'"/>'+content[j]+
+					'</label>';
+				}
+				break;
+			default:
+				value='<input type="text" name="value['+i+']" value=""/>';
+				break;
+			}
+			tr+='<tr>'+ 
+				'<th >'+list[i]['name']+'</th>'+
+				'<th >'+value+'</th>'+
+				'<th >'+list[i]['dsc']+'</th>'+
+				'</tr>';
+			 
+		}
+		 
+		$('#param table tbody').append(tr);
+	},'json');
+});
+</script>

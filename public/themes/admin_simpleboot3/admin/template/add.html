@@ -3,7 +3,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@param/nav" />
+			<include file="public@nav" />
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
 			 
@@ -17,10 +17,8 @@
 				<label for="" class="col-sm-2 control-label">所属大类: </label>
 				<div class="col-md-6 col-sm-10">
 					<select   name="cid" id="">
-					<foreach name="cates" item="vo"> 
-				 
-					 	<option value="{$key}">{$vo}</option>
-					 
+					<foreach name="cates" item="vo">  
+					 	<option value="{$key}">{$vo}</option> 
 					</foreach>
 					</select>
 				</div>

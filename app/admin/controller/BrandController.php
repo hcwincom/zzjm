@@ -6,20 +6,7 @@ namespace app\admin\controller;
 use app\common\controller\AdminInfoController; 
 use think\Db; 
  
-/**
- * Class BrandController
- * @package app\admin\controller
- *
- * @adminMenuRoot(
- *     'name'   =>'产品品牌',
- *     'action' =>'ii',
- *     'parent' =>'admin/Goods/default',
- *     'display'=> true,
- *     'order'  => 40,
- *     'icon'   =>'',
- *     'remark' =>'产品品牌'
- * )
- */
+
 class BrandController extends AdminInfoController
 {
     
@@ -39,10 +26,10 @@ class BrandController extends AdminInfoController
      * 产品品牌列表
      * @adminMenu(
      *     'name'   => '产品品牌列表',
-     *     'parent' => 'ii',
+     *     'parent' => 'admin/Goods/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 10,
+     *     'order'  => 40,
      *     'icon'   => '',
      *     'remark' => '产品品牌列表',
      *     'param'  => ''
@@ -100,11 +87,14 @@ class BrandController extends AdminInfoController
         $table=$this->table;
         $time=time();
         $admin=$this->admin;
-        
+        $char=zz_first_char($data['name']);
+        if(empty($char)){
+            $this->error('名称非法，无法获取首字母');
+        }
         $data_add=[
             'name'=>$data['name'],
             'dsc'=>$data['dsc'],
-            'cid'=>$data['cid'],
+            'char'=>$char,
             'pic'=>'',
             'sort'=>intval($data['sort']),
             'status'=>1,

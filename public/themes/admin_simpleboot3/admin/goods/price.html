@@ -1,0 +1,201 @@
+<if condition="isset($actions['auth']) || isset($actions['price_set'])">
+<div class="form-group">
+	<label for="" class="col-sm-2 control-label">价格模板</label>
+	<div class="col-md-6 col-sm-10">
+		 <select name="price" id="price">
+		 	<option value="0">未选择价格模板</option>
+		 	<foreach name="prices" item="vo">
+		 	<option value="{$key}">{$vo}</option>
+		 	</foreach>
+		 </select>
+		 
+		  <button type="button" id="set_price">计算价格</button>
+		  <span class="red">点击计算价格后，所有价格会按出厂价和模板价格规则重置!!</span>
+	</div>
+</div>
+ </if>
+<div class="form-group" id="fee">
+	<label for="" class="col-sm-2 control-label">价格</label>
+	<div class="col-md-6 col-sm-10">
+		<table class="table table-hover table-bordered table-list params">
+		 
+		
+			<thead>
+				<tr> 
+					<th class="price_sale">零售价</th>
+					
+					<th class="price_in">出厂价</th>
+					<th class="price_cost">出库价</th>
+					<th class="price_min">最低销售价</th> 
+					<th class="price_range1">区间价1</th>
+					<th class="price_range2">区间价2</th>
+					<th class="price_range3">区间价3</th>
+					<th class="price_dealer1">经销价1</th>
+					<th class="price_dealer2">经销价2</th>
+					<th class="price_dealer3">经销价3</th>
+					<th class="price_trade">同行价</th>
+					<th class="price_factory">工厂配套价</th>
+				</tr>
+			</thead>
+			<tbody>
+		    <tr> 
+				<td id="price_sale"><input type="text" name="price_sale" value="{$info.price_sale}"/></td>
+			 <present name="actions.auth">
+				<td id="price_in"><input type="text" name="price_in" value="{$info.price_in}"/></td>
+				<td id="price_cost"><input type="text" name="price_cost" value="{$info.price_cost}"/></td>
+				<td id="price_min"><input type="text" name="price_min" value="{$info.price_min}"/></td>
+				<td id="price_range1"><input type="text" name="price_range1" value="{$info.price_range1}"/></td>
+				<td id="price_range2"><input type="text" name="price_range2" value="{$info.price_range2}"/></td>
+				<td id="price_range3"><input type="text" name="price_range3" value="{$info.price_range3}"/></td>
+				<td id="price_dealer1"><input type="text" name="price_dealer1" value="{$info.price_dealer1}"/></td>
+				<td id="price_dealer2"><input type="text" name="price_dealer2" value="{$info.price_dealer2}"/></td>
+				<td id="price_dealer3"><input type="text" name="price_dealer3" value="{$info.price_dealer3}"/></td>	  
+				<td id="price_trade"><input type="text" name="price_trade" value="{$info.price_trade}"/></td>	  
+				<td id="price_factory"><input type="text" name="price_factory" value="{$info.price_factory}"/></td>	
+			<else/>
+				<td id="price_in">
+				 <present name="actions.price_in_set">
+				 	<input type="text" name="price_in" value="{$info.price_in}"/>
+				 <else/>
+				  	<present name="actions.price_in_get">
+				  		<input type="text" value="{$info.price_in}" readonly/>
+				  	<else/>
+				  		--
+				  		<input type="hidden" value="{$info.price_in}"/>
+				  	</present>
+				 </present>
+				</td>
+				<td id="price_cost">
+				 <present name="actions.price_cost_set">
+				 	<input type="text" name="price_cost" value="{$info.price_cost}"/>
+				 <else/>
+				  	<present name="actions.price_in_get">
+				  		<input type="text" value="{$info.price_cost}" readonly/>
+				  	<else/>
+				  		--
+				  	</present>
+				 </present>
+				</td>
+				 <td id="price_min">
+				 <present name="actions.price_min_set">
+				 	<input type="text" name="price_min" value="{$info.price_min}"/>
+				 <else/>
+				  	<present name="actions.price_min_get">
+				  		<input type="text" value="{$info.price_min}" readonly/>
+				  	<else/>
+				  		--
+				  	</present>
+				 </present>
+				</td>
+			<present name="actions.price_range_set"> 
+				<td id="price_range1"><input type="text" name="price_range1" value="{$info.price_range1}"/></td>
+				<td id="price_range2"><input type="text" name="price_range2" value="{$info.price_range2}"/></td>
+				<td id="price_range3"><input type="text" name="price_range3" value="{$info.price_range3}"/></td> 
+			<else/>
+				<present name="actions.price_range_get">
+					<td id="price_range1"><input type="text" name="" value="{$info.price_range1}" readonly/></td>
+					<td id="price_range2"><input type="text" name="" value="{$info.price_range2}" readonly/></td>
+					<td id="price_range3"><input type="text" name="" value="{$info.price_range3}" readonly/></td>
+				<else/>
+					<td id="price_range1">--</td>
+					<td id="price_range2">--</td>
+					<td id="price_range3">--</td>
+				</present> 
+			</present>
+				<td id="price_dealer1">
+				 <present name="actions.price_dealer1_set">
+				 	<input type="text" name="price_dealer1" value="{$info.price_dealer1}"/>
+				 <else/>
+				  	<present name="actions.price_dealer1_get">
+				  		<input type="text" value="{$info.price_dealer1}" readonly/>
+				  	<else/>
+				  		--
+				  	</present>
+				 </present> 
+				</td>
+				<td id="price_dealer2">
+				 <present name="actions.price_dealer2_set">
+				 	<input type="text" name="price_dealer2" value="{$info.price_dealer2}"/>
+				 <else/>
+				  	<present name="actions.price_dealer2_get">
+				  		<input type="text" value="{$info.price_dealer2}" readonly/>
+				  	<else/>
+				  		--
+				  	</present>
+				 </present> 
+				</td>
+				<td id="price_dealer3">
+				 <present name="actions.price_dealer3_set">
+				 	<input type="text" name="price_dealer3" value="{$info.price_dealer3}"/>
+				 <else/>
+				  	<present name="actions.price_dealer3_get">
+				  		<input type="text" value="{$info.price_dealer3}" readonly/>
+				  	<else/>
+				  		--
+				  	</present>
+				 </present> 
+				</td>
+				<td id="price_trade">
+				 <present name="actions.price_trade_set">
+				 	<input type="text" name="price_trade" value="{$info.price_trade}"/>
+				 <else/>
+				  	<present name="actions.price_trade_get">
+				  		<input type="text" value="{$info.price_trade}" readonly/>
+				  	<else/>
+				  		--
+				  	</present>
+				 </present> 
+				</td>
+				<td id="price_factory">
+				 <present name="actions.price_factory_set">
+				 	<input type="text" name="price_factory" value="{$info.price_factory}"/>
+				 <else/>
+				  	<present name="actions.price_factory_get">
+				  		<input type="text" value="{$info.price_factory}" readonly/>
+				  	<else/>
+				  		--
+				  	</present>
+				 </present> 
+				</td>
+				 
+		   	</present>  
+			</tr>
+			 
+			</tbody>
+			 
+		</table>
+		 
+	</div>
+</div>
+<script>
+ 
+ 
+{//根据初始价格和模板计算价格}
+$('#set_price').click(function(){
+	var t_id=parseInt($('#price').val()); 
+	var price_in=parseFloat($('#price_in input').val()); 
+	if(t_id<=0){
+		alert('还未选择价格模板');
+		return false;
+	}
+	if(!(price_in>0)){
+		alert('请填写有效的出厂价');
+		$('#price_in input').focus();
+		return false;
+	}
+	$.post("{:url('price_set')}",{'t_id':t_id},function(data){
+		console.log(data);
+		 $('#param table tbody').html('');
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		if(data.msg=='no'){
+			alert('参数错误');
+			return false;
+		} 
+		var fees=data.data;
+		 
+	},'json');
+});
+</script>

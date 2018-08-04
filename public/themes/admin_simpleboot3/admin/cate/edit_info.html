@@ -18,9 +18,9 @@
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control"  value="{$info.name}" />
 				 
-				 <notempty name='change.name'>
+				 <present name='change.name'>
 				 	<input type="text" class="red form-control" value="{$change.name}" />
-				 </notempty>
+				 </present>
 					
 				</div>
 			</div>
@@ -35,29 +35,32 @@
 					</foreach>
 					</select>
 					
-				<notempty name='change.fid'>
+				<present name='change.fid'>
 				 	<select id="" class="red">
 						<option value="0">作为一级分类</option>
 					<foreach name="cates" item="vo">
 						<option value="{$key}" <if condition="$change.fid eq $key">selected</if>>{$vo}</option>
 					</foreach>
 					</select>
-				 </notempty>
+				 </present>
 				</div>
 			</div>
 			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">编码</label>
+				<label for="input-gender" class="col-sm-2 control-label">同级编码</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" value="{$info.code}" readonly/>
+					<input type="text" class="form-control" value="{$info.code_num}" readonly/>
+				<present name='change.code_num'>
+				 	<input type="text" class="red form-control" value="{$change.code_num}" />
+				 </present>
 				</div>
 			</div>
 			 <div class="form-group">
 				<label for="input-gender" class="col-sm-2 control-label">排序</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control"  value="{$info.sort}" />
-				<notempty name='change.sort'>
+				<present name='change.sort'>
 				 	<input type="text" class="red form-control" value="{$change.sort}" />
-				 </notempty>
+				 </present>
 				</div>
 			</div>
 			<div class="form-group">
@@ -69,9 +72,11 @@
 			<div class="form-group rstatus">
 				<label for="input-gender" class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
-				 	 <foreach name="review_status" item="vo">
+				<foreach name="review_status" item="vo">
+				 	<label class="radio-inline">
 				 		<input type="radio" value="{$key}" name="rstatus" <if condition="$key eq $info1.rstatus">checked</if>/>{$vo}
-				 </foreach>
+				 	</label>
+				</foreach>
 				</div>
 			</div>
 			<div class="form-group">

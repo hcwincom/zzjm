@@ -1,0 +1,38 @@
+
+<select class=" cate0 {$select_class|default=''}" name="cid0" >
+	<option value='0'>全部</option> 
+	 <foreach name="cates0" item="vo" >
+	<option value="{$key}" <if condition="$key eq $cid0">selected</if>> 
+	 {$vo.name} 
+	</option>
+	</foreach>
+</select> &nbsp;&nbsp; 
+<select class=" cate {$select_class|default=''}" name="cid" >
+	<option class="cate230" value='0'>全部</option> 
+	 <foreach name="cates" item="vo" >
+	<option class="cate20 cate21{$vo.fid} cate23{$key}" value="{$key}" <if condition="$key eq $cid">selected</if>> 
+	 {$vo.name} 
+	</option>
+	</foreach>
+</select> &nbsp;&nbsp; 
+ 
+<script>
+ 
+$(function(){ 
+	 
+	var cid0="{$cid0|default=0}";
+	var cid="{$cid|default=0}";
+	cate(cid0,$('body'),cid);
+	$('.cate0').change(function(){
+		cid0=$(this).val(); 
+		cate(cid0,$(this).parent(),0);
+	});
+	function cate(cid0,$dir,cid){
+		$dir.find('.cate .cate20').hide();
+		$dir.find('.cate .cate21'+cid0).show();
+		$dir.find('.cate .cate23'+cid).prop('selected','selected');
+	}
+});
+
+
+</script>

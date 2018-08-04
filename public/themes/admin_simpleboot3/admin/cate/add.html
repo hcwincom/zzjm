@@ -7,9 +7,9 @@
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
 			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">父级分类</label>
-				<div class="col-md-6 col-sm-10">
-					<select name="fid" id="">
+				<label for="" class="col-sm-2 control-label">父级分类</label>
+				<div class="col-md-6 col-sm-10 ">
+					<select name="fid" id="cid">
 						<option value="0">作为一级分类</option>
 					<foreach name="cates" item="vo">
 						<option value="{$key}" <if condition="$fid eq $key">selected</if>>{$vo}</option>
@@ -18,14 +18,20 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">名称</label>
+				<label for="" class="col-sm-2 control-label">名称</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="name" value="" required/>
 				</div>
 			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">同级编码</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" name="code_num" id="code_num" value="" required/>
+				</div>
+			</div>
 			 
 			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">排序</label>
+				<label for="" class="col-sm-2 control-label">排序</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="sort" value="10" />
 				</div>
@@ -34,7 +40,7 @@
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-					<a class="btn btn-default" href="javascript:history.back(-1);">{:lang('BACK')}</a>
+					 
 				</div>
 			</div>
 		</form>
@@ -43,3 +49,34 @@
 	 
 </body>
 </html>
+<script>
+var cid=$('#cid').val(); 
+cid_change(cid); 
+
+$('#cid').change(function(){
+	cid=$(this).val();
+	cid_change(cid);
+});
+$('#code_num').change(function(){
+	cid=$('#cid').val();
+	var code_num=parseInt($('#code_num').val());
+	
+	$.post("{:url('code_change')}",{'cid':cid,'code_num':code_num},function(data){ 
+		if(data.code!=1){
+			alert(data.msg);
+			cid_change(cid);
+			return false;
+		} 
+	},'json');
+});
+function cid_change(cid){
+	$.post("{:url('cid_change')}",{'cid':cid},function(data){ 
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		$('#code_num').val(data.msg);
+	},'json');
+}
+ 
+</script>

@@ -3,7 +3,7 @@
 namespace app\common\controller;
 
 use cmf\controller\AdminBaseController;
- 
+use think\Db; 
 
 class AdminInfoController extends AdminBaseController
 {
@@ -57,6 +57,12 @@ class AdminInfoController extends AdminBaseController
             $data['cid']=0;
         }else{
             $where['p.cid']=['eq',$data['cid']];
+        }
+        //所属字母分类
+        if(empty($data['char'])){
+            $data['char']='-1';
+        }else{
+            $where['p.char']=['eq',$data['char']];
         }
         //类型
         if(empty($data['type'])){
@@ -437,7 +443,32 @@ class AdminInfoController extends AdminBaseController
             }
         }
         switch ($table){
+            case 'cate':
+                //修改了分类或编码
+                if(isset($content['fid']) || isset($content['code_num'])){
+                    //检查分类是否错误，级别不能错误
+                    if(isset($content['fid']) && ($content['fid']==0 || $data['fid']==0)){
+                        $this->error('一级分类和二级分类不能直接转换');
+                    }
+                    //检查编码是否合法
+                    $where=['code_num'=>$data['code_num'],'fid'=>$data['fid']];
+                    $tmp=$m->where($where)->find();
+                    if(!empty($tmp)){
+                        $this->error('该编码已存在');
+                    }
+                }
+                
+                break;
             case 'brand':
+                //检查名称
+                if(isset($content['name'])){
+                    $char=zz_first_char($data['name']);
+                    if(empty($char)){
+                        $this->error('名称非法，无法获取首字母');
+                    }
+                    $content['char']=$char;
+                }
+                
                 //处理图片
                 $path=getcwd().'/upload/';
                 if(!empty($content['pic'])){
@@ -777,22 +808,38 @@ class AdminInfoController extends AdminBaseController
             $change=json_decode($change,true);
             
             foreach($change as $k=>$v){
-                $update_info[$k]=$v;
-                //如果是父类变化，编码也会变化
-                if($table=='cate' && $k=='fid'){
-                    $fid=$v;
-                    if($fid==0){
-                        //一级分类处理
-                        $max_code=config('cate_max');
-                        $update_info['code_num']=$max_code+1;
-                        $update_info['code']=(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
-                    }else{
-                        //比较父类中记录的最大值和查找到的最大值
-                        $fcate=$m->where(['id'=>$fid])->find();
-                        $max_num=$m->where('fid',$fid)->order('code_num desc')->value('code_num');
-                        $update_info['code_num']=(($max_num>=$fcate['max_num'])?$max_num:$fcate['max_num'])+1;
-                        $update_info['code']=$fcate['code'].'-'.(str_pad($update_info['code_num'],2,'0',STR_PAD_LEFT));
+                $update_info[$k]=$v; 
+            }
+            //修改了分类或编码
+            if(($table=='cate') && (isset($update_info['fid']) || isset($update_info['code_num']))){
+                //得到编码和fid
+                $info_tmp=$m->where('id',$info['pid'])->find();
+                //检查分类是否错误，级别不能错误
+                if(isset($update_info['fid']) && ($info_tmp['fid']==0 || $update_info['fid']==0)){
+                    $this->error('一级分类和二级分类不能直接转换');
+                }
+                $fid=isset($update_info['fid'])?$update_info['fid']:$info_tmp['fid'];
+                $code_num=isset($update_info['code_num'])?$update_info['code_num']:$info_tmp['code_num'];
+                //检查编码是否合法
+                $where=['code_num'=>$code_num,'fid'=>$fid];
+                $tmp=$m->where($where)->find();
+                if(!empty($tmp)){
+                    $this->error('该编码已存在');
+                }
+                if($fid==0){
+                    $max_code=config('cate_max');
+                    //如果一级分类要更新配置中记录的最大编码
+                    if($max_code<$code_num){
+                        cmf_set_dynamic_config(['cate_max'=>$code_num]);
                     }
+                    $update_info['code']=(str_pad($code_num,2,'0',STR_PAD_LEFT));
+                }else{
+                    //，如果是2级要更新一级中的最大编码
+                    $fcate=$m->where(['id'=>$fid])->find();
+                    if($code_num > $fcate['max_num']){
+                        $m->where(['id'=>$fid])->update(['max_num'=>$code_num]);
+                    }
+                    $update_info['code']=$fcate['code'].'-'.(str_pad($code_num,2,'0',STR_PAD_LEFT));
                 }
                 
             }
@@ -801,8 +848,43 @@ class AdminInfoController extends AdminBaseController
                 $m->rollback();
                 $this->error('信息更新失败，请刷新后重试');
             } 
+            
         }
-       
+        //分类更改子级
+        if(($table=='cate') && (isset($update_info['code']))){
+             
+            //一级分类要更新下级编码
+            if($fid==0){
+                //获取下级分类更新编码
+                $cates=$m->where('fid',$info['pid'])->column('id,code_num');
+               
+                foreach($cates as $k=>$v){
+                    $data_cate=[
+                        'id'=>$k,
+                        'code'=>$update_info['code'].'-'.(str_pad($v,2,'0',STR_PAD_LEFT)),
+                    ];
+                    $m->update($data_cate);
+                    //更新产品编码
+                    $sql='update cmf_goods set code=concat("'.$data_cate['code'].'","-0",code_num) '.
+                    'where cid='.$data_cate['id'].' and code_num<10';
+                    Db::execute($sql);
+                    $sql='update cmf_goods set code=concat("'.$data_cate['code'].'","-",code_num) '.
+                        'where cid='.$data_cate['id'].' and code_num>=10';
+                    Db::execute($sql);
+                }
+            }else{
+                
+                //更新产品编码
+                $sql='update cmf_goods set cid0='.$fid.',code=concat("'.$update_info['code'].'","-0",code_num) '.
+                    'where cid='.$info['id'].' and code_num<10';
+                Db::execute($sql);
+                $sql='update cmf_goods set code=concat("'.$update_info['code'].'","-",code_num) '.
+                    'where cid='.$info['id'].' and code_num>=10';
+                Db::execute($sql);
+            }
+            
+            
+        }
         //审核成功，记录操作记录,发送审核信息
         $flag=$this->flag;
         $review_status=$this->review_status;
@@ -831,15 +913,8 @@ class AdminInfoController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         db('msg')->insert($data_msg);
-        //如果是修改了分类编码的要保存最新编码
-        if($table=='cate' && $status==2 && !empty($update_info['code_num'])){
-            if($fid==0){
-                cmf_set_dynamic_config(['cate_max'=>$update_info['code_num']]);
-            }else{
-                $m->where(['id'=>$fid])->update(['max_num'=>$update_info['code_num']]);
-            } 
-        }
-        $m->commit();
+         
+        $m->commit(); 
         $this->success('审核成功');
     }
     /**
@@ -1022,9 +1097,17 @@ class AdminInfoController extends AdminBaseController
             case 'price':
                 break;
             case 'fee': 
+                $where_cate=[
+                    'fid'=>0,
+                    'status'=>2,
+                    'table'=>$table,
+                ];
+                $cates=db('cate_any')->where($where_cate)->column('id,name');
+                $this->assign('cates',$cates);
+                
+                break;
             case 'brand': 
-                $where_cate['table']=$table;
-                $cates=db('cate_any')->where($where_cate)->order('sort asc,name asc')->column('id,name');
+                $cates=config('chars');
                 $this->assign('cates',$cates);
                 break;
             case 'template':

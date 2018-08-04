@@ -44,6 +44,7 @@ class OldController extends AdminBaseController
     { 
         $list=[
             '产品分类同步'=>url('cate'),
+            '产品分类数据更正'=>url('cate_correct'),
             '产品基本数据'=>url('goods'),
             '产品图片同步'=>url('goods_pic'),
             '客户主体'=>url('customer'),
@@ -118,8 +119,40 @@ class OldController extends AdminBaseController
     public function cate_correct()
     {
         $row=0;
+        $m=db('cate');
+        //先审核
+        $where=['status'=>1];
+        $time=time();
+        $data=[
+            'status'=>2,
+            'rid'=>1,
+            'rtime'=>$time,
+            'time'=>$time,
+        ];
+        $m->where($where)->update($data);
+        //得到最大一级分类
+//         $where=['fid'=>0];
+//         $info=$m->where($where)->order('code_num desc')->find();
+//         cmf_set_dynamic_config(['cate_max'=>($info['code_num']+1)]);
+        //得到二级分类最大
+        $where=[];
+        $list=$m->where($where)->group('fid')->column('fid,max(code_num)');
+        cmf_set_dynamic_config(['cate_max'=>$list[0]]);
+        unset($list[0]);
+        //update和字段更新的效率？
+        foreach($list as $k=>$v){
+            $m->where('id',$k)->update(['max_num'=>$v]);
+        }
+        //更新二级分类的max_num
+        $list=db('goods')->group('cid')->column('cid,max(code_num)');
+        if(isset($list[0])){
+            unset($list[0]);
+        }
+        foreach($list as $k=>$v){
+            $m->where('id',$k)->update(['max_num'=>$v]);
+        }
          //根据分类编码修正
-        $this->success('已更正数据数'.$row);
+        $this->success('已更正数据数');
     }
     /* 产品基本数据 */
     public function goods()

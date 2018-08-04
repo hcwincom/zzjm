@@ -17,7 +17,7 @@ class ActionController extends AdminBaseController
         
         $this->assign('flag','管理员操作记录');
         
-        $this->assign('types', config('types'));
+        $this->assign('types', config('action_types'));
         $this->assign('tables', config('tables'));
     }
      

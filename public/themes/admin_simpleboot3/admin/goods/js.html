@@ -1,0 +1,115 @@
+<script>
+$('.cid .cate').change(function(){ 
+	var cid=parseInt($('.cid .cate').val()); 
+	cid_change(cid);
+});
+$('#add').click(function(){
+	var name=$.trim($('.code_name input').val());
+	var cid=parseInt($('.cid .cate').val());
+	var code_num=parseInt($('#code_num').val());
+	var id=parseInt($('#id').val());
+	if(cid<=0 || name=='' || code_num<=0){
+		alert('先选择分类，输入三级名称,三级编码为大于0的整数');
+		return false;
+	}
+	$.post("{:url('add_code')}",{'cid':cid,'name':name,'code_num':code_num,'id':id},function(data){
+		 
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		} 
+		$('#name').val(data.msg);
+		$('#code').val(data.data.code);
+	},'json');
+});
+function cid_change(cid){
+	if(cid<=0){
+		$('#code_num').val(0);
+		return false;
+	}
+	$.post("{:url('cid_change')}",{'cid':cid},function(data){ 
+		
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		
+		$('#code_num').val(data.msg);
+	},'json');
+}
+//计算体积
+$('#size0').click(function(){
+	var length0=(parseFloat($('#length0').val())).toFixed(2);
+	var width0=(parseFloat($('#width0').val())).toFixed(2);
+	var height0=(parseFloat($('#height0').val())).toFixed(2);
+	if(!(length0>0)){
+		$('#length0').focus();
+		return false;
+	}
+	if(!(width0>0)){
+		$('#width0').focus();
+		return false;
+	}
+	if(!(height0>0)){
+		$('#height0').focus();
+		return false;
+	}
+	 
+	var size0=(length0*width0*height0).toFixed(2);
+	$('#length0').val(length0);
+	$('#width0').val(width0);
+	$('#height0').val(height0);
+	$('#size0').val(size0);
+	var weight0=(parseFloat($('#weight0').val())).toFixed(2);
+	if(!(weight0>0)){
+		$('#weight0').focus();
+		return false;
+	}
+	$('#weight0').val(weight0);
+	
+	var is_box=parseInt($('#is_box').val());
+	if(is_box==2){ 
+		$('#length1').val(length0);
+		$('#width1').val(width0);
+		$('#height1').val(height0);
+		$('#size1').val(size0);
+		
+		$('#weight1').val(weight0);
+	}
+});
+//计算体积
+$('#size1').click(function(){
+	var is_box=parseInt($('#is_box').val());
+	if(is_box==2){ 
+		return false;
+	}
+	var length1=(parseFloat($('#length1').val())).toFixed(2);
+	var width1=(parseFloat($('#width1').val())).toFixed(2);
+	var height1=(parseFloat($('#height1').val())).toFixed(2);
+	if(!(length1>0)){
+		$('#length1').focus();
+		return false;
+	}
+	if(!(width1>0)){
+		$('#width1').focus();
+		return false;
+	}
+	if(!(height1>0)){
+		$('#height1').focus();
+		return false;
+	}
+	 
+	var size1=(length1*width1*height1).toFixed(2);
+	$('#length1').val(length1);
+	$('#width1').val(width1);
+	$('#height1').val(height1);
+	$('#size1').val(size1);
+	var weight1=(parseFloat($('#weight1').val())).toFixed(2);
+	if(!(weight1>0)){
+		$('#weight1').focus();
+		return false;
+	}
+	$('#weight1').val(weight1);
+	 
+});
+</script>

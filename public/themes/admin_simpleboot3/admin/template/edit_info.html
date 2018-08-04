@@ -3,7 +3,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@param/nav" />
+			<include file="public@nav" />
 			<li class="active"><a href="{:url('edit_info',['id'=>$info1.id])}">审核{$flag}</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('review_edit')}">

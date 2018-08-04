@@ -116,21 +116,34 @@ class CateController extends AdminInfoController
             'name'=>$data['name'],
             'fid'=>$fid,
             'sort'=>intval($data['sort']),
+            'code_num'=>intval($data['code_num']),
             'status'=>1,
             'aid'=>$admin['id'],
             'atime'=>$time,
             'time'=>$time,
         ];
-        
-        if($fid==0){
+        if($data_add['code_num']<=0){
+            $this->error('编码错误');
+        }
+        //检查编码是否合法
+        $where=['code_num'=>$data_add['code_num'],'fid'=>$fid];
+        $tmp=$m->where($where)->find();
+        if(!empty($tmp)){
+            $this->error('该编码已存在');
+        }
+        if($fid==0){ 
             $max_code=config('cate_max');
-            $data_add['code_num']=$max_code+1;
+            //如果一级分类要更新配置中记录的最大编码
+            if($max_code<$data_add['code_num']){
+                cmf_set_dynamic_config(['cate_max'=>$data_add['code_num']]);
+            } 
             $data_add['code']=(str_pad($data_add['code_num'],2,'0',STR_PAD_LEFT));
         }else{
-            //比较父类中记录的最大值和查找到的最大值
+            //，如果是2级要更新一级中的最大编码
             $fcate=$m->where(['id'=>$fid])->find();
-            $max_num=$m->where('fid',$fid)->order('code_num desc')->value('code_num');
-            $data_add['code_num']=(($max_num>=$fcate['max_num'])?$max_num:$fcate['max_num'])+1;
+            if($data_add['code_num'] > $fcate['max_num']){
+                $m->where(['id'=>$fid])->update(['max_num'=>$data_add['code_num']]); 
+            } 
             $data_add['code']=$fcate['code'].'-'.(str_pad($data_add['code_num'],2,'0',STR_PAD_LEFT));
         }
         try {
@@ -138,12 +151,7 @@ class CateController extends AdminInfoController
         } catch (\Exception $e) {
             $this->error('操作失败，请重试');
         }
-        //如果一级分类要更新配置中记录的最大编码，如果是2级要更新一级中的最大编码
-        if($fid==0){
-            cmf_set_dynamic_config(['cate_max'=>$data_add['code_num']]);
-        }else{
-            $m->where(['id'=>$fid])->update(['max_num'=>$data_add['code_num']]); 
-        }
+        
         //记录操作记录
         $flag=$this->flag;
         $table=$this->table; 
@@ -302,7 +310,12 @@ class CateController extends AdminInfoController
         if(empty($info)){
             $this->error('数据不存在');
         }
-        $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
+        if($info['fid']==0){
+            $cates=['0'=>'一级分类'];
+        }else{
+            $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
+        }
+        
         
         $this->assign('info',$info);
         $this->assign('cates',$cates);
@@ -521,4 +534,42 @@ class CateController extends AdminInfoController
         parent::del_all();
         
     }
+     
+    //获取同级分类编码
+    public function cid_change(){
+        $id=$this->request->param('id',0,'intval');
+        $fid=$this->request->param('cid',0,'intval');
+        $m=$this->m;
+        
+        if($id!=0){
+            $info=$m->where(['id'=>$id])->find();
+            //分类没变
+            if($info['fid']==$fid){
+                $this->success($info['code_num']);
+                exit;
+            }
+        }
+        if($fid==0){
+            $max_code=config('cate_max'); 
+        }else{
+            //比较父类中记录的最大值和查找到的最大值
+            $max_code=$m->where(['id'=>$fid])->value('max_num'); 
+        }
+        $this->success($max_code+1);
+    }
+    //获取同级分类编码
+    public function code_change(){
+        $id=$this->request->param('id',0,'intval');
+        $fid=$this->request->param('cid',0,'intval');
+        $code_num=$this->request->param('code_num',0,'intval');
+        $m=$this->m;
+        //检查编码是否合法
+        $where=['code_num'=>$code_num,'fid'=>$fid];
+        $tmp=$m->where($where)->find();
+        if(!empty($tmp) && $tmp['id']!=$id){
+            $this->error('该编码已存在');
+        } 
+        $this->success('ok');
+    }
+    
 }
