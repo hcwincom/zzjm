@@ -39,7 +39,7 @@
 					<foreach name="list[$kk]" item="vo">
 				  
 					   <li id="saved-image{$vv[0]}{$key}">
-					        <input  class="file0"  " type="hidden"  value="{$vo.file}">
+					        <input  class="file0"  " type="hidden"  value="{$vo.file3}">
 					        <input class="form-control" id="photo-{$vv[0]}{$key}-name" type="text" name="{$vv[0]}_names[]" value="{$vo.name}"
 					               style="width: 200px;" title="图片名称">
 					       
@@ -81,15 +81,15 @@
 					<foreach name="change[$kk]" item="vo">
 				  
 					   <li id="">
-					    <input  class="file0"  type="hidden"  value="{$vo.file}">
+					    <input  class="file0"  type="hidden"  value="{$vo.file3}">
 					         <input class="form-control" id="" type="text"  value="{$vo.name}"
 					               style="width: 200px;" title="图片名称">
 					       
 							<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file1)});"></div>
 					       <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
 						     	&nbsp;&nbsp;&nbsp;
-						     	<a href="{:url($vv[0].'_load',['id'=>$key])}">下载</a>
-						     	
+						      
+						     	<a href="{:url('admin/public/file_load',['files'=>$vo.change0])}">下载</a> 
 						    </if>
 					    </li>
 					 </foreach> 

@@ -1601,7 +1601,7 @@ class GoodsController extends AdminBaseController
                     $tmp_file['name'].='文件已损坏';
                 }
                 //直接加判断，防止错误
-                if(is_file($path. $tmp_file['file'].'.1.jpg')){
+                if(is_file($path. $tmp_file['file'].'1.jpg')){
                     $tmp_file['file1']= $tmp_file['file'].'1.jpg';
                     $tmp_file['file2']= $tmp_file['file'].'2.jpg';
                     $tmp_file['file3']= $tmp_file['file'].'3.jpg';
