@@ -12,9 +12,10 @@ namespace cmf\lib;
 
 use think\File;
 use app\user\model\AssetModel;
-
+ 
 /**
  * ThinkCMF上传类,分块上传
+ * zz修改了上传代码，百度编辑器上传时可选文件夹，上传文件不保存asset表
  */
 class Upload
 {
@@ -43,7 +44,7 @@ class Upload
         $this->formName = $name;
     }
 
-    public function upload()
+    public function upload($fileSaveName='')
     {
         $uploadSetting = cmf_get_upload_setting();
 
@@ -191,8 +192,14 @@ class Upload
         if (!$done) {
             die('');//分片没上传完
         }
-
-        $fileSaveName    = (empty($app) ? '' : $app . '/') . $strDate . '/' . md5(uniqid()) . "." . $strFileExtension;
+        //zz文件上传地址
+        if(empty($fileSaveName)){
+            $fileSaveName    = (empty($app) ? '' : $app . '/') . $strDate . '/' . md5(uniqid()) . "." . $strFileExtension;
+        }else{
+            $fileSaveName=$fileSaveName.'/' . md5(uniqid()) .'.'.$strFileExtension;
+        }
+       
+        //$fileSaveName    = (empty($app) ? '' : $app . '/') . $strDate . '/' . md5(uniqid()) . "." . $strFileExtension;
         $strSaveFilePath = './upload/' . $fileSaveName; //TODO 测试 windows 下
         $strSaveFileDir  = dirname($strSaveFilePath);
         if (!file_exists($strSaveFileDir)) {
@@ -279,9 +286,10 @@ class Upload
         //关闭文件对象
         $fileImage = null;
         //检查文件是否已经存在
-        $assetModel = new AssetModel();
-        $objAsset   = $assetModel->where(["user_id" => $userId, "file_key" => $arrInfo["file_key"]])->find();
-
+        //zz不检查文件，不保存资源表
+//         $assetModel = new AssetModel();
+//         $objAsset   = $assetModel->where(["user_id" => $userId, "file_key" => $arrInfo["file_key"]])->find();
+        $objAsset=null;
         $storage = cmf_get_option('storage');
 
         if (empty($storage['type'])) {
@@ -307,7 +315,8 @@ class Upload
 
         } else {
             $needUploadToRemoteStorage = true;
-            $assetModel->data($arrInfo)->allowField(true)->save();
+            //zz不检查文件，不保存资源表
+//             $assetModel->data($arrInfo)->allowField(true)->save();
         }
 
         //删除临时文件

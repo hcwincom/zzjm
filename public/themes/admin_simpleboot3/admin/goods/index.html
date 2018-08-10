@@ -10,41 +10,77 @@
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
-			状态: 
+			 
 			<select class="form-control" name="status" >
-				<option value='0'>全部</option> 
+				<option value='0'>全部状态</option> 
 				 <foreach name="statuss" item="vo"  >
 				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
 				 {$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-			类型: 
+			 <include file="public@cate" /> 
+			  &nbsp;&nbsp;
+			   <include file="public@brand" /> 
+			  &nbsp;&nbsp;
 			<select class="form-control" name="type" >
-				<option value='0'>全部</option> 
+				<option value='0'>产品类型</option> 
 				 <foreach name="goods_type" item="vo" >
 				<option value="{$key}" <if condition="$key eq $data.type">selected</if>> 
 				 {$vo}
 				</option>
 				</foreach>
-			</select> &nbsp;&nbsp; 
-			分类:<include file="public@cate" /> 
-			 创建人: 
-			<select class="form-control" name="aid"  >
-				<option value='0'>全部</option> 
-				 <foreach name="aids" item="vo" >
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+			</select> 
+			 
+			<select class="form-control" name="goods_link" > 
+				 <foreach name="goods_links" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.goods_link">selected</if>> 
+				 {$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
-			审核人: 
-			<select class="form-control" name="rid" >
-				<option value='0'>全部</option> 
-				 <foreach name="rids" item="vo"  >
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+			<select class="form-control" name="about_link" > 
+				 <option value="0">产品资料</option>
+				 <foreach name="file_type" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.about_link">selected</if>> 
+				 {$vo[1]}
 				</option>
 				</foreach>
-			</select> &nbsp;&nbsp;
+			</select> 
+			<select class="form-control" name="about_link_num" > 
+				 
+				 <foreach name="about_link_nums" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.about_link_num">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp; 
+			<br/>
+			<select class="form-control" name="price" > 
+				 
+				 <foreach name="prices" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.price">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select>
+			<input class="form-control" type="text" name="price1" style="width: 80px;" value="{$data.price1}">
+			--
+			<input class="form-control" type="text" name="price2" style="width: 80px;" value="{$data.price2}">
+			 &nbsp;&nbsp;  &nbsp;&nbsp; 
+			 <select class="form-control" name="big" > 
+				 
+				 <foreach name="bigs" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.big">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select>
+			<input class="form-control" type="text" name="big1" style="width: 80px;" value="{$data.big1}">
+			--
+			<input class="form-control" type="text" name="big2" style="width: 80px;" value="{$data.big2}">
+			 &nbsp;&nbsp; 
+			<br/>
 			<select class="form-control" name="type1" id="">
 	        <foreach name="types" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>

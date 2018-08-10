@@ -187,7 +187,7 @@ class AdminCateController extends AdminBaseController
             'ip'=>get_client_ip(),
             'action'=>'添加'.$flag.$id.'-'.$data['name'],
             'table'=>$table,
-            'type'=>'add_cate',
+            'type'=>'cate_add',
             'pid'=>$id,
             'link'=>url('admin/'.$table.'cate/edit',['id'=>$id]),
             'shop'=>$admin['shop'],
@@ -273,7 +273,7 @@ class AdminCateController extends AdminBaseController
             'ip'=>get_client_ip(),
             'action'=>'审核'.$flag.$info['id'].'-'.$info['name'].'的状态为'.$statuss[$status],
             'table'=>$table,
-            'type'=>'review',
+            'type'=>'cate_review',
             'pid'=>$info['id'],
             'link'=>$link,
             'shop'=>$admin['shop'],
@@ -500,7 +500,7 @@ class AdminCateController extends AdminBaseController
             $this->error('保存数据错误，请重试');
         }
         //记录操作记录
-        $link=url('admin/'.$table.'/edit_info',['id'=>$eid]);
+        $link=url('admin/'.$table.'cate/edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,

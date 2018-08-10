@@ -571,5 +571,14 @@ class CateController extends AdminInfoController
         } 
         $this->success('ok');
     }
-    
+    //获取分类下所有产品
+    public function goods(){
+        $cid=$this->request->param('cid');
+        $where=[
+            'cid'=>$cid,
+            'status'=>2,
+        ];
+        $goods=db('goods')->where($where)->column('id,name');
+        $this->success('ok','',$goods);
+    }
 }

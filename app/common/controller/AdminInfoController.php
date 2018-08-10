@@ -461,11 +461,17 @@ class AdminInfoController extends AdminBaseController
                 break;
             case 'brand':
                 //检查名称
-                if(isset($content['name'])){
-                    $char=zz_first_char($data['name']);
-                    if(empty($char)){
-                        $this->error('名称非法，无法获取首字母');
+                if(isset($content['name']) || isset($content['char'])){
+                    if(empty($data['char'])){
+                        $char=zz_first_char($data['name']);
+                    }else{
+                        $char=zz_first_char($data['char']);
                     }
+                    
+                    if(empty($char)){
+                        $this->error('输入非法，无法获取首字母');
+                    }
+                    
                     $content['char']=$char;
                 }
                 

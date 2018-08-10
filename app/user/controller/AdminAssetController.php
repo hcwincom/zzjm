@@ -71,5 +71,40 @@ class AdminAssetController extends AdminBaseController
             $this->error('删除失败');
         }
     }
+    
+    /**
+     * 清空失效资源
+     * @adminMenu(
+     *     'name'   => '清空失效资源',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10000,
+     *     'icon'   => '',
+     *     'remark' => '清空失效资源',
+     *     'param'  => ''
+     * )
+     */
+    public function clear()
+    {
+        set_time_limit(300);
+        $m=Db::name('asset');
+        $list=$m->column('id,file_path');
+        $path='upload/';
+        $ids=[];
+        foreach($list as $k=>$v){
+            $file=$path.$v;
+            if (!file_exists($file)) {
+                $ids[]=$k;
+            }
+        }
+        if(empty($ids)){
+            $this->success('没有要清空的数据');
+        }else{
+            $rows=$m->where('id','in',$ids)->delete();
+            $this->success('清空数据'.$rows.'条');
+        }
+        
+    }
 
 }

@@ -3,7 +3,7 @@
 	<label for="" class="col-sm-2 control-label">价格模板</label>
 	<div class="col-md-6 col-sm-10">
 		 <select name="price" id="price">
-		 	<option value="0">未选择价格模板</option>
+		 	 
 		 	<foreach name="prices" item="vo">
 		 	<option value="{$key}">{$vo}</option>
 		 	</foreach>
@@ -60,7 +60,7 @@
 				  	<present name="actions.price_in_get">
 				  		<input type="text" value="{$info.price_in}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  		<input type="hidden" value="{$info.price_in}"/>
 				  	</present>
 				 </present>
@@ -72,7 +72,7 @@
 				  	<present name="actions.price_in_get">
 				  		<input type="text" value="{$info.price_cost}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  	</present>
 				 </present>
 				</td>
@@ -83,7 +83,7 @@
 				  	<present name="actions.price_min_get">
 				  		<input type="text" value="{$info.price_min}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  	</present>
 				 </present>
 				</td>
@@ -97,9 +97,9 @@
 					<td id="price_range2"><input type="text" name="" value="{$info.price_range2}" readonly/></td>
 					<td id="price_range3"><input type="text" name="" value="{$info.price_range3}" readonly/></td>
 				<else/>
-					<td id="price_range1">--</td>
-					<td id="price_range2">--</td>
-					<td id="price_range3">--</td>
+					<td id="price_range1">***</td>
+					<td id="price_range2">***</td>
+					<td id="price_range3">***</td>
 				</present> 
 			</present>
 				<td id="price_dealer1">
@@ -109,7 +109,7 @@
 				  	<present name="actions.price_dealer1_get">
 				  		<input type="text" value="{$info.price_dealer1}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  	</present>
 				 </present> 
 				</td>
@@ -120,7 +120,7 @@
 				  	<present name="actions.price_dealer2_get">
 				  		<input type="text" value="{$info.price_dealer2}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  	</present>
 				 </present> 
 				</td>
@@ -131,7 +131,7 @@
 				  	<present name="actions.price_dealer3_get">
 				  		<input type="text" value="{$info.price_dealer3}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  	</present>
 				 </present> 
 				</td>
@@ -142,7 +142,7 @@
 				  	<present name="actions.price_trade_get">
 				  		<input type="text" value="{$info.price_trade}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  	</present>
 				 </present> 
 				</td>
@@ -153,7 +153,7 @@
 				  	<present name="actions.price_factory_get">
 				  		<input type="text" value="{$info.price_factory}" readonly/>
 				  	<else/>
-				  		--
+				  		***
 				  	</present>
 				 </present> 
 				</td>
@@ -183,9 +183,8 @@ $('#set_price').click(function(){
 		$('#price_in input').focus();
 		return false;
 	}
-	$.post("{:url('price_set')}",{'t_id':t_id},function(data){
-		console.log(data);
-		 $('#param table tbody').html('');
+	$.post("{:url('price_set')}",{'t_id':t_id,'price_in':price_in},function(data){
+		  
 		if(data.code!=1){
 			alert(data.msg);
 			return false;
@@ -195,7 +194,51 @@ $('#set_price').click(function(){
 			return false;
 		} 
 		var fees=data.data;
+		{//根据各种价格是否存在赋值}
+		 var price_cost=$('#price_cost').find('input[name=price_cost]').val();
+		 if (typeof(price_cost) != "undefined")
+		 {
+			 $('#price_cost').find('input[name=price_cost]').val(fees['price_cost']);
+		 }
+		 var price_min=$('#price_min').find('input[name=price_min]').val();
+		 if (typeof(price_min) != "undefined")
+		 {
+			 $('#price_min').find('input[name=price_min]').val(fees['price_min']);
+		 }
+		 var price_range1=$('#price_range1').find('input[name=price_range1]').val();
+		 if (typeof(price_range1) != "undefined")
+		 {
+			 $('#price_range1').find('input[name=price_range1]').val(fees['price_range1']);
+			 $('#price_range2').find('input[name=price_range2]').val(fees['price_range2']);
+			 $('#price_range3').find('input[name=price_range3]').val(fees['price_range3']);
+		 }
+		 var price_dealer1=$('#price_dealer1').find('input[name=price_dealer1]').val();
+		 if (typeof(price_dealer1) != "undefined")
+		 {
+			 $('#price_dealer1').find('input[name=price_dealer1]').val(fees['price_dealer1']);
+		 }
+		 var price_dealer2=$('#price_dealer2').find('input[name=price_dealer2]').val();
+		 if (typeof(price_dealer2) != "undefined")
+		 {
+			 $('#price_dealer2').find('input[name=price_dealer2]').val(fees['price_dealer2']);
+		 }
+		 var price_dealer3=$('#price_dealer3').find('input[name=price_dealer3]').val();
+		 if (typeof(price_dealer3) != "undefined")
+		 {
+			 $('#price_dealer3').find('input[name=price_dealer3]').val(fees['price_dealer3']);
+		 }
+		 var price_trade=$('#price_trade').find('input[name=price_trade]').val();
+		 if (typeof(price_trade) != "undefined")
+		 {
+			 $('#price_trade').find('input[name=price_trade]').val(fees['price_trade']);
+		 }
+		 var price_factory=$('#price_factory').find('input[name=price_factory]').val();
+		 if (typeof(price_factory) != "undefined")
+		 {
+			 $('#price_factory').find('input[name=price_factory]').val(fees['price_factory']);
+		 }
 		 
+		  
 	},'json');
 });
 </script>

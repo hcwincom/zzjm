@@ -18,22 +18,7 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-			 编辑人: 
-			<select class="form-control" name="aid"  >
-				<option value='0'>全部</option> 
-				 <foreach name="aids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp; 
-			审核人: 
-			<select class="form-control" name="rid" >
-				<option value='0'>全部</option> 
-				 <foreach name="rids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp;
+			 
 			<select class="form-control" name="type1" id="">
 	        <foreach name="types" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
@@ -100,6 +85,11 @@
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
+						<switch name="vo.table">
+						<case value="goods"><a href="{:url('edit_info',['id'=>$vo.id])}">{$vo.id}-产品信息修改</a></case>
+						<case value="goods_file"><a href="{:url('image_edit_info',['id'=>$vo.id])}">{$vo.id}-图片/文件修改</a></case>
+						<case value="goods_content"><a href="{:url('content_edit_info',['id'=>$vo.id])}">{$vo.id}-详情修改</a></case>
+						</switch>
 						<a href="{:url('edit_info',['id'=>$vo.id])}">{$vo.id}</a>
 						</td>
 						<td>  

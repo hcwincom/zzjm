@@ -7,3 +7,23 @@
 	display:inline-block;
 	width:80px ;
 }
+
+.pic1{
+	background-position: center center;background-repeat: no-repeat;
+ 	 	display:inline-block;width:70px;height:70px;background-size:contain;
+ 	 }
+#clickImg{
+	  display: none;
+	  position: absolute;
+	  top:0;
+	  right: 0;
+	  left: 0;
+	  bottom: 0;
+	  margin: auto;
+	  background: rgba(0,0,0,0.9); 
+  }
+#clickImg .btnImg{text-align: right;padding: 5px 2%;}
+#clickImg .glyphicon-remove-circle{font-size: 50px;color: #fff;cursor: pointer;}
+#clickImg  #bigImg{margin: 0 auto;background-repeat: no-repeat;background-position: center center;max-width: 90%;max-height: 90%;} 
+
+ 

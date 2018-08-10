@@ -268,7 +268,9 @@ class UeditorController extends HomeBaseController
         $uploader = new Upload();
         $uploader->setFileType($fileType);
         $uploader->setFormName('upfile');
-        $result = $uploader->upload();
+        //获取文件上传路径
+        $fileSaveName=session('file_path');
+        $result = $uploader->upload($fileSaveName);
 
         if ($result === false) {
             return json_encode([

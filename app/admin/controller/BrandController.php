@@ -87,9 +87,14 @@ class BrandController extends AdminInfoController
         $table=$this->table;
         $time=time();
         $admin=$this->admin;
-        $char=zz_first_char($data['name']);
+        if(empty($data['char'])){
+            $char=zz_first_char($data['name']);
+        }else{
+            $char=zz_first_char($data['char']);
+        }
+       
         if(empty($char)){
-            $this->error('名称非法，无法获取首字母');
+            $this->error('输入非法，无法获取首字母');
         }
         $data_add=[
             'name'=>$data['name'],

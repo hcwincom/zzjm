@@ -81,6 +81,7 @@ $('#size0').click(function(){
 $('#size1').click(function(){
 	var is_box=parseInt($('#is_box').val());
 	if(is_box==2){ 
+		$('#size0').click();
 		return false;
 	}
 	var length1=(parseFloat($('#length1').val())).toFixed(2);
@@ -111,5 +112,31 @@ $('#size1').click(function(){
 	}
 	$('#weight1').val(weight1);
 	 
+});
+//选择类型
+$('.type').click(function(){
+	var type=$(this).find('input:checked').val();
+	if(type=='1'){ 
+		$('.goods_link').hide();
+	}else{
+		$('.goods_link').show();
+	}
+});
+//选择关联产品
+$('#goods_link').click(function(){
+	var $div=$(this).parent();
+	var id=$div.find('.goods').val();
+	var name=$div.find('.goods option:selected').text();
+	 if(id<=0){
+		 return false;
+	 }
+	var tr='<tr class=""><td>'+name+
+	'</td><td><input type="text" name="id_links['+id+
+		']" value="1"/></td><td><button class="del_link" type="button">删除</button></td></tr>';
+	$div.find('table').append(tr);
+	return false;
+});
+$(document).on('click','.del_link',function(){
+	$(this).parents('tr').remove();
 });
 </script>

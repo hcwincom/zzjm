@@ -1,14 +1,14 @@
 
 <select class="bcates {$select_class|default=''}" name="bchar" >
-	<option value='-1'>全部</option> 
+	<option value='-1'>品牌首字母</option> 
 	 <foreach name="bcates" item="vo" >
 	<option value="{$vo}" <if condition="$vo eq $bchar">selected</if>> 
 	 {$vo} 
 	</option>
 	</foreach>
-</select> &nbsp;&nbsp; 
+</select> 
 <select class=" brands {$select_class|default=''}" name="brand" >
-	<option class="brand0" value='0'>全部</option> 
+	<option class="brand0" value='0'>全部品牌</option> 
 	 <foreach name="brands" item="vo" >
 	<option class="brand1 brand2{$vo.char} brand3{$key}" value="{$key}" <if condition="$key eq $brand">selected</if>> 
 	 {$vo.name}

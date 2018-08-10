@@ -7,7 +7,28 @@ use think\Db;
 use think\Url;
  
 // 应用公共文件
- 
+/**
+ * 下载文件
+ * @param $file 文件
+ * @param $name 文件名
+ */
+function zz_download($file,$name=''){
+    $path='upload/';
+    $file=$path.$file;
+    if(!is_file($file)){
+        $this->error('文件损坏，不存在');
+    } 
+    $filename=empty($name)?time():$name;
+    
+    $info=pathinfo($file);
+    $ext=$info['extension']; 
+    header('Content-type: application/x-'.$ext);
+    header('content-disposition:attachment;filename='.$filename);
+    header('content-length:'.filesize($file));
+    readfile($file);
+    exit;
+    
+}
 /**
  * 获取字符串首字母
  * @param $name 字符串
@@ -228,7 +249,7 @@ function zz_set_image($pic,$pic_new,$width,$height,$thump=6){
     //         $image->thumb(800, 800,1)->water($water,1,50)->save($imgSrc);//生成缩略图、删除原图以及添加水印
     // 1; //常量，标识缩略图等比例缩放类型
     //         6; //常量，标识缩略图固定尺寸缩放类型
-    $path=getcwd().'/upload/';
+    $path='upload/';
     //判断文件来源，已上传和未上传
     $imgSrc=(is_file($pic))?$pic:($path.$pic);
     
@@ -243,35 +264,7 @@ function zz_set_image($pic,$pic_new,$width,$height,$thump=6){
     return $pic_new;
 }
 
-/**
- *组装图片
- * @param $pic  
- * @param $pic_old  
- */
-function zz_picid($pic,$pic_old,$type,$id){
-    $path=getcwd().'/upload/';
-    //logo处理
-    if(!is_file($path.$pic)){
-        return 0;
-    }
-    //文件未改变
-    if($pic==$pic_old){
-        return $pic;
-    }
-    $size=config('pic_'.$type);
-    $pic_new=$type.'/'.$id.'-'.time().'.jpg';
-    
-    $image = \think\Image::open($path.$pic);
-    $image->thumb($size['width'],  $size['height'],6)->save($path.$pic_new);
-    
-    unlink($path.$pic);
-    if(is_file($path.$pic_old)){
-        unlink($path.$pic_old);
-    }
-    
-    return $pic_new;
-    
-}
+ 
 /** 
  * 为网址补加http://
  * @param $link   网址

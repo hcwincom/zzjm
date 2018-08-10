@@ -13,53 +13,341 @@
 					<input type="text" class="form-control" value="{$info.id}" readonly/>
 				</div>
 			</div>
+			  <div class="form-group">
+				<label for="" class="col-sm-2 control-label">分类</label>
+				<div class="col-md-6 col-sm-10 cid">
+					 <input type="text" class="form-control" value="{$info.cname0}-{$info.cname}" readonly/>
+				<present name="change.cid">
+					<input type="text" class="red form-control" value="{$change.cname0}-{$change.cname}" readonly/>
+				</present>
+				</div>
+			</div> 
 			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.name}" readonly/>
-				 
-				 <present name='change.name'>
-				 	<input type="text" class="red form-control" value="{$change.name}" readonly/>
-				 </present>
-					
+				<label for="" class="col-sm-2 control-label">三级名称</label>
+				<div class="col-md-6 col-sm-10 code_name">
+					<input type="text" class="form-control"  value="{$info.code_name}" readonly/>
+				<present name="change.code_name">
+					<input type="text" class="red form-control" value="{$change.code_name}" readonly/>
+				</present>	 
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">分类</label>
-				<div class="col-md-6 col-sm-10">
+				<label for="" class="col-sm-2 control-label">三级编码</label>
+				<div class="col-md-6 col-sm-10 code_name">
+					<input type="text"   value="{$info.code_num}" readonly/>
+				 <present name="change.code_num">
+					<input type="text" class="red " value="{$change.code_num}" readonly/>
+				 </present>	
 					 
-					<input type="text" class="form-control"  value="{$cates[$info.cid]}"  readonly/>
-					<present name='change.cid'>
-					<input type="text" class="red form-control"  value="{$cates[$change.cid]}" readonly />
-					</present>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info.name}"   readonly/>
+				<present name="change.name">
+					<input type="text" class="red form-control" value="{$change.name}" readonly/>
+				 </present>	
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">编码</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info.code}"  readonly/>
+				<present name="change.code">
+					<input type="text" class="red form-control" value="{$change.code}" readonly/>
+				 </present>	
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">商城名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  name="name2" value="{$info.name2}" />
+				<present name="change.name2">
+					<input type="text" class="red form-control" value="{$change.name2}" readonly/>
+				 </present>	
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">打印名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"   name="name3" value="{$info.name3}" />
+				<present name="change.name3">
+					<input type="text" class="red form-control" value="{$change.name3}" readonly/>
+				 </present>	
 				</div>
 			</div>
 			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">类型</label>
+				<label for="" class="col-sm-2 control-label">产品类型</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$param_types[$info.type]}"  readonly/>
-					<present name='change.type'>
-					<input type="text" class="red form-control"  value="{$param_types[$change.type]}" readonly />
-					</present>
+					 
+					 <input type="text" class="form-control"  value="{$goods_type[$info.type]}" />
+				<present name="change.type">
+					<input type="text" class="red form-control" value="{$goods_type[$change.type]}" readonly/>
+				 </present>	
 				</div>
 			</div>
-			
-			  <div class="form-group">
-				<label for="" class="col-sm-2 control-label">默认值(最多4位小数)</label>
-				<div class="col-md-6 col-sm-10"> 
-					<input type="text" class="form-control"  value="{$info.fee}"  readonly/>
-					<present name='change.fee'>
-					<input type="text" class="red form-control"  value="{$change.fee}" readonly />
-					</present>
+		 
+			<div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">产品关联</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					 <table class="table table-hover table-bordered table-list">
+					 	<tr><td>产品</td><td>比例</td> </tr>
+					 <foreach name="links0" item="link" key="pid1">
+					 	<tr class="">
+					 		<td>{$link.name}</td>
+					 		<td><input type="text" value="{$link.num}"/></td>
+					 		 
+					 	</tr>
+					 </foreach>
+					 </table>
+					 <p>比例最多2位小数，默认为1，若加工1个产品需要3个关联产品，则比例为3，若加工一个产品只需要消耗0.5个单位的关联产品，则比例为0.5</p>
 				</div>
 			</div>
+	 	<present name="change.id_links">
+	 		<div class="form-group red">
+				<label for="" class="col-sm-2 control-label">产品关联</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					 <table class="table table-hover table-bordered table-list">
+					 	<tr><td>产品</td><td>比例</td> </tr>
+					 <foreach name="links1" item="link" key="pid1">
+					 	<tr class="">
+					 		<td>{$links10[$pid1]}</td>
+					 		<td><input type="text" value="{$link}"/></td>
+					 		 
+					 	</tr>
+					 </foreach>
+					 </table>
+					 <p>比例最多2位小数，默认为1，若加工1个产品需要3个关联产品，则比例为3，若加工一个产品只需要消耗0.5个单位的关联产品，则比例为0.5</p>
+				</div>
+			</div> 
+	 	</present>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">条码类型</label>
+				<div class="col-md-6 col-sm-10">
+					 <input type="text" class="form-control"  value="{$sn_type[$info.sn_type]}" />
+					 <input type="text"   value="{$info.sn}"/>
+				<present name="change.sn_type">
+					<input type="text" class="red form-control" value="{$sn_type[$change.sn_type]}" readonly/>
+				 </present>	
+				 <present name="change.sn">
+					<input type="text" class="red form-control" value="{$change.sn}" readonly/>
+				 </present>	
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">品牌</label>
+				<div class="col-md-6 col-sm-10">
+					 <input type="text" class="form-control"  value="{$info.bname|default=$info.brand}" />
+				 <present name="change.brand">
+					<input type="text" class="red form-control" value="{$change.bname|default=$change.brand}" readonly/>
+				 </present>		 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">大小(长度单位mm,重量单位g)</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list params">
+					 
+						<thead>
+							<tr> 
+								<th >净重</th>
+								<th >长</th>
+								<th >宽</th>
+							  	<th >高</th> 
+							  	<th >体积</th> 
+							  	<th >内盒</th> 
+							  	<th >毛重</th>
+								<th >内盒长</th>
+								<th >内盒宽</th>
+							  	<th >内盒高</th> 
+							  	<th >内盒体积</th>
+							</tr>
+						</thead>
+						<tbody>
+					  
+						 	<tr>  
+								<td><input type="text" id="weight0" name="weight0" value="{$info.weight0}" readonly/></td> 
+								<td> <input type="text" id="length0" name="length0" value="{$info.length0}" readonly/></td> 
+								<td><input type="text" id="width0" name="width0" value="{$info.width0}" readonly/></td> 
+								<td><input type="text" id="height0" name="height0" value="{$info.height0}" readonly/></td>
+								<td><input type="text" id="size0" name="size0" value="{$info.size0}" readonly/></td> 
+								<td>
+								{$is_box[$info.is_box]}
+							 		 
+								</td>
+								<td><input type="text" id="weight1" name="weight1" value="{$info.weight1}"/></td> 
+								<td> <input type="text" id="length1" name="length1" value="{$info.length1}"/></td> 
+								<td><input type="text" id="width1" name="width1" value="{$info.width1}"/></td> 
+								<td><input type="text" id="height1" name="height1" value="{$info.height1}"/></td>
+								<td><input type="text" id="size1" name="size1" value="{$info.size1}"/></td>  
+							 </tr> 
+							 <tr>  
+							 
+								<td>
+								<present name='change.weight0'>
+									<input class="red" type="text"  value="{$change.weight0}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td>
+								<td>
+								<present name='change.length0'>
+									<input class="red" type="text"  value="{$change.length0}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td> 
+								<td>
+								<present name='change.width0'>
+									<input class="red" type="text"  value="{$change.width0}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td> 
+								<td>
+								<present name='change.height0'>
+									<input class="red" type="text"  value="{$change.height0}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td>
+								
+								<td>
+								<present name='change.size0'>
+									<input class="red" type="text"  value="{$change.size0}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td> 
+								<td>
+								<present name='change.is_box'>
+									<span class="red" > {$is_box[$change.is_box]}</span>
+								<else/>
+									--
+								</present>  
+								</td> 
+								 
+								 <td>
+								<present name='change.weight1'>
+									<input class="red" type="text"  value="{$change.weight1}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td> 
+								<td>
+								<present name='change.length1'>
+									<input class="red" type="text"  value="{$change.length1}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td> 
+								<td>
+								<present name='change.width1'>
+									<input class="red" type="text"  value="{$change.width1}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td> 
+								<td>
+								<present name='change.height1'>
+									<input class="red" type="text"  value="{$change.height1}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td>
+								
+								<td>
+								<present name='change.size1'>
+									<input class="red" type="text"  value="{$change.size1}" readonly/>
+								<else/>
+									--
+								</present>  
+								</td> 
+								 
+							 </tr>  
+						</tbody>
+					 
+					</table>
+				</div>
+			 </div>
 			 
+		 
+			<div class="form-group" id="param">
+				<label for="" class="col-sm-2 control-label">{$info.tname}技术参数</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list">
+					 
+						<thead>
+							<tr> 
+								<th >参数</th>
+								<th >值</th>
+								<th >备注说明</th> 
+							</tr>
+						</thead>
+						<tbody> 
+						 
+						<foreach name="params0" item="vo">
+						 <tr> 
+						 	<td>{$vo.name}</td>
+						  	<td>
+						  	<if condition="isset($params1[$key])">
+						  	{$params1[$key]} 
+						  	</if>
+						  	 
+						  	</td>
+						   	<td>{$vo.dsc}</td>
+						 </tr>
+						</foreach> 
+						</tbody>
+						 
+					</table>
+					 
+				</div>
+			</div>
+ 		<present name="change.param">
+ 			<div class="form-group" id="param">
+				<label for="" class="col-sm-2 control-label">{$change.tname|default=''}技术参数</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list">
+					 
+						<thead>
+							<tr> 
+								<th >参数</th>
+								<th >值</th>
+								<th >备注说明</th> 
+							</tr>
+						</thead>
+						<tbody> 
+						 
+						<foreach name="params01" item="vo">
+						 <tr class="red"> 
+						 	<td>{$vo.name}</td>
+						  	<td>
+							 
+						  	{$params11[$key]} 
+						  	 
+							</td>
+						   	<td>{$vo.dsc}</td>
+						 </tr>
+						</foreach> 
+						</tbody>
+						 
+					</table>
+					 
+				</div>
+			</div>
+ 		</present>
+			 
+			  
 			  <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control"  rows="5" readonly>{$info.dsc}</textarea>
-				<present name='change.dsc'>
-				 	<textarea class="red form-control" rows="5" readonly>{$change.dsc}</textarea>
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control"  value="{$info.dsc}" readonly/>
+				<present name='change.dsc'> 
+				 	<input type="text" class="form-control"  value="{$change.dsc}" readonly/>
 				</present>
 				</div>
 			</div>

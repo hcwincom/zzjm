@@ -145,4 +145,32 @@ class PublicController extends AdminBaseController
         }
        
     }
+    
+    /**
+     * 文件下载
+     */
+    public function file_load()
+    {
+      
+        $str=$_REQUEST['s'];
+       
+        $arr=explode(',',$str);
+        $info['file']=substr($arr[1], 0,strrpos($arr[1],'.'));
+        $info['name']=substr($arr[0], strrpos($arr[0],'/')+1);
+       
+        $path='upload/';
+        $file=$path.$info['file'];
+        $filename=empty($info['name'])?date('Ymd-His'):$info['name'];
+        if(is_file($file)){
+            $fileinfo=pathinfo($file);
+            $ext=$fileinfo['extension'];
+            header('Content-type: application/x-'.$ext);
+            header('content-disposition:attachment;filename='.$filename);
+            header('content-length:'.filesize($file));
+            //readfile($file);
+            exit;
+        }else{
+            $this->error('文件损坏，不存在');
+        }
+    }
 }
