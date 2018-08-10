@@ -3846,7 +3846,7 @@ class GoodsController extends AdminBaseController
              header('Content-type: application/x-'.$ext);
              header('content-disposition:attachment;filename='.$filename);
              header('content-length:'.filesize($file));
-             //readfile($file);
+             readfile($file);
              exit;
          }else{
              $this->error('文件损坏，不存在');
