@@ -5,8 +5,7 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-		 <include file="admin@goods/nav" />
-	 
+		<include file="admin@goods/nav" />
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
@@ -22,7 +21,8 @@
 			 <include file="public@cate" /> 
 			  &nbsp;&nbsp;
 			   <include file="public@brand" /> 
-			  &nbsp;&nbsp;
+			 
+			 &nbsp;&nbsp;
 			<select class="form-control" name="type" >
 				<option value='0'>产品类型</option> 
 				 <foreach name="goods_type" item="vo" >
@@ -101,7 +101,10 @@
 			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
 			--
 			<input class="js-datetime form-control" type="text" id="datetime2" name="datetime2" value="{$data.datetime2}">
-			
+			<select name="is_link" class="form-control" id="">
+				<option value="0" <eq name="data.is_link" value="0">selected</eq>>主产品</option>
+				<option value="1" <eq name="data.is_link" value="1">selected</eq>>相关联产品</option>
+			</select>
 			<input type="submit" class="btn btn-primary" value="搜索" />
 				 
 		</form>
@@ -130,14 +133,13 @@
 						<th width="100">{$flag}ID</th>
 						 <th>店铺</th> 
 						<th>产品名</th> 
-						 <th>产品编码</th> 
-						<th>创建人</th>
-						<th>创建时间</th>
-						<th>审核人</th>
-						<th>审核时间</th>
-						<th>最近更新时间</th>
-						<th>排序</th>
-						<th>状态</th>
+						<th>产品编码</th> 
+						<th>产品类型</th>
+						<th>关联产品</th>
+						<th>关联比例</th> 
+						<th>产品更新时间</th>
+						<th>产品排序</th>
+						<th>产品状态</th>
 						 
 					</tr>
 				</thead>
@@ -158,15 +160,10 @@
 						 <td  > 
 						{$vo.code}
 						</td>
-						<td>{$vo.aname|default=$vo.aid}</td>
-						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
-						<eq name="vo.rid" value="0">
-						<td>-</td>
-						<td>-</td>
-						<else/>
-						<td>{$vo.rname|default=$vo.rid}</td>
-						<td>{$vo.rtime|date='Y-m-d H:i',###}</td>
-						</eq>
+						<td>{$goods_type[$vo.type]}</td>
+						 
+						 <td><a href="{:url('edit',['id'=>$vo.pid1])}"  target="_blank">{$vo.link_name}</a></td>
+						<td>{$vo.link_num}</td> 
 						
 						<td>{$vo.time|date='Y-m-d H:i',###}</td>
 						<td>{$vo.sort}</td>
