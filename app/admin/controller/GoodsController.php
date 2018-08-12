@@ -15,7 +15,7 @@ use think\Db;
  *     'action' =>'default',
  *     'parent' =>'',
  *     'display'=> true,
- *     'order'  => 10,
+ *     'order'  => 1,
  *     'icon'   =>'',
  *     'remark' =>'产品管理'
  * )
@@ -1570,6 +1570,8 @@ class GoodsController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         $m->commit();
+        //添加收藏关联
+        $this->goods_collect($id,$admin['id'],1);
         $this->success('添加成功',url('index'));
     }
      
@@ -2026,6 +2028,8 @@ class GoodsController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         $m_edit->commit();
+        //添加收藏关联
+        $this->goods_collect($info['id'],$admin['id'],2);
         $this->success('已提交修改');
     }
     /**
@@ -2313,6 +2317,8 @@ class GoodsController extends AdminBaseController
         db('msg')->insert($data_msg);
         
         $m->commit();
+        //添加收藏关联
+        $this->goods_collect($info['pid'],$admin['id'],3);
         $this->success('审核成功');
     }
     /**
@@ -2424,6 +2430,8 @@ class GoodsController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         $m_edit->commit();
+        //添加收藏关联
+        $this->goods_collect($info['id'],$admin['id'],2);
         $this->success('已提交修改');
     }
     /**
@@ -2592,6 +2600,8 @@ class GoodsController extends AdminBaseController
         db('msg')->insert($data_msg);
         
         $m->commit();
+        //添加收藏关联
+        $this->goods_collect($info['pid'],$admin['id'],3);
         $this->success('审核成功');
     }
     /**
@@ -2721,6 +2731,8 @@ class GoodsController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         $m_edit->commit();
+        //添加收藏关联
+        $this->goods_collect($info['id'],$admin['id'],2);
         $this->success('已提交修改');
          
     }
@@ -2920,6 +2932,8 @@ class GoodsController extends AdminBaseController
         db('msg')->insert($data_msg);
         
         $m->commit();
+        //添加收藏关联
+        $this->goods_collect($info['pid'],$admin['id'],3);
         $this->success('审核成功');
     }
     
@@ -3050,6 +3064,8 @@ class GoodsController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         $m_edit->commit();
+        //添加收藏关联
+        $this->goods_collect($info['id'],$admin['id'],2);
         $this->success('已提交修改');
         
     }
@@ -3249,6 +3265,8 @@ class GoodsController extends AdminBaseController
         db('msg')->insert($data_msg);
         
         $m->commit();
+        //添加收藏关联
+        $this->goods_collect($info['pid'],$admin['id'],3);
         $this->success('审核成功');
     }
     
@@ -3439,6 +3457,8 @@ class GoodsController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         $m_edit->commit();
+        //添加收藏关联
+        $this->goods_collect($info['id'],$admin['id'],2);
         $this->success('已提交修改');
         
     }
@@ -3640,6 +3660,8 @@ class GoodsController extends AdminBaseController
         db('msg')->insert($data_msg);
         
         $m->commit();
+        //添加收藏关联
+        $this->goods_collect($info['pid'],$admin['id'],3);
         $this->success('审核成功');
     }
     
@@ -3930,6 +3952,8 @@ class GoodsController extends AdminBaseController
         ];
         db('action')->insert($data_action);
         $m_edit->commit();
+        //添加收藏关联
+        $this->goods_collect($info['id'],$admin['id'],2);
         $this->success('已提交修改');
     }
     /**
@@ -4417,6 +4441,8 @@ class GoodsController extends AdminBaseController
         db('msg')->insert($data_msg);
         
         $m->commit();
+        //添加收藏关联
+        $this->goods_collect($info['pid'],$admin['id'],3);
         $this->success('审核成功');
     }
     /**
@@ -4623,7 +4649,8 @@ class GoodsController extends AdminBaseController
         $m_link->where($where_link)->delete();
         //删除标签
         $m_label->where($where_link)->delete();
-        
+        //删除收藏
+        db('goods_collect')->where('pid','in',$ids)->delete();
         $m->commit();
         $this->success('成功删除数据'.$tmp.'条');
         
@@ -4855,5 +4882,27 @@ class GoodsController extends AdminBaseController
        
         return $data;
     }
-     
+     //收藏
+     public function goods_collect($pid,$uid,$type=1){
+         $time=time();
+         $m_collect=db('goods_collect');
+         
+         $where=[
+             'pid'=>$pid,
+             'uid'=>$uid,
+         ];
+         $tmp=$m_collect->where($where)->find();
+         if(empty($tmp)){ 
+             $data=[
+                 'pid'=>$pid,
+                 'uid'=>$uid,
+                 'type'=>$type,
+                 'ctime'=>$time,
+                 'time'=>$time,
+             ];
+             $m_collect->insert($data);
+         }else{
+             $m_collect->where('id',$tmp['id'])->update(['time'=>$time]);
+         }
+     }
 }

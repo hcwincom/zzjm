@@ -53,6 +53,10 @@ class UserController extends AdminBaseController
         $types=config('user_search');
         $search_types=config('search_types');
         $where = ["p.user_type" => ['eq',1]];
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            $where['p.shop'] =  ['eq',$admin['shop']];
+        }
         /**搜索条件**/
         $data = $this->request->param();
         if(empty($data['type1'])){

@@ -194,6 +194,36 @@ class GoodsajaxController extends AdminBaseController
         $this->success('ok','',$data);
         
     }
-     
+     /*  
+      * 收藏
+      * */
+    public function goods_collect(){
+        $pid=$this->request->param('pid',0,'intval');
+        $admin=$this->admin;
+        $where=[
+            'pid'=>$pid,
+            'uid'=>$admin['id'],
+        ];
+        $m_collect=db('goods_collect');
+        $tmp=$m_collect->where($where)->find();
+        $time=time();
+        if(empty($tmp)){
+            $data=[
+                'pid'=>$pid,
+                'uid'=>$admin['id'],
+                'type'=>4,
+                'ctime'=>$time,
+                'time'=>$time,
+            ];
+            $m_collect->insert($data);
+            $this->success('已收藏');
+        }else{
+            $data=[ 
+                'time'=>$time,
+            ];
+            $m_collect->where('id',$tmp['id'])->update($data);
+            $this->success('已更新时间');
+        }
+    }
      
 }

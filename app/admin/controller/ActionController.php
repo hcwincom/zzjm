@@ -39,6 +39,10 @@ class ActionController extends AdminBaseController
         $m=$this->m;
         $where=[];
         $data=$this->request->param();
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            $where['p.shop'] =  ['eq',$admin['shop']];
+        }
         if(empty($data['type'])){
             $data['type']='';
         }else{
