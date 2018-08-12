@@ -85,15 +85,11 @@
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						<switch name="vo.table">
-						<case value="goods"><a href="{:url('edit_info',['id'=>$vo.id])}">{$vo.id}-产品信息修改</a></case>
-						<case value="goods_file"><a href="{:url('image_edit_info',['id'=>$vo.id])}">{$vo.id}-图片/文件修改</a></case>
-						<case value="goods_content"><a href="{:url('content_edit_info',['id'=>$vo.id])}">{$vo.id}-详情修改</a></case>
-						</switch>
-						<a href="{:url('edit_info',['id'=>$vo.id])}">{$vo.id}</a>
+						 
+						<a href="{:url($table_info[$vo.table][0],['id'=>$vo.id])}">{$vo.id}-{$table_info[$vo.table][1]}</a>
 						</td>
 						<td>  
-						 <a href="{:url('edit',['id'=>$vo.pid])}">{$vo.pid}-{$vo.pname}</a>
+						 <a href="{:url('edit',['id'=>$vo.pid])}" >{$vo.pid}-{$vo.pname}</a>
 						 </td>
 						 
 						<td>{$vo.aname|default=$vo.aid}</td>

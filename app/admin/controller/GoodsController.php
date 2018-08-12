@@ -31,6 +31,7 @@ class GoodsController extends AdminBaseController
     private $fields;
     private $flag;
     private $file_type;
+    private $goods_type;
     public function _initialize()
     {
         parent::_initialize();
@@ -40,11 +41,12 @@ class GoodsController extends AdminBaseController
         $this->assign('flag',$this->flag);
         $this->statuss=config('info_status');
         $this->review_status=config('review_status');
+        $this->goods_type=config('goods_type');
         
         $this->assign('statuss',$this->statuss);
         $this->assign('review_status',$this->review_status);
         $this->assign('html',$this->request->action());
-        $this->assign('goods_type',config('goods_type'));
+        $this->assign('goods_type',$this->goods_type);
         $this->assign('sn_type',config('sn_type'));
         $this->assign('is_box',config('is_box'));
         //计算小数位
@@ -62,7 +64,7 @@ class GoodsController extends AdminBaseController
         ];
         $this->assign('file_type',$this->file_type);
         
-        $this->tables=['goods','goods_file','goods_content'];
+        $this->tables=['goods','goods_file','goods_content','goods_type2','goods_type3','goods_type4'];
     }
      
     /**
@@ -198,7 +200,7 @@ class GoodsController extends AdminBaseController
             $data['price1']='';
             $data['price2']=''; 
         }else{
-            $where_price=[];
+           
             //判断处理价格参数
             if(!isset($data['price1']) || $data['price1']==''){
                 $data['price1']=='';
@@ -237,9 +239,12 @@ class GoodsController extends AdminBaseController
             }elseif(isset($price2)){
                 //只有最大价 
                 $where_price=['elt',$price2];
-            } 
+            }  
             //组装
-            $where['p.'.$data['price']]=$where_price;
+            if(!empty($where_price)){
+                $where['p.'.$data['price']]=$where_price;
+            }
+            
         }
          
         
@@ -259,7 +264,7 @@ class GoodsController extends AdminBaseController
             $data['big2']='';
             
         }else{
-            $where_big=[];
+            
             //判断处理重量体积参数
             if(!isset($data['big1']) || $data['big1']==''){
                 $data['big1']=='';
@@ -299,8 +304,11 @@ class GoodsController extends AdminBaseController
                 //只有最大价
                 $where_big=['elt',$big2];
             }
+             
             //组装
-            $where['p.'.$data['big']]=$where_big;
+            if(!empty($where_big)){
+                $where['p.'.$data['big']]=$where_big;
+            }
         }
         //查询字段
         $types=config('goods_search');
@@ -387,19 +395,19 @@ class GoodsController extends AdminBaseController
         return $this->fetch();
     }
     /**
-     * 产品关联列表
+     * 产品组合列表
      * @adminMenu(
-     *     'name'   => '产品关联列表',
+     *     'name'   => '产品组合列表',
      *     'parent' => 'default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
      *     'icon'   => '',
-     *     'remark' => '产品关联列表',
+     *     'remark' => '产品组合列表',
      *     'param'  => ''
      * )
      */
-    public function links()
+    public function links2()
     {
         
         $admin=$this->admin;
@@ -408,8 +416,11 @@ class GoodsController extends AdminBaseController
         $data=$this->request->param();
         $admin=$this->admin;
         $where=[];
+        //类型组合
+        $where['p.type']=['eq',2];
+        
         if($admin['shop']!=1){
-            $where['p.shop']=['eq',$admin['shop']];
+            $where['gl.shop']=['eq',$admin['shop']];
         }
         
         //状态
@@ -418,12 +429,7 @@ class GoodsController extends AdminBaseController
         }else{
             $where['p.status']=['eq',$data['status']];
         }
-        //类型
-        if(empty($data['type'])){
-            $data['type']=0;
-        }else{
-            $where['p.type']=['eq',$data['type']];
-        }
+       
         
         //一级分类
         if(empty($data['cid0'])){
@@ -467,7 +473,7 @@ class GoodsController extends AdminBaseController
                     $where['p.goods_link']=['egt',3];
                     break;
                 default:
-                    $where['p.goods_link']=['eq',$num];
+                    $where['p.goods_link']=['eq',$data['goods_link']];
                     break;
             }
         }
@@ -489,6 +495,8 @@ class GoodsController extends AdminBaseController
         }else{
             $about=$file_type[$data['about_link']][0];
             switch($data['about_link_num']){
+                case -1:
+                    break;
                 case 3:
                     $where['p.'.$about]=['egt',3];
                     break;
@@ -519,7 +527,7 @@ class GoodsController extends AdminBaseController
             $data['price1']='';
             $data['price2']='';
         }else{
-            $where_price=[];
+           
             //判断处理价格参数
             if(!isset($data['price1']) || $data['price1']==''){
                 $data['price1']=='';
@@ -559,8 +567,11 @@ class GoodsController extends AdminBaseController
                 //只有最大价
                 $where_price=['elt',$price2];
             }
-            //组装
-            $where['p.'.$data['price']]=$where_price;
+            //组装 
+            if(!empty($where_price)){
+                $where['p.'.$data['price']]=$where_price;
+            }
+            
         }
         
         
@@ -580,7 +591,7 @@ class GoodsController extends AdminBaseController
             $data['big2']='';
             
         }else{
-            $where_big=[];
+            
             //判断处理重量体积参数
             if(!isset($data['big1']) || $data['big1']==''){
                 $data['big1']=='';
@@ -620,8 +631,10 @@ class GoodsController extends AdminBaseController
                 //只有最大价
                 $where_big=['elt',$big2];
             }
-            //组装
-            $where['p.'.$data['big']]=$where_big;
+            //组装 
+            if(!empty($where_big)){
+                $where['p.'.$data['big']]=$where_big;
+            }
         }
         //查询字段
         $types=config('goods_search');
@@ -683,7 +696,7 @@ class GoodsController extends AdminBaseController
             ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p','p.id=gl.pid0')
             ->join('cmf_goods p1','p1.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=p.shop','left')
+            ->join('cmf_shop s','s.id=gl.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -727,6 +740,700 @@ class GoodsController extends AdminBaseController
         
         return $this->fetch();
     }
+    
+    /**
+     * 加工产品列表
+     * @adminMenu(
+     *     'name'   => '加工产品列表',
+     *     'parent' => 'default',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 4,
+     *     'icon'   => '',
+     *     'remark' => '加工产品列表',
+     *     'param'  => ''
+     * )
+     */
+    public function links4()
+    {
+        
+        $admin=$this->admin;
+        
+        $m=$this->m;
+        $data=$this->request->param();
+        $admin=$this->admin;
+        $where=[];
+        //类型组合
+        $where['p.type']=['eq',4];
+        
+        if($admin['shop']!=1){
+            $where['gl.shop']=['eq',$admin['shop']];
+        }
+        
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
+        
+        
+        //一级分类
+        if(empty($data['cid0'])){
+            $data['cid0']=0;
+        }else{
+            $where['p.cid0']=['eq',$data['cid0']];
+        }
+        //二级分类
+        if(empty($data['cid'])){
+            $data['cid']=0;
+        }else{
+            $where['p.cid']=['eq',$data['cid']];
+        }
+        
+        //品牌分类
+        if(empty($data['bchar']) || $data['bchar']==-1){
+            $data['bchar']=-1;
+        }else{
+            $where['p.bchar']=['eq',$data['bchar']];
+        }
+        //品牌
+        if(empty($data['brand'])){
+            $data['brand']=0;
+        }else{
+            $where['p.brand']=['eq',$data['brand']];
+        }
+        //关联设备数
+        $goods_links=[
+            '-1'=>'关联设备',
+            '0'=>'0个',
+            '1'=>'1个',
+            '2'=>'2个',
+            '3'=>'3个以上',
+        ];
+        $this->assign('goods_links',$goods_links);
+        if(!isset($data['goods_link']) || $data['goods_link']==-1){
+            $data['goods_link']=-1;
+        }else{
+            switch($data['goods_link']){
+                case 3:
+                    $where['p.goods_link']=['egt',3];
+                    break;
+                default:
+                    $where['p.goods_link']=['eq',$data['goods_link']];
+                    break;
+            }
+        }
+        
+        //关联资料数
+        $file_type=$this->file_type;
+        $about_link_nums=[
+            '-1'=>'数量',
+            '0'=>'0个',
+            '1'=>'1个',
+            '2'=>'2个',
+            '3'=>'3个以上',
+        ];
+        $this->assign('about_link_nums',$about_link_nums);
+        if(empty($data['about_link']) || !isset($data['about_link_num']) || $data['about_link_num']==-1){
+            $data['about_link']=0;
+            $data['about_link_num']=-1;
+            
+        }else{
+            $about=$file_type[$data['about_link']][0];
+            switch($data['about_link_num']){
+                case -1:
+                    break;
+                case 3:
+                    $where['p.'.$about]=['egt',3];
+                    break;
+                default:
+                    $where['p.'.$about]=['eq',$data['about_link_num']];
+                    break;
+            }
+        }
+        //价格
+        $prices=[
+            'price0'=>'价格',
+            'price_sale'=>'零售价格',
+            'price_in'=>'入库价',
+            'price_cost'=>'出厂价',
+            'price_min'=>'最低销售价',
+            'price_range1'=>'区间价1',
+            'price_range2'=>'区间价2',
+            'price_range3'=>'区间价3',
+            'price_dealer1'=>'经销价1',
+            'price_dealer2'=>'经销价2',
+            'price_dealer3'=>'经销价3',
+            'price_trade'=>'同行价',
+            'price_factory'=>'工程配套价',
+        ];
+        $this->assign('prices',$prices);
+        if(empty($data['price']) || $data['price']=='price0'){
+            $data['price']='price0';
+            $data['price1']='';
+            $data['price2']='';
+        }else{
+            
+            //判断处理价格参数
+            if(!isset($data['price1']) || $data['price1']==''){
+                $data['price1']=='';
+                
+            }else{
+                $price1=0;
+                $data['price1']=round($data['price1'],2);
+                $price1=$data['price1'];
+                if($price1<0){
+                    $this->error('价格不能小于0');
+                }
+            }
+            if(!isset($data['price2']) || $data['price2']==''){
+                $data['price2']=='';
+                
+            }else{
+                $price2=0;
+                $data['price2']=round($data['price2'],2);
+                $price2=$data['price2'];
+                if($price2<0){
+                    $this->error('价格不能小于0');
+                }
+            }
+            //判断查询条件
+            if(isset($price1)){
+                if(isset($price2)){
+                    //最大最小价格都有
+                    if($price2<$price1){
+                        $this->error('最大价格不能小于最小价格');
+                    }
+                    $where_price=['between',[$price1,$price2]];
+                }else{
+                    //最小价格
+                    $where_price=['egt',$price1];
+                }
+            }elseif(isset($price2)){
+                //只有最大价
+                $where_price=['elt',$price2];
+            }
+            //组装
+            if(!empty($where_price)){
+                $where['p.'.$data['price']]=$where_price;
+            }
+            
+        }
+        
+        
+        //重量体积
+        $bigs=[
+            'big0'=>'重量体积',
+            'weight0'=>'净重量',
+            'size0'=>'净体积',
+            'weight1'=>'毛重量',
+            'size1'=>'毛体积',
+            
+        ];
+        $this->assign('bigs',$bigs);
+        if(empty($data['big']) || $data['big']=='big0'){
+            $data['big']='big0';
+            $data['big1']='';
+            $data['big2']='';
+            
+        }else{
+            
+            //判断处理重量体积参数
+            if(!isset($data['big1']) || $data['big1']==''){
+                $data['big1']=='';
+                
+            }else{
+                $big1=0;
+                $data['big1']=round($data['big1'],2);
+                $big1=$data['big1'];
+                if($big1<0){
+                    $this->error('重量体积不能小于0');
+                }
+            }
+            if(!isset($data['big2']) || $data['big2']==''){
+                $data['big2']=='';
+                
+            }else{
+                $big2=0;
+                $data['big2']=round($data['big2'],2);
+                $big2=$data['big2'];
+                if($big2<0){
+                    $this->error('重量体积不能小于0');
+                }
+            }
+            //判断查询条件
+            if(isset($big1)){
+                if(isset($big2)){
+                    //最大最小重量体积都有
+                    if($big2<$big1){
+                        $this->error('最大重量体积不能小于最小重量体积');
+                    }
+                    $where_big=['between',[$big1,$big2]];
+                }else{
+                    //最小重量体积
+                    $where_big=['egt',$big1];
+                }
+            }elseif(isset($big2)){
+                //只有最大价
+                $where_big=['elt',$big2];
+            }
+            //组装
+            if(!empty($where_big)){
+                $where['p.'.$data['big']]=$where_big;
+            }
+        }
+        //查询字段
+        $types=config('goods_search');
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        }
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        if(!isset($data['name']) || $data['name']==''){
+            $data['name']='';
+        }else{
+            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+        }
+        
+        //时间类别
+        $times=config('time1_search');
+        if(empty($data['time'])){
+            $data['time']=key($times);
+            $data['datetime1']='';
+            $data['datetime2']='';
+        }else{
+            //时间处理
+            if(empty($data['datetime1'])){
+                $data['datetime1']='';
+                $time1=0;
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $time2=0;
+                }else{
+                    //只有结束时间
+                    $time2=strtotime($data['datetime2']);
+                    $where['p.'.$data['time']]=['elt',$time2];
+                }
+            }else{
+                //有开始时间
+                $time1=strtotime($data['datetime1']);
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $where['p.'.$data['time']]=['egt',$time1];
+                }else{
+                    //有结束时间有开始时间between
+                    $time2=strtotime($data['datetime2']);
+                    if($time2<=$time1){
+                        $this->error('结束时间必须大于起始时间');
+                    }
+                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
+                }
+            }
+        }
+        //主产品还是副产品
+        if(empty($data['is_link'])){
+            $data['is_link']=0;
+            $list=db('goods_link')
+            ->alias('gl')
+            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->join('cmf_goods p','p.id=gl.pid0')
+            ->join('cmf_goods p1','p1.id=gl.pid1','left')
+            ->join('cmf_shop s','s.id=gl.shop','left')
+            ->join('cmf_brand b','b.id=p.brand','left')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where($where)
+            ->order('p.status asc,p.time desc')
+            ->paginate();
+        }else{
+            $list=db('goods_link')
+            ->alias('gl')
+            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->join('cmf_goods p0','p0.id=gl.pid0')
+            ->join('cmf_goods p','p.id=gl.pid1','left')
+            ->join('cmf_shop s','s.id=gl.shop','left')
+            ->join('cmf_brand b','b.id=p.brand','left')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where($where)
+            ->order('p.status asc,p.time desc')
+            ->paginate();
+        }
+        
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        $this->assign('types',$types);
+        $this->assign('times',$times);
+        $this->assign("search_types", $search_types);
+        //分类
+        $this->cates();
+        $this->assign('cid0',$data['cid0']);
+        $this->assign('cid',$data['cid']);
+        $this->assign('select_class','form-control');
+        //品牌
+        $this->brands();
+        $this->assign('bchar',$data['bchar']);
+        $this->assign('brand',$data['brand']);
+        
+        return $this->fetch();
+    }
+    /**
+     * 标签产品列表
+     * @adminMenu(
+     *     'name'   => '标签产品列表',
+     *     'parent' => 'default',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 3,
+     *     'icon'   => '',
+     *     'remark' => '标签产品列表',
+     *     'param'  => ''
+     * )
+     */
+    public function links3()
+    {
+        
+        $admin=$this->admin;
+        
+        $m=$this->m;
+        $data=$this->request->param();
+        $admin=$this->admin;
+        $where=[];
+        //类型组合
+         
+        if($admin['shop']!=1){
+            $where['gl.shop']=['eq',$admin['shop']];
+        }
+        
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
+        
+        
+        //一级分类
+        if(empty($data['cid0'])){
+            $data['cid0']=0;
+        }else{
+            $where['p.cid0']=['eq',$data['cid0']];
+        }
+        //二级分类
+        if(empty($data['cid'])){
+            $data['cid']=0;
+        }else{
+            $where['p.cid']=['eq',$data['cid']];
+        }
+        
+        //品牌分类
+        if(empty($data['bchar']) || $data['bchar']==-1){
+            $data['bchar']=-1;
+        }else{
+            $where['p.bchar']=['eq',$data['bchar']];
+        }
+        //品牌
+        if(empty($data['brand'])){
+            $data['brand']=0;
+        }else{
+            $where['p.brand']=['eq',$data['brand']];
+        }
+        //关联设备数
+        $goods_links=[
+            '-1'=>'标签数量',
+            '0'=>'0个',
+            '1'=>'1个',
+            '2'=>'2个',
+            '3'=>'3个以上',
+        ];
+        $this->assign('goods_links',$goods_links);
+        if(!isset($data['goods_link']) || $data['goods_link']==-1){
+            $data['goods_link']=-1;
+        }else{
+            switch($data['goods_link']){
+                case 3:
+                    $where['gl.num']=['egt',3];
+                    break;
+                default:
+                    $where['gl.num']=['eq',$data['goods_link']];
+                    break;
+            }
+        }
+        
+        
+        //关联资料数
+        $file_type=$this->file_type;
+        $about_link_nums=[
+            '-1'=>'数量',
+            '0'=>'0个',
+            '1'=>'1个',
+            '2'=>'2个',
+            '3'=>'3个以上',
+        ];
+        $this->assign('about_link_nums',$about_link_nums);
+        if(empty($data['about_link']) || !isset($data['about_link_num']) || $data['about_link_num']==-1){
+            $data['about_link']=0;
+            $data['about_link_num']=-1;
+            
+        }else{
+            $about=$file_type[$data['about_link']][0];
+            switch($data['about_link_num']){
+                case -1:
+                    break;
+                case 3:
+                    $where['p.'.$about]=['egt',3];
+                    break;
+                default:
+                    $where['p.'.$about]=['eq',$data['about_link_num']];
+                    break;
+            }
+        }
+        //价格
+        $prices=[
+            'price0'=>'价格',
+            'price_sale'=>'零售价格',
+            'price_in'=>'入库价',
+            'price_cost'=>'出厂价',
+            'price_min'=>'最低销售价',
+            'price_range1'=>'区间价1',
+            'price_range2'=>'区间价2',
+            'price_range3'=>'区间价3',
+            'price_dealer1'=>'经销价1',
+            'price_dealer2'=>'经销价2',
+            'price_dealer3'=>'经销价3',
+            'price_trade'=>'同行价',
+            'price_factory'=>'工程配套价',
+        ];
+        $this->assign('prices',$prices);
+        if(empty($data['price']) || $data['price']=='price0'){
+            $data['price']='price0';
+            $data['price1']='';
+            $data['price2']='';
+        }else{
+            
+            //判断处理价格参数
+            if(!isset($data['price1']) || $data['price1']==''){
+                $data['price1']=='';
+                
+            }else{
+                $price1=0;
+                $data['price1']=round($data['price1'],2);
+                $price1=$data['price1'];
+                if($price1<0){
+                    $this->error('价格不能小于0');
+                }
+            }
+            if(!isset($data['price2']) || $data['price2']==''){
+                $data['price2']=='';
+                
+            }else{
+                $price2=0;
+                $data['price2']=round($data['price2'],2);
+                $price2=$data['price2'];
+                if($price2<0){
+                    $this->error('价格不能小于0');
+                }
+            }
+            //判断查询条件
+            if(isset($price1)){
+                if(isset($price2)){
+                    //最大最小价格都有
+                    if($price2<$price1){
+                        $this->error('最大价格不能小于最小价格');
+                    }
+                    $where_price=['between',[$price1,$price2]];
+                }else{
+                    //最小价格
+                    $where_price=['egt',$price1];
+                }
+            }elseif(isset($price2)){
+                //只有最大价
+                $where_price=['elt',$price2];
+            }
+            //组装
+            if(!empty($where_price)){
+                $where['p.'.$data['price']]=$where_price;
+            }
+            
+        }
+        
+        
+        //重量体积
+        $bigs=[
+            'big0'=>'重量体积',
+            'weight0'=>'净重量',
+            'size0'=>'净体积',
+            'weight1'=>'毛重量',
+            'size1'=>'毛体积',
+            
+        ];
+        $this->assign('bigs',$bigs);
+        if(empty($data['big']) || $data['big']=='big0'){
+            $data['big']='big0';
+            $data['big1']='';
+            $data['big2']='';
+            
+        }else{
+            
+            //判断处理重量体积参数
+            if(!isset($data['big1']) || $data['big1']==''){
+                $data['big1']=='';
+                
+            }else{
+                $big1=0;
+                $data['big1']=round($data['big1'],2);
+                $big1=$data['big1'];
+                if($big1<0){
+                    $this->error('重量体积不能小于0');
+                }
+            }
+            if(!isset($data['big2']) || $data['big2']==''){
+                $data['big2']=='';
+                
+            }else{
+                $big2=0;
+                $data['big2']=round($data['big2'],2);
+                $big2=$data['big2'];
+                if($big2<0){
+                    $this->error('重量体积不能小于0');
+                }
+            }
+            //判断查询条件
+            if(isset($big1)){
+                if(isset($big2)){
+                    //最大最小重量体积都有
+                    if($big2<$big1){
+                        $this->error('最大重量体积不能小于最小重量体积');
+                    }
+                    $where_big=['between',[$big1,$big2]];
+                }else{
+                    //最小重量体积
+                    $where_big=['egt',$big1];
+                }
+            }elseif(isset($big2)){
+                //只有最大价
+                $where_big=['elt',$big2];
+            }
+            //组装
+            if(!empty($where_big)){
+                $where['p.'.$data['big']]=$where_big;
+            }
+        }
+        //查询字段
+        $types=config('goods_search');
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        }
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        if(!isset($data['name']) || $data['name']==''){
+            $data['name']='';
+        }else{
+            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+        }
+        
+        //时间类别
+        $times=config('time1_search');
+        if(empty($data['time'])){
+            $data['time']=key($times);
+            $data['datetime1']='';
+            $data['datetime2']='';
+        }else{
+            //时间处理
+            if(empty($data['datetime1'])){
+                $data['datetime1']='';
+                $time1=0;
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $time2=0;
+                }else{
+                    //只有结束时间
+                    $time2=strtotime($data['datetime2']);
+                    $where['p.'.$data['time']]=['elt',$time2];
+                }
+            }else{
+                //有开始时间
+                $time1=strtotime($data['datetime1']);
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $where['p.'.$data['time']]=['egt',$time1];
+                }else{
+                    //有结束时间有开始时间between
+                    $time2=strtotime($data['datetime2']);
+                    if($time2<=$time1){
+                        $this->error('结束时间必须大于起始时间');
+                    }
+                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
+                }
+            }
+        }
+        //主产品还是副产品
+        if(empty($data['is_link'])){
+            $data['is_link']=0;
+            $list=db('goods_label')
+            ->alias('gl')
+            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->join('cmf_goods p','p.id=gl.pid0')
+            ->join('cmf_goods p1','p1.id=gl.pid1','left')
+            ->join('cmf_shop s','s.id=gl.shop','left')
+            ->join('cmf_brand b','b.id=p.brand','left')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where($where)
+            ->order('p.status asc,p.time desc')
+            ->paginate();
+        }else{
+            $list=db('goods_label')
+            ->alias('gl')
+            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->join('cmf_goods p0','p0.id=gl.pid0')
+            ->join('cmf_goods p','p.id=gl.pid1','left')
+            ->join('cmf_shop s','s.id=gl.shop','left')
+            ->join('cmf_brand b','b.id=p.brand','left')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where($where)
+            ->order('p.status asc,p.time desc')
+            ->paginate();
+        }
+        
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        $this->assign('types',$types);
+        $this->assign('times',$times);
+        $this->assign("search_types", $search_types);
+        //分类
+        $this->cates();
+        $this->assign('cid0',$data['cid0']);
+        $this->assign('cid',$data['cid']);
+        $this->assign('select_class','form-control');
+        //品牌
+        $this->brands();
+        $this->assign('bchar',$data['bchar']);
+        $this->assign('brand',$data['brand']);
+        
+        return $this->fetch();
+    }
+    
     /**
      * 产品添加
      * @adminMenu(
@@ -770,201 +1477,9 @@ class GoodsController extends AdminBaseController
         
        return $this->fetch();
     }
-    //选择二级分类得到三级编码
-    public function cid_change(){
-        $cid=$this->request->param('cid',0,'intval');
-        $id=$this->request->param('id',0,'intval');
-        if($cid<1){
-            $this->error('无效分类');
-        }
-        $m=$this->m;
-        if($id!=0){
-            $info=$m->where(['id'=>$id])->find();
-            //分类没变
-            if($info['cid']==$cid){
-                $this->success($info['code_num']);
-                exit;
-            }
-        }
-        $where=[
-            'id'=>$cid, 
-            'fid'=>['neq',0],
-        ];
-        $info=db('cate')->field('id,max_num')->where($where)->find();
-        if(empty($info)){
-            $this->error('无效分类');
-        }else{
-            $this->success($info['max_num']+1);
-        }
-        
-    }
+     
     
-    //产品添加编码
-    public function add_code(){
-        $id=$this->request->param('id',0,'intval');
-        $cid=$this->request->param('cid',0,'intval');
-        $code_num=$this->request->param('code_num',0,'intval');
-        $name=$this->request->param('name','');
-        $m=$this->m;
-        //检查编码是否合法
-        $where=[
-            'cid'=>$cid,
-            'code_num'=>$code_num,
-        ];
-        if(!empty($id)){
-            $where['id']=['neq',$id];
-        }
-        $tmp=$m->where($where)->find();
-        if(!empty($tmp)){
-            $this->error('该编码已存在');
-        }
-         
-        $cate=db('cate')
-        ->field('c.*,f.name as fname')
-        ->alias('c')
-        ->join('cmf_cate f','f.id=c.fid')
-        ->where('c.id',$cid)
-        ->find();
-        if(empty($cate) || $cate['fid']==0){
-            $this->error('分类选择不合法');
-        } 
-        
-        //下面组装产品名称和编码 
-        $name0=$cate['name'].$name.$cate['fname'];
-        $code=$cate['code'].'-'.str_pad($code_num, 2,'0',STR_PAD_LEFT);
-        $this->success($name0,'',['code'=>$code]);
-    }
-    /**
-     * 产品参数模板选择
-     * @adminMenu(
-     *     'name'   => '产品参数模板选择',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 80,
-     *     'icon'   => '',
-     *     'remark' => '产品参数模板选择',
-     *     'param'  => ''
-     * )
-     */
-    public function template_set(){
-        $cid=$this->request->param('cid',0,'intval');
-        if($cid<=0){
-            $this->success('no');
-        }
-        $where=[
-            'cid'=>$cid,
-            'status'=>2,
-        ];
-        $tmps=db('template')->where($where)->order('sort asc')->column('id,name');
-        if(empty($tmps)){
-            $this->success('no');
-        }
-        $this->success('ok','',['list'=>$tmps]);
-    }
-    /**
-     * 产品参数设置
-     * @adminMenu(
-     *     'name'   => '产品参数设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 81,
-     *     'icon'   => '',
-     *     'remark' => '产品参数设置',
-     *     'param'  => ''
-     * )
-     */
-    public function param_set(){
-        $t_id=$this->request->param('t_id',0,'intval');
-        if($t_id<=0){
-            $this->success('no');
-        }
-        $where=[
-            'tp.t_id'=>$t_id,
-            'p.status'=>2,
-        ];
-        $tmps=db('template_param')
-        ->alias('tp')
-        ->join('cmf_param p','tp.p_id=p.id')
-        ->where($where)
-        ->order('p.sort asc')
-        ->column('p.id,p.name,p.type,p.content,p.dsc');
-       
-        if(empty($tmps)){
-            $this->success('no');
-        }
-        foreach($tmps as $k=>$v){
-            if($tmps[$k]['type']==3){
-                $tmps[$k]['content']='';
-            }else{
-                //清除不规范输入导致的空格
-                $tmps[$k]['content']=explode(',',$tmps[$k]['content']);
-            }
-        }
-        $this->success('ok','',['list'=>$tmps]);
-    }
-    /**
-     * 产品参数查看
-     * @adminMenu(
-     *     'name'   => '产品参数查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 82,
-     *     'icon'   => '',
-     *     'remark' => '产品参数查看',
-     *     'param'  => ''
-     * )
-     */
-    public function param_get(){
-        $this->success('ok');
-    }
-    //获取价格模板
-    public function prices(){
-        $where=[
-            'status'=>2,
-        ];
-        $prices=db('price')->where($where)->order('sort asc,name asc')->column('id,name');
-        $this->assign('prices',$prices);
-        
-    }
-    /**
-     * 产品价格模板确认
-     * @adminMenu(
-     *     'name'   => '产品价格模板确认',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>90,
-     *     'icon'   => '',
-     *     'remark' => '产品价格模板确认',
-     *     'param'  => ''
-     * )
-     */
-    public function price_set(){
-        $t_id=$this->request->param('t_id',0,'intval');
-        $price_in=$this->request->param('price_in',0);
-        if($t_id<=0 || $price_in<=0){
-            $this->success('no');
-        }
-        $price_in=round($price_in,2);
-        //按模板规则计算得到各种价格，暂时不写
-        $data=[];
-        $data['price_cost']=$price_in;
-        $data['price_min']=$price_in;
-        $data['price_range1']=$price_in;
-        $data['price_range2']=$price_in;
-        $data['price_range3']=$price_in;
-        $data['price_dealer1']=$price_in;
-        $data['price_dealer2']=$price_in;
-        $data['price_dealer3']=$price_in;
-        $data['price_trade']=$price_in;
-        $data['price_factory']=$price_in;
-        $this->success('ok','',$data);
-        
-    }
-   
+    
      
     /**
      * 产品添加do
@@ -996,9 +1511,7 @@ class GoodsController extends AdminBaseController
         //技术参数
         $value=$data_add['value'];
         unset($data_add['value']); 
-        //关联产品
-        $id_links=$data_add['id_links'];
-        unset($data_add['id_links']); 
+        
         //创建人信息
         $data_add['aid']=$admin['id'];
         $data_add['status']=1;
@@ -1040,22 +1553,7 @@ class GoodsController extends AdminBaseController
             }
             db('goods_param')->insertAll($params);
         }
-       
-        //关联产品,为1不记录
-        if(!empty($id_links) && $data_add['type']!=1){
-            $data_link=[];
-            foreach($id_links as $k=>$v){
-                $data_link[]=[
-                    'pid0'=>$id,
-                    'pid1'=>$k,
-                    'num'=>round($v,2),
-                    'type'=>$data_add['type'],
-                ];
-            }
-           
-            db('goods_link')->insertAll($data_link);
-        }
-       
+        
         //记录操作记录
         $flag=$this->flag;
         $table=$this->table;
@@ -1201,6 +1699,7 @@ class GoodsController extends AdminBaseController
         
         return $this->fetch();
     }
+    
     /**
      * 产品状态审核
      * @adminMenu(
@@ -2096,6 +2595,1055 @@ class GoodsController extends AdminBaseController
         $this->success('审核成功');
     }
     /**
+     * 产品组合详情
+     * @adminMenu(
+     *     'name'   => '产品组合详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 50,
+     *     'icon'   => '',
+     *     'remark' => '产品组合详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type2()
+    { 
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        //获取分类
+        $this->cates();
+        
+        //关联产品 
+        $id_links=db('goods_link')
+        ->alias('gl')
+        ->join('cmf_goods p','p.id=gl.pid1')
+        ->where('gl.pid0',$id)
+        ->column('gl.pid1,gl.num,p.name');
+        
+        $this->assign('id_links',$id_links); 
+        $this->assign('info',$info); 
+       
+        return $this->fetch();
+    }
+    /**
+     * 产品组合编辑提交
+     * @adminMenu(
+     *     'name'   => '产品组合编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 51,
+     *     'icon'   => '',
+     *     'remark' => '产品组合编辑提交',
+     *     'param'  => ''
+     * )
+     */
+    public function type2_edit_do()
+    {
+        $m=$this->m;
+        $data=$this->request->param();
+        $id=intval($data['id']);
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $table=$this->table;
+        $flag=$this->flag;
+        $table0='goods_type2'; 
+        $flag0='产品组合';
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能编辑其他店铺的信息');
+            }
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table0,
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $content=[];
+        //关联产品
+        $links0=db('goods_link')->where('pid0',$data['id'])->column('pid1,num');
+        $links1=empty($data['id_links'])?[]:$data['id_links'];
+        //配件数量格式
+        foreach($links1 as $k=>$v){
+            $links1[$k]=intval($v);
+            if($links1[$k]<=0){
+                $this->error('关联产品数量错误');
+            }
+         }
+        //关联产品比较
+        if(!empty(array_diff($links0,$links1)) ||  !empty(array_diff($links1,$links0))){
+            $content['id_links']=json_encode($links1);
+        }
+        if(empty($content)){
+            $this->error('未修改');
+        }
+        //保存更改
+        $m_edit=db('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            db('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        //记录操作记录
+        $link=url('admin/'.$table.'/type2_edit_info',['id'=>$eid]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'编辑'.$flag0.$info['id'].'-'.$info['name'],
+            'table'=>$table,
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        $m_edit->commit();
+        $this->success('已提交修改');
+         
+    }
+    /**
+     * 产品组合修改详情
+     * @adminMenu(
+     *     'name'   => '产品组合修改详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 52,
+     *     'icon'   => '',
+     *     'remark' => '产品组合修改详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type2_edit_info()
+    {
+        $m=$this->m;
+        $eid=$this->request->param('id',0,'intval');
+        $info1=db('edit')->where('id',$eid)->find();
+        if(empty($info1)){
+            $this->error('数据不存在');
+        }
+        $info=$m->where('id',$info1['pid'])->find();
+        if(empty($info)){
+            $this->error('原数据不存在');
+        }
+        //获取改变的信息
+        $change=db('edit_info')->where('eid',$eid)->value('content');
+        $change=json_decode($change,true);
+        
+        $m_link=db('goods_link');
+        $links0=$m_link
+        ->alias('gl')
+        ->join('cmf_goods g','g.id=gl.pid1','left')
+        ->where('gl.pid0',$info['id'])
+        ->column('gl.pid1,gl.num,g.name');
+        $links1=[];
+        $links10=[];
+        if(isset($change['id_links'])){
+            $links1=json_decode($change['id_links'],true);
+            if(!empty($links1)){
+                $ids=array_keys($links1);
+                $links10=$m->where('id','in',$ids)->column('id,name');
+            }
+        }
+        $this->assign('links0',$links0);
+        $this->assign('links1',$links1);
+        $this->assign('links10',$links10);
+        $this->assign('info1',$info1);
+        $this->assign('info',$info);
+        $this->assign('change',$change);
+        return $this->fetch();
+    }
+    /**
+     * 产品组合审核
+     * @adminMenu(
+     *     'name'   => '产品组合审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 53,
+     *     'icon'   => '',
+     *     'remark' => '产品组合审核',
+     *     'param'  => ''
+     * )
+     */
+    public function type2_edit_review()
+    {
+        //审核编辑的信息
+        $status=$this->request->param('rstatus',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        if(($status!=2 && $status!=3) || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        $table=$this->table;
+        $m_edit=db('edit');
+        $info=$m_edit
+        ->field('e.*,p.name as pname,p.type,a.user_nickname as aname')
+        ->alias('e')
+        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->join('cmf_user a','a.id=e.aid')
+        ->where('e.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('无效信息');
+        }
+        if($info['rstatus']!=1){
+            $this->error('编辑信息已被审核！不能重复审核');
+        }
+        
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
+        $time=time();
+        
+        $m->startTrans();
+        
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+        ];
+        //只有未审核的才能更新
+        $where=[
+            'id'=>$id,
+            'rstatus'=>1,
+        ];
+        $row=$m_edit->where($where)->update($update);
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        //是否更新,2同意，3不同意
+        if($status==2){
+            //组装更新数据
+            $update_info=[
+                'time'=>$time,
+            ];
+            //得到修改的字段
+            $change=db('edit_info')->where('eid',$id)->value('content');
+            $change=json_decode($change,true);
+            
+            foreach($change as $k=>$v){
+                $update_info[$k]=$v;
+            }
+            //得到原数据
+            $info_tmp=$m->where('id',$info['pid'])->find();
+             
+            //处理关联产品
+            if(isset($update_info['id_links'])){
+                $links=json_decode($update_info['id_links'],true);
+                $type=isset($update_info['type'])?$update_info['type']:$info_tmp['type'];
+                unset($update_info['id_links']);
+                $links_add=[];
+                //统计关联设备总数量
+                $num=0;
+                foreach($links as $k=>$v){
+                    $links_add[]=[
+                        'pid0'=>$info['pid'],
+                        'pid1'=>$k,
+                        'num'=>$v,
+                        'type'=>$type,
+                    ];
+                    $num+=$v;
+                }
+                db('goods_link')->where('pid0',$info['pid'])->delete();
+                if(!empty($links_add)){
+                    db('goods_link')->insertAll($links_add);
+                }
+                $update_info['goods_link']=count($links_add);
+            }
+            
+            $row=$m->where('id',$info['pid'])->update($update_info);
+            if($row!==1){
+                $m->rollback();
+                $this->error('信息更新失败，请刷新后重试');
+            }
+            
+        }
+        
+        //审核成功，记录操作记录,发送审核信息
+         
+         $flag0='产品组合';
+         
+        $review_status=$this->review_status;
+        //记录操作记录
+        $link=url('admin/'.$table.'/type2_edit_info',['id'=>$info['id']]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'table'=>$table,
+            'type'=>'edit_review',
+            'pid'=>$info['pid'],
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        //发送审核信息
+        $data_msg=[
+            'aid'=>1,
+            'time'=>$time,
+            'uid'=>$info['aid'],
+            'dsc'=>'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
+            'type'=>'edit_review',
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        db('msg')->insert($data_msg);
+        
+        $m->commit();
+        $this->success('审核成功');
+    }
+    
+    /**
+     * 产品加工详情
+     * @adminMenu(
+     *     'name'   => '产品加工详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 60,
+     *     'icon'   => '',
+     *     'remark' => '产品加工详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type4()
+    {
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        //获取分类
+        $this->cates();
+        
+        //关联产品
+        $id_links=db('goods_link')
+        ->alias('gl')
+        ->join('cmf_goods p','p.id=gl.pid1')
+        ->where('gl.pid0',$id)
+        ->column('gl.pid1,gl.num,p.name');
+        
+        $this->assign('id_links',$id_links);
+        $this->assign('info',$info);
+        
+        return $this->fetch();
+    }
+    /**
+     * 产品加工编辑提交
+     * @adminMenu(
+     *     'name'   => '产品加工编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 61,
+     *     'icon'   => '',
+     *     'remark' => '产品加工编辑提交',
+     *     'param'  => ''
+     * )
+     */
+    public function type4_edit_do()
+    {
+        $m=$this->m;
+        $data=$this->request->param();
+        $id=intval($data['id']);
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $table=$this->table;
+        $flag=$this->flag;
+        $table0='type4'; 
+        $flag0='产品加工';
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能编辑其他店铺的信息');
+            }
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>'goods_'.$table0,
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $content=[];
+        //关联产品
+        $links0=db('goods_link')->where('pid0',$data['id'])->column('pid1,num');
+        $links1=empty($data['id_links'])?[]:$data['id_links'];
+        //配件数量格式
+        foreach($links1 as $k=>$v){
+            $links1[$k]=intval($v);
+            if($links1[$k]<=0){
+                $this->error('关联产品数量错误');
+            }
+        }
+        //关联产品比较
+        if(!empty(array_diff($links0,$links1)) ||  !empty(array_diff($links1,$links0))){
+            $content['id_links']=json_encode($links1);
+        }
+        if(empty($content)){
+            $this->error('未修改');
+        }
+        //保存更改
+        $m_edit=db('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            db('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        //记录操作记录
+        $link=url('admin/'.$table.'/'.$table0.'_edit_info',['id'=>$eid]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'编辑'.$flag0.$info['id'].'-'.$info['name'],
+            'table'=>$table,
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        $m_edit->commit();
+        $this->success('已提交修改');
+        
+    }
+    /**
+     * 产品加工修改详情
+     * @adminMenu(
+     *     'name'   => '产品加工修改详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 62,
+     *     'icon'   => '',
+     *     'remark' => '产品加工修改详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type4_edit_info()
+    {
+        $m=$this->m;
+        $eid=$this->request->param('id',0,'intval');
+        $info1=db('edit')->where('id',$eid)->find();
+        if(empty($info1)){
+            $this->error('数据不存在');
+        }
+        $info=$m->where('id',$info1['pid'])->find();
+        if(empty($info)){
+            $this->error('原数据不存在');
+        }
+        //获取改变的信息
+        $change=db('edit_info')->where('eid',$eid)->value('content');
+        $change=json_decode($change,true);
+        
+        $m_link=db('goods_link');
+        $links0=$m_link
+        ->alias('gl')
+        ->join('cmf_goods g','g.id=gl.pid1','left')
+        ->where('gl.pid0',$info['id'])
+        ->column('gl.pid1,gl.num,g.name');
+        $links1=[];
+        $links10=[];
+        if(isset($change['id_links'])){
+            $links1=json_decode($change['id_links'],true);
+            if(!empty($links1)){
+                $ids=array_keys($links1);
+                $links10=$m->where('id','in',$ids)->column('id,name');
+            }
+        }
+        $this->assign('links0',$links0);
+        $this->assign('links1',$links1);
+        $this->assign('links10',$links10);
+        $this->assign('info1',$info1);
+        $this->assign('info',$info);
+        $this->assign('change',$change);
+        return $this->fetch();
+    }
+    /**
+     * 产品加工审核
+     * @adminMenu(
+     *     'name'   => '产品加工审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 63,
+     *     'icon'   => '',
+     *     'remark' => '产品加工审核',
+     *     'param'  => ''
+     * )
+     */
+    public function type4_edit_review()
+    {
+        //审核编辑的信息
+        $status=$this->request->param('rstatus',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        if(($status!=2 && $status!=3) || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        $table=$this->table;
+        $m_edit=db('edit');
+        $info=$m_edit
+        ->field('e.*,p.name as pname,p.type,a.user_nickname as aname')
+        ->alias('e')
+        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->join('cmf_user a','a.id=e.aid')
+        ->where('e.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('无效信息');
+        }
+        if($info['rstatus']!=1){
+            $this->error('编辑信息已被审核！不能重复审核');
+        }
+        
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
+        $time=time();
+        
+        $m->startTrans();
+        
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+        ];
+        //只有未审核的才能更新
+        $where=[
+            'id'=>$id,
+            'rstatus'=>1,
+        ];
+        $row=$m_edit->where($where)->update($update);
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        //是否更新,2同意，3不同意
+        if($status==2){
+            //组装更新数据
+            $update_info=[
+                'time'=>$time,
+            ];
+            //得到修改的字段
+            $change=db('edit_info')->where('eid',$id)->value('content');
+            $change=json_decode($change,true);
+            
+            foreach($change as $k=>$v){
+                $update_info[$k]=$v;
+            }
+            //得到原数据
+            $info_tmp=$m->where('id',$info['pid'])->find();
+            
+            //处理关联产品
+            if(isset($update_info['id_links'])){
+                $links=json_decode($update_info['id_links'],true);
+                $type=isset($update_info['type'])?$update_info['type']:$info_tmp['type'];
+                unset($update_info['id_links']);
+                $links_add=[];
+                //统计关联设备总数量
+                $num=0;
+                foreach($links as $k=>$v){
+                    $links_add[]=[
+                        'pid0'=>$info['pid'],
+                        'pid1'=>$k,
+                        'num'=>$v,
+                        'type'=>$type,
+                    ];
+                    $num+=$v;
+                }
+                db('goods_link')->where('pid0',$info['pid'])->delete();
+                if(!empty($links_add)){
+                    db('goods_link')->insertAll($links_add);
+                }
+                $update_info['goods_link']=count($links_add);
+            }
+            
+            $row=$m->where('id',$info['pid'])->update($update_info);
+            if($row!==1){
+                $m->rollback();
+                $this->error('信息更新失败，请刷新后重试');
+            }
+            
+        }
+        
+        //审核成功，记录操作记录,发送审核信息
+        
+        $flag0='产品加工';
+        $table0='type4';
+        $review_status=$this->review_status;
+        //记录操作记录
+        $link=url('admin/'.$table.'/'.$table0.'_edit_info',['id'=>$info['id']]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'table'=>$table,
+            'type'=>'edit_review',
+            'pid'=>$info['pid'],
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        //发送审核信息
+        $data_msg=[
+            'aid'=>1,
+            'time'=>$time,
+            'uid'=>$info['aid'],
+            'dsc'=>'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
+            'type'=>'edit_review',
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        db('msg')->insert($data_msg);
+        
+        $m->commit();
+        $this->success('审核成功');
+    }
+    
+    /**
+     * 产品标签详情
+     * @adminMenu(
+     *     'name'   => '产品标签详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 70,
+     *     'icon'   => '',
+     *     'remark' => '产品标签详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type3()
+    {
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        //获取标签
+        $label=db('goods_label')
+        ->alias('gl')
+        ->field('gl.*,p1.name as pname1')
+        ->join('cmf_goods p1','p1.id=gl.pid1')
+        ->where('gl.pid0',$info['id'])
+        ->find();
+        if(empty($label)){
+            $label=null; 
+        }else{
+            $label['files']=json_decode($label['files'],true);
+        }
+        
+        //获取分类
+        $this->cates();
+        
+        $pics=[
+            '1'=>'正面标签',
+            '2'=>'背面标签',
+            '3'=>'侧面标签',
+            '4'=>'外盒标签',
+            '5'=>'其他标签', 
+        ];
+        
+        $this->assign('info',$info);
+        $this->assign('label',$label);
+        $this->assign('pics',$pics);
+        return $this->fetch();
+    }
+    /**
+     * 产品标签编辑提交
+     * @adminMenu(
+     *     'name'   => '产品标签编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 71,
+     *     'icon'   => '',
+     *     'remark' => '产品标签编辑提交',
+     *     'param'  => ''
+     * )
+     */
+    public function type3_edit_do()
+    {
+        $m=$this->m;
+        $data=$this->request->param();
+        $id=intval($data['id']);
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $table=$this->table;
+        $flag=$this->flag;
+        $table0='type3';
+        $flag0='产品标签';
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能编辑其他店铺的信息');
+            }
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>'goods_'.$table0,
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $content=[];
+        //原标签
+        $label=db('goods_label')->where('pid0',$info['id'])->find();
+        if(empty($label)){
+            $label=null;
+         }
+        if(empty($data['pid1'])){
+            $this->error('没有添加关联产品');
+        }
+        $id1=intval($data['pid1']); 
+        //关联产品比较
+        if($id1 != $label['pid1']){
+            $content['pid1']=$id1;
+        }
+        //比较编码 
+        if($label['code']!=$data['code']){
+            $content['code']=$data['code'];
+        }
+        //比较说明
+        if($label['dsc']!=$data['dsc']){
+            $content['dsc']=$data['dsc'];
+        }
+        //标签记录
+        $pics=[
+            '1'=>'正面标签',
+            '2'=>'背面标签',
+            '3'=>'侧面标签',
+            '4'=>'外盒标签',
+            '5'=>'其他标签',
+        ];
+        if(empty($label)){
+            $label=null;
+        }
+        //循环比较图片，数量
+        $num=0;
+        foreach($pics as $k=>$v){
+            if($label['pic'.$k]!=$data['pic'.$k]){
+                $content['pic'.$k]=$data['pic'.$k];
+            }
+            if($label['num'.$k]!=$data['num'.$k]){
+                $content['num'.$k]=$data['num'.$k];
+            }
+            //总数量
+            $num=$num+$data['num'.$k];
+        }
+        if($num!=$label['num']){
+            $content['num']=$num;
+        }
+        //比较文档
+        if(empty($data['files'])){
+            $files1='';
+        }else{
+            $files1=[];
+            foreach($data['files'] as $k=>$v){
+                $files1[]=['name'=>$data['names'][$k],'file'=>$data['files'][$k]];
+            }
+            $files1=json_encode($files1);
+        }
+        if($label['files']!=$files1){
+            $content['files']=$files1;
+        }
+        if(empty($content)){
+            $this->error('未修改');
+        }
+        //保存更改
+        $m_edit=db('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            db('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        //记录操作记录
+        $link=url('admin/'.$table.'/'.$table0.'_edit_info',['id'=>$eid]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'编辑'.$flag0.$info['id'].'-'.$info['name'],
+            'table'=>$table,
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        $m_edit->commit();
+        $this->success('已提交修改');
+        
+    }
+    /**
+     * 产品标签修改详情
+     * @adminMenu(
+     *     'name'   => '产品标签修改详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 72,
+     *     'icon'   => '',
+     *     'remark' => '产品标签修改详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type3_edit_info()
+    {
+        $m=$this->m;
+        $eid=$this->request->param('id',0,'intval');
+        $info1=db('edit')->where('id',$eid)->find();
+        if(empty($info1)){
+            $this->error('数据不存在');
+        }
+        $info=$m->where('id',$info1['pid'])->find();
+        if(empty($info)){
+            $this->error('原数据不存在');
+        }
+        //获取改变的信息
+        $change=db('edit_info')->where('eid',$eid)->value('content');
+        $change=json_decode($change,true);
+        
+        if(!empty($change['files'])){
+            $change['files']=json_decode($change['files'],true);
+        }
+        //关联产品
+        if(isset($change['pid1'])){ 
+            $change['pname1']=db('goods')->where('id',$change['pid1'])->value('name'); 
+        }
+        //原标签 
+        //获取标签
+        $label=db('goods_label')
+        ->alias('gl')
+        ->field('gl.*,p1.name as pname1')
+        ->join('cmf_goods p1','p1.id=gl.pid1')
+        ->where('gl.pid0',$info['id'])
+        ->find();
+        if(empty($label)){
+            $label=null;
+        }else{
+            $label['files']=json_decode($label['files'],true);
+        }
+         
+         
+        //标签记录
+        $pics=[
+            '1'=>'正面标签',
+            '2'=>'背面标签',
+            '3'=>'侧面标签',
+            '4'=>'外盒标签',
+            '5'=>'其他标签',
+        ];
+         
+        $this->assign('pics',$pics);
+       
+        $this->assign('label',$label);
+        $this->assign('info1',$info1);
+        $this->assign('info',$info);
+        $this->assign('change',$change);
+        return $this->fetch();
+    }
+    /**
+     * 产品标签审核
+     * @adminMenu(
+     *     'name'   => '产品标签审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 73,
+     *     'icon'   => '',
+     *     'remark' => '产品标签审核',
+     *     'param'  => ''
+     * )
+     */
+    public function type3_edit_review()
+    {
+        //审核编辑的信息
+        $status=$this->request->param('rstatus',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        if(($status!=2 && $status!=3) || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        $table=$this->table;
+        $m_edit=db('edit');
+        $info=$m_edit
+        ->field('e.*,p.name as pname,p.type,a.user_nickname as aname')
+        ->alias('e')
+        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->join('cmf_user a','a.id=e.aid')
+        ->where('e.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('无效信息');
+        }
+        if($info['rstatus']!=1){
+            $this->error('编辑信息已被审核！不能重复审核');
+        }
+        
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
+        $time=time();
+        
+        $m->startTrans();
+        
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+        ];
+        //只有未审核的才能更新
+        $where=[
+            'id'=>$id,
+            'rstatus'=>1,
+        ];
+        $row=$m_edit->where($where)->update($update);
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        //是否更新,2同意，3不同意
+        if($status==2){
+            //组装更新数据
+            $update_info=[
+                'time'=>$time,
+                'goods_link'=>1,
+            ];
+            //得到修改的字段
+            $change=db('edit_info')->where('eid',$id)->value('content');
+            $change=json_decode($change,true);
+            //更新主要在goods_label表
+            $m_label=db('goods_label');
+            $label1=[];
+            foreach($change as $k=>$v){
+                $label1[$k]=$v;
+            }
+            //得到原数据
+            $label0=$m_label->where('pid0',$info['pid'])->find();
+            //没加过就新增，加过就更新
+            if(empty($label0)){
+                $label1['pid0']=$info['pid'];
+                $m_label->insert($label1); 
+            }else{
+                $m_label->where('pid0',$info['pid'])->update($label1); 
+            }
+             
+            $row=$m->where('id',$info['pid'])->update($update_info);
+            if($row!==1){
+                $m->rollback();
+                $this->error('信息更新失败，请刷新后重试');
+            }
+            
+        }
+        
+        //审核成功，记录操作记录,发送审核信息
+        
+        $flag0='产品标签';
+        $table0='type3';
+        $review_status=$this->review_status;
+        //记录操作记录
+        $link=url('admin/'.$table.'/'.$table0.'_edit_info',['id'=>$info['id']]);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'table'=>$table,
+            'type'=>'edit_review',
+            'pid'=>$info['pid'],
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        //发送审核信息
+        $data_msg=[
+            'aid'=>1,
+            'time'=>$time,
+            'uid'=>$info['aid'],
+            'dsc'=>'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
+            'type'=>'edit_review',
+            'link'=>$link,
+            'shop'=>$admin['shop'],
+        ];
+        db('action')->insert($data_action);
+        db('msg')->insert($data_msg);
+        
+        $m->commit();
+        $this->success('审核成功');
+    }
+    
+    /**
      * 产品状态批量同意
      * @adminMenu(
      *     'name'   => '产品状态批量同意',
@@ -2322,25 +3870,7 @@ class GoodsController extends AdminBaseController
                 $content[$v]=$data[$v];
             } 
         }
-        //关联产品
-        if(is_array($data['id_links'])){
-            //如果变为基础产品，要删除关联.如果不是要重新添加关联
-            if(isset($content['type'])){
-                if($data['type']==1){
-                    $content['id_links']=json_encode([]);
-                }else{
-                    $content['id_links']=json_encode($data['id_links']);
-                } 
-            }else{
-                $links1=$data['id_links']; 
-                $links0=db('goods_link')->where('pid0',$data['id'])->column('pid1,num');
-                //计算新旧参数的差级，没有差级就是完全一样
-                if(!empty(array_diff($links0,$links1)) ||  !empty(array_diff($links1,$links0))){
-                    $content['id_links']=json_encode($links1); 
-                }
-            }
-            
-        } 
+       
          //技术参数记录,新旧参数比较  
          if(is_array($data['value'])){
              $params=[];
@@ -2533,6 +4063,15 @@ class GoodsController extends AdminBaseController
         $rids=$m_user->where($where_rid)->column('id,user_nickname');
         //分类信息
         $this->cates();
+        $table_info=[
+            'goods'=>['edit_info','产品信息修改'],
+            'goods_file'=>['image_edit_info','产品图片文件修改'],
+            'goods_content'=>['content_edit_info','产品技术详情修改'],
+            'goods_type2'=>['type2_edit_info','产品组合修改'],
+            'goods_type3'=>['type3_edit_info','产品标签修改'], 
+            'goods_type4'=>['type4_edit_info','产品加工修改'], 
+        ];
+        $this->assign('table_info',$table_info);
         $this->assign('page',$page);
         $this->assign('list',$list);
         $this->assign('aids',$aids);
@@ -2681,27 +4220,7 @@ class GoodsController extends AdminBaseController
                 }
             }
         }  
-        //关联产品
-        if(isset($actions['auth']) || isset($actions['link_set'])){
-            $m_link=db('goods_link');
-            $links0=$m_link
-            ->alias('gl')
-            ->join('cmf_goods g','g.id=gl.pid1')
-            ->where('gl.pid0',$info['id'])
-            ->column('gl.pid1,gl.num,g.name');
-            $links1=[];
-            $links10=[];
-            if(isset($change['id_links'])){
-                $links1=json_decode($change['id_links'],true);
-                if(!empty($links1)){
-                    $ids=array_keys($links1);
-                    $links10=$m->where('id','in',$ids)->column('id,name');
-                } 
-            }  
-            $this->assign('links0',$links0);
-            $this->assign('links1',$links1);
-            $this->assign('links10',$links10);
-        }
+        
         
         $this->assign('params0',$params0);
         $this->assign('params1',$params1);
@@ -3043,6 +4562,21 @@ class GoodsController extends AdminBaseController
             }
         }
         
+        //产品关联删除
+        $m_link=db('goods_link');
+        //被关联的不能删除
+        $where_link=[
+            'pid1'=>['in',$ids],
+        ];
+        $tmp=$m_link->where($where_link)->find();
+        if(!empty($tmp)){
+            $this->error('有产品'.$tmp['pid1'].'与产品'.$tmp['pid0'].'关联，不能删除');
+        }
+        $m_label=db('goods_label');
+        $tmp=$m_label->where($where_link)->find();
+        if(!empty($tmp)){
+            $this->error('有产品'.$tmp['pid1'].'与产品'.$tmp['pid0'].'标签关联，不能删除');
+        }
         $count=count($ids);
         $m->startTrans();
         $tmp=$m->where($where)->delete();
@@ -3078,6 +4612,18 @@ class GoodsController extends AdminBaseController
         }
         //参数参数对应
         db('goods_param')->where(['pid'=>['in',$ids]])->delete();
+        
+        //关联的删除
+        $where_link=[
+            'pid0'=>['in',$ids],
+        ];
+        if(!empty($where['shop'])){
+            $where_link['shop']=$where['shop'];
+        }
+        $m_link->where($where_link)->delete();
+        //删除标签
+        $m_label->where($where_link)->delete();
+        
         $m->commit();
         $this->success('成功删除数据'.$tmp.'条');
         
@@ -3111,9 +4657,17 @@ class GoodsController extends AdminBaseController
         $this->assign('brands',$brands);
     }
     
-     
+    //获取价格模板
+    public function prices(){
+        $where=[
+            'status'=>2,
+        ];
+        $prices=db('price')->where($where)->order('sort asc,name asc')->column('id,name');
+        $this->assign('prices',$prices);
+        
+    }
     //获取权限信息
-    public function auth_get($id,$str='admin/goods/'){
+    public function auth_get($id,$str='admin/goodsauth/'){
         $actions=[];
         //检测是否超级管理员
         if($id==1){
@@ -3250,16 +4804,7 @@ class GoodsController extends AdminBaseController
         }else{
             $all=0;
         }
-        //关联产品 
-        if($all || isset($actions['link_set'])){
-            if(empty($data0['id_links'])){
-                $data['id_links']=[];
-            }else{
-                $data['id_links']=$data0['id_links'];
-            }
-        }else{
-            $data['id_links']=0;
-        }
+         
         //template技术参数
         if($all || isset($actions['template_set'])){
             $data['template']=intval($data0['template']); 
@@ -3310,691 +4855,5 @@ class GoodsController extends AdminBaseController
        
         return $data;
     }
-    
-    /**
-     * 产品入库价设置
-     * @adminMenu(
-     *     'name'   => '产品入库价设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>91,
-     *     'icon'   => '',
-     *     'remark' => '产品入库价设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_in_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品出库价设置
-     * @adminMenu(
-     *     'name'   => '产品出库价设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>92,
-     *     'icon'   => '',
-     *     'remark' => '产品出库价设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_cost_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品最低销售价设置
-     * @adminMenu(
-     *     'name'   => '产品最低销售价设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>93,
-     *     'icon'   => '',
-     *     'remark' => '产品最低销售价设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_min_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品区间价格设置
-     * @adminMenu(
-     *     'name'   => '产品区间价设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>94,
-     *     'icon'   => '',
-     *     'remark' => '产品区间1价设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_range_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品经销价1设置
-     * @adminMenu(
-     *     'name'   => '产品经销价1设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>95,
-     *     'icon'   => '',
-     *     'remark' => '产品经销价1设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_dealer1_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品经销价2设置
-     * @adminMenu(
-     *     'name'   => '产品经销价2设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>96,
-     *     'icon'   => '',
-     *     'remark' => '产品经销价2设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_dealer2_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品经销价3设置
-     * @adminMenu(
-     *     'name'   => '产品经销价3设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>97,
-     *     'icon'   => '',
-     *     'remark' => '产品经销价3设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_dealer3_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品同行价设置
-     * @adminMenu(
-     *     'name'   => '产品同行价设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>97,
-     *     'icon'   => '',
-     *     'remark' => '产品同行价设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_trade_set(){
-        $this->success('ok');
-    }
-    /**
-     * 产品工厂配套价设置
-     * @adminMenu(
-     *     'name'   => '产品工厂配套价设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>98,
-     *     'icon'   => '',
-     *     'remark' => '产品工厂配套价设置',
-     *     'param'  => ''
-     * )
-     */
-    public function price_factory_set(){
-        $this->success('ok');
-    }
-    
-    /**
-     * 产品入库价查看
-     * @adminMenu(
-     *     'name'   => '产品入库价查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>101,
-     *     'icon'   => '',
-     *     'remark' => '产品入库价查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_in_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品出库价查看
-     * @adminMenu(
-     *     'name'   => '产品出库价查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>102,
-     *     'icon'   => '',
-     *     'remark' => '产品出库价查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_cost_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品最低销售价查看
-     * @adminMenu(
-     *     'name'   => '产品最低销售价查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>103,
-     *     'icon'   => '',
-     *     'remark' => '产品最低销售价查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_min_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品区间价格查看
-     * @adminMenu(
-     *     'name'   => '产品区间价查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>104,
-     *     'icon'   => '',
-     *     'remark' => '产品区间1价查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_range_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品经销价1查看
-     * @adminMenu(
-     *     'name'   => '产品经销价1查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>105,
-     *     'icon'   => '',
-     *     'remark' => '产品经销价1查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_dealer1_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品经销价2查看
-     * @adminMenu(
-     *     'name'   => '产品经销价2查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>106,
-     *     'icon'   => '',
-     *     'remark' => '产品经销价2查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_dealer2_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品经销价3查看
-     * @adminMenu(
-     *     'name'   => '产品经销价3查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>107,
-     *     'icon'   => '',
-     *     'remark' => '产品经销价3查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_dealer3_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品同行价查看
-     * @adminMenu(
-     *     'name'   => '产品同行价查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>107,
-     *     'icon'   => '',
-     *     'remark' => '产品同行价查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_trade_get(){
-        $this->success('ok');
-    }
-    /**
-     * 产品工厂配套价查看
-     * @adminMenu(
-     *     'name'   => '产品工厂配套价查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>108,
-     *     'icon'   => '',
-     *     'remark' => '产品工厂配套价查看',
-     *     'param'  => ''
-     * )
-     */
-    public function price_factory_get(){
-        $this->success('ok');
-    }
-    /**
-     * 实物图片设置
-     * @adminMenu(
-     *     'name'   => '实物图片设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>110,
-     *     'icon'   => '',
-     *     'remark' => '实物图片设置',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_pro_set(){
-        $this->success('ok');
-    }
-    /**
-     * logo图片设置
-     * @adminMenu(
-     *     'name'   => 'logo图片设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>111,
-     *     'icon'   => '',
-     *     'remark' => 'logo图片设置',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_logo_set(){
-        $this->success('ok');
-    }
-    /**
-     * 规格图片设置
-     * @adminMenu(
-     *     'name'   => '规格图片设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>112,
-     *     'icon'   => '',
-     *     'remark' => '规格图片设置',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_param_set(){
-        $this->success('ok');
-    }
-    /**
-     * 原理图片设置
-     * @adminMenu(
-     *     'name'   => '原理图片设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>113,
-     *     'icon'   => '',
-     *     'remark' => '原理图片设置',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_principle_set(){
-        $this->success('ok');
-    }
-    /**
-     * 其他图片设置
-     * @adminMenu(
-     *     'name'   => '其他图片设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>114,
-     *     'icon'   => '',
-     *     'remark' => '其他图片设置',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_other_set(){
-        $this->success('ok');
-    }
-    /**
-     * 说明书设置
-     * @adminMenu(
-     *     'name'   => '说明书设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>115,
-     *     'icon'   => '',
-     *     'remark' => '说明书设置',
-     *     'param'  => ''
-     * )
-     */
-    public function file_instructions_set(){
-        $this->success('ok');
-    }
-    /**
-     * 其他文档设置
-     * @adminMenu(
-     *     'name'   => '其他文档设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>116,
-     *     'icon'   => '',
-     *     'remark' => '其他文档设置',
-     *     'param'  => ''
-     * )
-     */
-    public function file_other_set(){
-        $this->success('ok');
-    }
-    
-    /**
-     * 实物图片查看
-     * @adminMenu(
-     *     'name'   => '实物图片查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>120,
-     *     'icon'   => '',
-     *     'remark' => '实物图片查看',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_pro_get(){
-        $this->success('ok');
-    }
-    /**
-     * logo图片查看
-     * @adminMenu(
-     *     'name'   => 'logo图片查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>121,
-     *     'icon'   => '',
-     *     'remark' => 'logo图片查看',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_logo_get(){
-        $this->success('ok');
-    }
-    /**
-     * 规格图片查看
-     * @adminMenu(
-     *     'name'   => '规格图片查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>122,
-     *     'icon'   => '',
-     *     'remark' => '规格图片查看',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_param_get(){
-        $this->success('ok');
-    }
-    /**
-     * 原理图片查看
-     * @adminMenu(
-     *     'name'   => '原理图片查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>123,
-     *     'icon'   => '',
-     *     'remark' => '原理图片查看',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_principle_get(){
-        $this->success('ok');
-    }
-    /**
-     * 其他图片查看
-     * @adminMenu(
-     *     'name'   => '其他图片查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>124,
-     *     'icon'   => '',
-     *     'remark' => '其他图片查看',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_other_get(){
-        $this->success('ok');
-    }
-    /**
-     * 说明书查看
-     * @adminMenu(
-     *     'name'   => '说明书查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>125,
-     *     'icon'   => '',
-     *     'remark' => '说明书查看',
-     *     'param'  => ''
-     * )
-     */
-    public function file_instructions_get(){
-        $this->success('ok');
-    }
-    /**
-     * 其他文档查看
-     * @adminMenu(
-     *     'name'   => '其他文档查看',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>126,
-     *     'icon'   => '',
-     *     'remark' => '其他文档查看',
-     *     'param'  => ''
-     * )
-     */
-    public function file_other_get(){
-        $this->success('ok');
-    }
-     //图片下载
-     public function goods_file_load($type=1){
-         $id=$this->request->param('id',0,'intval');
-         $pid=$this->request->param('pid',0,'intval');
-         $where=[
-             'id'=>$id,
-             'type'=>$type,
-         ];
-         $info=db('goods_file')->where($where)->find();
-         if(empty($info)){
-             $this->error('数据错误，文件不存在');
-         }
-         $path='upload/';
-         $file=$path.$info['file'];
-         $filename=empty($info['name'])?date('Ymd-His'):$info['name'];
-         if(is_file($file)){ 
-             $fileinfo=pathinfo($file);
-             $ext=$fileinfo['extension'];
-             header('Content-type: application/x-'.$ext);
-             header('content-disposition:attachment;filename='.$filename);
-             header('content-length:'.filesize($file));
-             readfile($file);
-             exit;
-         }else{
-             $this->error('文件损坏，不存在');
-         }
-     }
-    
-    /**
-     * 商城图片下载
-     * @adminMenu(
-     *     'name'   => '商城图片下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>130,
-     *     'icon'   => '',
-     *     'remark' => '商城图片下载',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_jm_load(){
-        $this->goods_file_load(1);
-    }
-    /**
-     * 实物图片下载
-     * @adminMenu(
-     *     'name'   => '实物图片下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>131,
-     *     'icon'   => '',
-     *     'remark' => '实物图片下载',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_pro_load(){
-        $this->goods_file_load(2);
-    }
-    /**
-     * logo图片下载
-     * @adminMenu(
-     *     'name'   => 'logo图片下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>132,
-     *     'icon'   => '',
-     *     'remark' => 'logo图片下载',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_logo_load(){
-        $this->goods_file_load(3);
-    }
-    /**
-     * 规格图片下载
-     * @adminMenu(
-     *     'name'   => '规格图片下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>133,
-     *     'icon'   => '',
-     *     'remark' => '规格图片下载',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_param_load(){
-        $this->goods_file_load(4);
-    }
-    /**
-     * 原理图片下载
-     * @adminMenu(
-     *     'name'   => '原理图片下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>134,
-     *     'icon'   => '',
-     *     'remark' => '原理图片下载',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_principle_load(){
-        $this->goods_file_load(5);
-    }
-    /**
-     * 其他图片下载
-     * @adminMenu(
-     *     'name'   => '其他图片下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>135,
-     *     'icon'   => '',
-     *     'remark' => '其他图片下载',
-     *     'param'  => ''
-     * )
-     */
-    public function pic_other_load(){
-        $this->goods_file_load(6);
-    }
-    /**
-     * 说明书下载
-     * @adminMenu(
-     *     'name'   => '说明书下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>136,
-     *     'icon'   => '',
-     *     'remark' => '说明书下载',
-     *     'param'  => ''
-     * )
-     */
-    public function file_instructions_load(){
-        $this->goods_file_load(7);
-    }
-    /**
-     * 其他文档下载
-     * @adminMenu(
-     *     'name'   => '其他文档下载',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>137,
-     *     'icon'   => '',
-     *     'remark' => '其他文档下载',
-     *     'param'  => ''
-     * )
-     */
-    public function file_other_load(){
-        $this->goods_file_load(8);
-    }
-    /**
-     * 关联产品设置
-     * @adminMenu(
-     *     'name'   => '关联产品设置',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  =>70,
-     *     'icon'   => '',
-     *     'remark' => '关联产品设置',
-     *     'param'  => ''
-     * )
-     */
-    public function link_set(){
-        $this->success('ok');
-    }
+     
 }

@@ -40,7 +40,10 @@
 			 <include file="admin@goods/nav" />
 			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 			<li class="active"><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
-			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li>  
+			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li>
+		<neq name="info.type" value="1">
+			<li class=""><a href="{:url('type'.$info['type'],['id'=>$info.id])}">{$goods_type[$info.type]}</a></li>  
+		</neq>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('image_edit_do')}">
 		 
@@ -71,7 +74,7 @@
 					       
 							<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file1)});"></div>
 					     <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
-					     	<a href="{:url($vv[0].'_load',['id'=>$vo.id])}">下载</a>
+					     	<a href="{:url('admin/goodsauth/'.$vv[0].'_load',['id'=>$vo.id])}">下载</a>
 					     	&nbsp;&nbsp;&nbsp;
 					    </if>
 					    <if condition="isset($actions['auth']) || ($kk eq 1) || isset($actions[$vv[0].'_set'])">
@@ -88,7 +91,7 @@
 					        <input class="form-control" id="file-{$vv[0]}-name" type="text" name="{$vv[0]}_names[]" value="{$vo.name}"
 					               style="width: 200px;" title="文件名称">
 					    <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
-					     	<a href="{:url($vv[0].'_load',['id'=>$vo.id])}">下载</a>
+					     		<a href="{:url('admin/goodsauth/'.$vv[0].'_load',['id'=>$vo.id])}">下载</a>
 					     	&nbsp;&nbsp;&nbsp;
 					    </if>
 					    <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_set'])">

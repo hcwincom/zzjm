@@ -7,6 +7,14 @@ use think\Db;
 use think\Url;
  
 // 应用公共文件
+
+/**
+ * 操作后记录和通知
+ */
+function zz_action(){
+     
+    
+}
 /**
  * 下载文件
  * @param $file 文件

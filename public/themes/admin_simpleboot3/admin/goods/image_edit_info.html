@@ -46,8 +46,7 @@
 							<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file1)});"></div>
 					       <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
 						     	&nbsp;&nbsp;&nbsp;
-						     	<a href="{:url($vv[0].'_load',['id'=>$key])}">下载</a>
-						     	
+						       <a href="{:url('admin/goodsauth/'.$vv[0].'_load',['id'=>$key])}">下载</a>
 						    </if>
 					    </li>
 					 </foreach> 
@@ -60,7 +59,7 @@
 					               style="width: 200px;" title="文件名称">
 					        <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
 						     	&nbsp;&nbsp;&nbsp;
-						     	<a href="{:url($vv[0].'_load',['id'=>$key])}">下载</a>
+						     	 <a href="{:url('admin/goodsauth/'.$vv[0].'_load',['id'=>$key])}">下载</a>
 						     	 
 						    </if>
 					    </li> 

@@ -59,7 +59,7 @@ class AdminInfoController extends AdminBaseController
             $where['p.cid']=['eq',$data['cid']];
         }
         //所属字母分类
-        if(empty($data['char'])){
+        if(empty($data['char']) || $data['char']=='-1'){
             $data['char']='-1';
         }else{
             $where['p.char']=['eq',$data['char']];
@@ -131,8 +131,10 @@ class AdminInfoController extends AdminBaseController
         ->where($where)
         ->order('p.status asc,p.sort asc,p.time desc')
         ->paginate();
+        
         // 获取分页显示
         $page = $list->appends($data)->render();
+        
         $m_user=db('user');
         //创建人
         $where_aid=[
@@ -476,7 +478,7 @@ class AdminInfoController extends AdminBaseController
                 }
                 
                 //处理图片
-                $path=getcwd().'/upload/';
+                $path='upload/';
                 if(!empty($content['pic'])){
                     if(is_file($path.$content['pic'])){
                         if(!is_dir($path.$info['path'])){
@@ -506,7 +508,10 @@ class AdminInfoController extends AdminBaseController
                 break;
             case 'template':
                 //新关联的参数
-                $ids=$_POST['ids']; 
+                if(empty($_POST['ids'])){
+                    $this->error('没有选择参数项');
+                } 
+                $ids=$_POST['ids'];  
                 //原本关联的
                 $ids0=db('template_param')->where('t_id',$data['id'])->column('p_id');
                  //计算新旧参数的差级，没有差级就是完全一样 

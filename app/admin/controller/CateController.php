@@ -578,6 +578,10 @@ class CateController extends AdminInfoController
             'cid'=>$cid,
             'status'=>2,
         ];
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            $where['shop']=$admin['shop'];
+        }
         $goods=db('goods')->where($where)->column('id,name');
         $this->success('ok','',$goods);
     }

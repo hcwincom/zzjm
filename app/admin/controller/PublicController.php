@@ -164,6 +164,49 @@ class PublicController extends AdminBaseController
         if(is_file($file)){
             $fileinfo=pathinfo($file);
             $ext=$fileinfo['extension'];
+            $filename=$filename.'.'.$ext;
+            header('Content-type: application/x-'.$ext);
+            header('content-disposition:attachment;filename='.$filename);
+            header('content-length:'.filesize($file));
+            readfile($file);
+            exit;
+        }else{
+            $this->error('文件损坏，不存在');
+        }
+    }
+    /**
+     * 下载修改的文件 
+     */
+    public function change_load()
+    {
+         $data=$this->request->param();
+        $change=db('edit_info')->where('id',$data['eid'])->value('content');
+        if(empty($change)){
+            $this->error('未找到修改数据');
+        }
+        $change=json_decode($change,true);
+        
+        if(empty($change[$data['name']])){
+            $this->error('未找到要下载的文件');
+        }
+        $files=$change[$data['name']];
+        //判断是多文件还是单文件
+        if(isset($data['key'])){
+            $files=json_decode($files,true);
+            $file=$files[$data['key']]['file'];
+            $filename=$files[$data['key']]['name'];
+        }else{
+            $file=$change[$data['name']];
+            $filename=date('Ymd-His');
+        }
+       
+        $path='upload/';
+        $file=$path.$file;
+        
+        if(is_file($file)){
+            $fileinfo=pathinfo($file);
+            $ext=$fileinfo['extension'];
+            $filename=$filename.'.'.$ext;
             header('Content-type: application/x-'.$ext);
             header('content-disposition:attachment;filename='.$filename);
             header('content-length:'.filesize($file));

@@ -7,6 +7,11 @@
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
 			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li>  
+		 
+		<neq name="info.type" value="1">
+			<li class=""><a href="{:url('type'.$info['type'],['id'=>$info.id])}">{$goods_type[$info.type]}</a></li>  
+		</neq>
+		 
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
 			  <include file="admin@goods/base" />

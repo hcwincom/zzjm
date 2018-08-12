@@ -1,0 +1,193 @@
+<include file="public@header" />
+  
+</head>
+<body>
+
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs"> 
+		<include file="admin@goods/nav" />
+		</ul>
+		 <form class="well form-inline margin-top-20" method="post"
+			action="">
+			 
+			<select class="form-control" name="status" >
+				<option value='0'>全部状态</option> 
+				 <foreach name="statuss" item="vo"  >
+				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;  
+			 <include file="public@cate" /> 
+			  &nbsp;&nbsp;
+			   <include file="public@brand" /> 
+			 
+			 &nbsp;&nbsp;
+			 
+			 
+			<select class="form-control" name="goods_link" > 
+				 <foreach name="goods_links" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.goods_link">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp; 
+			<select class="form-control" name="about_link" > 
+				 <option value="0">产品资料</option>
+				 <foreach name="file_type" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.about_link">selected</if>> 
+				 {$vo[1]}
+				</option>
+				</foreach>
+			</select> 
+			<select class="form-control" name="about_link_num" > 
+				 
+				 <foreach name="about_link_nums" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.about_link_num">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp; 
+			<br/>
+			<select class="form-control" name="price" > 
+				 
+				 <foreach name="prices" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.price">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select>
+			<input class="form-control" type="text" name="price1" style="width: 80px;" value="{$data.price1}">
+			--
+			<input class="form-control" type="text" name="price2" style="width: 80px;" value="{$data.price2}">
+			 &nbsp;&nbsp;  &nbsp;&nbsp; 
+			 <select class="form-control" name="big" > 
+				 
+				 <foreach name="bigs" item="vo" >
+				<option value="{$key}" <if condition="$key eq $data.big">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select>
+			<input class="form-control" type="text" name="big1" style="width: 80px;" value="{$data.big1}">
+			--
+			<input class="form-control" type="text" name="big2" style="width: 80px;" value="{$data.big2}">
+			 &nbsp;&nbsp; 
+			<br/>
+			<select class="form-control" name="type1" id="">
+	        <foreach name="types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+	        <select class="form-control" name="type2" id=""> 
+	         <foreach name="search_types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.type2">selected</if>>{$vo}</option>
+	        </foreach>  
+	        </select> 
+	        
+            <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
+            <select class="form-control" name="time" id="">
+	        <foreach name="times" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
+			--
+			<input class="js-datetime form-control" type="text" id="datetime2" name="datetime2" value="{$data.datetime2}">
+			<select name="is_link" class="form-control" id="">
+				<option value="0" <eq name="data.is_link" value="0">selected</eq>>主产品</option>
+				<option value="1" <eq name="data.is_link" value="1">selected</eq>>相关联产品</option>
+			</select>
+			<input type="submit" class="btn btn-primary" value="搜索" />
+				 
+		</form>
+		 
+		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
+			<div class="table-actions">
+				 
+				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
+			 
+			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
+			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
+			 	 
+			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
+			 	<p class='error'></p>
+			</div>
+
+			<table class="table table-hover table-bordered table-list">
+				<thead>
+					<tr>
+					 	<th width="15">
+					 	<label> <input type="checkbox"
+								class="js-check-all" data-direction="x"
+								data-checklist="js-check-x">
+						</label>
+						</th>
+						<th width="100">{$flag}ID</th>
+						 <th>店铺</th> 
+						<th>产品名</th> 
+						<th>产品编码</th>  
+						<th>关联产品</th>
+						<th>标签数量</th> 
+						<th>产品更新时间</th>
+						<th>产品排序</th>
+						<th>产品状态</th>
+						 
+					</tr>
+				</thead>
+				<tbody>
+					<foreach name="list" item="vo">
+				 
+					<tr class="status{$vo.status}">
+						<td>
+							<input type="checkbox" class="js-check"
+							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+							value="{$vo.id}">
+						</td>
+						<td class='id'> 
+						{$vo.id}
+						</td>
+						<td>{$vo.sname|default=$vo.shop}</td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="_blank">{$vo.name}</a></td>
+						 <td  > {$vo.code}</td>
+					 
+						 
+						 <td><a href="{:url('edit',['id'=>$vo.pid1])}"  target="_blank">{$vo.link_name}</a></td>
+						<td>{$vo.link_num}</td> 
+						
+						<td>{$vo.time|date='Y-m-d H:i',###}</td>
+						<td>{$vo.sort}</td>
+						<td>{$statuss[$vo.status]}</td>
+						 
+					</tr>
+				 
+					</foreach>
+				</tbody>
+
+			</table>
+
+		</form>
+	 	<div class="pagination">{$page}</div>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+<script>
+ var id=0;
+ var fid=0;
+ var hideall=0;
+ 
+ 
+$('.ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('ban')}");
+});
+$('.cancel_ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
+});
+$('.review_all').click(function(){
+	$(this).parents('form').attr('action',"{:url('review_all')}");
+});
+$('.del_all').click(function(){
+	$(this).parents('form').attr('action',"{:url('del_all')}");
+});
+</script>
+</body>
+</html>

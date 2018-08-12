@@ -1,0 +1,139 @@
+<include file="public@header" />
+ <script type="text/html" id="files-item">
+    <li id="saved-file{id}">
+        <input id="file-{id}" type="hidden" name="files[]" value="{filepath}">
+        <input class="form-control" id="file-{id}-name" type="text" name="names[]" value="{name}"
+               style="width: 200px;" title="文件名称"> 
+	&nbsp;&nbsp;&nbsp;
+        <a href="javascript:(function(){$('#saved-file{id}').remove();})();">移除</a>
+    </li>
+</script>
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			 <include file="admin@goods/nav" />
+			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
+			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li> 
+			<li class="active"><a href="{:url('type3',['id'=>$info.id])}">{$goods_type[$info.type]}</a></li>   
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type3_edit_do')}">
+		 
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">产品id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="{:url('edit',['id'=>$info.id])}" target="_blank">查看产品详情</a>
+					&nbsp;&nbsp;&nbsp;
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">查看编辑记录</a>
+				</div>
+			</div>
+		 
+			<div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">产品关联</label>
+				<div class="col-md-6 col-sm-10">
+					 <include file="public@cate_goods" />  
+					 <button type="button" id="goods_link">确定</button>
+					 <table class="table table-hover table-bordered table-list">
+					 <notempty name="label.pid1">
+					 	<tr class="">
+					 	<input type="hidden" name="pid1" value="{$label.pid1}"/>
+					 		<td><a href="{:url('edit',['id'=>$label.pid1])}">{$label.pname1}</a></td>
+					 		
+					 		<td><button class="del_link" type="button">删除</button></td>
+					 	</tr> 
+					 </notempty> 
+					 </table> 
+				</div>
+			</div>
+	 		<div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">标签编码</label>
+				<div class="col-md-6 col-sm-10">
+					  <input type="text" name="code" value="{$label.code}"/>
+					  <p>编码为标签存放的文件夹编号</p>
+				</div>
+			</div>
+		<foreach name="pics" item="vo">
+			 <div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">{$vo}</label>
+				<div class="col-md-6 col-sm-10">
+					   标签数量：<input type="text" name="num{$key}" value="{$label['num'.$key]}"/>
+					 标签图片： 
+					 <input type="hidden" class="file0" id="photo{$key}" name="pic{$key}" value="{$label['pic'.$key]}">
+				 	
+					 <img class="pic1" id="photo{$key}-preview" src="{:cmf_get_image_url($label['pic'.$key])}">
+					 
+					 <a href="javascript:uploadOneImage('图片上传','#photo{$key}');">上传图片</a>
+				<notempty name="label['pic0'.$key]">
+					<a href="{:url('admin/goodsauth/label_load',['pid'=>$label.pid0,'key'=>$key])}">下载图片</a>
+				</notempty>
+				</div>
+			</div>
+		</foreach>
+		 	<div class="form-group">
+				<label for="" class="col-sm-2 control-label">制作与贴标签说明</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					<textarea class="form-control" name="dsc" rows="5"></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">标签文档</label>
+				<div class="col-md-6 col-sm-10">
+					 <ul id="files" class="pic-list list-unstyled form-inline">
+					 <foreach name="label.files" item="vo">
+					    <li id="saved-file{$key}">
+					        <input  class="file0" id="file-{$key}" type="hidden" name="files[]" value="{$vo.file}">
+					        <input class="form-control" id="file-{$key}-name" type="text" name="names[]" value="{$vo.name}"
+					               style="width: 200px;" title="文件名称"> 
+					     		<a href="{:url('admin/goodsauth/label_file_load',['pid0'=>$label.pid0,'key'=>$key])}">下载</a>
+					     	&nbsp;&nbsp;&nbsp; 
+					        <a href="javascript:(function(){$('#saved-file{$key}').remove();})();">移除</a>
+					   
+					    </li> 
+				   </foreach>  
+					 </ul>
+					 <a href="javascript:uploadMultiFile('附件上传','#files','files-item');"
+                               class="btn btn-sm btn-default">选择文件</a>
+				</div>
+			</div>
+			 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+					 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
+					 
+					 <p> </p>
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	 
+	<script src="__STATIC__/js/admin.js"></script> 
+	 
+<script>
+//选择关联产品
+$('#goods_link').click(function(){
+	var $div=$(this).parent();
+	var id=parseInt($div.find('.goods').val());
+	var name=$div.find('.goods option:selected').text();
+	 if(id<=0){
+		 return false;
+	 }
+	var tr='<tr class=""><input type="hidden" name="link_id" value="'+id+'"/><td>'+name+
+	'</td><td><button class="del_link" type="button">删除</button></td></tr>';
+	$div.find('table').append(tr);
+	return false;
+});
+$(document).on('click','.del_link',function(){
+	$(this).parents('tr').remove();
+});
+</script>	  
+</body>
+</html>
+
+ 

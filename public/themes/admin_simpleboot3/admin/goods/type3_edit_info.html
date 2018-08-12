@@ -1,0 +1,170 @@
+<include file="public@header" />
+ 
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			 <include file="admin@goods/nav" />
+			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
+			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li> 
+			<li class="active"><a href="{:url('type3_edit_info',['id'=>$info1.id])}">审核{$goods_type[$info.type]}</a></li>   
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type3_edit_review')}">
+		 
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">产品id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="{:url('edit',['id'=>$info.id])}" target="_blank">查看产品详情</a>
+					&nbsp;&nbsp;&nbsp;
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">查看编辑记录</a>
+				</div>
+			</div>
+		 
+			<div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">产品关联</label>
+				<div class="col-md-6 col-sm-10">
+					 <a href="{:url('edit',['id'=>$label.pid1])}" target="_blank">{$label.pname1|default=$label.pid1}</a>
+			<present name="change.pid1">
+			&nbsp;&nbsp;&nbsp;&nbsp;
+					  <a class="red" href="{:url('edit',['id'=>$change.pid1])}" target="_blank">{$change.pname1|default=$change.pid1}</a>
+							 
+				</present>
+				</div>
+			</div>
+		
+	 		<div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">标签编码</label>
+				<div class="col-md-6 col-sm-10">
+					  <input type="text" value="{$label.code}"/>
+					  
+					  <present name="change.code">
+						 <input class="red" type="text" value="{$change.code}"/> 
+					 </present>
+					 <p>编码为标签存放的文件夹编号</p>
+				</div>
+			</div>
+		
+		<foreach name="pics" item="vo">
+			 <div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">{$vo}</label>
+				<div class="col-md-6 col-sm-10">
+					   标签数量：<input type="text"   value="{$label['num'.$key]}"/>
+					 <present name="change['num'.$key]">
+					 	<input type="text" class="red" value="{$change['num'.$key]}"/>
+					 </present>
+					 标签图片： 
+					 <input type="hidden" class="file0" id="photo{$key}" name="pic{$key}" value="{$label['pic'.$key]}">
+				 	
+					 <img class="pic1" id="photo{$key}-preview" src="{:cmf_get_image_url($label['pic'.$key])}">
+					 
+					 
+				<notempty name="label['pic'.$key]">
+					<a href="{:url('admin/goodsauth/label_pic_load',['pid'=>$label.pid0,'key'=>$key])}">下载图片</a>
+				</notempty>
+				
+				 <present name="change['pic'.$key]">
+				 	<span class="red"> 标签图片： </span>
+					 <input type="hidden" class="file0" id="photo{$key}" name="pic{$key}" value="{$label['pic'.$key]}">
+				 	
+					 <img class="pic1"  src="{:cmf_get_image_url($change['pic'.$key])}">
+					 <a href="{:url('admin/public/change_load',['eid'=>$info1.id,'name'=>('pic'.$key)])}">下载</a>
+					 
+			 
+					 
+				 </present>
+				
+				</div>
+			</div>
+		</foreach>
+		 	<div class="form-group">
+				<label for="" class="col-sm-2 control-label">制作与贴标签说明</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					<textarea class="form-control"  rows="5">{$label.dsc}</textarea>
+				<present name="change.dsc">
+					<textarea class=" red form-control"   rows="5">{$change.dsc}</textarea>
+				</present>
+				</div>
+			</div>
+		
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">标签文档</label>
+				<div class="col-md-6 col-sm-10">
+					 <ul id="files" class="pic-list list-unstyled form-inline">
+					 <foreach name="label.files" item="vo">
+					    <li id="saved-file{$key}">
+					        <input  class="file0" id="file-{$key}" type="hidden" name="files[]" value="{$vo.file}">
+					        <input class="form-control" id="file-{$key}-name" type="text" name="names[]" value="{$vo.name}"
+					               style="width: 200px;" title="文件名称"> 
+					     		<a href="{:url('admin/goodsauth/label_file_load',['pid'=>$label.pid0,'key'=>$key])}">下载</a>
+					     	&nbsp;&nbsp;&nbsp; 
+					        
+					   
+					    </li> 
+				   </foreach>  
+					 </ul>
+					 
+				</div>
+			</div>
+		<present name="change.files">
+			<div class="form-group red">
+				<label for="" class="col-sm-2 control-label">标签文档</label>
+				<div class="col-md-6 col-sm-10">
+					 <ul id="files" class="pic-list list-unstyled form-inline">
+					 <foreach name="change.files" item="vo">
+					    <li id="saved-file{$key}">
+					        <input  class="file0" id="file-{$key}" type="hidden" name="files[]" value="{$vo.file}">
+					        <input class="form-control" id="file-{$key}-name" type="text" name="names[]" value="{$vo.name}"
+					               style="width: 200px;" title="文件名称"> 
+					     		<a href="{:url('admin/public/change_load',['eid'=>$info1.id,'key'=>$key,'name'=>'files'])}">下载</a>
+					     	&nbsp;&nbsp;&nbsp;  
+					    </li> 
+				   </foreach>  
+					 </ul> 
+				</div>
+			</div>
+		</present>	 
+			<div class="form-group rstatus">
+				<label for="input-gender" class="col-sm-2 control-label">审核状态</label>
+				<div class="col-md-6 col-sm-10">
+				 <foreach name="review_status" item="vo">
+				 <label class="radio-inline">
+				 		<input type="radio" value="{$key}" name="rstatus" <if condition="$key eq $info1.rstatus">checked</if>/>{$vo}
+				 </label>
+				 </foreach>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+					<input type="hidden" name="id" value="{$info1.id}" /> 
+					<eq name="info1.rstatus" value="1">
+					<button type="submit" class="review_edit btn btn-primary js-ajax-submit"  >审核</button> 
+					 </eq> 
+					 
+					 <p> </p>
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	 
+	<script src="__STATIC__/js/admin.js"></script> 
+	 
+ <script>
+ $('.review_edit').click(function(){
+	 var status=$('.rstatus input:checked').val();
+	 if(status=='1'){ 
+		 return false;
+	 }
+	 
+	 $(this).parents('form').attr('action',"{:url('type3_edit_review')}");
+ });
+ </script>  
+</body>
+</html>
+
+ 

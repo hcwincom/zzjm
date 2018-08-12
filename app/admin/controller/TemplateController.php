@@ -124,18 +124,21 @@ class TemplateController extends AdminInfoController
             'shop'=>$admin['shop'],
         ];
         db('action')->insert($data_action); 
-        //关联的参数
+        //关联的参数 
+        if(empty($_POST['ids'])){
+            $this->error('没有选择参数项');
+        } else
+        
         $ids=$_POST['ids'];
-        if(!empty($ids)){
-            $data_param=[];
-            foreach($ids as $v){
-                $data_param[]=[
-                    'p_id'=>$v,
-                    't_id'=>$id,
-                ];
-            }
-            db('template_param')->insertAll($data_param);
+        $data_param=[];
+        foreach($ids as $v){
+            $data_param[]=[
+                'p_id'=>$v,
+                't_id'=>$id,
+            ];
         }
+        db('template_param')->insertAll($data_param);
+        
         $m->commit();
         $this->success('添加成功',$url);
     }
