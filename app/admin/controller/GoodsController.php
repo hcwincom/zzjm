@@ -1939,7 +1939,8 @@ class GoodsController extends AdminBaseController
                 }
             } 
         }
-       
+        //图片尺寸
+        $pic_size=config('pic_size');
         $files=[];
         //循环得到上传后的数据
         foreach($file_type as $k=>$v){
@@ -1959,6 +1960,7 @@ class GoodsController extends AdminBaseController
                         }
                     }
                     $files[$k][]=$data[$names][$kk].','.$data[$urls][$kk];
+                   
                 } 
             }
             //没文件的为空
@@ -1976,18 +1978,36 @@ class GoodsController extends AdminBaseController
                         $this->error($tmp_file[0].'文件损坏，请注意');
                     }
                     //先比较是否需要额外保存,admin打头的要重新保存
-                    if(strpos($tmp_file[1], 'admin/')===0){
+                    if(strpos($tmp_file[1], $pathid)!==0){
                           //获取后缀名,复制文件
                         $ext=substr($tmp_file[1], strrpos($tmp_file[1],'.'));
-                        $newfile=$pathid.($v[0]).$tmp_file[0].date('Ymd-His').$ext;
-                        $result =copy($path.$tmp_file[1], $path.$newfile);
+                        $new_file=$pathid.($v[0]).$tmp_file[0].date('Ymd-His').$ext;
+                        $result =copy($path.$tmp_file[1], $path.$new_file);
                         if ($result == false)
                         {
                             $this->error($tmp_file[0].'文件复制错误，请重试');
                         }else{
-                            $files[$k][$kk]=$tmp_file[0].','.$newfile;
+                            $files[$k][$kk]=$tmp_file[0].','.$new_file;
                         } 
+                        $tmp_file[1]=$new_file;
                         
+                    } 
+                    //生成不同图片
+                    //判断是否需要编制图片
+                    if($kk<4){
+                        $tmp_file=['file'=>$tmp_file[1]];
+                        $tmp_file['file1']= $tmp_file['file'].'1.jpg';
+                        $tmp_file['file2']= $tmp_file['file'].'2.jpg';
+                        $tmp_file['file3']= $tmp_file['file'].'3.jpg';
+                        if(!is_file($path. $tmp_file['file1']) ){
+                            zz_set_image($tmp_file['file'], $tmp_file['file1'], $pic_size[1][0], $pic_size[1][1]);
+                        }
+                        if(!is_file($path. $tmp_file['file2'])){
+                            zz_set_image($tmp_file['file'], $tmp_file['file2'], $pic_size[2][0], $pic_size[2][1]);
+                        }
+                        if(!is_file($path. $tmp_file['file3'])){
+                            zz_set_image($tmp_file['file'], $tmp_file['file3'], $pic_size[3][0], $pic_size[3][1]);
+                        }
                     } 
                     
                 }
@@ -2104,15 +2124,19 @@ class GoodsController extends AdminBaseController
                     $tmp_file['name'].='文件已损坏';
                 }
                 //直接加判断，防止错误
-                if(is_file($path. $tmp_file['file'].'1.jpg')){
-                    $tmp_file['file1']= $tmp_file['file'].'1.jpg';
-                    $tmp_file['file2']= $tmp_file['file'].'2.jpg';
-                    $tmp_file['file3']= $tmp_file['file'].'3.jpg';
-                }else{
-                    $tmp_file['file1']= $tmp_file['file'];
-                    $tmp_file['file2']= $tmp_file['file'];
-                    $tmp_file['file3']= $tmp_file['file'];
+                //判断是否需要编制图片
+                if($k<4){
+                    if(is_file($path. $tmp_file['file'].'1.jpg')){
+                        $tmp_file['file1']= $tmp_file['file'].'1.jpg';
+                        $tmp_file['file2']= $tmp_file['file'].'2.jpg';
+                        $tmp_file['file3']= $tmp_file['file'].'3.jpg';
+                    }else{
+                        $tmp_file['file1']= $tmp_file['file'];
+                        $tmp_file['file2']= $tmp_file['file'];
+                        $tmp_file['file3']= $tmp_file['file'];
+                    }
                 }
+                
                 //要保留字符串
                 $tmp_file['change0']=urlencode($vv);
                 $v[$kk]=$tmp_file;
@@ -2131,22 +2155,24 @@ class GoodsController extends AdminBaseController
         $tmp=db('goods_file')->where($where_file)->column('id,name,file,type');
         $list=[];
        
-        foreach($tmp as $k=>$v){
-            if(!is_file($path.$v['file'])){
-                $v['name'].='文件已损坏';
+        foreach($tmp as $k=>$tmp_file){
+            if(!is_file($path.$tmp_file['file'])){
+                $tmp_file['name'].='文件已损坏';
             }
-           //直接加判断，防止错误
-            if(is_file($path.$v['file'].'1.jpg')){
-                $v['file1']=$v['file'].'1.jpg';
-                $v['file2']=$v['file'].'2.jpg';
-                $v['file3']=$v['file'].'3.jpg';
-            }else{
-                $v['file1']=$v['file'];
-                $v['file2']=$v['file'];
-                $v['file3']=$v['file'];
+            //判断是否需要编制图片
+            if($tmp_file['type']<4){
+                if(is_file($path. $tmp_file['file'].'1.jpg')){
+                    $tmp_file['file1']= $tmp_file['file'].'1.jpg';
+                    $tmp_file['file2']= $tmp_file['file'].'2.jpg';
+                    $tmp_file['file3']= $tmp_file['file'].'3.jpg';
+                }else{
+                    $tmp_file['file1']= $tmp_file['file'];
+                    $tmp_file['file2']= $tmp_file['file'];
+                    $tmp_file['file3']= $tmp_file['file'];
+                }
             }
             
-            $list[$v['type']][$k]=$v;
+            $list[$tmp_file['type']][$k]=$tmp_file;
             
         }
         $this->assign('info1',$info1);
@@ -2258,7 +2284,8 @@ class GoodsController extends AdminBaseController
                         'name'=>$tmp_file['name'],
                         'file'=>$tmp_file['file'],
                     ];
-                    //判断是否需要编制图片
+                    /* 
+                     * 提前制作好了//判断是否需要编制图片
                     if($k<4){
                         $tmp_file['file1']= $tmp_file['file'].'1.jpg';
                         $tmp_file['file2']= $tmp_file['file'].'2.jpg';
@@ -2268,13 +2295,23 @@ class GoodsController extends AdminBaseController
                             zz_set_image($tmp_file['file'], $tmp_file['file2'], $pic_size[2][0], $pic_size[2][1]);
                             zz_set_image($tmp_file['file'], $tmp_file['file3'], $pic_size[3][0], $pic_size[3][1]);
                         }
-                    } 
+                    }  */
                     
                 }
+                
                //统计图片文件数量 
                 $update_info[$file_type[$k][0]]=count($v);
             }
-              
+            //商城图片变化保存封面
+            if(!empty($change[1])){
+                //分析数据
+                $v=json_decode($change[1],true);
+               //有数据才改变
+                if(!empty($v[0])){
+                    $tmp_file=explode(',', $v[0]);
+                    $update_info['pic']=$tmp_file[1].'1.jpg';
+                }
+            }
             $row=$m->where('id',$info['pid'])->update($update_info);
             if($row!==1){
                 $m->rollback();

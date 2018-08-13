@@ -68,11 +68,20 @@
 					<foreach name="list[$kk]" item="vo">
 				  
 					   <li id="saved-image{$vv[0]}{$key}">
-					        <input class="file0" id="photo-{$vv[0]}{$key}" type="hidden" name="{$vv[0]}_urls[]" value="{$vo.file3}">
-					        <input class="form-control" id="photo-{$vv[0]}{$key}-name" type="text" name="{$vv[0]}_names[]" value="{$vo.name}"
+					    <input class="form-control" id="photo-{$vv[0]}{$key}-name" type="text" name="{$vv[0]}_names[]" value="{$vo.name}"
 					               style="width: 200px;" title="图片名称">
+					   <lt name="kk" value="4">
+					        
+					       <input class="file0" id="photo-{$vv[0]}{$key}" type="hidden" name="{$vv[0]}_urls[]" value="{$vo.file3}">
 					       
 							<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file1)});"></div>
+					    <else/>
+					    	<input class="file0" id="photo-{$vv[0]}{$key}" type="hidden" name="{$vv[0]}_urls[]" value="{$vo.file}">
+					       
+							<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file)});"></div>
+					  
+					    
+					    </lt>
 					     <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
 					     	<a href="{:url('admin/goodsauth/'.$vv[0].'_load',['id'=>$vo.id])}">下载</a>
 					     	&nbsp;&nbsp;&nbsp;

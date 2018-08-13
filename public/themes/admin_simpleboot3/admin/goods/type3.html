@@ -39,7 +39,7 @@
 					 <table class="table table-hover table-bordered table-list">
 					 <notempty name="label.pid1">
 					 	<tr class="">
-					 	<input type="hidden" name="pid1" value="{$label.pid1}"/>
+					 		<input type="hidden" name="pid1" value="{$label.pid1}"/>
 					 		<td><a href="{:url('edit',['id'=>$label.pid1])}">{$label.pname1}</a></td>
 					 		
 					 		<td><button class="del_link" type="button">删除</button></td>
@@ -64,7 +64,7 @@
 					 <input type="hidden" class="file0" id="photo{$key}" name="pic{$key}" value="{$label['pic'.$key]}">
 				 	
 					 <img class="pic1" id="photo{$key}-preview" src="{:cmf_get_image_url($label['pic'.$key])}">
-					 
+					   
 					 <a href="javascript:uploadOneImage('图片上传','#photo{$key}');">上传图片</a>
 				<notempty name="label['pic0'.$key]">
 					<a href="{:url('admin/goodsauth/label_load',['pid'=>$label.pid0,'key'=>$key])}">下载图片</a>
@@ -124,7 +124,7 @@ $('#goods_link').click(function(){
 	 if(id<=0){
 		 return false;
 	 }
-	var tr='<tr class=""><input type="hidden" name="link_id" value="'+id+'"/><td>'+name+
+	var tr='<tr class=""><input type="hidden" name="pid1" value="'+id+'"/><td>'+name+
 	'</td><td><button class="del_link" type="button">删除</button></td></tr>';
 	$div.find('table').append(tr);
 	return false;
