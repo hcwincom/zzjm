@@ -121,7 +121,7 @@ $('#goods_link').click(function(){
 	var $div=$(this).parent();
 	var id=parseInt($div.find('.goods').val());
 	var name=$div.find('.goods option:selected').text();
-	 if(id<=0){
+	 if(!(id>0)){
 		 return false;
 	 }
 	var tr='<tr class=""><input type="hidden" name="pid1" value="'+id+'"/><td>'+name+

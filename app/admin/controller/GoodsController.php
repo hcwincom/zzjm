@@ -148,7 +148,7 @@ class GoodsController extends AdminBaseController
                     $where['p.goods_link']=['egt',3];
                     break;
                 default:
-                    $where['p.goods_link']=['eq',$num];
+                    $where['p.goods_link']=['eq',$data['goods_link']];
                     break;
             } 
         }
@@ -1434,6 +1434,235 @@ class GoodsController extends AdminBaseController
         return $this->fetch();
     }
     
+    /**
+     * 产品技术资料列表
+     * @adminMenu(
+     *     'name'   => '产品技术资料列表',
+     *     'parent' => 'default',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 5,
+     *     'icon'   => '',
+     *     'remark' => '产品技术资料列表',
+     *     'param'  => ''
+     * )
+     */
+    public function params()
+    {
+        
+        $admin=$this->admin;
+        
+        $m=$this->m;
+        $data=$this->request->param();
+        $admin=$this->admin;
+        $where=[];
+        //类型组合
+        
+        if($admin['shop']!=1){
+            $where['gl.shop']=['eq',$admin['shop']];
+        }
+        
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
+        //分类
+        $m_cate=db('cate');
+        $where_cate=[
+            'fid'=>0,
+            'status'=>2,
+        ];
+        $cates0=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,code');
+        //一级分类
+        if(empty($data['cid0'])){
+            $data['cid0']=key($cates0);
+        }
+        $where['p.cid0']=['eq',$data['cid0']];
+        //二级分类
+        if(empty($data['cid'])){
+            $data['cid']=0;
+        }else{
+            $where['p.cid']=['eq',$data['cid']];
+        }
+        $where_cate=[
+            'fid'=>['eq',$data['cid0']],
+            'status'=>['eq',2],
+        ];
+        $cates=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,fid,code');
+        $this->assign('cates0',$cates0);
+        $this->assign('cates',$cates);
+         
+        //参数模板
+        $where_template=[
+            'cid'=>['eq',$data['cid0']],
+            'status'=>['eq',2],
+        ];
+        $templates=db('template')->where($where_template)->column('id,name,cid');
+        $this->assign('templates',$templates);
+        if(empty($data['template'])){
+            $data['template']=key($templates);
+        }
+        $where['p.template']=['eq',$data['template']];
+        $params=db('template_param')
+        ->alias('tp')
+        ->join('cmf_param p','p.id=tp.p_id')
+        ->where('tp.t_id',$data['template'])
+        ->column('p.id,p.name,p.content,p.type');
+        //获取参数 
+        $param=empty($data['param'])?[]:$data['param'];
+        $where_value=[];
+        $where_values=[];
+        foreach($params as $k=>$v){
+            switch ($v['type']){
+                case 1:
+                    //处理参数项
+                    if(empty($v['content'])){
+                        $params[$k]['content']=[];
+                    }else{
+                        $params[$k]['content']=explode(',',$v['content']);
+                    } 
+                    //所选参数值 
+                    if(isset($param[$k])){
+                        
+                        $where_value[$k]=['eq',$param[$k]];
+                    } else{
+                        $param[$k]='';
+                    }
+                    break;
+                case 2:
+                    if(empty($v['content'])){
+                        $params[$k]['content']=[];
+                    }else{
+                        $params[$k]['content']=explode(',',$v['content']);
+                    }
+                    
+                    //所选参数值
+                    if(empty($data['params'.$k])){
+                        $param[$k]=[]; 
+                    } else{
+                        $param[$k]=$data['params'.$k];
+                        //多选是多个
+                        $where_values[$k]=[];
+                        foreach($param[$k] as $k1=>$v1){
+                            $where_values[$k][]=['like','%'.$v1.'%'];
+                        }
+                        
+                    }
+                    break;
+                case 3: 
+                   
+                    if(empty($param[$k])){
+                        $param[$k]=''; 
+                    } else{
+                        $where_value[$k]=['eq',$param[$k]];
+                    }
+                    break;
+            }
+            
+        }
+        $this->assign('params',$params);
+       
+          
+        
+         
+        //查询字段
+        $types=config('goods_search');
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        }
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        if(!isset($data['name']) || $data['name']==''){
+            $data['name']='';
+        }else{
+            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+        }
+         //要根据参数值得到pid
+         $m_gp=db('goods_param');
+       //先得到ids
+         $ids=$m
+         ->alias('p') 
+         ->where($where)
+         ->column('id');
+         if(empty($ids)){
+             $ids=[0];
+         }
+         //单选,数值
+         foreach($where_value as $k=>$v){
+             if(empty($ids)){
+                 $ids=[0]; 
+                 break;
+             }
+             $where_tmp=[
+                 'param_id'=>['eq',$k],
+                 'value'=>$v,
+                 'pid'=>['in',$ids],
+             ]; 
+             $ids=$m_gp->where($where_tmp)->column('pid');
+           
+         }
+         //多选
+         foreach($where_values as $k=>$v){
+             
+             if(empty($ids)){
+                 $ids=[0];
+                 break;
+             }
+             foreach($v as $kk=>$vv){
+                 if(empty($ids)){
+                     $ids=[0];
+                     break;
+                 }
+                 $where_tmp=[
+                     'param_id'=>['eq',$k],
+                     'value'=>$vv,
+                     'pid'=>['in',$ids],
+                 ];
+                 $ids=$m_gp->where($where_tmp)->column('pid');
+                 
+             } 
+         }
+        
+         if(empty($ids)){
+             $ids=[0]; 
+         }
+         $where=['p.id'=>['in',$ids]];
+         $list=$m
+         ->alias('p')
+         ->field('p.*,s.name as sname')
+         ->join('cmf_shop s','s.id=p.shop','left')
+         ->where($where) 
+         ->order('p.status asc,p.time desc')
+         ->paginate();
+         
+         // 获取分页显示
+         $page = $list->appends($data)->render();
+         //循环读取和一次读取，差别?
+         $tech=[];
+         foreach($list as $k=>$v){
+             $tech[$k]=$m_gp->where('pid',$v['id'])->column('param_id,value');
+             
+         }
+          
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        $this->assign('tech',$tech);
+        $this->assign('data',$data);
+        $this->assign('types',$types);
+        
+        $this->assign("search_types", $search_types);
+       
+        
+         $this->assign('param',$param);
+        
+        return $this->fetch();
+    }
     /**
      * 产品添加
      * @adminMenu(
@@ -2850,7 +3079,7 @@ class GoodsController extends AdminBaseController
         $table=$this->table;
         $m_edit=db('edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,p.type,a.user_nickname as aname')
+        ->field('e.*,p.name as pname,p.shop as pshop,p.type,a.user_nickname as aname')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
@@ -2919,6 +3148,7 @@ class GoodsController extends AdminBaseController
                         'pid1'=>$k,
                         'num'=>$v,
                         'type'=>$type,
+                        'shop'=>$info['pshop'],
                     ];
                     $num+=$v;
                 }
@@ -3183,7 +3413,7 @@ class GoodsController extends AdminBaseController
         $table=$this->table;
         $m_edit=db('edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,p.type,a.user_nickname as aname')
+        ->field('e.*,p.name as pname,p.type,p.shop as pshop,a.user_nickname as aname')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
@@ -3252,6 +3482,7 @@ class GoodsController extends AdminBaseController
                         'pid1'=>$k,
                         'num'=>$v,
                         'type'=>$type,
+                        'shop'=>$info['pshop'],
                     ];
                     $num+=$v;
                 }
@@ -3652,6 +3883,7 @@ class GoodsController extends AdminBaseController
             //没加过就新增，加过就更新
             if(empty($label0)){
                 $label1['pid0']=$info['pid'];
+                $label1['shop']=$info['pshop'];
                 $m_label->insert($label1); 
             }else{
                 $m_label->where('pid0',$info['pid'])->update($label1); 
