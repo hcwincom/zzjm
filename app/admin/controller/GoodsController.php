@@ -1459,7 +1459,7 @@ class GoodsController extends AdminBaseController
         //类型组合
         
         if($admin['shop']!=1){
-            $where['gl.shop']=['eq',$admin['shop']];
+            $where['p.shop']=['eq',$admin['shop']];
         }
         
         //状态
