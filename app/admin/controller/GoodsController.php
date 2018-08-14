@@ -2843,8 +2843,9 @@ class GoodsController extends AdminBaseController
             //检查是否存在，更新或添加
             $m_content=db('goods_tech');
             $find=$m_content->where($where_delete)->find();
+           
             if(empty($find)){
-                $m_content->insertAll($data_add);
+                $m_content->insert($data_add);
             }else{
                 $m_content->where($where_delete)->update($data_add);
             }
