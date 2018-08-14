@@ -2069,12 +2069,13 @@ class GoodsController extends AdminBaseController
                 //直接加判断，防止错误
                 //if(in_array($v['type'],[1,2,3])){
                 if(is_file($path.$v['file'].'1.jpg')){
-                    $v['file1']=$v['file'].'1.jpg';
-                    $v['file2']=$v['file'].'2.jpg';
-                    $v['file3']=$v['file'].'3.jpg';
+                    $v['file1']=$v['file'].'1.jpg'; 
                 }else{
-                    $v['file1']=$v['file'];
-                    $v['file2']=$v['file'];
+                    $v['file1']=$v['file']; 
+                }
+                if(is_file($path.$v['file'].'3.jpg')){ 
+                    $v['file3']=$v['file'].'3.jpg';
+                }else{ 
                     $v['file3']=$v['file'];
                 }
             }else{
@@ -2188,8 +2189,7 @@ class GoodsController extends AdminBaseController
                             $this->error('文件名称中不能有逗号');
                         }
                     }
-                    $files[$k][]=$data[$names][$kk].','.$data[$urls][$kk];
-                   
+                    $files[$k][]=$data[$names][$kk].','.$data[$urls][$kk]; 
                 } 
             }
             //没文件的为空
@@ -2210,7 +2210,7 @@ class GoodsController extends AdminBaseController
                     if(strpos($tmp_file[1], $pathid)!==0){
                           //获取后缀名,复制文件
                         $ext=substr($tmp_file[1], strrpos($tmp_file[1],'.'));
-                        $new_file=$pathid.($v[0]).$tmp_file[0].date('Ymd-His').$ext;
+                        $new_file=$pathid.($v[0]).$kk.$tmp_file[0].date('Ymd-His').$ext;
                         $result =copy($path.$tmp_file[1], $path.$new_file);
                         if ($result == false)
                         {
@@ -2223,7 +2223,7 @@ class GoodsController extends AdminBaseController
                     } 
                     //生成不同图片
                     //判断是否需要编制图片
-                    if($kk<4){
+                    if($k<4){
                         $tmp_file=['file'=>$tmp_file[1]];
                         $tmp_file['file1']= $tmp_file['file'].'1.jpg';
                         $tmp_file['file2']= $tmp_file['file'].'2.jpg';
@@ -2237,7 +2237,15 @@ class GoodsController extends AdminBaseController
                         if(!is_file($path. $tmp_file['file3'])){
                             zz_set_image($tmp_file['file'], $tmp_file['file3'], $pic_size[3][0], $pic_size[3][1]);
                         }
-                    } 
+                    } elseif($k<7){
+                        $tmp_file=['file'=>$tmp_file[1]];
+                        $tmp_file['file1']= $tmp_file['file'].'1.jpg';
+                       
+                        if(!is_file($path. $tmp_file['file1']) ){
+                            zz_set_image($tmp_file['file'], $tmp_file['file1'], $pic_size[1][0], $pic_size[1][1]);
+                        }
+                        
+                    }
                     
                 }
                 $content[$k]=json_encode($files[$k]);
@@ -2364,6 +2372,9 @@ class GoodsController extends AdminBaseController
                         $tmp_file['file2']= $tmp_file['file'];
                         $tmp_file['file3']= $tmp_file['file'];
                     }
+                }elseif($k<7){
+                    $tmp_file['file1']= $tmp_file['file'].'1.jpg';
+                    $tmp_file['file3']= $tmp_file['file'];
                 }
                 
                 //要保留字符串
@@ -2399,6 +2410,9 @@ class GoodsController extends AdminBaseController
                     $tmp_file['file2']= $tmp_file['file'];
                     $tmp_file['file3']= $tmp_file['file'];
                 }
+            }elseif($tmp_file['type']<7){
+                $tmp_file['file1']= $tmp_file['file'].'1.jpg';
+                $tmp_file['file3']= $tmp_file['file'];
             }
             
             $list[$tmp_file['type']][$k]=$tmp_file;

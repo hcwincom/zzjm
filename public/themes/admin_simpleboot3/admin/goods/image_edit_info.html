@@ -42,13 +42,10 @@
 					    	<input class="form-control"   type="text"  value="{$vo.name}"
 					               style="width: 200px;" title="图片名称">
 					       
-					    <lt name="kk" value="4">
+					    
 					         <input  class="file0"  " type="hidden"  value="{$vo.file3}">
 					        <div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file1)});"></div>
-					    <else/>
-					    	<input class="file0"  type="hidden" name="{$vv[0]}_urls[]" value="{$vo.file}">
-					        <div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file)});"></div>
-					    </lt> 
+					     
 					       <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
 						     	&nbsp;&nbsp;&nbsp;
 						       <a href="{:url('admin/goodsauth/'.$vv[0].'_load',['id'=>$key])}">下载</a>
@@ -88,13 +85,10 @@
 					   
 					         <input class="form-control" id="" type="text"  value="{$vo.name}"
 					               style="width: 200px;" title="图片名称">
-					    <lt name="kk" value="4">
+					  
 					        <input  class="file0"  " type="hidden"  value="{$vo.file3}">
 					        <div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file1)});"></div>
-					    <else/>
-					    	<input class="file0"  type="hidden" name="{$vv[0]}_urls[]" value="{$vo.file}">
-					        <div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.file)});"></div>
-					    </lt> 
+					   
 					      
 					       <if condition="isset($actions['auth']) || isset($actions[$vv[0].'_load'])">
 						     	&nbsp;&nbsp;&nbsp; 
