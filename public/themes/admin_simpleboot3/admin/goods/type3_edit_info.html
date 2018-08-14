@@ -5,9 +5,7 @@
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
 			 <include file="admin@goods/nav" />
-			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
-			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
-			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li> 
+			 
 			<li class="active"><a href="{:url('type3_edit_info',['id'=>$info1.id])}">审核{$goods_type[$info1.ptype]}</a></li>   
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type3_edit_review')}">
