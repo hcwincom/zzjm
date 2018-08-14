@@ -5,7 +5,7 @@
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
 			 <include file="admin@goods/nav" />
-			 <li class="active"><a href="{:url('type4_edit_info',['id'=>$info1.id])}">审核{$goods_type[$info.type]}</a></li>  
+			 <li class="active"><a href="{:url('type4_edit_info',['id'=>$info1.id])}">审核{$goods_type[$info1.ptype]}</a></li>  
 			  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type4_edit_do')}">
@@ -13,11 +13,11 @@
 			<div class="form-group">
 				<label  class="col-sm-2 control-label">产品id</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" value="{$info.id}" readonly/>
+					<input type="text" class="form-control" value="{$info1.pid}" readonly/>
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<a href="{:url('edit',['id'=>$info.id])}" target="_blank">查看产品详情</a>
+					<a href="{:url('edit',['id'=>$info1.pid])}" target="_blank">{$info1.pname}--详情</a>
 					&nbsp;&nbsp;&nbsp;
-					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">查看编辑记录</a>
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info1.pid])}" target="_blank">查看编辑记录</a>
 				</div>
 			</div>
 		 
@@ -56,8 +56,14 @@
 			</div>
 	 </present>
 			 
+			<div class="form-group">
+				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
+				<div class="col-md-6 col-sm-10">
+				 	<input type="text" class="form-control" value="{$statuss[$info1.pstatus]}" readonly/>  
+				</div>
+			</div>
 			<div class="form-group rstatus">
-				<label for="input-gender" class="col-sm-2 control-label">审核状态</label>
+				<label for="input-gender" class="col-sm-2 control-label">产品加工编辑状态</label>
 				<div class="col-md-6 col-sm-10">
 				 <foreach name="review_status" item="vo">
 				 <label class="radio-inline">

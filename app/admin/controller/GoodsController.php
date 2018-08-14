@@ -2308,13 +2308,17 @@ class GoodsController extends AdminBaseController
         $eid=$this->request->param('id',0,'intval');
         $table=$this->table;
         //获取编辑信息
-        $m_edit=db('edit');
-        $info1=$m_edit->where('id',$eid)->find();
+        $info1=db('edit')
+        ->field('e.*,p.name as pname,p.status as pstatus,p.type as ptype')
+        ->alias('e')
+        ->join('cmf_goods p','p.id=e.pid')
+        ->where('e.id',$eid)
+        ->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
-        $id=$info1['pid']; 
-        $where_file=['pid'=>['eq',$id]];
+        
+        $where_file=['pid'=>['eq',$info1['pid']]];
         //权限检测
         $admin=$this->admin;
         $actions=$this->auth_get($admin['id']);
@@ -2385,12 +2389,7 @@ class GoodsController extends AdminBaseController
             
            
         }
-      
        
-        $info=$m->where('id',$id)->find();
-        if(empty($info)){
-            $this->error('数据不存在');
-        }
         //
         $tmp=db('goods_file')->where($where_file)->column('id,name,file,type');
         $list=[];
@@ -2419,6 +2418,7 @@ class GoodsController extends AdminBaseController
             
         }
         $this->assign('info1',$info1);
+       
         $this->assign('list',$list);
         $this->assign('change',$change);
       
@@ -2733,20 +2733,20 @@ class GoodsController extends AdminBaseController
         $eid=$this->request->param('id',0,'intval');
         $table=$this->table;
         //获取编辑信息
-        $m_edit=db('edit');
-        $info1=$m_edit->where('id',$eid)->find();
+       
+        $info1=db('edit')
+        ->field('e.*,p.name as pname,p.status as pstatus,p.type as ptype')
+        ->alias('e')
+        ->join('cmf_goods p','p.id=e.pid')
+        ->where('e.id',$eid)
+        ->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
         //获取改变的信息
         $change=db('edit_info')->where('eid',$eid)->value('content');
-        
-        $id=$info1['pid'];
-        $info=$m->where('id',$id)->find();
-        if(empty($info)){
-            $this->error('数据不存在');
-        }
-        $content=db('goods_tech')->where('pid',$id)->value('content');
+         
+        $content=db('goods_tech')->where('pid',$info1['pid'])->value('content');
         
         $this->assign('info1',$info1);
         $this->assign('content',$content);
@@ -3033,14 +3033,17 @@ class GoodsController extends AdminBaseController
     {
         $m=$this->m;
         $eid=$this->request->param('id',0,'intval');
-        $info1=db('edit')->where('id',$eid)->find();
+         
+        $info1=db('edit')
+        ->field('e.*,p.name as pname,p.status as pstatus,p.type as ptype')
+        ->alias('e')
+        ->join('cmf_goods p','p.id=e.pid')
+        ->where('e.id',$eid)
+        ->find();
         if(empty($info1)){
             $this->error('数据不存在');
         }
-        $info=$m->where('id',$info1['pid'])->find();
-        if(empty($info)){
-            $this->error('原数据不存在');
-        }
+        
         //获取改变的信息
         $change=db('edit_info')->where('eid',$eid)->value('content');
         $change=json_decode($change,true);
@@ -3049,7 +3052,7 @@ class GoodsController extends AdminBaseController
         $links0=$m_link
         ->alias('gl')
         ->join('cmf_goods g','g.id=gl.pid1','left')
-        ->where('gl.pid0',$info['id'])
+        ->where('gl.pid0',$info1['pid'])
         ->column('gl.pid1,gl.num,g.name');
         $links1=[];
         $links10=[];
@@ -3064,7 +3067,7 @@ class GoodsController extends AdminBaseController
         $this->assign('links1',$links1);
         $this->assign('links10',$links10);
         $this->assign('info1',$info1);
-        $this->assign('info',$info);
+      
         $this->assign('change',$change);
         return $this->fetch();
     }
@@ -3367,14 +3370,16 @@ class GoodsController extends AdminBaseController
     {
         $m=$this->m;
         $eid=$this->request->param('id',0,'intval');
-        $info1=db('edit')->where('id',$eid)->find();
+        $info1=db('edit')
+        ->field('e.*,p.name as pname,p.status as pstatus,p.type as ptype')
+        ->alias('e')
+        ->join('cmf_goods p','p.id=e.pid')
+        ->where('e.id',$eid)
+        ->find();
         if(empty($info1)){
             $this->error('数据不存在');
         }
-        $info=$m->where('id',$info1['pid'])->find();
-        if(empty($info)){
-            $this->error('原数据不存在');
-        }
+        
         //获取改变的信息
         $change=db('edit_info')->where('eid',$eid)->value('content');
         $change=json_decode($change,true);
@@ -3383,7 +3388,7 @@ class GoodsController extends AdminBaseController
         $links0=$m_link
         ->alias('gl')
         ->join('cmf_goods g','g.id=gl.pid1','left')
-        ->where('gl.pid0',$info['id'])
+        ->where('gl.pid0',$info1['pid'])
         ->column('gl.pid1,gl.num,g.name');
         $links1=[];
         $links10=[];
@@ -3398,7 +3403,7 @@ class GoodsController extends AdminBaseController
         $this->assign('links1',$links1);
         $this->assign('links10',$links10);
         $this->assign('info1',$info1);
-        $this->assign('info',$info);
+       
         $this->assign('change',$change);
         return $this->fetch();
     }
@@ -3761,14 +3766,16 @@ class GoodsController extends AdminBaseController
     {
         $m=$this->m;
         $eid=$this->request->param('id',0,'intval');
-        $info1=db('edit')->where('id',$eid)->find();
+        $info1=db('edit')
+        ->field('e.*,p.name as pname,p.status as pstatus,p.type as ptype')
+        ->alias('e')
+        ->join('cmf_goods p','p.id=e.pid')
+        ->where('e.id',$eid)
+        ->find();
         if(empty($info1)){
             $this->error('数据不存在');
         }
-        $info=$m->where('id',$info1['pid'])->find();
-        if(empty($info)){
-            $this->error('原数据不存在');
-        }
+        
         //获取改变的信息
         $change=db('edit_info')->where('eid',$eid)->value('content');
         $change=json_decode($change,true);
@@ -3786,7 +3793,7 @@ class GoodsController extends AdminBaseController
         ->alias('gl')
         ->field('gl.*,p1.name as pname1')
         ->join('cmf_goods p1','p1.id=gl.pid1')
-        ->where('gl.pid0',$info['id'])
+        ->where('gl.pid0',$info1['pid'])
         ->find();
         if(empty($label)){
             $label=null;
@@ -3808,7 +3815,7 @@ class GoodsController extends AdminBaseController
        
         $this->assign('label',$label);
         $this->assign('info1',$info1);
-        $this->assign('info',$info);
+       
         $this->assign('change',$change);
         return $this->fetch();
     }
