@@ -3823,7 +3823,7 @@ class GoodsController extends AdminBaseController
         $table=$this->table;
         $m_edit=db('edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,p.type,a.user_nickname as aname')
+        ->field('e.*,p.name as pname,p.shop as pshop,p.type,a.user_nickname as aname')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
