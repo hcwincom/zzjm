@@ -1,0 +1,230 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}">
+			 
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="name" name="name" value="{$info.name}" required/>
+					 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">技术模板</label>
+				<div class="col-md-6 col-sm-10">
+					  {$info.cname}--{$info.tname} 
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">添加对比产品</label>
+				<div class="col-md-6 col-sm-10">
+					 <select id="cate" >
+					 	<option  class="cate0" value='0'>未选择二级分类</option> 
+					 <foreach name="cates" item="vo">
+					 	<option  class="cate" value="{$key}">{$vo}</option> 
+					 </foreach>
+					 
+					 </select> 
+					 <select id="goods"   >
+					 	<option class="goods0" value="0" > 
+						未选择
+						</option> 
+					<foreach name="goods" item="vo">
+					 	<option  class="goods goods{$vo.cid}" value="{$key}">{$vo.name}</option> 
+					 </foreach>
+						 
+					</select>
+					<button type="button" id="add_goods">确认添加</button> 
+				</div>
+			</div>
+			<div class="form-group ">
+				<label for="" class="col-sm-2 control-label">对比产品</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					 <table id="pids" class="table table-hover table-bordered table-list">
+					 
+					 	<tr class="tr_name"><td class="td0">对比产品</td></tr> 
+					 	<tr class="tr_unit"><td class="td0">计量单位</td></tr> 
+					 	<tr class="tr_weight0"><td class="td0">净重</td></tr> 
+					 	<tr class="tr_size0"><td class="td0">体积</td></tr> 
+					 	<tr class="tr_weight1"><td class="td0">毛重</td></tr> 
+					 	<tr class="tr_size1"><td class="td0">内盒体积</td></tr> 
+					 <foreach name="params" item="vo">
+					 	<tr class="tech tech{$key}"><td class="td0">{$vo}</td></tr> 
+					 </foreach>
+					 </table>
+					 
+				</div>
+			</div> 
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">测试结果</label>
+				<div class="col-md-6 col-sm-10"> 
+					<textarea class="form-control" name="res" rows="5">{$info.res}</textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">测试说明</label>
+				<div class="col-md-6 col-sm-10"> 
+					<textarea class="form-control" name="dsc" rows="5">{$info.dsc}</textarea>
+				</div>
+			</div>  
+			 
+			<div class="form-group">
+				<label   class="col-sm-2 control-label">审核状态</label>
+				<div class="col-md-6 col-sm-10">
+				 
+				 <foreach name="statuss" item="vo">
+				  	<label class="radio-inline">
+				 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+				 	</label>
+				 </foreach>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+				<input type="hidden"  name=id value="{$info.id}" />
+					<button type="submit" class="review btn btn-primary js-ajax-submit"  >审核状态</button> 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
+					 
+					<eq name="info.status" value="4">
+					 	<button type="submit" class="cancel_ban btn btn-primary js-ajax-submit">恢复</button> 
+					</eq>
+					<eq name="info.status" value="2">
+					 	  <button type="submit" class="ban btn btn-primary  js-ajax-submit" >禁用</button> 
+					</eq>
+					
+					 <p> </p>
+				</div>
+				
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+	 
+</body>
+<script>
+$('.review').click(function(){
+	$('form').attr('action',"{:url('review')}");
+});
+$('.save').click(function(){
+	$('form').attr('action',"{:url('edit_do')}");
+});
+$('.ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('ban')}");
+});
+$('.cancel_ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
+});
+</script>
+<script>
+$('#cate0').change(function(){
+	var cid0=$(this).val();
+	
+	$('#template .t1').hide();
+	$('#template .t2'+cid0).show();
+	$('#template .t0').prop('selected','selected');
+});
+$('#add_t').click(function(){
+	var cid0=$('#cate0').val();
+	var tid=$('#template').val();
+	if(cid0=='0' || tid=='0'){
+		alert('请选择产品大类和技术模板');
+		return false;
+	}
+	$.post("{:url('admin/goodsajax/goods_get_by_template')}",{'cid0':cid0,'tid':tid},function(data){
+		 
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		var cate=data.data.cate;
+		var goods=data.data.goods;
+		var option_cate='';
+		var option_goods='';
+		for(var i in cate){
+			option_cate+='<option class="cate" value="'+i+'">'+cate[i]+'</option>';
+		}
+		for(var j in goods){
+			option_goods+='<option class="goods goods'+goods[j]['cid']+'" value="'+j+'">'+goods[j]['name']+'</option>';
+		}
+		$('#cate .cate0').prop('selected','selected');
+		$('#cate .cate').remove();
+		$('#cate').append(option_cate);
+		$('#goods .goods0').prop('selected','selected');
+		$('#goods .goods').remove();
+		$('#goods').append(option_goods);
+		$('#goods .goods').hide();
+		
+		$('#pids .td').remove();
+		$('#pids .tech').remove();
+		var tr_tech='';
+		var techs=data.data.params;
+		for(var k in techs){
+			tr_tech+='<tr class="tech tech'+k+'"><td class="td0">'+techs[k]+'</td></tr> ';
+		}
+		$('#pids').append(tr_tech);
+	},'json');
+		
+});
+$('#cate').change(function(){
+	var cid=$(this).val();
+	
+	$('#goods .goods').hide();
+	$('#goods .goods'+cid).show();
+	$('#goods .goods0').prop('selected','selected');
+});
+ var get_param_by_goods_url="{:url('admin/goodsajax/get_param_by_goods')}";
+$('#add_goods').click(function(){
+	var pid=$('#goods').val(); 
+	if(pid=='0'){
+		alert('请选择产品');
+		return false;
+	} 
+	//获取产品参数
+	get_param_by_goods(pid,get_param_by_goods_url);
+		 
+});
+<foreach name="list" item="vo"> 
+get_param_by_goods({$vo},get_param_by_goods_url);
+</foreach>
+function get_param_by_goods(pid,get_param_by_goods_url){ 
+	//获取产品参数
+	$.post(get_param_by_goods_url,{'pid':pid},function(data){ 
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		var goods=data.data.goods;
+		var param=data.data.param;
+		var tr_name='<td class="td td'+pid+
+		'"><input type="hidden" name="pids['+pid+
+			']" value="'+pid+'"/>'+goods['name']+'<button type="button" class="del">删除</button></td>';
+		$('.tr_name').append(tr_name);
+		$('.tr_unit').append('<td class="td td'+pid+'">'+goods['unit_name']+'</td>');
+		$('.tr_weight0').append('<td class="td td'+pid+'">'+goods['weight0']+'</td>');
+		var tr_size0='<td class="td td'+pid+'">'+goods['length0']+'*'+goods['width0']+'*'+goods['height0']+'='+goods['size0']+'</td>'
+		$('.tr_size0').append(tr_size0);
+		
+		$('.tr_weight1').append('<td class="td td'+pid+'">'+goods['weight1']+'</td>');
+		var tr_size1='<td class="td td'+pid+'">'+goods['length1']+'*'+goods['width1']+'*'+goods['height1']+'='+goods['size1']+'</td>'
+		$('.tr_size1').append(tr_size1);
+		
+		var tech0='<td class="td'+pid+'">--</td>';
+		$('.tech').append(tech0);
+		for( var i in param){
+			$('.tech'+i+' .td'+pid).text(param[i]);
+		}
+	},'json');	
+}
+$(document).on('click','.del',function(){
+	var pid=$(this).siblings('input').val();
+	$('.td'+pid).remove();
+});
+</script>
+</html>

@@ -169,7 +169,7 @@ class WorkController extends AdminBaseController
                 }
             }
         }
-        $list=db('goods_collect') 
+        $list=Db::name('goods_collect') 
         ->alias('gc')
         ->field('p.*,gc.ctime as gc_ctime,gc.time as gc_time,gc.type as gc_type') 
         ->join('cmf_goods p','p.id=gc.pid')
@@ -186,8 +186,9 @@ class WorkController extends AdminBaseController
         $this->assign('types',$types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
-        //分类
-        $this->cates();
+        //分类 
+        $goods0=new Goods0Controller();
+        $goods0->cates();
         $this->assign('cid0',$data['cid0']);
         $this->assign('cid',$data['cid']);
         $this->assign('select_class','form-control');
@@ -219,26 +220,10 @@ class WorkController extends AdminBaseController
             'uid'=>$admin['id'],
             'pid'=>['in',$_POST['ids']], 
         ];
-        $rows=db('goods_collect')->where($where)->delete();
+        $rows=Db::name('goods_collect')->where($where)->delete();
         $this->error('已删除收藏'.$rows.'条');
     }
     
-    //获取分类信息
-    public function cates(){
-        //分类
-        $m_cate=db('cate');
-        $where_cate=[
-            'fid'=>0,
-            'status'=>2,
-        ];
-        $cates0=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,code');
-        $where_cate=[
-            'fid'=>['neq',0],
-            'status'=>['eq',2],
-        ];
-        $cates=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,fid,code');
-        $this->assign('cates0',$cates0);
-        $this->assign('cates',$cates);
-    }
+     
      
 }

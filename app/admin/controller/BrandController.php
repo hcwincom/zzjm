@@ -140,7 +140,7 @@ class BrandController extends AdminInfoController
             'link'=>url('admin/'.$table.'/edit',['id'=>$id]),
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
+        Db::name('action')->insert($data_action);
         $m->commit();
         $this->success('添加成功',$url);
     }
@@ -281,6 +281,7 @@ class BrandController extends AdminInfoController
     public function edit_info()
     {
         parent::edit_info();
+        
         return $this->fetch();  
     }
     /**
@@ -345,7 +346,7 @@ class BrandController extends AdminInfoController
         $time=time();
         //检查是否有产品
         $where=['brand'=>['in',$ids]];
-        $tmp=db('goods')->where($where)->find();
+        $tmp=Db::name('goods')->where($where)->find();
         if(!empty($tmp)){
             $this->error($flag.$tmp['brand'].'下有产品'.$tmp['name'].$tmp['code']);
         }

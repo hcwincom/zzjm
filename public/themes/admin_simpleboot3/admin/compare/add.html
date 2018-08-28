@@ -1,0 +1,201 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
+			 
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="name" name="name" value="" required/>
+					 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">选择技术模板</label>
+				<div class="col-md-6 col-sm-10">
+					 <select id="cate0"   name="cid0" required>
+					 <option value="0" > 
+					请选择一级分类
+					</option> 
+					<foreach name="cates0" item="vo" >
+						<option value="{$key}"  > 
+						{$vo} 
+						</option>
+					</foreach>
+					</select>  
+			 
+				 <select id="template"   name="template" required>
+				 	<option class="t0" value="0" > 
+					请选择技术模板
+					</option>
+					 <foreach name="templates" item="vo" >
+					<option class="t1 t2{$vo.cid}" value="{$key}" > 
+					{$vo.name}
+					</option>
+					</foreach>
+				</select>
+				<button type="button" id="add_t">确认技术模板</button>
+					 <p>先确认技术模板再选择添加比对产品</p>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">添加对比产品</label>
+				<div class="col-md-6 col-sm-10">
+					 <select id="cate" >
+						<option  class="cate0" value='0'>未选择二级分类</option> 
+						 
+					 </select> 
+					 <select id="goods"   >
+					 	<option class="goods0" value="0" > 
+						未选择
+						</option> 
+					</select>
+					<button type="button" id="add_goods">确认添加</button> 
+				</div>
+			</div>
+			<div class="form-group ">
+				<label for="" class="col-sm-2 control-label">对比产品</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					 <table id="pids" class="table table-hover table-bordered table-list">
+					 	<tr class="tr_name"><td class="td0">对比产品</td></tr> 
+					 	<tr class="tr_unit"><td class="td0">计量单位</td></tr> 
+					 	<tr class="tr_weight0"><td class="td0">净重</td></tr> 
+					 	<tr class="tr_size0"><td class="td0">体积</td></tr> 
+					 	<tr class="tr_weight1"><td class="td0">毛重</td></tr> 
+					 	<tr class="tr_size1"><td class="td0">内盒体积</td></tr> 
+					 </table>
+					 
+				</div>
+			</div> 
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">测试结果</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					<textarea class="form-control" name="res" rows="5"></textarea>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">测试说明</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					<textarea class="form-control" name="dsc" rows="5"></textarea>
+				</div>
+			</div>  
+			 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">添加</button>
+				 	<p>添加后进入编辑页面查看对比详情</p>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+	 
+</body>
+<script>
+$('#cate0').change(function(){
+	var cid0=$(this).val();
+	
+	$('#template .t1').hide();
+	$('#template .t2'+cid0).show();
+	$('#template .t0').prop('selected','selected');
+});
+$('#add_t').click(function(){
+	var cid0=$('#cate0').val();
+	var tid=$('#template').val();
+	if(cid0=='0' || tid=='0'){
+		alert('请选择产品大类和技术模板');
+		return false;
+	}
+	$.post("{:url('admin/goodsajax/goods_get_by_template')}",{'cid0':cid0,'tid':tid},function(data){
+		console.log(data);
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		var cate=data.data.cate;
+		var goods=data.data.goods;
+		var option_cate='';
+		var option_goods='';
+		for(var i in cate){
+			option_cate+='<option class="cate" value="'+i+'">'+cate[i]+'</option>';
+		}
+		for(var j in goods){
+			option_goods+='<option class="goods goods'+goods[j]['cid']+'" value="'+j+'">'+goods[j]['name']+'</option>';
+		}
+		$('#cate .cate0').prop('selected','selected');
+		$('#cate .cate').remove();
+		$('#cate').append(option_cate);
+		$('#goods .goods0').prop('selected','selected');
+		$('#goods .goods').remove();
+		$('#goods').append(option_goods);
+		$('#goods .goods').hide();
+		
+		$('#pids .td').remove();
+		$('#pids .tech').remove();
+		var tr_tech='';
+		var techs=data.data.params;
+		for(var k in techs){
+			tr_tech+='<tr class="tech tech'+k+'"><td class="td0">'+techs[k]+'</td></tr> ';
+		}
+		$('#pids').append(tr_tech);
+	},'json');
+		
+});
+$('#cate').change(function(){
+	var cid=$(this).val();
+	
+	$('#goods .goods').hide();
+	$('#goods .goods'+cid).show();
+	$('#goods .goods0').prop('selected','selected');
+});
+ 
+$('#add_goods').click(function(){
+	var pid=$('#goods').val(); 
+	if(pid=='0'){
+		alert('请选择产品');
+		return false;
+	} 
+	//获取产品参数
+	$.post("{:url('admin/goodsajax/get_param_by_goods')}",{'pid':pid},function(data){
+		console.log(data);
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		var goods=data.data.goods;
+		var param=data.data.param;
+		var tr_name='<td class="td td'+pid+
+		'"><input type="hidden" name="pids['+pid+
+			']" value="'+pid+'"/>'+goods['name']+'<button type="button" class="del">删除</button></td>';
+		$('.tr_name').append(tr_name);
+		$('.tr_unit').append('<td class="td td'+pid+'">'+goods['unit_name']+'</td>');
+		$('.tr_weight0').append('<td class="td td'+pid+'">'+goods['weight0']+'</td>');
+		var tr_size0='<td class="td td'+pid+'">'+goods['length0']+'*'+goods['width0']+'*'+goods['height0']+'='+goods['size0']+'</td>'
+		$('.tr_size0').append(tr_size0);
+		
+		$('.tr_weight1').append('<td class="td td'+pid+'">'+goods['weight1']+'</td>');
+		var tr_size1='<td class="td td'+pid+'">'+goods['length1']+'*'+goods['width1']+'*'+goods['height1']+'='+goods['size1']+'</td>'
+		$('.tr_size1').append(tr_size1);
+		
+		var tech0='<td class="td'+pid+'">--</td>';
+		$('.tech').append(tech0);
+		for( var i in param){
+			$('.tech'+i+' .td'+pid).text(param[i]);
+		}
+	},'json');	
+		 
+});
+
+$(document).on('click','.del',function(){
+	var pid=$(this).siblings('input').val();
+	$('.td'+pid).remove();
+});
+</script>
+</html>

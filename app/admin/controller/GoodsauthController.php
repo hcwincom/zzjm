@@ -4,7 +4,7 @@ namespace app\admin\controller;
 
  
 use cmf\controller\AdminBaseController; 
- 
+use think\Db; 
  /* 权限细分 */
 class GoodsauthController extends AdminBaseController
 {
@@ -623,7 +623,7 @@ class GoodsauthController extends AdminBaseController
             'id'=>$id,
             'type'=>$type,
         ];
-        $info=db('goods_file')->where($where)->find();
+        $info=Db::name('goods_file')->where($where)->find();
         if(empty($info)){
             $this->error('数据错误，文件不存在');
         }
@@ -793,7 +793,7 @@ class GoodsauthController extends AdminBaseController
         $where=[
             'pid0'=>$pid, 
         ];
-        $info=db('goods_label')->where($where)->find();
+        $info=Db::name('goods_label')->where($where)->find();
         if(empty($info)){
             $this->error('数据错误，文件不存在');
         }
@@ -832,7 +832,7 @@ class GoodsauthController extends AdminBaseController
         $where=[
             'pid0'=>$pid,
         ];
-        $info=db('goods_label')->where($where)->find();
+        $info=Db::name('goods_label')->where($where)->find();
         if(empty($info)){
             $this->error('数据错误，文件不存在');
         }

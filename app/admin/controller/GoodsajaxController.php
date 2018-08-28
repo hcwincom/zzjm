@@ -9,38 +9,11 @@ use think\Db;
  * 产品页面的ajax  */ 
 class GoodsajaxController extends AdminBaseController
 {
-    private $m;
-    private $statuss;
-    private $review_status;
-    private $table;
     
-    private $fields;
-    private $flag;
-    private $file_type;
     public function _initialize()
-    {
-        parent::_initialize();
-        $this->m=Db::name('goods');
-        $this->flag='产品'; 
-        $this->table='goods'; 
-        
-        $this->statuss=config('info_status');
-        $this->review_status=config('review_status');
-         
+    { 
         //计算小数位
-        bcscale(2);
-        
-        $this->file_type=[
-            1=>['pic_jm','极敏商城图片'],
-            2=>['pic_pro','实物图片'],
-            3=>['pic_logo','极敏logo图片'],
-            4=>['pic_param','产品规格图'],
-            5=>['pic_principle','产品原理图'],
-            6=>['pic_other','其他图片'],
-            7=>['file_instructions','产品说明书'], 
-            8=>['file_other','其他文档'],
-        ];
-         
+        bcscale(2); 
     }
      
      
@@ -52,7 +25,7 @@ class GoodsajaxController extends AdminBaseController
         if($cid<1){
             $this->error('无效分类');
         }
-        $m=$this->m;
+        $m=Db::name('goods');
         if($id!=0){
             $info=$m->where(['id'=>$id])->find();
             //分类没变
@@ -65,7 +38,7 @@ class GoodsajaxController extends AdminBaseController
             'id'=>$cid, 
             'fid'=>['neq',0],
         ];
-        $info=db('cate')->field('id,max_num')->where($where)->find();
+        $info=Db::name('cate')->field('id,max_num')->where($where)->find();
         if(empty($info)){
             $this->error('无效分类');
         }else{
@@ -80,7 +53,7 @@ class GoodsajaxController extends AdminBaseController
         $cid=$this->request->param('cid',0,'intval');
         $code_num=$this->request->param('code_num',0,'intval');
         $name=$this->request->param('name','');
-        $m=$this->m;
+        $m=Db::name('goods');
         //检查编码是否合法
         $where=[
             'cid'=>$cid,
@@ -94,7 +67,7 @@ class GoodsajaxController extends AdminBaseController
             $this->error('该编码已存在');
         }
          
-        $cate=db('cate')
+        $cate=Db::name('cate')
         ->field('c.*,f.name as fname')
         ->alias('c')
         ->join('cmf_cate f','f.id=c.fid')
@@ -121,7 +94,7 @@ class GoodsajaxController extends AdminBaseController
             'cid'=>$cid,
             'status'=>2,
         ];
-        $tmps=db('template')->where($where)->order('sort asc')->column('id,name');
+        $tmps=Db::name('template')->where($where)->order('sort asc')->column('id,name');
         if(empty($tmps)){
             $this->success('no');
         }
@@ -139,7 +112,7 @@ class GoodsajaxController extends AdminBaseController
             'tp.t_id'=>$t_id,
             'p.status'=>2,
         ];
-        $tmps=db('template_param')
+        $tmps=Db::name('template_param')
         ->alias('tp')
         ->join('cmf_param p','tp.p_id=p.id')
         ->where($where)
@@ -160,15 +133,7 @@ class GoodsajaxController extends AdminBaseController
         $this->success('ok','',['list'=>$tmps]);
     }
     
-    //获取价格模板
-    public function prices(){
-        $where=[
-            'status'=>2,
-        ];
-        $prices=db('price')->where($where)->order('sort asc,name asc')->column('id,name');
-        $this->assign('prices',$prices);
-        
-    }
+    
     /**
      * 产品价格模板确认 
      */
@@ -204,7 +169,7 @@ class GoodsajaxController extends AdminBaseController
             'pid'=>$pid,
             'uid'=>$admin['id'],
         ];
-        $m_collect=db('goods_collect');
+        $m_collect=Db::name('goods_collect');
         $tmp=$m_collect->where($where)->find();
         $time=time();
         if(empty($tmp)){
@@ -225,5 +190,78 @@ class GoodsajaxController extends AdminBaseController
             $this->success('已更新时间');
         }
     }
-     
+    //获取价格模板
+    public function prices(){
+        $where=[
+            'status'=>2,
+        ];
+        $prices=Db::name('price')->where($where)->order('sort asc,name asc')->column('id,name');
+        $this->assign('prices',$prices); 
+    }
+    
+    //根据分类和技术模板得到二级分类和产品
+    public function goods_get_by_template(){
+        $cid0=$this->request->param('cid0',0,'intval');
+        $tid=$this->request->param('tid',0,'intval');
+        if($cid0<=0){
+            $this->error('请选择一级分类');
+        }
+        if($tid<=0){
+            $this->error('请选择技术模板');
+        }
+        $where_cate=[
+            'fid'=>$cid0,
+            'status'=>2,
+        ];
+        $cate=Db::name('cate')->where($where_cate)->column('id,name');
+        if(empty($cate)){
+            $this->error('没有找到符合条件的产品');
+        }
+        $where_goods=[
+            'cid0'=>$cid0,
+            'status'=>2,
+            'template'=>$tid,
+        ];
+        $goods=Db::name('goods')->where($where_goods)->column('id,cid,name');
+        if(empty($goods)){
+            $this->error('没有找到符合条件的产品');
+        }
+        $where_param=[
+            'tp.t_id'=>$tid,
+            'p.status'=>2,
+        ];
+        $params=Db::name('template_param')
+        ->alias('tp')
+        ->join('cmf_param p','p.id=tp.p_id')
+        ->where($where_param)->column('p.id,p.name');
+        $this->success('ok','',['cate'=>$cate,'goods'=>$goods,'params'=>$params]);
+        
+    }
+    //获取分类下所有产品
+    public function goods(){
+        $cid=$this->request->param('cid');
+        $where=[
+            'cid'=>$cid,
+            'status'=>2,
+        ];
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            $where['shop']=$admin['shop'];
+        }
+        $goods=Db::name('goods')->where($where)->column('id,name');
+        $this->success('ok','',$goods);
+    }
+    //获取产品的参数值
+    public function get_param_by_goods(){
+        $pid=$this->request->param('pid');
+        $goods=Db::name('goods')->where('id',$pid)->find();
+        if(empty($goods)){
+            $this->error('没有找到符合条件的产品');
+        }
+        $units=config('units');
+        $unit=$units[$goods['unit']];
+        $goods['unit_name']=implode(',', $unit);
+        $param=Db::name('goods_param')->where('pid',$pid)->column('param_id,value');
+        $this->success('ok','',['goods'=>$goods,'param'=>$param]);
+    }
 }

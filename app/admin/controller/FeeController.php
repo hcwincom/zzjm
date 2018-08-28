@@ -136,7 +136,7 @@ class FeeController extends AdminInfoController
             'link'=>url('admin/'.$table.'/edit',['id'=>$id]),
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
+        Db::name('action')->insert($data_action);
         $m->commit();
         $this->success('添加成功',$url);
     }

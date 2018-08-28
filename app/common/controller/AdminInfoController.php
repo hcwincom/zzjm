@@ -556,6 +556,19 @@ class AdminInfoController extends AdminBaseController
                         $content['content']=json_encode($data_fees);
                     }
                     break;
+            case 'compare':
+                //新关联的参数
+                if(empty($_POST['pids'])){
+                    $this->error('没有选择对比产品');
+                }
+                $ids=$_POST['pids'];
+                //原本关联的
+                $ids0=db('goods_compare')->where('compare_id',$data['id'])->column('pid');
+                //计算新旧参数的差级，没有差级就是完全一样
+                if(!empty(array_diff($ids,$ids0)) ||  !empty(array_diff($ids0,$ids))){
+                    $content['pids']=json_encode($ids);
+                }
+                break;
         }
         
         if(empty($content)){
@@ -747,7 +760,32 @@ class AdminInfoController extends AdminBaseController
         //获取改变的信息
         $change=db('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
-        
+        switch ($table){
+            case 'compare':
+               //原关联产品
+                $pids0=Db::name('goods_compare')
+                ->alias('gc')
+                ->join('cmf_goods g','g.id=gc.pid')
+                ->where('gc.compare_id',$info['id'])
+                ->column('gc.pid,g.name');
+                $pids0=implode('--', $pids0);
+                $this->assign('pids0',$pids0);
+              
+                //新关联产品
+                if(isset($change['pids'])){
+                    $pids1=json_decode($change['pids'],true);
+                   
+                    $pids1=Db::name('goods')
+                    ->where('id','in',$pids1)
+                    ->column('id,name');
+                    $pids1=implode('--', $pids1);
+                    $this->assign('pids1',$pids1);
+                    
+                } 
+              
+                break;
+        }
+      
         $this->assign('info',$info);
         $this->assign('info1',$info1); 
         $this->assign('change',$change);
@@ -821,46 +859,60 @@ class AdminInfoController extends AdminBaseController
             foreach($change as $k=>$v){
                 $update_info[$k]=$v; 
             }
-            //修改了分类或编码
-            if(($table=='cate') && (isset($update_info['fid']) || isset($update_info['code_num']))){
-                //得到编码和fid
-                $info_tmp=$m->where('id',$info['pid'])->find();
-                //检查分类是否错误，级别不能错误
-                if(isset($update_info['fid']) && ($info_tmp['fid']==0 || $update_info['fid']==0)){
-                    $this->error('一级分类和二级分类不能直接转换');
-                }
-                $fid=isset($update_info['fid'])?$update_info['fid']:$info_tmp['fid'];
-                $code_num=isset($update_info['code_num'])?$update_info['code_num']:$info_tmp['code_num'];
-                //检查编码是否合法
-                $where=['code_num'=>$code_num,'fid'=>$fid];
-                $tmp=$m->where($where)->find();
-                if(!empty($tmp)){
-                    $this->error('该编码已存在');
-                }
-                if($fid==0){
-                    $max_code=config('cate_max');
-                    //如果一级分类要更新配置中记录的最大编码
-                    if($max_code<$code_num){
-                        cmf_set_dynamic_config(['cate_max'=>$code_num]);
+            switch ($table){
+                case 'cate':
+                    //修改了分类或编码 
+                    if((isset($update_info['fid']) || isset($update_info['code_num']))){
+                        //得到编码和fid
+                        $info_tmp=$m->where('id',$info['pid'])->find();
+                        //检查分类是否错误，级别不能错误
+                        if(isset($update_info['fid']) && ($info_tmp['fid']==0 || $update_info['fid']==0)){
+                            $this->error('一级分类和二级分类不能直接转换');
+                        }
+                        $fid=isset($update_info['fid'])?$update_info['fid']:$info_tmp['fid'];
+                        $code_num=isset($update_info['code_num'])?$update_info['code_num']:$info_tmp['code_num'];
+                        //检查编码是否合法
+                        $where=['code_num'=>$code_num,'fid'=>$fid];
+                        $tmp=$m->where($where)->find();
+                        if(!empty($tmp)){
+                            $this->error('该编码已存在');
+                        }
+                        if($fid==0){
+                            $max_code=config('cate_max');
+                            //如果一级分类要更新配置中记录的最大编码
+                            if($max_code<$code_num){
+                                cmf_set_dynamic_config(['cate_max'=>$code_num]);
+                            }
+                            $update_info['code']=(str_pad($code_num,2,'0',STR_PAD_LEFT));
+                        }else{
+                            //，如果是2级要更新一级中的最大编码
+                            $fcate=$m->where(['id'=>$fid])->find();
+                            if($code_num > $fcate['max_num']){
+                                $m->where(['id'=>$fid])->update(['max_num'=>$code_num]);
+                            }
+                            $update_info['code']=$fcate['code'].'-'.(str_pad($code_num,2,'0',STR_PAD_LEFT));
+                        }
+                        
+                    } 
+                    break;
+                case 'compare':
+                    //修改对比产品
+                    if(isset($update_info['pids'])){
+                        $pids=json_decode($update_info['pids']);
+                        $data_goods_compare=[];
+                        foreach($pids as $k=>$v){
+                            $data_goods_compare[]=[
+                                'pid'=>$v,
+                                'compare_id'=>$info['pid'],
+                            ];
+                        }
+                        Db::name('goods_compare')->where('compare_id',$info['pid'])->delete();
+                        Db::name('goods_compare')->insertAll($data_goods_compare);
                     }
-                    $update_info['code']=(str_pad($code_num,2,'0',STR_PAD_LEFT));
-                }else{
-                    //，如果是2级要更新一级中的最大编码
-                    $fcate=$m->where(['id'=>$fid])->find();
-                    if($code_num > $fcate['max_num']){
-                        $m->where(['id'=>$fid])->update(['max_num'=>$code_num]);
-                    }
-                    $update_info['code']=$fcate['code'].'-'.(str_pad($code_num,2,'0',STR_PAD_LEFT));
-                }
-                
+                    break;
             }
-            $row=$m->where('id',$info['pid'])->update($update_info);
-            if($row!==1){
-                $m->rollback();
-                $this->error('信息更新失败，请刷新后重试');
-            } 
-            
         }
+            
         //分类更改子级
         if(($table=='cate') && (isset($update_info['code']))){
              
@@ -1126,6 +1178,16 @@ class AdminInfoController extends AdminBaseController
                 $where_cate['fid']=0;
                 $cates=db('cate')->where($where_cate)->order('sort asc,code asc')->column('id,name');
                 $this->assign('cates',$cates);
+                break;
+            case 'compare':
+                //获取技术模板
+                $templates=db('template')->where($where_cate)->order('cid asc,sort asc')->column('id,cid,name');
+                $this->assign('templates',$templates);
+                //获取大类
+                $where_cate['fid']=0;
+                $cates=db('cate')->where($where_cate)->order('sort asc,code asc')->column('id,name');
+                $this->assign('cates0',$cates);
+                 
                 break;
             default:
                 break;

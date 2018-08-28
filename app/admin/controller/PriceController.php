@@ -63,7 +63,7 @@ class PriceController extends AdminInfoController
         foreach($prices as $k=>$v){
             
             $where['c.sort']=['between',[$k*10,$k*10+10]];
-            $fees[$k]=db('fee')
+            $fees[$k]=Db::name('fee')
             ->alias('p')
             ->join('cmf_cate_any c','c.id=p.cid')
             ->where($where)
@@ -130,7 +130,7 @@ class PriceController extends AdminInfoController
             'link'=>url('admin/'.$table.'/edit',['id'=>$id]),
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action); 
+        Db::name('action')->insert($data_action); 
         //价格关联的参数
         $data_fee=[];
         foreach($data['fee1'] as $k=>$v){
@@ -143,7 +143,7 @@ class PriceController extends AdminInfoController
             ];
         }
         
-        db('price_fee')->insertAll($data_fee);
+        Db::name('price_fee')->insertAll($data_fee);
          
         $m->commit();
         $this->success('添加成功',$url);
@@ -172,7 +172,7 @@ class PriceController extends AdminInfoController
         foreach($prices as $k=>$v){
             
             $where['c.sort']=['between',[$k*10,$k*10+10]];
-            $fees[$k]=db('price_fee')
+            $fees[$k]=Db::name('price_fee')
             ->alias('pf')
             ->join('cmf_fee p','p.id=pf.p_id')
             ->join('cmf_cate_any c','c.id=p.cid')
@@ -308,7 +308,7 @@ class PriceController extends AdminInfoController
         $id=$this->request->param('id',0,'intval');
         $table=$this->table;
         //获取编辑信息
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $info1=$m_edit->where('id',$id)->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
@@ -319,11 +319,11 @@ class PriceController extends AdminInfoController
             $this->error('编辑关联的信息不存在');
         }
         //获取改变的信息
-        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
         //模板编辑要转化content的值
         $id=$this->request->param('id',0,'intval');
-        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
         
         $change=json_decode($change,true);
         //获取改变的参数对应，转化为数组
@@ -343,7 +343,7 @@ class PriceController extends AdminInfoController
         foreach($prices as $k=>$v){
             
             $where['c.sort']=['between',[$k*10,$k*10+10]];
-            $fees[$k]=db('price_fee')
+            $fees[$k]=Db::name('price_fee')
             ->alias('pf')
             ->join('cmf_fee p','p.id=pf.p_id')
             ->join('cmf_cate_any c','c.id=p.cid')
@@ -379,7 +379,7 @@ class PriceController extends AdminInfoController
         }
         $m=$this->m;
         $table=$this->table;
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $info=$m_edit
         ->field('e.*,p.name as pname,a.user_nickname as aname')
         ->alias('e')
@@ -429,7 +429,7 @@ class PriceController extends AdminInfoController
         //是否更新,2同意，3不同意
         if($status==2){
             //得到修改的字段
-            $change=db('edit_info')->where('eid',$id)->value('content');
+            $change=Db::name('edit_info')->where('eid',$id)->value('content');
             $change=json_decode($change,true);
            
             foreach($change as $k=>$v){
@@ -446,7 +446,7 @@ class PriceController extends AdminInfoController
             } 
             //模板参数变化
             if(isset($change['content'])){
-                $m_price_fee=db('price_fee');
+                $m_price_fee=Db::name('price_fee');
                 //再还原为数组一次
                 $data_fees=json_decode($change['content'],true);
                 foreach($data_fees as $kk=>$vv){
@@ -488,8 +488,8 @@ class PriceController extends AdminInfoController
             'link'=>$link,
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
-        db('msg')->insert($data_msg);
+        Db::name('action')->insert($data_action);
+        Db::name('msg')->insert($data_msg);
          
         $m->commit();
        

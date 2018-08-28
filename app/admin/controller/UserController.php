@@ -140,7 +140,7 @@ class UserController extends AdminBaseController
         }
         //部门
         $where_dt=['status'=>1];
-        $departments=db('department')->where($where_dt)->column('id,name');
+        $departments=Db::name('department')->where($where_dt)->column('id,name');
         
         $this->assign("shops", $shops);
         $this->assign("departments", $departments);
@@ -263,7 +263,7 @@ class UserController extends AdminBaseController
         $this->assign("role_ids", $role_ids);
         //部门
         $where_dt=['status'=>1];
-        $departments=db('department')->where($where_dt)->column('id,name');
+        $departments=Db::name('department')->where($where_dt)->column('id,name');
          
         $this->assign("departments", $departments);
         $user = DB::name('user')->where(["id" => $id])->find();
@@ -365,7 +365,7 @@ class UserController extends AdminBaseController
         $id   = cmf_get_current_admin_id();
         $user = Db::name('user')->where(["id" => $id])->find();
          
-        $dt=db('department')->where('id',$user['department'])->value('name');
+        $dt=Db::name('department')->where('id',$user['department'])->value('name');
         $this->assign($user);
         $this->assign('dt',$dt);
         return $this->fetch();

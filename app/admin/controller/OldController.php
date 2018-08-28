@@ -89,7 +89,7 @@ class OldController extends AdminBaseController
       //取得数量后期比对
         $row=count($data);
       
-        $m_new=db('cate');
+        $m_new=Db::name('cate');
         //开启事务
         $m_new->startTrans();
         //先截取旧数据
@@ -119,7 +119,7 @@ class OldController extends AdminBaseController
     public function cate_correct()
     {
         $row=0;
-        $m=db('cate');
+        $m=Db::name('cate');
         //先审核
         $where=['status'=>1];
         $time=time();
@@ -144,7 +144,7 @@ class OldController extends AdminBaseController
             $m->where('id',$k)->update(['max_num'=>$v]);
         }
         //更新二级分类的max_num
-        $list=db('goods')->group('cid')->column('cid,max(code_num)');
+        $list=Db::name('goods')->group('cid')->column('cid,max(code_num)');
         if(isset($list[0])){
             unset($list[0]);
         }
@@ -226,7 +226,7 @@ class OldController extends AdminBaseController
         //取得数量后期比对
          $row=count($data_goods);
         
-        $m_goods=db('goods');
+        $m_goods=Db::name('goods');
         //开启事务
         $m_goods->startTrans();
         //先截取旧数据
@@ -237,25 +237,25 @@ class OldController extends AdminBaseController
             $this->error('同步错误');
         } 
         //详情
-        $m_info=db('goods_info'); 
+        $m_info=Db::name('goods_info'); 
         //先截取旧数据
         $m_info->execute('truncate table cmf_goods_info');
         $m_info->insertAll($data_info);
         
         //技术资料
-        $m_tech=db('goods_tech');
+        $m_tech=Db::name('goods_tech');
         //先截取旧数据
         $m_tech->execute('truncate table cmf_goods_tech');
         $m_tech->insertAll($data_tech);
         
         //说明书
-        $m_file=db('goods_file');
+        $m_file=Db::name('goods_file');
         //先截取旧数据
         $m_file->execute('truncate table cmf_goods_file');
         $m_file->insertAll($data_file);
         
         //产品图片
-        $m_file=db('goods_file');
+        $m_file=Db::name('goods_file');
         //先截取旧数据
         $m_file->execute('truncate table cmf_goods_file');
         $m_file->insertAll($data_file);
@@ -294,7 +294,7 @@ class OldController extends AdminBaseController
         }
         
         //产品图片
-        $m_file=db('goods_file');
+        $m_file=Db::name('goods_file');
         //先截取旧数据
         $m_file->execute('truncate table cmf_goods_file');
         $row_mew=$m_file->insertAll($data_file);

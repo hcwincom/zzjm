@@ -32,6 +32,7 @@ class GoodsController extends AdminBaseController
     private $flag;
     private $file_type;
     private $goods_type;
+    private $units;
     public function _initialize()
     {
         parent::_initialize();
@@ -65,6 +66,13 @@ class GoodsController extends AdminBaseController
         $this->assign('file_type',$this->file_type);
         
         $this->tables=['goods','goods_file','goods_content','goods_type2','goods_type3','goods_type4','goods_type5'];
+        //计量单位
+        $units=config('units');
+        foreach($units as $k=>$v){
+            $units[$k]=implode(',', $v);
+        }
+        $this->units=$units;
+        $this->assign('units',$units);
     }
      
     /**
@@ -4850,7 +4858,7 @@ class GoodsController extends AdminBaseController
         ];
         //产品的字段
         $fields=['cid','cid0','code_num','code_name','code','name','name2','name3',
-            'type','sn_type','sn','brand','bchar','weight0','length0','width0',
+            'type','sn_type','sn','brand','bchar','unit','weight0','length0','width0',
             'height0','size0','is_box','weight1','length1','width1',
             'height1','size1','template','price','price_sale','price_in','price_cost',
             'price_min','price_range1','price_range2','price_range3','price_dealer1',
@@ -5707,6 +5715,7 @@ class GoodsController extends AdminBaseController
             'name3'=>$data0['name3'],
             'brand'=>$data0['brand'],
             'bchar'=>$data0['bchar'],
+            'unit'=>$data0['unit'],
         ];
         if(empty($data['code_num'])){
             return ('未添加编码');

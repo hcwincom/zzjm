@@ -60,7 +60,7 @@ class TemplateController extends AdminInfoController
     public function add()
     {
         parent::add();
-        $params=db('param')->field('id,name,content,type')->where('status',2)->order('id asc')->select();
+        $params=Db::name('param')->field('id,name,content,type')->where('status',2)->order('id asc')->select();
        
        $this->assign('params',$params);
        $this->assign('end',count($params)-1);
@@ -123,7 +123,7 @@ class TemplateController extends AdminInfoController
             'link'=>url('admin/'.$table.'/edit',['id'=>$id]),
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action); 
+        Db::name('action')->insert($data_action); 
         //关联的参数 
         if(empty($_POST['ids'])){
             $this->error('没有选择参数项');
@@ -137,7 +137,7 @@ class TemplateController extends AdminInfoController
                 't_id'=>$id,
             ];
         }
-        db('template_param')->insertAll($data_param);
+        Db::name('template_param')->insertAll($data_param);
         
         $m->commit();
         $this->success('添加成功',$url);
@@ -159,10 +159,10 @@ class TemplateController extends AdminInfoController
     {
         parent::edit(); 
         //获取所有参数供选择
-        $params=db('param')->field('id,name,content,type')->where('status',2)->order('id asc')->select();
+        $params=Db::name('param')->field('id,name,content,type')->where('status',2)->order('id asc')->select();
         //获取关联的参数
         $id=input('id',0,'intval');
-        $ids=db('template_param')->where('t_id',$id)->column('p_id');
+        $ids=Db::name('template_param')->where('t_id',$id)->column('p_id');
         $this->assign('params',$params);
         $this->assign('end',count($params)-1);
         $this->assign('ids',$ids);
@@ -292,7 +292,7 @@ class TemplateController extends AdminInfoController
         $id=$this->request->param('id',0,'intval');
         $table=$this->table;
         //获取编辑信息
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $info1=$m_edit->where('id',$id)->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
@@ -303,11 +303,11 @@ class TemplateController extends AdminInfoController
             $this->error('编辑关联的信息不存在');
         }
         //获取改变的信息
-        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
         //模板编辑要转化content的值
         $id=$this->request->param('id',0,'intval');
-        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
         
         $change=json_decode($change,true);
         //获取改变的参数对应，转化为数组
@@ -320,10 +320,10 @@ class TemplateController extends AdminInfoController
         $this->cates();
          
         //获取所有参数供选择
-        $params=db('param')->field('id,name,content,type')->where('status',2)->order('id asc')->select();
+        $params=Db::name('param')->field('id,name,content,type')->where('status',2)->order('id asc')->select();
         //获取关联的参数
         $id=input('id',0,'intval');
-        $ids=db('template_param')->where('t_id',$info1['pid'])->column('p_id');
+        $ids=Db::name('template_param')->where('t_id',$info1['pid'])->column('p_id');
         $this->assign('params',$params);
         $this->assign('end',count($params)-1);
         $this->assign('ids',$ids);
@@ -353,7 +353,7 @@ class TemplateController extends AdminInfoController
         }
         $m=$this->m;
         $table=$this->table;
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $info=$m_edit
         ->field('e.*,p.name as pname,a.user_nickname as aname')
         ->alias('e')
@@ -403,7 +403,7 @@ class TemplateController extends AdminInfoController
         //是否更新,2同意，3不同意
         if($status==2){
             //得到修改的字段
-            $change=db('edit_info')->where('eid',$id)->value('content');
+            $change=Db::name('edit_info')->where('eid',$id)->value('content');
             $change=json_decode($change,true);
            
             foreach($change as $k=>$v){
@@ -421,7 +421,7 @@ class TemplateController extends AdminInfoController
             } 
             //模板参数变化
             if(isset($p_ids)){
-                $m_t_p=db('template_param');
+                $m_t_p=Db::name('template_param');
                 $data_t_p=[];
                 foreach($p_ids as $v){
                     $data_t_p[]=[
@@ -460,8 +460,8 @@ class TemplateController extends AdminInfoController
             'link'=>$link,
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
-        db('msg')->insert($data_msg);
+        Db::name('action')->insert($data_action);
+        Db::name('msg')->insert($data_msg);
          
         $m->commit();
        

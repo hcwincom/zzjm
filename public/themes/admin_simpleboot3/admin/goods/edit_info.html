@@ -109,14 +109,24 @@
 			 <div class="form-group">
 				<label for="" class="col-sm-2 control-label">品牌</label>
 				<div class="col-md-6 col-sm-10">
-					 <input type="text" class="form-control"  value="{$info.bname|default=$info.brand}" />
+					 <input type="text" class="form-control"  value="{$info.bname|default=$info.brand}" readonly/>
 				 <present name="change.brand">
 					<input type="text" class="red form-control" value="{$change.bname|default=$change.brand}" readonly/>
 				 </present>		 
 				</div>
 			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">计量单位</label>
+				<div class="col-md-6 col-sm-10">
+					
+					<input type="text" class="form-control"  value="{$units[$info.unit]}" readonly/>
+				 <present name="change.unit">
+					<input type="text" class="red form-control" value="{$units[$change.unit]}" readonly/>
+				 </present>	
+				</div>
+			</div>
 			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">大小(长度单位mm,重量单位g)</label>
+				<label for="" class="col-sm-2 control-label">重量体积参数</label>
 				<div class="col-md-6 col-sm-10">
 					<table class="table table-hover table-bordered table-list params">
 					 
