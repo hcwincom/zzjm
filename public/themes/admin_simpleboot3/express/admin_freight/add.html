@@ -1,0 +1,42 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
+			 
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="name" value="" required/>
+				</div>
+			</div>
+		 
+			  <div class="form-group">
+				<label for="" class="col-sm-2 control-label">简介</label>
+				<div class="col-md-6 col-sm-10">
+					 
+					<textarea class="form-control" name="dsc" rows="5"  maxlength="250"></textarea>
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">排序</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="sort" value="1000" />
+				</div>
+			</div>
+			 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+					 
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+	 
+</body>
+</html>

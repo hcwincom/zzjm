@@ -9,6 +9,7 @@ use think\Db;
 class OldController extends AdminBaseController
 {
     private $dbconfig;
+    private $db_old;
     public function _initialize()
     {
         //链接数据库
@@ -25,6 +26,7 @@ class OldController extends AdminBaseController
         if($aid!=1){
             $this->error('开发者功能，不要操作');
         }
+        $this->db_old= config('db_old');
     }
      
     /**
@@ -45,10 +47,11 @@ class OldController extends AdminBaseController
         $list=[
             '产品分类同步'=>url('cate'),
             '产品分类数据更正'=>url('cate_correct'),
-            '产品基本数据'=>url('goods'),
-            '产品图片同步'=>url('goods_pic'),
-            '客户主体'=>url('customer'),
-            '客户联系人'=>url('customer_tel'),
+            '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
+            
+            '客户数据(所属公司+分类+主体)'=>url('custom'),
+            
+            '客户联系人'=>url('custom_tel'),
             '供货商'=>url('supplier'),
             '供货商主体'=>url('supplier_tel'),
         ];
@@ -182,8 +185,7 @@ class OldController extends AdminBaseController
                 'sn'=>$tmp['tiao'],
                 'code_name'=>$tmp['codename'],
                 'code_num'=>$tmp['codenum'], 
-                'price_sale'=>$tmp['sell_price'],
-                'pid'=>$tmp['pid'],
+                'price_sale'=>$tmp['sell_price'], 
                 'pic'=>$tmp['img'],
                 'weight0'=>$tmp['weight'],
                 'weight1'=>$tmp['weight'],
@@ -255,50 +257,146 @@ class OldController extends AdminBaseController
         $m_file->insertAll($data_file);
         
         //产品图片
-        $m_file=Db::name('goods_file');
-        //先截取旧数据
-        $m_file->execute('truncate table cmf_goods_file');
-        $m_file->insertAll($data_file);
-        
-        $m_goods->commit();
-        $this->success('已同步数据数'.$row_mew);
-    }
-    /* 产品图片 */
-    public function goods_pic()
-    {
-        
-        $m= mysqli_init();
-        $m->options(MYSQLI_OPT_CONNECT_TIMEOUT, 2);//设置超时时间
-        $dbconfig=$this->dbconfig;
-        $m->real_connect($dbconfig['host'],$dbconfig['user'],$dbconfig['psw'],$dbconfig['dbname'],$dbconfig['port']);
         $sql='select id,goods_id as pid,img as file from sp_goods_photo where goods_id>0';
        
         $res=$m->query($sql);
         if(empty($res)){
             $this->error('数据查询错误');
-        } 
+        }
+        $data_file=[];
         
-        $data_file=[]; 
         while($tmp=($res->fetch_assoc())){
-            if(is_file()){
-                
-            }
-            $data_file[]=[
-                'id'=>$tmp['id'],
+            
+            $data_file[]=[ 
                 'pid'=>$tmp['pid'],
                 'file'=>$tmp['file'],
                 'name'=>'极敏商城图片'.$tmp['id'],
                 'type'=>1,
             ];
-             
+            
+        }
+        $m_file->insertAll($data_file);
+        
+        $m_goods->commit();
+        $this->success('已同步数据数'.$row_mew);
+    }
+    //客户相关信息
+    public function custom_about()
+    {
+        $m_old=Db::connect($this->db_old);
+        $sql='select id,company as name,code,allname,account_name,account_bank,account_num,feenum,contact,address'.
+            ' from sp_company ';
+        $data=$m_old->query($sql);
+        //取得数量后期比对
+        $row=count($data);
+        
+        $m_new=Db::name('company');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_company');
+        $row_mew=$m_new->insertAll($data);
+        if($row_mew==$row){
+            $m_new->commit();
+        }else{
+            $m_new->rollback();
+            $this->error('同步所属公司错误');
+        }
+        //付款方式suppaytype
+        
+         
+        //转账银行
+        $sql='select id,bank_name as name'.
+            ' from sp_news_bank ';
+        $data=$m_old->query($sql);
+        
+        //取得数量后期比对
+        $row=count($data);
+        $m_new=Db::name('bank');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_bank');
+        $row_mew=$m_new->insertAll($data);
+        if($row_mew==$row){
+            $m_new->commit();
+        }else{
+            $m_new->rollback();
+            $this->error('同步银行信息错误');
         }
         
-        //产品图片
-        $m_file=Db::name('goods_file');
+        //发货物流
+        $sql='select id,bank_name as name'.
+            ' from sp_news_bank ';
+        $data=$m_old->query($sql);
+        
+        //取得数量后期比对
+        $row=count($data);
+        $m_new=Db::name('bank');
+        //开启事务
+        $m_new->startTrans();
         //先截取旧数据
-        $m_file->execute('truncate table cmf_goods_file');
-        $row_mew=$m_file->insertAll($data_file);
+        $m_new->execute('truncate table cmf_bank');
+        $row_mew=$m_new->insertAll($data);
+        if($row_mew==$row){
+            $m_new->commit();
+        }else{
+            $m_new->rollback();
+            $this->error('同步银行信息错误');
+        }
         
         $this->success('已同步数据数'.$row_mew);
     }
+    //客户
+    public function custom()
+    {
+        $m_old=Db::connect($this->db_old);
+        
+        
+        //客户分类
+        $sql='select id,customcate_name as name,sort,addtime as atime,note as dsc'.
+            ' from sp_customcate ';
+        $data=$m_old->query($sql); 
+        
+        //取得数量后期比对
+        $row=count($data);
+        
+        $m_new=Db::name('customcate');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_customcate');
+        $row_mew=$m_new->insertAll($data);
+        if($row_mew==$row){
+            $m_new->commit();
+        }else{
+            $m_new->rollback();
+            $this->error('同步客户分类错误');
+        }
+       
+        
+        
+        //获取主体数据
+        $sql='select * from sp_user ';
+        $data=$m_old->query($sql); 
+        foreach($data as $k=>$v){
+            //组装数据
+            
+            //组装联系人，默认收货人default_reciver
+        }
+        $this->success('已同步数据数'.$row_mew);
+    }
+    
+    //客户和供货商联系人和收款账号
+    public function custom_tel(){
+        $db_old=$this->db_old;
+        //联系人new_contacts
+        $list=Db::connect($db_old)->query('select * from new_contacts');
+//         $list=Db::name('user')->limit(10)->select();
+        dump($list);
+        
+        //new_accounts
+        exit;
+    }
+    
 }

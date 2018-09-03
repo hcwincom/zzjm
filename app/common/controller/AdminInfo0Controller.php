@@ -4,8 +4,10 @@ namespace app\common\controller;
 
 use cmf\controller\AdminBaseController; 
 use think\Db; 
-
-class AdminInfoController extends AdminBaseController
+/*
+ * 和admininfo功能相同，为了单个进程代码更简洁，复制了一份
+ */
+class AdminInfo0Controller extends AdminBaseController
 {
     protected $m;
     protected $statuss;
@@ -13,7 +15,7 @@ class AdminInfoController extends AdminBaseController
     protected $table;
     protected $fields;
     protected $flag;
-   
+    protected $isshop;
     public function _initialize()
     {
         parent::_initialize();
@@ -32,8 +34,19 @@ class AdminInfoController extends AdminBaseController
     {
         $table=$this->table;
         $m=$this->m;
+        $admin=$this->admin;
         $data=$this->request->param();
         $where=[];
+        //判断是否有店铺
+        $join=[];
+        $field='p.*';
+        if($this->isshop){
+            if($admin['shop']!=1){
+                $where['p.shop']=['eq',$admin['shop']];
+            }
+            $join[]=['cmf_shop shop','p.shop=shop.id'];
+            $field.=',shop.name as sname';
+        }
         //状态
         if(empty($data['status'])){
             $data['status']=0;
@@ -52,18 +65,7 @@ class AdminInfoController extends AdminBaseController
         }else{
             $where['p.rid']=['eq',$data['rid']];
         }
-        //所属分类
-        if(empty($data['cid'])){
-            $data['cid']=0;
-        }else{
-            $where['p.cid']=['eq',$data['cid']];
-        }
-        //所属字母分类
-        if(empty($data['char']) || $data['char']=='-1'){
-            $data['char']='-1';
-        }else{
-            $where['p.char']=['eq',$data['char']];
-        }
+         
         //类型
         if(empty($data['type'])){
             $data['type']=0;
@@ -127,8 +129,9 @@ class AdminInfoController extends AdminBaseController
         }
         $list=$m
         ->alias('p')
-        ->field('p.*')
-        ->where($where)
+        ->field($field)
+        ->join($join)
+        ->where($where) 
         ->order('p.status asc,p.sort asc,p.time desc')
         ->paginate();
         
@@ -148,8 +151,7 @@ class AdminInfoController extends AdminBaseController
             'shop'=>1,
         ];
         $rids=$m_user->where($where_rid)->column('id,user_nickname');
-        //分类信息
-        $this->cates();
+       
         $this->assign('page',$page);
         $this->assign('list',$list);
         $this->assign('aids',$aids);
@@ -165,7 +167,53 @@ class AdminInfoController extends AdminBaseController
      */
     public function add()
     {
-       $this->cates();
+       
+    }
+    /* 添加 */
+    public function add_do()
+    {
+        $m=$this->m;
+        $data=$this->request->param();
+        if(empty($data['name'])){
+            $this->error('名称不能为空');
+        }
+        
+        $url=url('index');
+        
+        $table=$this->table;
+        $time=time();
+        $admin=$this->admin;
+        $data_add=$data;
+        $data_add['sort']=intval($data['sort']);
+        $data_add['status']=1;
+      
+        $data_add['aid']=$admin['id'];
+        $data_add['atime']=$time;
+        $data_add['time']=$time;
+        //判断是否有店铺
+        if($this->isshop){
+            $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
+        } 
+        $m->startTrans();
+        $id=$m->insertGetId($data_add);
+        
+        //记录操作记录
+        $flag=$this->flag;
+        $table=$this->table;
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>'添加'.$flag.$id.'-'.$data['name'],
+            'table'=>$table,
+            'type'=>'add',
+            'pid'=>$id,
+            'link'=>url('edit',['id'=>$id]),
+            'shop'=>$admin['shop'],
+        ];
+        Db::name('action')->insert($data_action);
+        $m->commit();
+        $this->success('添加成功',$url);
     }
     /**
      * 信息详情 
@@ -185,9 +233,7 @@ class AdminInfoController extends AdminBaseController
             $this->error('数据不存在');
         }
         
-        //对应分类数据
-        $this->cates();
-       
+        
         $this->assign('info',$info); 
        
     }
@@ -231,7 +277,7 @@ class AdminInfoController extends AdminBaseController
         $statuss=$this->statuss;
         $table=$this->table;
         //记录操作记录
-        $link=url('admin/'.$table.'/edit',['id'=>$info['id']]);
+        $link=url('edit',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -412,7 +458,7 @@ class AdminInfoController extends AdminBaseController
         $admin=$this->admin;
         //其他店铺的审核判断
         if($admin['shop']!=1){
-            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+            if(isset($info['shop']) && $info['shop']!=$admin['shop']){
                 $this->error('不能编辑其他店铺的信息');
             }
         }
@@ -429,142 +475,19 @@ class AdminInfoController extends AdminBaseController
        
         $fields=config($table.'_edit');
         if(empty($fields)){
-            $fields=config('base_edit');
+            $fields=config('base0_edit');
         }
         $content=[];
         //检测改变了哪些字段
         foreach($fields as $k=>$v){
-             
             //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
-            if(isset($data[$k]) && $info[$k]!=$data[$k]){ 
-                $content[$k]=$data[$k];
+            if(isset($data[$v]) && $info[$v]!=$data[$v]){ 
+                $content[$v]=$data[$v];
             }
+             
         }
         switch ($table){
-            case 'cate':
-                //修改了分类或编码
-                if(isset($content['fid']) || isset($content['code_num'])){
-                    //检查分类是否错误，级别不能错误
-                    if(isset($content['fid']) && ($content['fid']==0 || $data['fid']==0)){
-                        $this->error('一级分类和二级分类不能直接转换');
-                    }
-                    //检查编码是否合法
-                    $where=['code_num'=>$data['code_num'],'fid'=>$data['fid']];
-                    $tmp=$m->where($where)->find();
-                    if(!empty($tmp)){
-                        $this->error('该编码已存在');
-                    }
-                }
-                
-                break;
-            case 'brand':
-                //检查名称
-                if(isset($content['name']) || isset($content['char'])){
-                    if(empty($data['char'])){
-                        $char=zz_first_char($data['name']);
-                    }else{
-                        $char=zz_first_char($data['char']);
-                    }
-                    
-                    if(empty($char)){
-                        $this->error('输入非法，无法获取首字母');
-                    }
-                    
-                    $content['char']=$char;
-                }
-                
-                //处理图片
-                $path='upload/';
-                if(!empty($content['pic'])){
-                    if(is_file($path.$content['pic'])){
-                        if(!is_dir($path.$info['path'])){
-                            mkdir($path.$info['path']);
-                        }
-                        $pic_conf=config('pic_'.$table);
-                        $content['pic']=$info['path'].'/'.$admin['id'].'-'.$time.'.jpg';
-                        zz_set_image($data['pic'], $content['pic'], $pic_conf[0], $pic_conf[1],$pic_conf[2]);
-                        unlink($path.$data['pic']);
-                    }else{
-                        unset($content['pic']);
-                    }
-                    
-                }
-                break;
-            case 'param':
-                //清除不规范输入导致的空格
-                if(!empty($content['content'])){
-                    //3是自由输入
-                    if($info['type']==3){
-                        unset($content['content']);
-                    }else{
-                        //清除不规范输入导致的空格
-                        $content['content']=zz_delimiter($content['content']);
-                    }
-                }
-                break;
-            case 'template':
-                //新关联的参数
-                if(empty($_POST['ids'])){
-                    $this->error('没有选择参数项');
-                } 
-                $ids=$_POST['ids'];  
-                //原本关联的
-                $ids0=Db::name('template_param')->where('t_id',$data['id'])->column('p_id');
-                 //计算新旧参数的差级，没有差级就是完全一样 
-                if(!empty(array_diff($ids,$ids0)) ||  !empty(array_diff($ids0,$ids))){
-                    $content['content']=implode(',', $ids);
-                }
-                break;
-            case 'fee':
-                //过滤费用值
-                if(isset($content['fee'])){
-                    $content['fee']=round($content['fee'],4);
-                }
-                break;
-            case 'price':
-                    $fee1=$data['fee1']; 
-                    $type1=$data['type1']; 
-                    $dsc1=$data['dsc1']; 
-                    //获取所有价格参数来比较，暂时获取全部
-                    $prices=config('prices');
-                    //模板关联，获取全部，多点也没关系
-                    $where=['pf.t_id'=>['eq',$data['id']]];
-                    
-                    $fees0=Db::name('price_fee')
-                    ->alias('pf')
-                    ->where($where)
-                    ->column('pf.p_id,pf.fee,pf.type,pf.dsc');
-                    //循环比较
-                    $data_fees=[];
-                    foreach($fee1 as $k=>$vv){
-                        $v=$fees0[$k];
-                        $vv=round($vv,4);
-                        if($vv!=$v['fee'] || $type1[$k]!=$v['type'] || $dsc1[$k]!=$v['dsc']){
-                            $data_fees[$k]=[
-                                'p_id'=>$k,
-                                'fee'=>$vv,
-                                'type'=>$type1[$k],
-                                'dsc'=>$dsc1[$k],
-                            ];
-                        }
-                    }
-                    if(!empty($data_fees)){
-                        $content['content']=json_encode($data_fees);
-                    }
-                    break;
-            case 'compare':
-                //新关联的参数
-                if(empty($_POST['pids'])){
-                    $this->error('没有选择对比产品');
-                }
-                $ids=$_POST['pids'];
-                //原本关联的
-                $ids0=Db::name('goods_compare')->where('compare_id',$data['id'])->column('pid');
-                //计算新旧参数的差级，没有差级就是完全一样
-                if(!empty(array_diff($ids,$ids0)) ||  !empty(array_diff($ids0,$ids))){
-                    $content['pids']=json_encode($ids);
-                }
-                break;
+            
         }
         
         if(empty($content)){
@@ -585,7 +508,7 @@ class AdminInfoController extends AdminBaseController
             $this->error('保存数据错误，请重试');
         }
         //记录操作记录
-        $link=url('admin/'.$table.'/edit_info',['id'=>$eid]);
+        $link=url('edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -722,8 +645,7 @@ class AdminInfoController extends AdminBaseController
             'shop'=>1,
         ];
         $rids=$m_user->where($where_rid)->column('id,user_nickname');
-        //分类信息
-        $this->cates();
+         
         $this->assign('page',$page);
         $this->assign('list',$list);
         $this->assign('aids',$aids);
@@ -785,7 +707,7 @@ class AdminInfoController extends AdminBaseController
         $this->assign('info',$info);
         $this->assign('info1',$info1); 
         $this->assign('change',$change);
-        $this->cates();
+       
     }
     
     /**
@@ -818,10 +740,8 @@ class AdminInfoController extends AdminBaseController
        
         $admin=$this->admin;
         //其他店铺的审核判断
-        if($admin['shop']!=1){
-            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
-                $this->error('不能审核其他店铺的信息');
-            }
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+           $this->error('不能审核其他店铺的信息'); 
         }
         $time=time();
         
@@ -857,98 +777,22 @@ class AdminInfoController extends AdminBaseController
             }
             switch ($table){
                 case 'cate':
-                    //修改了分类或编码 
-                    if((isset($update_info['fid']) || isset($update_info['code_num']))){
-                        //得到编码和fid
-                        $info_tmp=$m->where('id',$info['pid'])->find();
-                        //检查分类是否错误，级别不能错误
-                        if(isset($update_info['fid']) && ($info_tmp['fid']==0 || $update_info['fid']==0)){
-                            $this->error('一级分类和二级分类不能直接转换');
-                        }
-                        $fid=isset($update_info['fid'])?$update_info['fid']:$info_tmp['fid'];
-                        $code_num=isset($update_info['code_num'])?$update_info['code_num']:$info_tmp['code_num'];
-                        //检查编码是否合法
-                        $where=['code_num'=>$code_num,'fid'=>$fid];
-                        $tmp=$m->where($where)->find();
-                        if(!empty($tmp)){
-                            $this->error('该编码已存在');
-                        }
-                        if($fid==0){
-                            $max_code=config('cate_max');
-                            //如果一级分类要更新配置中记录的最大编码
-                            if($max_code<$code_num){
-                                cmf_set_dynamic_config(['cate_max'=>$code_num]);
-                            }
-                            $update_info['code']=(str_pad($code_num,2,'0',STR_PAD_LEFT));
-                        }else{
-                            //，如果是2级要更新一级中的最大编码
-                            $fcate=$m->where(['id'=>$fid])->find();
-                            if($code_num > $fcate['max_num']){
-                                $m->where(['id'=>$fid])->update(['max_num'=>$code_num]);
-                            }
-                            $update_info['code']=$fcate['code'].'-'.(str_pad($code_num,2,'0',STR_PAD_LEFT));
-                        }
-                        
-                    } 
+                    
                     break;
-                case 'compare':
-                    //修改对比产品
-                    if(isset($update_info['pids'])){
-                        $pids=json_decode($update_info['pids']);
-                        $data_goods_compare=[];
-                        foreach($pids as $k=>$v){
-                            $data_goods_compare[]=[
-                                'pid'=>$v,
-                                'compare_id'=>$info['pid'],
-                            ];
-                        }
-                        Db::name('goods_compare')->where('compare_id',$info['pid'])->delete();
-                        Db::name('goods_compare')->insertAll($data_goods_compare);
-                    }
-                    break;
-            }
-        }
-            
-        //分类更改子级
-        if(($table=='cate') && (isset($update_info['code']))){
-             
-            //一级分类要更新下级编码
-            if($fid==0){
-                //获取下级分类更新编码
-                $cates=$m->where('fid',$info['pid'])->column('id,code_num');
-               
-                foreach($cates as $k=>$v){
-                    $data_cate=[
-                        'id'=>$k,
-                        'code'=>$update_info['code'].'-'.(str_pad($v,2,'0',STR_PAD_LEFT)),
-                    ];
-                    $m->update($data_cate);
-                    //更新产品编码
-                    $sql='update cmf_goods set code=concat("'.$data_cate['code'].'","-0",code_num) '.
-                    'where cid='.$data_cate['id'].' and code_num<10';
-                    Db::execute($sql);
-                    $sql='update cmf_goods set code=concat("'.$data_cate['code'].'","-",code_num) '.
-                        'where cid='.$data_cate['id'].' and code_num>=10';
-                    Db::execute($sql);
-                }
-            }else{
                 
-                //更新产品编码
-                $sql='update cmf_goods set cid0='.$fid.',code=concat("'.$update_info['code'].'","-0",code_num) '.
-                    'where cid='.$info['id'].' and code_num<10';
-                Db::execute($sql);
-                $sql='update cmf_goods set code=concat("'.$update_info['code'].'","-",code_num) '.
-                    'where cid='.$info['id'].' and code_num>=10';
-                Db::execute($sql);
             }
-            
-            
+            $row=$m->where('id',$info['pid'])->update($update_info);
+            if($row!==1){
+                $m->rollback();
+                $this->error('信息更新失败，请刷新后重试');
+            }
         }
+          
         //审核成功，记录操作记录,发送审核信息
         $flag=$this->flag;
         $review_status=$this->review_status;
         //记录操作记录
-        $link=url('admin/'.$table.'/edit_info',['id'=>$info['id']]);
+        $link=url('edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -1004,7 +848,7 @@ class AdminInfoController extends AdminBaseController
             ->where($where)
             ->find();
             if($tmp['shop']!=$admin['shop']){
-                $this->error('不能审核其他店铺的信息');
+                $this->error('不能操作其他店铺的信息');
             }else{
                 $where['e.shop']=['eq',$admin['shop']];
             }
@@ -1089,11 +933,14 @@ class AdminInfoController extends AdminBaseController
             $tmp=$m
             ->where($where)
             ->find();
-            if(empty($tmp['shop']) || $tmp['shop']!=$admin['shop']){
-                $this->error('只能操作自己店铺的信息');
-            }else{
-                $where['shop']=['eq',$admin['shop']];
-            }
+            if(isset($tmp['shop']) ){
+                
+                if($tmp['shop']!=$admin['shop']){
+                    $this->error('不能操作其他店铺的信息');
+                }else{
+                    $where['shop']=['eq',$admin['shop']];
+                } 
+            } 
         }
        
         $count=count($ids);
@@ -1132,62 +979,11 @@ class AdminInfoController extends AdminBaseController
         //不同表处理
         switch($table){
             //模板表删除参数对应
-            case 'template':
-                Db::name('template_param')->where(['t_id'=>['in',$ids]])->delete();
-                break;
-            case 'price':
-                Db::name('price_fee')->where(['t_id'=>['in',$ids]])->delete();
-                break;
+           
         }
         $m->commit(); 
         $this->success('成功删除数据'.$tmp.'条');
        
     }
-    
-    //分类信息展示
-    /**
-     * 分类信息
-     *   */
-    public function cates(){
-        $table=$this->table; 
-        $where_cate=['status'=>2];
-        switch($table){
-            case 'param': 
-            case 'price':
-                break;
-            case 'fee': 
-                $where_cate=[
-                    'fid'=>0,
-                    'status'=>2,
-                    'table'=>$table,
-                ];
-                $cates=Db::name('cate_any')->where($where_cate)->column('id,name');
-                $this->assign('cates',$cates);
-                
-                break;
-            case 'brand': 
-                $cates=config('chars');
-                $this->assign('cates',$cates);
-                break;
-            case 'template':
-                //获取大类
-                $where_cate['fid']=0;
-                $cates=Db::name('cate')->where($where_cate)->order('sort asc,code asc')->column('id,name');
-                $this->assign('cates',$cates);
-                break;
-            case 'compare':
-                //获取技术模板
-                $templates=Db::name('template')->where($where_cate)->order('cid asc,sort asc')->column('id,cid,name');
-                $this->assign('templates',$templates);
-                //获取大类
-                $where_cate['fid']=0;
-                $cates=Db::name('cate')->where($where_cate)->order('sort asc,code asc')->column('id,name');
-                $this->assign('cates0',$cates);
-                 
-                break;
-            default:
-                break;
-        }
-    }
-    
+     
 }

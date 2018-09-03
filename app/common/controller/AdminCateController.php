@@ -3,7 +3,7 @@
 namespace app\common\controller;
 
 use cmf\controller\AdminBaseController;
-
+use think\Db; 
 
 class AdminCateController extends AdminBaseController
 {
@@ -20,7 +20,7 @@ class AdminCateController extends AdminBaseController
         
         $this->statuss=config('info_status');
         $this->review_status=config('review_status');
-        $this->m=db('cate_any');
+        $this->m=Db::name('cate_any');
         $this->assign('statuss',$this->statuss);
         $this->assign('review_status',$this->review_status);
         $this->assign('html',$this->request->action());
@@ -120,7 +120,7 @@ class AdminCateController extends AdminBaseController
         ->paginate();
         // 获取分页显示
         $page = $list->appends($data)->render();
-        $m_user=db('user');
+        $m_user=Db::name('user');
         //创建人
         $where_aid=[
             'user_type'=>1,
@@ -186,13 +186,13 @@ class AdminCateController extends AdminBaseController
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'添加'.$flag.$id.'-'.$data['name'],
-            'table'=>$table,
-            'type'=>'cate_add',
+            'table'=>$table.'cate',
+            'type'=>'add',
             'pid'=>$id,
-            'link'=>url('admin/'.$table.'cate/edit',['id'=>$id]),
+            'link'=>url('edit',['id'=>$id]),
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
+        Db::name('action')->insert($data_action);
         $m->commit();
         $this->success('添加成功',url('index'));
     }
@@ -266,14 +266,15 @@ class AdminCateController extends AdminBaseController
         $statuss=$this->statuss;
       
         //记录操作记录
-        $link=url('admin/'.$table.'cate/edit',['id'=>$info['id']]);
+        $link=url('edit',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'审核'.$flag.$info['id'].'-'.$info['name'].'的状态为'.$statuss[$status],
-            'table'=>$table,
-            'type'=>'cate_review',
+          
+            'table'=>$table.'cate',
+            'type'=>'review',
             'pid'=>$info['id'],
             'link'=>$link,
             'shop'=>$admin['shop'],
@@ -288,8 +289,8 @@ class AdminCateController extends AdminBaseController
             'link'=>$link,
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
-        db('msg')->insert($data_msg);
+        Db::name('action')->insert($data_action);
+        Db::name('msg')->insert($data_msg);
         $m->commit();
         $this->success('审核成功');
     }
@@ -364,8 +365,8 @@ class AdminCateController extends AdminBaseController
             $m->rollback();
             $this->error('没有数据审核成功，批量审核只能把未审核的数据审核为正常');
         }
-        db('action')->insert($data_action);
-        db('msg')->insertAll($data_msg);
+        Db::name('action')->insert($data_action);
+        Db::name('msg')->insertAll($data_msg);
         $m->commit();
         $this->success('审核成功'.$rows.'条数据');
     }
@@ -486,7 +487,7 @@ class AdminCateController extends AdminBaseController
             $this->error('未修改');
         }
         //保存更改
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $m_edit->startTrans();
         $eid=$m_edit->insertGetId($update);
         if($eid>0){
@@ -494,25 +495,25 @@ class AdminCateController extends AdminBaseController
                 'eid'=>$eid,
                 'content'=>json_encode($content),
             ];
-            db('edit_info')->insert($data_content);
+            Db::name('edit_info')->insert($data_content);
         }else{
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
         //记录操作记录
-        $link=url('admin/'.$table.'cate/edit_info',['id'=>$eid]);
+        $link=url('edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'编辑'.$flag.$info['id'].'-'.$info['name'],
-            'table'=>$table,
-            'type'=>'cate_edit',
+            'table'=>$table.'cate',
+            'type'=>'edit',
             'pid'=>$info['id'],
             'link'=>$link,
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
+        Db::name('action')->insert($data_action);
         $m_edit->commit();
         $this->success('已提交修改');
     }
@@ -523,7 +524,7 @@ class AdminCateController extends AdminBaseController
     {
         
         $table=$this->table;
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $flag=$this->flag;
         $data=$this->request->param();
         //查找当前表的编辑
@@ -613,7 +614,7 @@ class AdminCateController extends AdminBaseController
         
         // 获取分页显示
         $page = $list->appends($data)->render();
-        $m_user=db('user');
+        $m_user=Db::name('user');
         //创建人
         $where_aid=[
             'user_type'=>1,
@@ -646,7 +647,7 @@ class AdminCateController extends AdminBaseController
         $id=$this->request->param('id',0,'intval');
         $table=$this->table;
         //获取编辑信息
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $where=[
             'id'=>$id,
             'table'=>$table.'cate',
@@ -661,7 +662,7 @@ class AdminCateController extends AdminBaseController
             $this->error('编辑关联的信息不存在');
         }
         //获取改变的信息
-        $change=db('edit_info')->where('eid',$id)->value('content');
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
         
         $this->assign('info',$info);
@@ -683,7 +684,7 @@ class AdminCateController extends AdminBaseController
         }
         $m=$this->m;
         $table=$this->table;
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $where=[
             'e.id'=>$id,
             'e.table'=>$table.'cate',
@@ -735,7 +736,7 @@ class AdminCateController extends AdminBaseController
                 'time'=>$time,
             ];
             //得到修改的字段
-            $change=db('edit_info')->where('eid',$id)->value('content');
+            $change=Db::name('edit_info')->where('eid',$id)->value('content');
             $change=json_decode($change,true);
             
             foreach($change as $k=>$v){
@@ -753,14 +754,14 @@ class AdminCateController extends AdminBaseController
         $flag=$this->flag;
         $review_status=$this->review_status;
         //记录操作记录
-        $link=url('admin/'.$table.'cate/edit_info',['id'=>$info['id']]);
+        $link=url('edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
-            'table'=>$table,
-            'type'=>'cate_edit_review',
+            'table'=>$table.'cate',
+            'type'=>'edit_review',
             'pid'=>$info['pid'],
             'link'=>$link,
             'shop'=>$admin['shop'],
@@ -775,8 +776,8 @@ class AdminCateController extends AdminBaseController
             'link'=>$link,
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
-        db('msg')->insert($data_msg);
+        Db::name('action')->insert($data_action);
+        Db::name('msg')->insert($data_msg);
         
         $m->commit();
         $this->success('审核成功');
@@ -793,7 +794,7 @@ class AdminCateController extends AdminBaseController
         
         $admin=$this->admin;
         $table=$this->table;
-        $m_edit=db('edit');
+        $m_edit=Db::name('edit');
         $time=time();
         $where=[
             'e.id'=>['in',$eids],
@@ -836,8 +837,8 @@ class AdminCateController extends AdminBaseController
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'批量删除'.$flag.'编辑记录('.$eidss.')',
-            'table'=>$table,
-            'type'=>'cate_edit_del',
+            'table'=>$table.'cate',
+            'type'=>'edit_del',
             'link'=>'',
             'shop'=>$admin['shop'],
         ];
@@ -868,9 +869,9 @@ class AdminCateController extends AdminBaseController
             $this->error('没有删除数据');
         }
         //删除编辑详情
-        db('edit_info')->where(['eid'=>['in',$eids]])->delete();
-        db('action')->insert($data_action);
-        db('msg')->insertAll($data_msg);
+        Db::name('edit_info')->where(['eid'=>['in',$eids]])->delete();
+        Db::name('action')->insert($data_action);
+        Db::name('msg')->insertAll($data_msg);
         $m_edit->commit();
         $this->success('已批量删除'.$rows.'条数据');
     }
@@ -920,12 +921,12 @@ class AdminCateController extends AdminBaseController
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>'批量删除'.$flag.'('.$idss.')',
-            'table'=>$table,
-            'type'=>'cate_del',
+            'table'=>$table.'cate',
+            'type'=>'del',
             'link'=>'',
             'shop'=>$admin['shop'],
         ];
-        db('action')->insert($data_action);
+        Db::name('action')->insert($data_action);
         
         //删除关联编辑记录
         $where_edit=[
@@ -933,10 +934,10 @@ class AdminCateController extends AdminBaseController
             'pid'=>['in',$ids],
         ];
         //现获取编辑id来删除info
-        $eids=db('edit')->where($where_edit)->column('id');
+        $eids=Db::name('edit')->where($where_edit)->column('id');
         if(!empty($eids)){
-            db('edit_info')->where(['eid'=>['in',$eids]])->delete();
-            db('edit')->where(['id'=>['in',$eids]])->delete();
+            Db::name('edit_info')->where(['eid'=>['in',$eids]])->delete();
+            Db::name('edit')->where(['id'=>['in',$eids]])->delete();
         }
         
         $m->commit();
