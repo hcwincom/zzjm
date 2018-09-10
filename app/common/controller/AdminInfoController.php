@@ -13,9 +13,12 @@ class AdminInfoController extends AdminBaseController
     protected $table;
     protected $fields;
     protected $flag;
-   
+    protected $isshop;
+    protected $edit;
+    protected $search;
     public function _initialize()
     {
+        exit('ddddd');
         parent::_initialize();
         
         $this->statuss=config('info_status');
@@ -34,6 +37,11 @@ class AdminInfoController extends AdminBaseController
         $m=$this->m;
         $data=$this->request->param();
         $where=[];
+        $join=[
+            ['cmf_user a','a.id=p.aid','left'],
+            ['cmf_user r','r.id=p.rid','left'],
+        ];
+        $field='p.*,a.user_nickname as aname,r.user_nickname as rname';
         //状态
         if(empty($data['status'])){
             $data['status']=0;
@@ -756,31 +764,7 @@ class AdminInfoController extends AdminBaseController
         //获取改变的信息
         $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
-        switch ($table){
-            case 'compare':
-               //原关联产品
-                $pids0=Db::name('goods_compare')
-                ->alias('gc')
-                ->join('cmf_goods g','g.id=gc.pid')
-                ->where('gc.compare_id',$info['id'])
-                ->column('gc.pid,g.name');
-                $pids0=implode('--', $pids0);
-                $this->assign('pids0',$pids0);
-              
-                //新关联产品
-                if(isset($change['pids'])){
-                    $pids1=json_decode($change['pids'],true);
-                   
-                    $pids1=Db::name('goods')
-                    ->where('id','in',$pids1)
-                    ->column('id,name');
-                    $pids1=implode('--', $pids1);
-                    $this->assign('pids1',$pids1);
-                    
-                } 
-              
-                break;
-        }
+         
       
         $this->assign('info',$info);
         $this->assign('info1',$info1); 

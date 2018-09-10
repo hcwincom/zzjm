@@ -16,6 +16,16 @@ class AdminCompanyController extends AdminInfo0Controller
         $this->flag='子公司';
         $this->table='company';
         $this->m=Db::name('company');
+        $this->edit=['name','sort','dsc','code','allname','account_name','account_bank','account_num',
+            'feenum','contact','address',
+        ];
+        $this->search=[
+            'name' => '公司名称',
+            'code' => '公司代码',
+            'allname' => '公司全称',
+            'contact' => '联系电话',
+            'id' => 'id',
+        ];
         //没有店铺区分
         $this->isshop=1;
         $this->assign('flag',$this->flag);
@@ -180,6 +190,7 @@ class AdminCompanyController extends AdminInfo0Controller
      */
     public function edit_do()
     {
+       
         parent::edit_do();
     }
     /**

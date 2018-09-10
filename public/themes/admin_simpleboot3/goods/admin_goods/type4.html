@@ -1,0 +1,63 @@
+<include file="public@header" />
+ 
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			 <include file="admin@goods/nav" />
+			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
+			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li> 
+			<li class="active"><a href="{:url('type4',['id'=>$info.id])}">{$goods_type[$info.type]}</a></li>   
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type4_edit_do')}">
+		 
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">产品id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="{:url('edit',['id'=>$info.id])}" target="_blank">查看产品详情</a>
+					&nbsp;&nbsp;&nbsp;
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">查看编辑记录</a>
+				</div>
+			</div>
+		 
+			<div class="form-group goods_link">
+				<label for="" class="col-sm-2 control-label">产品关联</label>
+				<div class="col-md-6 col-sm-10">
+					 <include file="public@cate_goods" />  
+					 <button type="button" id="goods_link">确定</button>
+					 <table class="table table-hover table-bordered table-list">
+					 	<tr><td>产品</td><td>配件数量</td><td>操作</td></tr>
+					 <foreach name="id_links" item="link" key="pid1">
+					 	<tr class="">
+					 		<td>{$link.name}</td>
+					 		<td><input type="text" name="id_links[{$link.pid1}]" value="{$link.num}"/></td>
+					 		<td><button class="del_link" type="button">删除</button></td>
+					 	</tr>
+					 </foreach>
+					 </table>
+					 
+				</div>
+			</div>
+	 
+			 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+					 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
+					 
+					 <p> </p>
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	
+	<script src="__STATIC__/js/admin.js"></script> 
+	  <include file="admin@goods/js" />
+</body>
+</html>
+ 

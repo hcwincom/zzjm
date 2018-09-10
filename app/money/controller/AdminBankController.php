@@ -17,7 +17,7 @@ class AdminBankController extends AdminInfo0Controller
         $this->table='bank';
         $this->m=Db::name('bank');
         //没有店铺区分
-        $this->ismoney=0;
+        $this->isshop=0;
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
         

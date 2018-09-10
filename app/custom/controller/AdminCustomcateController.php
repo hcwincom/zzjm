@@ -6,7 +6,7 @@ namespace app\custom\controller;
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
   
-class AdminCustomcateController extends AdminInfo0Controller
+class AdminCustomCateController extends AdminInfo0Controller
 {
     
     public function _initialize()
@@ -14,8 +14,8 @@ class AdminCustomcateController extends AdminInfo0Controller
         parent::_initialize();
        
         $this->flag='客户类别';
-        $this->table='customcate';
-        $this->m=Db::name('customcate');
+        $this->table='custom_cate';
+        $this->m=Db::name('custom_cate');
         //没有店铺区分
         $this->isshop=0;
         $this->assign('flag',$this->flag);

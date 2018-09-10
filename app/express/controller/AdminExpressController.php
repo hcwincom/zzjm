@@ -13,9 +13,10 @@ class AdminExpressController extends AdminInfo0Controller
     {
         parent::_initialize();
        
-        $this->flag='快递物流';
+        $this->flag='快递类型';
         $this->table='express';
         $this->m=Db::name('express');
+       
         //没有店铺区分
         $this->isshop=0;
         $this->assign('flag',$this->flag);
@@ -23,15 +24,15 @@ class AdminExpressController extends AdminInfo0Controller
         
     }
     /**
-     * 快递物流列表
+     * 快递类型列表
      * @adminMenu(
-     *     'name'   => '快递物流列表',
+     *     'name'   => '快递类型列表',
      *     'parent' => 'express/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 1,
+     *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流列表',
+     *     'remark' => '快递类型列表',
      *     'param'  => ''
      * )
      */
@@ -43,15 +44,15 @@ class AdminExpressController extends AdminInfo0Controller
      
    
     /**
-     * 快递物流添加
+     * 快递类型添加
      * @adminMenu(
-     *     'name'   => '快递物流添加',
+     *     'name'   => '快递类型添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流添加',
+     *     'remark' => '快递类型添加',
      *     'param'  => ''
      * )
      */
@@ -62,15 +63,15 @@ class AdminExpressController extends AdminInfo0Controller
         
     }
     /**
-     * 快递物流添加do
+     * 快递类型添加do
      * @adminMenu(
-     *     'name'   => '快递物流添加do',
+     *     'name'   => '快递类型添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流添加do',
+     *     'remark' => '快递类型添加do',
      *     'param'  => ''
      * )
      */
@@ -80,15 +81,15 @@ class AdminExpressController extends AdminInfo0Controller
         
     }
     /**
-     * 快递物流详情
+     * 快递类型详情
      * @adminMenu(
-     *     'name'   => '快递物流详情',
+     *     'name'   => '快递类型详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流详情',
+     *     'remark' => '快递类型详情',
      *     'param'  => ''
      * )
      */
@@ -98,15 +99,15 @@ class AdminExpressController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 快递物流状态审核
+     * 快递类型状态审核
      * @adminMenu(
-     *     'name'   => '快递物流状态审核',
+     *     'name'   => '快递类型状态审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流状态审核',
+     *     'remark' => '快递类型状态审核',
      *     'param'  => ''
      * )
      */
@@ -115,15 +116,15 @@ class AdminExpressController extends AdminInfo0Controller
         parent::review();
     }
     /**
-     * 快递物流状态批量同意
+     * 快递类型状态批量同意
      * @adminMenu(
-     *     'name'   => '快递物流状态批量同意',
+     *     'name'   => '快递类型状态批量同意',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流状态批量同意',
+     *     'remark' => '快递类型状态批量同意',
      *     'param'  => ''
      * )
      */
@@ -132,7 +133,7 @@ class AdminExpressController extends AdminInfo0Controller
         parent::review_all();
     }
     /**
-     * 快递物流禁用
+     * 快递类型禁用
      * @adminMenu(
      *     'name'   => '信息状态禁用',
      *     'parent' => 'index',
@@ -149,15 +150,15 @@ class AdminExpressController extends AdminInfo0Controller
         parent::ban();
     }
     /**
-     * 快递物流信息状态恢复
+     * 快递类型信息状态恢复
      * @adminMenu(
-     *     'name'   => '快递物流信息状态恢复',
+     *     'name'   => '快递类型信息状态恢复',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流信息状态恢复',
+     *     'remark' => '快递类型信息状态恢复',
      *     'param'  => ''
      * )
      */
@@ -166,15 +167,15 @@ class AdminExpressController extends AdminInfo0Controller
         parent::cancel_ban();
     }
     /**
-     * 快递物流编辑提交
+     * 快递类型编辑提交
      * @adminMenu(
-     *     'name'   => '快递物流编辑提交',
+     *     'name'   => '快递类型编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流编辑提交',
+     *     'remark' => '快递类型编辑提交',
      *     'param'  => ''
      * )
      */
@@ -183,15 +184,15 @@ class AdminExpressController extends AdminInfo0Controller
         parent::edit_do();
     }
     /**
-     * 快递物流编辑列表
+     * 快递类型编辑列表
      * @adminMenu(
-     *     'name'   => '快递物流编辑列表',
+     *     'name'   => '快递类型编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流编辑列表',
+     *     'remark' => '快递类型编辑列表',
      *     'param'  => ''
      * )
      */
@@ -201,15 +202,15 @@ class AdminExpressController extends AdminInfo0Controller
     }
     
     /**
-     * 快递物流审核详情
+     * 快递类型审核详情
      * @adminMenu(
-     *     'name'   => '快递物流审核详情',
+     *     'name'   => '快递类型审核详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流审核详情',
+     *     'remark' => '快递类型审核详情',
      *     'param'  => ''
      * )
      */
@@ -219,15 +220,15 @@ class AdminExpressController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 快递物流信息编辑审核
+     * 快递类型信息编辑审核
      * @adminMenu(
-     *     'name'   => '快递物流编辑审核',
+     *     'name'   => '快递类型编辑审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流编辑审核',
+     *     'remark' => '快递类型编辑审核',
      *     'param'  => ''
      * )
      */
@@ -236,15 +237,15 @@ class AdminExpressController extends AdminInfo0Controller
         parent::edit_review();
     }
     /**
-     * 快递物流编辑记录批量删除
+     * 快递类型编辑记录批量删除
      * @adminMenu(
-     *     'name'   => '快递物流编辑记录批量删除',
+     *     'name'   => '快递类型编辑记录批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流编辑记录批量删除',
+     *     'remark' => '快递类型编辑记录批量删除',
      *     'param'  => ''
      * )
      */
@@ -254,15 +255,15 @@ class AdminExpressController extends AdminInfo0Controller
     }
     
     /**
-     * 快递物流批量删除
+     * 快递类型批量删除
      * @adminMenu(
-     *     'name'   => '快递物流批量删除',
+     *     'name'   => '快递类型批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '快递物流批量删除',
+     *     'remark' => '快递类型批量删除',
      *     'param'  => ''
      * )
      */

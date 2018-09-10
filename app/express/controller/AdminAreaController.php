@@ -16,6 +16,7 @@ class AdminAreaController extends AdminInfo0Controller
         $this->flag='地区';
         $this->table='area';
         $this->m=Db::name('area');
+        $this->edit=['name','sort','dsc','code','postcode',];
         //没有店铺区分
         $this->isshop=0;
         $this->assign('flag',$this->flag);
@@ -29,7 +30,7 @@ class AdminAreaController extends AdminInfo0Controller
      *     'parent' => 'express/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 11,
      *     'icon'   => '',
      *     'remark' => '地区列表',
      *     'param'  => ''

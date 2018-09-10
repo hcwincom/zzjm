@@ -1,0 +1,450 @@
+ <input type="hidden" class="form-control" id="id" value="{$info.id|default=0}" /> 
+		 	<notempty name="info.id">
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">ID</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/> 
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">查看编辑记录</a>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					<a class="js-ajax-delete" data-msg="确认收藏吗？" href="{:url('goods/goodsajax/goods_collect',array('pid'=>$info['id']))}">收藏</a>
+				</div>
+			</div>
+			</notempty>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">分类</label>
+				<div class="col-md-6 col-sm-10 cid">
+					 <include file="public@cate" /> 
+				</div>
+			</div> 
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">三级名称</label>
+				<div class="col-md-6 col-sm-10 code_name">
+					<input type="text" class="form-control" id="code_name" name="code_name" value="{$info.code_name}" required/>
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">三级编码</label>
+				<div class="col-md-6 col-sm-10 code_name">
+					<input type="text" name="code_num" id="code_num" value="{$info.code_num}" required/>
+					<button type="button" id="add">确定</button>
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="name" name="name" value="{$info.name}"   required/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">编码</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="code" name="code" value="{$info.code}"  readonly/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">商城名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  name="name2" value="{$info.name2}" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">打印名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"   name="name3" value="{$info.name3}" />
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">产品类型</label>
+				<div class="col-md-6 col-sm-10">
+					<foreach name="goods_type" item="vo"> 
+					 <label class="radio-inline type">
+	                    <input class="" type="radio" name="type" value="{$key}" <if condition="$key eq $info.type">checked</if> required/>{$vo}
+	                </label>
+					</foreach>
+					<p>非基础产品有产品关联页面，有产品关联的产品改为基础产品后自动删除关联</p>
+				</div>
+			</div>
+	  		
+	 
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">条码类型</label>
+				<div class="col-md-6 col-sm-10">
+					<foreach name="sn_type" item="vo"> 
+					 <label class="radio-inline">
+	                    <input type="radio" name="sn_type" value="{$key}" <if condition="$key eq $info.sn_type">checked</if> required/>{$vo}
+	                </label>
+					</foreach>
+					<input type="text" id="sn" name="sn" value=""/>
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">品牌</label>
+				<div class="col-md-6 col-sm-10">
+					 <include file="public@brand" />
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">计量单位</label>
+				<div class="col-md-6 col-sm-10">
+					<foreach name="units" item="vo"> 
+					 <label class="radio-inline type">
+	                    <input class="" type="radio" name="unit" value="{$key}" <if condition="$key eq $info.unit">checked</if> required/>{$vo}
+	                </label>
+					</foreach>
+					 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">重量体积参数</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list params">
+					 
+						<thead>
+							<tr> 
+								<th >净重</th>
+								<th >长</th>
+								<th >宽</th>
+							  	<th >高</th> 
+							  	<th >体积</th> 
+							  	<th >内盒</th> 
+							  	<th >毛重</th>
+								<th >内盒长</th>
+								<th >内盒宽</th>
+							  	<th >内盒高</th> 
+							  	<th >内盒体积</th>
+							</tr>
+						</thead>
+						<tbody>
+					  
+						 	<tr>  
+								<td><input type="text" id="weight0" name="weight0" value="{$info.weight0}" required/></td> 
+								<td> <input type="text" id="length0" name="length0" value="{$info.length0}" required/></td> 
+								<td><input type="text" id="width0" name="width0" value="{$info.width0}" required/></td> 
+								<td><input type="text" id="height0" name="height0" value="{$info.height0}" required/></td>
+								<td><input type="text" id="size0" name="size0" value="{$info.size0}" required/></td> 
+								<td>
+							 		<select name="is_box" id="is_box">
+									<foreach name="is_box" item="vo"> 
+										<option value="{$key}" <if condition="$key eq $info.is_box"></if>>{$vo}</option>
+									</foreach> 
+									</select>
+								</td>
+								<td><input type="text" id="weight1" name="weight1" value="{$info.weight1}"/></td> 
+								<td> <input type="text" id="length1" name="length1" value="{$info.length1}"/></td> 
+								<td><input type="text" id="width1" name="width1" value="{$info.width1}"/></td> 
+								<td><input type="text" id="height1" name="height1" value="{$info.height1}"/></td>
+								<td><input type="text" id="size1" name="size1" value="{$info.size1}"/></td>  
+							 </tr> 
+					 	 
+					 	 
+						</tbody>
+					 
+					</table>
+				</div>
+			 </div>
+		 
+		 <if condition="isset($actions['auth']) || isset($actions['template_set'])">
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">技术参数模板</label>
+				<div class="col-md-6 col-sm-10">
+					 <select id="template">
+					 	<option value="0">未选择技术模板</option>
+				 	<foreach name="templates" item="vo">
+				 		<option value="{$key}" <if condition="$key eq $info.template">selected</if>>{$vo}</option>
+				 	</foreach>
+					 </select>
+					 <input type="hidden" id="template_t" name="template" value="{$info.template}"/>
+					 <button type="button" id="get_templates">获取匹配模板</button>
+					  <button type="button" id="set_template">确认匹配模板</button>
+				</div>
+			</div>
+		</if>
+		<if condition="isset($actions['auth']) || isset($actions['param_set']) || isset($actions['param_get'])">
+			<div class="form-group" id="param">
+				<label for="" class="col-sm-2 control-label">技术参数</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list">
+					 
+						<thead>
+							<tr> 
+								<th >参数</th>
+								<th >值</th>
+								<th >备注说明</th> 
+							</tr>
+						</thead>
+						<tbody> 
+						 
+						<foreach name="params0" item="vo">
+						 <tr> 
+						 	<td>{$vo.name}</td>
+						  	<td>
+					  		<switch name="vo.type">
+					  		<case value="1">
+					  			<foreach name="vo.content" item="vv" key="kk">
+					  			<label class="radio-inline">
+									<input type="radio" name="value[{$key}]" value="{$vv}" <if condition="$vv eq $params1[$key]">checked</if>/>{$vv}
+								</label>
+					  			</foreach>
+					  		</case>
+					  		<case value="2">
+					  			<foreach name="vo.content" item="vv" key="kk">
+					  			<label class="checkbox-inline">
+									<input type="checkbox" name="value[{$key}][]" value="{$vv}" <if condition="in_array($vv,$params1[$key])">checked</if> />{$vv}
+								</label>
+					  			</foreach>
+					  		</case>
+					  		<default>
+					  			<input type="text" name="value[{$key}]" value="{$params1[$key]}"/>
+					  		</default>
+					  		</switch> 
+						  	</td>
+						   	<td>{$vo.dsc}</td>
+						 </tr>
+						</foreach> 
+						</tbody>
+						 
+					</table>
+					 
+				</div>
+			</div>
+		</if>
+		
+		<if condition="isset($actions['auth']) || isset($actions['price_set'])">
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">价格模板</label>
+				<div class="col-md-6 col-sm-10">
+					 <select name="price" id="price">
+					 	 
+					 	<foreach name="prices" item="vo">
+					 	<option value="{$key}">{$vo}</option>
+					 	</foreach>
+					 </select>
+					 
+					  <button type="button" id="set_price">计算价格</button>
+					  <span class="red">点击计算价格后，所有价格会按出厂价和模板价格规则重置!!</span>
+				</div>
+			</div>
+		</if>
+			<div class="form-group" id="fee">
+				<label for="" class="col-sm-2 control-label">价格</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list params">
+					 
+					
+						<thead>
+							<tr> 
+								<th class="price_sale">零售价</th>
+								
+								<th class="price_in">出厂价</th>
+								<th class="price_cost">出库价</th>
+								<th class="price_min">最低销售价</th> 
+								<th class="price_range1">区间价1</th>
+								<th class="price_range2">区间价2</th>
+								<th class="price_range3">区间价3</th>
+								<th class="price_dealer1">经销价1</th>
+								<th class="price_dealer2">经销价2</th>
+								<th class="price_dealer3">经销价3</th>
+								<th class="price_trade">同行价</th>
+								<th class="price_factory">工厂配套价</th>
+							</tr>
+						</thead>
+						<tbody>
+					    <tr> 
+							<td id="price_sale"><input type="text" name="price_sale" value="{$info.price_sale}"/></td>
+						 <present name="actions.auth">
+							<td id="price_in"><input type="text" name="price_in" value="{$info.price_in}"/></td>
+							<td id="price_cost"><input type="text" name="price_cost" value="{$info.price_cost}"/></td>
+							<td id="price_min"><input type="text" name="price_min" value="{$info.price_min}"/></td>
+							<td id="price_range1"><input type="text" name="price_range1" value="{$info.price_range1}"/></td>
+							<td id="price_range2"><input type="text" name="price_range2" value="{$info.price_range2}"/></td>
+							<td id="price_range3"><input type="text" name="price_range3" value="{$info.price_range3}"/></td>
+							<td id="price_dealer1"><input type="text" name="price_dealer1" value="{$info.price_dealer1}"/></td>
+							<td id="price_dealer2"><input type="text" name="price_dealer2" value="{$info.price_dealer2}"/></td>
+							<td id="price_dealer3"><input type="text" name="price_dealer3" value="{$info.price_dealer3}"/></td>	  
+							<td id="price_trade"><input type="text" name="price_trade" value="{$info.price_trade}"/></td>	  
+							<td id="price_factory"><input type="text" name="price_factory" value="{$info.price_factory}"/></td>	
+						<else/>
+							<td id="price_in">
+							 <present name="actions.price_in_set">
+							 	<input type="text" name="price_in" value="{$info.price_in}"/>
+							 <else/>
+							  	<present name="actions.price_in_get">
+							  		<input type="text" value="{$info.price_in}" readonly/>
+							  	<else/>
+							  		***
+							  		<input type="hidden" value="{$info.price_in}"/>
+							  	</present>
+							 </present>
+							</td>
+							<td id="price_cost">
+							 <present name="actions.price_cost_set">
+							 	<input type="text" name="price_cost" value="{$info.price_cost}"/>
+							 <else/>
+							  	<present name="actions.price_in_get">
+							  		<input type="text" value="{$info.price_cost}" readonly/>
+							  	<else/>
+							  		***
+							  	</present>
+							 </present>
+							</td>
+							 <td id="price_min">
+							 <present name="actions.price_min_set">
+							 	<input type="text" name="price_min" value="{$info.price_min}"/>
+							 <else/>
+							  	<present name="actions.price_min_get">
+							  		<input type="text" value="{$info.price_min}" readonly/>
+							  	<else/>
+							  		***
+							  	</present>
+							 </present>
+							</td>
+						<present name="actions.price_range_set"> 
+							<td id="price_range1"><input type="text" name="price_range1" value="{$info.price_range1}"/></td>
+							<td id="price_range2"><input type="text" name="price_range2" value="{$info.price_range2}"/></td>
+							<td id="price_range3"><input type="text" name="price_range3" value="{$info.price_range3}"/></td> 
+						<else/>
+							<present name="actions.price_range_get">
+								<td id="price_range1"><input type="text" name="" value="{$info.price_range1}" readonly/></td>
+								<td id="price_range2"><input type="text" name="" value="{$info.price_range2}" readonly/></td>
+								<td id="price_range3"><input type="text" name="" value="{$info.price_range3}" readonly/></td>
+							<else/>
+								<td id="price_range1">***</td>
+								<td id="price_range2">***</td>
+								<td id="price_range3">***</td>
+							</present> 
+						</present>
+							<td id="price_dealer1">
+							 <present name="actions.price_dealer1_set">
+							 	<input type="text" name="price_dealer1" value="{$info.price_dealer1}"/>
+							 <else/>
+							  	<present name="actions.price_dealer1_get">
+							  		<input type="text" value="{$info.price_dealer1}" readonly/>
+							  	<else/>
+							  		***
+							  	</present>
+							 </present> 
+							</td>
+							<td id="price_dealer2">
+							 <present name="actions.price_dealer2_set">
+							 	<input type="text" name="price_dealer2" value="{$info.price_dealer2}"/>
+							 <else/>
+							  	<present name="actions.price_dealer2_get">
+							  		<input type="text" value="{$info.price_dealer2}" readonly/>
+							  	<else/>
+							  		***
+							  	</present>
+							 </present> 
+							</td>
+							<td id="price_dealer3">
+							 <present name="actions.price_dealer3_set">
+							 	<input type="text" name="price_dealer3" value="{$info.price_dealer3}"/>
+							 <else/>
+							  	<present name="actions.price_dealer3_get">
+							  		<input type="text" value="{$info.price_dealer3}" readonly/>
+							  	<else/>
+							  		***
+							  	</present>
+							 </present> 
+							</td>
+							<td id="price_trade">
+							 <present name="actions.price_trade_set">
+							 	<input type="text" name="price_trade" value="{$info.price_trade}"/>
+							 <else/>
+							  	<present name="actions.price_trade_get">
+							  		<input type="text" value="{$info.price_trade}" readonly/>
+							  	<else/>
+							  		***
+							  	</present>
+							 </present> 
+							</td>
+							<td id="price_factory">
+							 <present name="actions.price_factory_set">
+							 	<input type="text" name="price_factory" value="{$info.price_factory}"/>
+							 <else/>
+							  	<present name="actions.price_factory_get">
+							  		<input type="text" value="{$info.price_factory}" readonly/>
+							  	<else/>
+							  		***
+							  	</present>
+							 </present> 
+							</td>
+							 
+					   	</present>  
+						</tr>
+						 
+						</tbody>
+						 
+					</table>
+					 
+				</div>
+			</div>
+			  <div class="form-group">
+				<label for="" class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10">
+					 <input type="text" class="form-control" name="dsc" value="{$info.dsc}" />
+					 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">排序</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="sort" value="{$info.sort|default=1000}" /> 
+				</div>
+			</div>
+		<notempty name="info.id">
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">资料完成情况</label>
+				<div class="col-md-6 col-sm-10">
+					<table class="table table-hover table-bordered table-list ">
+					 
+						<thead>
+							<tr> 
+								<th >商城图</th>
+								<th >实物图</th>
+								<th >logo图</th>
+							  	<th >规格图</th> 
+							  	<th >原理图</th> 
+							  	<th >参考图</th> 
+							  	<th >资料</th>
+								<th >说明书</th>
+								<th >其他文档</th>
+							   
+							  	<th >修改时间</th>
+							  	<th >创建时间</th>
+							</tr>
+						</thead>
+						<tbody>
+					  	
+						 	<tr> 
+								<td >{$info.pic_jm}</td>
+								<td >{$info.pic_pro}</td>
+								<td >{$info.pic_logo}</td>
+							  	<td >{$info.pic_param}</td> 
+							  	<td >{$info.pic_principle}</td> 
+							  	<td >{$info.pic_other}</td> 
+							  	<td >资料</td>
+								<td >{$info.file_instructions}</td>
+								<td >{$info.file_other}</td>
+							  
+							  	<td ><a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">{$info.time|date='Y-m-d H:i',###}</a></td>
+							  	<td >{$info.atime|date='Y-m-d H:i',###}</td>
+							</tr>
+						 </tbody>
+					</table> 
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">产品状态</label>
+				<div class="col-md-6 col-sm-10">
+				 <foreach name="statuss" item="vo">
+				  	<label class="radio-inline">
+				 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+				 	</label>
+				 </foreach>
+				</div>
+			</div>
+		</notempty>
+			 

@@ -1,0 +1,54 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			 <include file="admin@goods/nav" />
+			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
+			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li>  
+		 
+		<neq name="info.type" value="1">
+			<li class=""><a href="{:url('type'.$info['type'],['id'=>$info.id])}">{$goods_type[$info.type]}</a></li>  
+		</neq>
+		 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
+			  <include file="admin@goods/base" />
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+					<button type="submit" class="review btn btn-primary js-ajax-submit"  >审核状态</button> 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
+					 
+					<eq name="info.status" value="4">
+					 	<button type="submit" class="cancel_ban btn btn-primary js-ajax-submit">恢复</button> 
+					</eq>
+					<eq name="info.status" value="2">
+					 	  <button type="submit" class="ban btn btn-primary  js-ajax-submit" >禁用</button> 
+					</eq>
+					
+					 <p> </p>
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+	<include file="admin@goods/js" />
+</body>
+</html>
+<script>
+$('.review').click(function(){
+	$('form').attr('action',"{:url('review')}");
+});
+$('.save').click(function(){
+	$('form').attr('action',"{:url('edit_do')}");
+});
+$('.ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('ban')}");
+});
+$('.cancel_ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
+});
+</script>

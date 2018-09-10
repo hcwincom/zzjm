@@ -21,12 +21,53 @@
 				</div>
 			</div>
 			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">编码</label>
+				<label for="" class="col-sm-2 control-label">代码</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="code" value="{$info.code}" required/>
-					<p>编码为快递接口查询代码，不需要查询的请输入0</p>
+					<input type="text" class="form-control" name="code" value="{$info.code}" required/> 
 				</div>
 			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">全称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="allname" value="{$info.allname}" required/> 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">帐户名</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="account_name" value="{$info.account_name}" /> 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">开户行</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="account_bank" value="{$info.account_bank}" /> 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">账号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="account_num" value="{$info.account_num}" /> 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">税号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="feenum" value="{$info.feenum}" /> 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="contact" value="{$info.contact}" /> 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">地址</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="address" value="{$info.address}" /> 
+				</div>
+			</div> 
 		  
 			 <div class="form-group">
 				<label class="col-sm-2 control-label">简介</label>
@@ -38,7 +79,7 @@
 			 <div class="form-group">
 				<label class="col-sm-2 control-label">排序</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="sort" value="{$info.sort}" />
+					<input type="number" class="form-control" name="sort" value="{$info.sort}" required/>
 				</div>
 			</div>
 			<div class="form-group">

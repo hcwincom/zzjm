@@ -1,0 +1,41 @@
+<!-- 点击放大的图片 -->
+<div id="clickImg">
+	<div class="btnImg">
+		<span class="glyphicon glyphicon-remove-circle"></span>
+	</div>
+	<div id="bigImg" style="background-size: contain;"></div>	
+	<img src="" alt="" class="srcImg" style="display: none;">
+</div>
+
+<script>
+$(function(){
+//  点击放大图片
+
+	var img_url="{:cmf_get_image_url('')}"+'/';
+
+	$(document).on("click",'.pic1',function () {
+		var backgroundImg=$(this).parents('li').find('.file0').val();	
+		$(".srcImg").attr("src",img_url+backgroundImg);
+
+		$("<img />").attr("src", img_url + backgroundImg).load(function () {
+				var imgWidth = this.width,
+				imgHeight = this.height;
+				
+			 $("#bigImg").css({
+				"width": imgWidth,
+				"height": imgHeight,
+				"background-image": "url(" + img_url + backgroundImg + ")"
+			});	
+		});
+				
+		$("#clickImg").fadeIn(); 
+	});
+
+	$(".btnImg .glyphicon-remove-circle").click(function () {
+		$("#clickImg").fadeOut();
+	});
+
+});
+</script>
+	
+	

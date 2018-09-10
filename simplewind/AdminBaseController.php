@@ -38,6 +38,7 @@ class AdminBaseController extends BaseController
         }
         View::share('zzsite', config('zzsite'));
         View::share('zzajax', config('zzajax'));
+        View::share('zztarget', config('zztarget'));
         $this->assign('html',$this->request->action());
     }
 

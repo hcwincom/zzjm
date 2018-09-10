@@ -216,4 +216,31 @@ class PublicController extends AdminBaseController
             $this->error('文件损坏，不存在');
         }
     }
+    
+    /*
+     * 根据fid获取城市地区 */
+    public function city()
+    {
+        $fid=$this->request->param('fid',1,'intval'); 
+        $where=[
+            'status'=>2,
+            'fid'=>$fid,
+        ]; 
+        $citys=Db::name('area')->where($where)->order('sort asc,name asc')->column('id,name');
+        $this->success('ok','',['list'=>$citys]);
+    }
+    
+    //获取一个城市的区号，邮编
+    public function city_one()
+    {
+        $id=$this->request->param('id',0,'intval');
+        if($id<1){
+            $this->error('数据错误');
+        }
+        $where=[
+            'id'=>$id,
+        ];
+        $city=Db::name('area')->field('id,name,code,postcode,fid')->where($where)->find();
+        $this->success('ok','',['city'=>$city]);
+    }
 }

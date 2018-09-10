@@ -1,0 +1,323 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class="active"><a href="{:url('tel_edit',['id'=>$info.id])}">关联设置</a></li>  
+			 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">{$flag}id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">联系人1姓名</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_name" value="{$tel1.name}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">性别</label>
+				<div class="col-md-6 col-sm-10">
+					<label class="radio-inline">
+				 		<input type="radio" value="1" name="tel1_sex"  checked />男
+				 	</label>
+				 	<label class="radio-inline">
+				 		<input type="radio" value="2" name="tel1_sex" <if condition="2 eq $tel1.sex">checked</if>/>女
+				 	</label>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">职位</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_position" value="{$tel1.position}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机1</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_mobile" value="{$tel1.mobile}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机2</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_mobile1" value="{$tel1.mobile1}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_phone" value="{$tel1.phone}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">QQ</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_qq" value="{$tel1.qq}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">微信</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_wechat" value="{$tel1.wechat}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">传真</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_fax" value="{$tel1.fax}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">email</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_email" value="{$tel1.email}" />
+				</div>
+			</div>
+			  
+			 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="tel1_dsc" value="{$tel1.dsc}" />
+				</div>
+			</div>
+		 	<div style="clear:both"></div>
+		 	<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">联系人2姓名</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_name" value="{$tel2.name}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">性别</label>
+				<div class="col-md-6 col-sm-10">
+					<label class="radio-inline">
+				 		<input type="radio" value="1" name="tel2_sex" checked />男
+				 	</label>
+				 	<label class="radio-inline">
+				 		<input type="radio" value="2" name="tel2_sex" <if condition="2 eq $tel2.sex">checked</if>/>女
+				 	</label>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">职位</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_position" value="{$tel2.position}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机1</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_mobile" value="{$tel2.mobile}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机2</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_mobile1" value="{$tel2.mobile1}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_phone" value="{$tel2.phone}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">QQ</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_qq" value="{$tel2.qq}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">微信</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_wechat" value="{$tel2.wechat}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">传真</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_fax" value="{$tel2.fax}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">email</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_email" value="{$tel2.email}" />
+				</div>
+			</div>
+			  
+			 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="tel2_dsc" value="{$tel2.dsc}" />
+				</div>
+			</div>
+		 	<div style="clear:both"></div>
+		 	 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">对公账户名</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="dg_name1" value="{$dg.name1}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">账号</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="dg_num1" value="{$dg.num1}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">开户行</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="dg_location1" value="{$dg.location1}" />
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		 	 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">对私账户名</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="ds_name1" value="{$ds.name1}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">账号</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="ds_num1" value="{$ds.num1}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">开户行</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="ds_location1" value="{$ds.location1}" />
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		 	 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">支付宝账户名</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="zfb_name1" value="{$zfb.name1}" />
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">账号</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="zfb_num1" value="{$zfb.num1}" />
+					<input type="hidden"  name="zfb_location1" value="{$zfb.location1}" />
+				</div>
+			</div>
+			<div style="clear:both"></div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">配送区域添加</label>
+				<div class="col-md-6 col-sm-10"> 
+					 <select name="" id="ea">
+					 <foreach name="areas" item="vo">
+					 	<option value="{$key}">{$vo}</option>
+					 </foreach>
+					 </select>
+					 <button id="add" type="button">添加</button>
+				</div>
+			</div>
+				<div style="clear:both"></div>
+		<foreach name="fees" item="vo">
+		<div class="fees fees{$key}">
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">{$vo['ea_name']|default="关联区域已不存在"}-首重</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="price0[{$key}]" value="{$vo.price0}" style="width:60px;"/>元/
+					<input type="text" class="form-control" name="weight0[{$key}]" value="{$vo.weight0}" style="width:60px;"/>g
+					 
+				</div>
+			</div>
+		  
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">续重</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="price1[{$key}]" value="{$vo.price1}" style="width:60px;"/>元/
+					<input type="text" class="form-control" name="weight1[{$key}]" value="{$vo.weight1}" style="width:60px;"/>g
+					 
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">体积重量换算比</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="size[{$key}]" value="{$vo.size}" style="width:60px;"/>
+					<button class="del" type="button">删除</button>
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		</div>
+		</foreach>
+		 
+			<div class="form-group" id="status">
+				<label   class="col-sm-2 control-label">{$flag}状态</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$statuss[$info.status]}" readonly/>
+				 
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+				 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
+					 <p>物流费用的体积换算比适用于体积大重量清的物品，计算方式为长(cm)*宽(cm)*高(cm)/换算比=重量(g),换算比一般为6，计价时比较实际重量和体积换算重量，取最大的数</p>
+				  
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+<script>
+ 
+$('.save').click(function(){
+	$('form').attr('action',"{:url('tel_edit_do')}");
+});
+ 
+ $('#add').click(function(){
+	 var ea=$('#ea').val(); 
+	 if(($('.fees'+ea+' input').val())!=undefined){
+		 $('.fees'+ea+' input').focus();
+		return false;
+	 } 
+	 var ea_name=$('#ea option:selected').text();
+	 var div='<div class="fees fees'+ea+'">'+
+				'<div class="form-group fleft">'+
+					'<label class="col-sm-2 control-label">'+ea_name+'-首重</label>'+
+					'<div class="col-md-6 col-sm-10"> '+
+						'<input type="text" class="form-control" name="price0['+ea+']" value="" style="width:60px;"/>元/'+
+						'<input type="text" class="form-control" name="weight0['+ea+']" value="500" style="width:60px;"/>g '+
+					'</div>'+
+				'</div>'+ 
+				'<div class="form-group fleft">'+
+					'<label class="col-sm-2 control-label">续重</label>'+
+					'<div class="col-md-6 col-sm-10"> '+
+						'<input type="text" class="form-control" name="price1['+ea+']" value="" style="width:60px;"/>元/'+
+						'<input type="text" class="form-control" name="weight1['+ea+']" value="500" style="width:60px;"/>g '+
+					'</div>'+
+				'</div>'+
+				 '<div class="form-group fleft">'+
+					'<label class="col-sm-2 control-label">体积重量换算比</label>'+
+					'<div class="col-md-6 col-sm-10"> '+
+						'<input type="text" class="form-control" name="size['+ea+']" value="6" style="width:60px;"/>'+
+						'<button class="del" type="button">删除</button>'+
+					'</div>'+
+				'</div>'+
+				'<div style="clear:both"></div>'+
+			'</div>';
+	$('#status').before(div);
+ });
+$(document).on('click','.del',function(){
+ 	$(this).parents('.fees').remove();
+});
+</script>

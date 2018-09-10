@@ -10,6 +10,8 @@ class OldController extends AdminBaseController
 {
     private $dbconfig;
     private $db_old;
+    private $corrects;
+    private $where_corrects;
     public function _initialize()
     {
         //链接数据库
@@ -26,6 +28,8 @@ class OldController extends AdminBaseController
         if($aid!=1){
             $this->error('开发者功能，不要操作');
         }
+        $this->corrects=['status'=>2,'aid'=>1,'rid'=>1,'atime'=>time(),'rtime'=>time(),'time'=>time()];
+        $this->where_corrects=['rid'=>0];
         $this->db_old= config('db_old');
     }
      
@@ -48,12 +52,12 @@ class OldController extends AdminBaseController
             '产品分类同步'=>url('cate'),
             '产品分类数据更正'=>url('cate_correct'),
             '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
-            
-            '客户数据(所属公司+分类+主体)'=>url('custom'),
-            
-            '客户联系人'=>url('custom_tel'),
+            '所属公司+付款银行+付款类型'=>url('sys'),
+            '(客户/供货商)联系人+对应付款账号+物流公司对应联系人和账号'=>url('tel'),
+            '客户(同步客户分类和客户主体，关联联系人和付款账号)'=>url('custom'), 
             '供货商'=>url('supplier'),
-            '供货商主体'=>url('supplier_tel'),
+           
+            
         ];
         $this->assign('list',$list);
         return $this->fetch();
@@ -88,22 +92,16 @@ class OldController extends AdminBaseController
         $data=$res->fetch_all(MYSQLI_ASSOC);
        /*  while($tmp=($res->fetch_assoc())){ 
             $data[]=$tmp; 
-        } */
-      //取得数量后期比对
-        $row=count($data);
+        } */ 
       
         $m_new=Db::name('cate');
         //开启事务
         $m_new->startTrans();
         //先截取旧数据
         $m_new->execute('truncate table cmf_cate');
-        $row_mew=$m_new->insertAll($data);
-        if($row_mew==$row){
-            $m_new->commit();
-        }else{
-            $m_new->rollback();
-            $this->error('同步错误');
-        }
+        $row_mew=$m_new->insertAll($data); 
+        $m_new->where($this->where_corrects)->update($this->corrects);
+        $m_new->commit();
         $this->success('已同步数据数'.$row_mew);
     }
     /**
@@ -215,18 +213,7 @@ class OldController extends AdminBaseController
                 ];
             }
          
-         } 
-//          echo '<h1>goods</h1>';
-//          dump($data_goods);
-//          echo '<h1>$$data_info</h1>';
-//          dump($data_info);
-//          echo '<h1>$data_tech</h1>';
-//          dump($data_tech);
-//          echo '<h1>$$$data_file</h1>';
-//          dump($data_file);
-//         exit; 
-        //取得数量后期比对
-         $row=count($data_goods);
+         }  
         
         $m_goods=Db::name('goods');
         //开启事务
@@ -234,10 +221,7 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_goods->execute('truncate table cmf_goods');
         $row_mew=$m_goods->insertAll($data_goods);
-        if($row_mew!=$row){
-            $m_goods->rollback();
-            $this->error('同步错误');
-        } 
+        $m_goods->where($this->where_corrects)->update($this->corrects);
         //详情
         $m_info=Db::name('goods_info'); 
         //先截取旧数据
@@ -280,86 +264,195 @@ class OldController extends AdminBaseController
         $m_goods->commit();
         $this->success('已同步数据数'.$row_mew);
     }
-    //客户相关信息
-    public function custom_about()
+    
+    // '所属公司+付款银行+付款类型
+    public function sys()
     {
+        //  '所属公司+付款银行+付款类型 
         $m_old=Db::connect($this->db_old);
         $sql='select id,company as name,code,allname,account_name,account_bank,account_num,feenum,contact,address'.
             ' from sp_company ';
-        $data=$m_old->query($sql);
-        //取得数量后期比对
-        $row=count($data);
-        
+        $data=$m_old->query($sql); 
         $m_new=Db::name('company');
         //开启事务
         $m_new->startTrans();
         //先截取旧数据
         $m_new->execute('truncate table cmf_company');
-        $row_mew=$m_new->insertAll($data);
-        if($row_mew==$row){
-            $m_new->commit();
-        }else{
-            $m_new->rollback();
-            $this->error('同步所属公司错误');
-        }
-        //付款方式suppaytype
+        $row_mew=$m_new->insertAll($data); 
+        $m_new->where($this->where_corrects)->update($this->corrects);
         
-         
         //转账银行
         $sql='select id,bank_name as name'.
-            ' from sp_news_bank ';
-        $data=$m_old->query($sql);
-        
-        //取得数量后期比对
-        $row=count($data);
-        $m_new=Db::name('bank');
-        //开启事务
-        $m_new->startTrans();
+            ' from sp_new_banks ';
+        $data=$m_old->query($sql); 
+        $m_new=Db::name('bank'); 
         //先截取旧数据
         $m_new->execute('truncate table cmf_bank');
-        $row_mew=$m_new->insertAll($data);
-        if($row_mew==$row){
-            $m_new->commit();
-        }else{
-            $m_new->rollback();
-            $this->error('同步银行信息错误');
-        }
+        $row_mew=$m_new->insertAll($data); 
+        $m_new->where($this->where_corrects)->update($this->corrects);
         
-        //发货物流
-        $sql='select id,bank_name as name'.
-            ' from sp_news_bank ';
-        $data=$m_old->query($sql);
-        
-        //取得数量后期比对
-        $row=count($data);
-        $m_new=Db::name('bank');
-        //开启事务
-        $m_new->startTrans();
+        //付款类型
+        $sql='select id,suppaytype_name as name,sort,note as dsc,addtime as atime '.
+            ' from sp_suppaytype ';
+        $data=$m_old->query($sql);  
+        $m_new=Db::name('paytype'); 
         //先截取旧数据
-        $m_new->execute('truncate table cmf_bank');
+        $m_new->execute('truncate table cmf_paytype');
         $row_mew=$m_new->insertAll($data);
-        if($row_mew==$row){
-            $m_new->commit();
-        }else{
-            $m_new->rollback();
-            $this->error('同步银行信息错误');
-        }
+        $m_new->where($this->where_corrects)->update($this->corrects);
         
+        $m_new->commit();
         $this->success('已同步数据数'.$row_mew);
     }
-    //客户
-    public function custom()
-    {
+    //联系人
+    public function tel(){
+        set_time_limit(300);
         $m_old=Db::connect($this->db_old);
+        //联系人
+        $sql='select id,user_id as uid,name,position,other,'.
+            'sex,mobile,mobile1,mobile2,phone,phone1,province,city,area,street,postcode,fax,qq,'.
+            'wechat,wechatphone,wechatname,email,taobaoid,aliid,ctype '.
+            ' from sp_new_contacts '; 
+        $data=$m_old->query($sql); 
+        $m_tel=Db::name('tel');
+        $m_account=Db::name('account');
+        $m_new=Db::name('freight'); 
+      
+        //开启事务
+        $m_tel->startTrans();
+        //先截取旧数据
+        $m_tel->execute('truncate table cmf_tel');
+        $m_tel->insertAll($data);
         
         
+        //对应付款账号
+        $sql='select id,user_id as uid,bank_id as bank1,account_name as name1,account_num as num1,account_location as location1,'.
+                'income_id as bank2,income_name as name2,income_num as num2,income_location as location2 from sp_new_accounts ';
+        $data=$m_old->query($sql); 
+        
+        //先截取旧数据
+        $m_account->execute('truncate table cmf_account');
+        $m_account->insertAll($data);
+        
+        //物流公司
+        $sql='select * from sp_freight ';
+        $data=$m_old->query($sql);
+       
+        $data_freight=[];  
+        foreach($data as $v){
+            $tmp=[
+                'name'=>$v['name'],
+                'province'=>intval($v['province_id']),
+                'city'=>intval($v['city_id']),
+                'area'=>intval($v['area_id']),
+                'code'=>$v['code'],
+                'paytype'=>intval($v['suppaytype_id']),
+                'dg'=>0,
+                'ds'=>0,
+                'zfb'=>0,
+                'tel1'=>0,
+                'tel2'=>0,
+            ];
+            //对公支付账号信息
+            if(!empty($v['dg'])){
+                $dgs=explode(',', $v['dg']);
+                if(!empty($dgs[2])){
+                    $data_account=[
+                        'num1'=>$dgs[0],
+                        'name1'=>$dgs[1],
+                        'location1'=>$dgs[2],
+                        'type'=>3,
+                        'site'=>1,
+                        'uid'=>$v['id'],
+                    ];
+                    $tmp['dg']=$m_account->insertGetId($data_account);
+                }
+                
+            }
+            //对私支付账号信息
+            if(!empty($v['ds'])){
+                $dss=explode(',', $v['ds']);
+                if(!empty($dgs[2])){
+                    $data_account=[
+                        'num1'=>$dss[0],
+                        'name1'=>$dss[1],
+                        'location1'=>$dss[2],
+                        'type'=>3,
+                        'site'=>1,
+                        'uid'=>$v['id'],
+                    ];
+                    $tmp['ds']=$m_account->insertGetId($data_account);
+                }
+                
+            }
+            
+            //支付宝支付账号信息
+            if(!empty($v['zfb'])){
+                $data_account=[
+                    'num1'=>$v['zfb'],
+                    'name1'=>$v['zfbzhm'],
+                    'location1'=>'支付宝',
+                    'type'=>3,
+                    'site'=>3,
+                    'uid'=>$v['id'],
+                ];
+                $tmp['zfb']=$m_account->insertGetId($data_account);
+            }
+            //联系人1信息
+            if(!empty($v['fzr1info'])){
+                $tel=explode(',', $v['fzr1info']);
+                if(!empty($tel['0'])){
+                    $data_tel=[
+                        'name'=>$tel[0],
+                        'sex'=>$tel[1],
+                        'position'=>$tel[2],
+                        'mobile'=>$tel[4],
+                        'mobile1'=>$tel[5],
+                        'type'=>3,
+                        'site'=>1,
+                        'uid'=>$v['id'],
+                    ];
+                    $tmp['tel1']=$m_tel->insertGetId($data_tel);
+                }
+            }
+            //联系人2信息
+            if(!empty($v['fzr2info'])){
+                $tel=explode(',', $v['fzr2info']);
+                if(!empty($tel['0'])){
+                    $data_tel=[
+                        'name'=>$tel[0],
+                        'sex'=>$tel[1],
+                        'position'=>$tel[2],
+                        'mobile'=>$tel[4],
+                        'mobile1'=>$tel[5],
+                        'type'=>3,
+                        'site'=>1,
+                        'uid'=>$v['id'],
+                    ];
+                    $tmp['tel2']=$m_tel->insertGetId($data_tel);
+                }
+            }
+            $data_freight[]=$tmp;
+        }
+        
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_freight');
+        $row_mew=$m_new->insertAll($data_freight);
+        $m_new->where($this->where_corrects)->update($this->corrects);
+        
+        $m_tel->commit();
+        $this->success('已同步数据数'.$row_mew);
+        exit;
+    }
+    //客户 
+    public function custom(){
+        set_time_limit(300);
+        $m_old=Db::connect($this->db_old);
+       
         //客户分类
         $sql='select id,customcate_name as name,sort,addtime as atime,note as dsc'.
             ' from sp_customcate ';
         $data=$m_old->query($sql); 
-        
-        //取得数量后期比对
-        $row=count($data);
         
         $m_new=Db::name('customcate');
         //开启事务
@@ -367,36 +460,161 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_new->execute('truncate table cmf_customcate');
         $row_mew=$m_new->insertAll($data);
-        if($row_mew==$row){
-            $m_new->commit();
-        }else{
-            $m_new->rollback();
-            $this->error('同步客户分类错误');
-        }
-       
-        
+        $m_new->where($this->where_corrects)->update($this->corrects);
         
         //获取主体数据
         $sql='select * from sp_user ';
-        $data=$m_old->query($sql); 
-        foreach($data as $k=>$v){
-            //组装数据
-            
-            //组装联系人，默认收货人default_reciver
-        }
-        $this->success('已同步数据数'.$row_mew);
-    }
-    
-    //客户和供货商联系人和收款账号
-    public function custom_tel(){
-        $db_old=$this->db_old;
-        //联系人new_contacts
-        $list=Db::connect($db_old)->query('select * from new_contacts');
-//         $list=Db::name('user')->limit(10)->select();
-        dump($list);
+        $data=$m_old->query($sql);
+        $m_tel=Db::name('tel');
+        $m_account=Db::name('account');
+        $data_user=[];
         
-        //new_accounts
+        foreach($data as $k=>$v){
+            if(empty($v['name'])){
+                continue;
+            }
+            //组装数据
+            $tmp=[
+                'id'=>$v['id'],
+                'name'=>$v['name'],
+                'company'=>intval($v['khly']),
+                'customcate'=>intval($v['customcate_id']),
+                'city_code'=>$v['khqh'],
+                'code_num'=>intval($v['khbh']), 
+                'paytype'=>intval($v['suppaytype_id']),
+                'email'=>$v['email'],
+                'mobile'=>$v['mobile'],
+                'contacter'=>intval($v['contact_person']),
+                'receiver'=>intval($v['receiver']),
+                'checker'=>intval($v['check_person']),
+                'payer'=>intval($v['account1']),
+                'level'=>intval($v['level']),
+                'url'=>$v['url'],
+                'shopurl'=>$v['shopurl'],
+                'wechat'=>$v['wechat'],
+                'qq'=>$v['qq'],
+                'fax'=>$v['fax'],
+                'province'=>intval($v['province']),
+                'city'=>intval($v['city']),
+                'area'=>intval($v['area']),
+                'street'=>$v['street'],
+                'other'=>$v['other'],
+                'announcement'=>$v['announcement'],
+                'invoice_type'=>intval($v['invoice_type']),
+                'tax_point'=>$v['tax_point'],
+                'freight'=>intval($v['freight']),
+                'status'=>intval($v['state']),
+                
+            ];
+           
+            //客户编号
+            $tmp['code']=$tmp['city_code'].'-'.$tmp['code_num'];
+            
+            //默认收货人
+            if(!empty($tmp['default_receiver'])){
+                if($tmp['default_receiver']==1){
+                    $tmp['receiver']=$v['receiver1'];
+                }else{
+                    $tmp['receiver']=$v['receiver2'];
+                } 
+            }
+            $data_user[]=$tmp;
+            //联系人信息更新
+            if(!empty($v['contact_person1'])){
+                $tel=[
+                    'id'=>$v['contact_person1'],
+                    'site'=>1,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ]; 
+                $m_tel->update($tel);
+            }
+            if(!empty($v['contact_person2'])){
+                $tel=[
+                    'id'=>$v['contact_person2'],
+                    'site'=>2,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_tel->update($tel);
+            }
+            if(!empty($v['receiver'])){
+                $tel=[
+                    'id'=>$v['receiver'],
+                    'site'=>3,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_tel->update($tel);
+            }
+            if(!empty($v['receiver1'])){
+                $tel=[
+                    'id'=>$v['receiver1'],
+                    'site'=>4,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_tel->update($tel);
+            }
+            if(!empty($v['receiver2'])){
+                $tel=[
+                    'id'=>$v['receiver2'],
+                    'site'=>5,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_tel->update($tel);
+            }
+            if(!empty($v['check_person'])){
+                $tel=[
+                    'id'=>$v['check_person'],
+                    'site'=>0,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_tel->update($tel);
+            }
+            //付款账号更新
+            if(!empty($v['account1'])){
+                $account=[
+                    'id'=>$v['account1'],
+                    'site'=>1,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_account->update($account);
+            }
+            if(!empty($v['account2'])){
+                $account=[
+                    'id'=>$v['account2'],
+                    'site'=>2,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_account->update($account);
+            }
+            if(!empty($v['account3'])){
+                $account=[
+                    'id'=>$v['account3'],
+                    'site'=>3,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_account->update($account);
+            }
+            
+        }
+       //客户主体数据
+        //先截取旧数据
+        $m_new=Db::name('custom');
+        $m_new->execute('truncate table cmf_custom');  
+        $row_mew=$m_new->insertAll($data_user); 
+        $m_new->where($this->where_corrects)->update($this->corrects);
+        
+        $m_new->commit();
+        $this->success('已同步数据数'.$row_mew);
         exit;
     }
+    
     
 }

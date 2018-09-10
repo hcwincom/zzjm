@@ -30,7 +30,7 @@
 			<select class="form-control" name="rid" >
 				<option value='0'>全部</option> 
 				 <foreach name="rids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -106,13 +106,13 @@
 						 <a href="{:url('edit',['id'=>$vo.pid])}">{$vo.pid}-{$vo.pname}</a>
 						 </td>
 						 
-						<td>{$aids[$vo.aid]|default=$vo.aid}</td>
+						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">
 						<td>-</td>
 						<td>-</td>
 						<else/>
-						<td>{$rids[$vo.rid]|default=$vo.rid}</td>
+						<td>{$vo.rname|default=$vo.rid}</td>
 						<td>{$vo.rtime|date='Y-m-d H:i',###}</td>
 						</eq>
 						 

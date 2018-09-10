@@ -18,7 +18,7 @@ class SqlBack{
         $this->dbname=$database;
         $this->dir=$dir;
         // 连接数据库
-        $this->db = new mysqli( $host, $username, $password,$database,$port) or die( '<p class="dbDebug"><span class="err">Mysql Connect Error : </span>'.mysqli_connect_error().'</p>');
+        $this->db =  @mysqli_connect( $host, $username, $password,$database,$port) or die( '<p class="dbDebug"><span class="err">Mysql Connect Error : </span>'.mysqli_connect_error().'</p>');
         // 数据库编码方式
         mysqli_set_charset($this->db, $charset);
         //连续的->报错

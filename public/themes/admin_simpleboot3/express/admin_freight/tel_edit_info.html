@@ -1,0 +1,448 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+			 
+			<li class="active"><a href="{:url('tel_edit_info',['id'=>$info1.id])}">审核相关设置</a></li>  
+			 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">{$flag}id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+					<a href="{:url('tel_edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">联系人1姓名</label>
+				<div class="col-md-6 col-sm-10"> 
+					 <input type="text" class="form-control" value="{$tel1.name}" /> 
+				<present name="change.tel1.name"> 
+					 <input type="text" class="red form-control" value="{$change.tel1.name}" />
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">性别</label>
+				<div class="col-md-6 col-sm-10">
+					<label class="radio-inline">
+				 		<input type="radio" value="1" name="tel1_sex"  checked />男
+				 	</label>
+				 	<label class="radio-inline">
+				 		<input type="radio" value="2" name="tel1_sex" <if condition="2 eq $tel1.sex">checked</if>/>女
+				 	</label>
+				 <present name="change.tel1.sex"> 
+				 	<br/>
+				 	<label class="red radio-inline">
+				 		<input type="radio" value="1" name="tel1_sex"  checked />男
+				 	</label>
+				 	<label class="red radio-inline">
+				 		<input type="radio" value="2" name="tel1_sex" <if condition="2 eq $tel1.sex">checked</if>/>女
+				 	</label>
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">职位</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$tel1.position}" />
+				 <present name="change.tel1.position"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.position}" />
+				 </present>
+					
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机1</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_mobile" value="{$tel1.mobile}" />
+				<present name="change.tel1.mobile"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.mobile}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机2</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_mobile1" value="{$tel1.mobile1}" />
+				<present name="change.tel1.mobile1"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.mobile1}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_phone" value="{$tel1.phone}" />
+				<present name="change.tel1.phone"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.phone}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">QQ</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_qq" value="{$tel1.qq}" />
+				<present name="change.tel1.qq"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.qq}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">微信</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_wechat" value="{$tel1.wechat}" />
+				<present name="change.tel1.wechat"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.wechat}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">传真</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_fax" value="{$tel1.fax}" />
+				<present name="change.tel1.fax"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.fax}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">email</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel1_email" value="{$tel1.email}" />
+				<present name="change.tel1.email"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.email}" />
+				 </present>
+				</div>
+			</div>
+			  
+			 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="tel1_dsc" value="{$tel1.dsc}" />
+				<present name="change.tel1.dsc"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel1.dsc}" />
+				 </present>
+				</div>
+			</div>
+		 	<div style="clear:both"></div>
+		 	<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">联系人2姓名</label>
+				<div class="col-md-6 col-sm-10"> 
+					 <input type="text" class="form-control" value="{$tel2.name}" /> 
+				<present name="change.tel2.name"> 
+					 <input type="text" class="red form-control" value="{$change.tel2.name}" />
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">性别</label>
+				<div class="col-md-6 col-sm-10">
+					<label class="radio-inline">
+				 		<input type="radio" value="1" name="tel2_sex"  checked />男
+				 	</label>
+				 	<label class="radio-inline">
+				 		<input type="radio" value="2" name="tel2_sex" <if condition="2 eq $tel2.sex">checked</if>/>女
+				 	</label>
+				 <present name="change.tel2.sex"> 
+				 	<br/>
+				 	<label class="red radio-inline">
+				 		<input type="radio" value="1" name="tel2_sex"  checked />男
+				 	</label>
+				 	<label class="red radio-inline">
+				 		<input type="radio" value="2" name="tel2_sex" <if condition="2 eq $tel2.sex">checked</if>/>女
+				 	</label>
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">职位</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$tel2.position}" />
+				 <present name="change.tel2.position"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.position}" />
+				 </present>
+					
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机1</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_mobile" value="{$tel2.mobile}" />
+				<present name="change.tel2.mobile"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.mobile}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机2</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_mobile1" value="{$tel2.mobile1}" />
+				<present name="change.tel2.mobile1"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.mobile1}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_phone" value="{$tel2.phone}" />
+				<present name="change.tel2.phone"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.phone}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">QQ</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_qq" value="{$tel2.qq}" />
+				<present name="change.tel2.qq"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.qq}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">微信</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_wechat" value="{$tel2.wechat}" />
+				<present name="change.tel2.wechat"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.wechat}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">传真</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_fax" value="{$tel2.fax}" />
+				<present name="change.tel2.fax"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.fax}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">email</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel2_email" value="{$tel2.email}" />
+				<present name="change.tel2.email"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.email}" />
+				 </present>
+				</div>
+			</div>
+			  
+			 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="tel2_dsc" value="{$tel2.dsc}" />
+				<present name="change.tel2.dsc"> 
+				 	<input type="text" class="red form-control"  value="{$change.tel2.dsc}" />
+				 </present>
+				</div>
+			</div>
+		 	 
+		 	<div style="clear:both"></div>
+		 	 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">对公账户名</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="dg_name1" value="{$dg.name1}" />
+				<present name="change.dg.name1"> 
+				 	<input type="text" class="red form-control"  value="{$change.dg.name1}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">账号</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="dg_num1" value="{$dg.num1}" />
+				<present name="change.dg.num1"> 
+				 	<input type="text" class="red form-control"  value="{$change.dg.num1}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">开户行</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="dg_location1" value="{$dg.location1}" />
+				<present name="change.dg.location1"> 
+				 	<input type="text" class="red form-control"  value="{$change.dg.location1}" />
+				 </present>
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		 	 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">对私账户名</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="ds_name1" value="{$ds.name1}" />
+				<present name="change.ds.name1"> 
+				 	<input type="text" class="red form-control"  value="{$change.ds.name1}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">账号</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="ds_num1" value="{$ds.num1}" />
+				<present name="change.ds.num1"> 
+				 	<input type="text" class="red form-control"  value="{$change.ds.num1}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">开户行</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="ds_location1" value="{$ds.location1}" />
+				<present name="change.ds.location1"> 
+				 	<input type="text" class="red form-control"  value="{$change.ds.location1}" />
+				 </present>
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		 	 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">支付宝账户名</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="zfb_name1" value="{$zfb.name1}" />
+				<present name="change.zfb.name1"> 
+				 	<input type="text" class="red form-control"  value="{$change.zfb.name1}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">账号</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="zfb_num1" value="{$zfb.num1}" />
+				<present name="change.zfb.num1"> 
+				 	<input type="text" class="red form-control"  value="{$change.zfb.num1}" />
+				 </present>
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		 
+		<foreach name="fees" item="vo" >
+		<div class="fees fees{$key}">
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">
+				<if condition="in_array($key,$change['fees']['del'])">
+					<span class="red">删除</span>
+				</if>
+					{$vo['ea_name']|default="关联区域已不存在"}-首重
+				</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="price0[$key]" value="{$vo.price0}" style="width:60px;"/>元/
+					<input type="text" class="form-control" name="weight0[$key]" value="{$vo.weight0}" style="width:60px;"/>g
+				<present name="change['fees'][$key]['price0']"> 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$key]['price0']}" style="width:60px;"/>元/
+				 </present> 
+				 <present name="change['fees'][$key]['weight0']"> 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$key]['weight0']}" style="width:60px;"/>g
+				 </present> 
+				</div>
+			</div>
+		  
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">续重</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="price1[$key]" value="{$vo.price1}" style="width:60px;"/>元/
+					<input type="text" class="form-control" name="weight1[$key]" value="{$vo.weight1}" style="width:60px;"/>g
+				 <present name="change['fees'][$key]['price1']"> 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$key]['price1']}" style="width:60px;"/>元/
+				 </present> 
+				 <present name="change['fees'][$key]['weight1']"> 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$key]['weight1']}" style="width:60px;"/>g
+				 </present> 
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">体积重量换算比</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="size[$key]" value="{$vo.size}" style="width:60px;"/>
+					
+					 
+				 <present name="change['fees'][$key]['size']"> 
+				 <br/>
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$key]['size']}" style="width:60px;"/>
+				 </present> 	 
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		</div>
+		</foreach>
+		 <foreach name="change.fees.add" item="vo" >
+		<div class="red fees fees{$vo}">
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label"> <span class="red">新增</span>{$change['fees'][$vo]['ea_name']}-首重</label>
+				<div class="col-md-6 col-sm-10">  
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$vo]['price0']}" style="width:60px;"/>元/ 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$vo]['weight0']}" style="width:60px;"/>g 
+				</div>
+			</div>
+		  
+			<div class="form-group fleft">
+				<label class="col-sm-2 control-label">续重</label>
+				<div class="col-md-6 col-sm-10"> 
+					 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$vo]['price1']}" style="width:60px;"/>元/
+				 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$vo]['weight1']}" style="width:60px;"/>g
+				 
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label class="col-sm-2 control-label">体积重量换算比</label>
+				<div class="col-md-6 col-sm-10"> 
+					 
+				 	<input type="text" class="red form-control"  value="{$change['fees'][$vo]['size']}" style="width:60px;"/>
+				 	
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		</div>
+		</foreach>
+			<div class="form-group" id="status">
+				<label   class="col-sm-2 control-label">{$flag}状态</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$statuss[$info.status]}" readonly/>
+				 
+				</div>
+			</div>
+			<div class="form-group rstatus">
+				<label for="input-gender" class="col-sm-2 control-label">审核状态</label>
+				<div class="col-md-6 col-sm-10">
+				 <foreach name="review_status" item="vo">
+				 <label class="radio-inline">
+				 		<input type="radio" value="{$key}" name="rstatus" <if condition="$key eq $info1.rstatus">checked</if>/>{$vo}
+				 </label>
+				 </foreach>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+					<input type="hidden" name="id" value="{$info1.id}" /> 
+					<eq name="info1.rstatus" value="1">
+					<button type="submit" class="review_edit btn btn-primary js-ajax-submit"  >审核</button> 
+					 </eq>  
+					 <p>物流费用的体积换算比适用于体积大重量清的物品，计算方式为长(cm)*宽(cm)*高(cm)/换算比=重量(g),换算比一般为6，计价时比较实际重量和体积换算重量，取最大的数</p>
+				  <p>若多次编辑有冲突，如A的修改添加了区域华南，修改了区域华北，删除了华东，B的修改是修改了区域华东，华北，添加了区域华南。
+				  若先审核了A的修改，再去审核B,则B修改的区域华北内容会生效，但是修改华东操作不会生效，添加华南的操作变为更新华南。
+				  因为华东被删除，已经不存在了。华南已被添加了，所以是更新。</p>
+				</div> 
+			</div>
+			 
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+ 
+<script>
+$('.review_edit').click(function(){
+	 var status=$('.rstatus input:checked').val();
+	 if(status=='1'){ 
+		 return false;
+	 } 
+	 $(this).parents('form').attr('action',"{:url('tel_edit_review')}");
+});
+</script>
+ 

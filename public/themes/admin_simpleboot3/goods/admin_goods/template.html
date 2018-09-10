@@ -1,0 +1,153 @@
+<if condition="isset($actions['auth']) || isset($actions['template_set'])">
+<div class="form-group">
+	<label for="" class="col-sm-2 control-label">技术参数模板</label>
+	<div class="col-md-6 col-sm-10">
+		 <select id="template">
+		 	<option value="0">未选择技术模板</option>
+	 	<foreach name="templates" item="vo">
+	 		<option value="{$key}" <if condition="$key eq $info.template">selected</if>>{$vo}</option>
+	 	</foreach>
+		 </select>
+		 <input type="hidden" id="template_t" name="template" value="{$info.template}"/>
+		 <button type="button" id="get_templates">获取匹配模板</button>
+		  <button type="button" id="set_template">确认匹配模板</button>
+	</div>
+</div>
+</if>
+<if condition="isset($actions['auth']) || isset($actions['param_set']) || isset($actions['param_get'])">
+<div class="form-group" id="param">
+	<label for="" class="col-sm-2 control-label">技术参数</label>
+	<div class="col-md-6 col-sm-10">
+		<table class="table table-hover table-bordered table-list">
+		 
+			<thead>
+				<tr> 
+					<th >参数</th>
+					<th >值</th>
+					<th >备注说明</th> 
+				</tr>
+			</thead>
+			<tbody> 
+			 
+			<foreach name="params0" item="vo">
+			 <tr> 
+			 	<td>{$vo.name}</td>
+			  	<td>
+		  		<switch name="vo.type">
+		  		<case value="1">
+		  			<foreach name="vo.content" item="vv" key="kk">
+		  			<label class="radio-inline">
+						<input type="radio" name="value[{$key}]" value="{$vv}" <if condition="$vv eq $params1[$key]">checked</if>/>{$vv}
+					</label>
+		  			</foreach>
+		  		</case>
+		  		<case value="2">
+		  			<foreach name="vo.content" item="vv" key="kk">
+		  			<label class="checkbox-inline">
+						<input type="checkbox" name="value[{$key}][]" value="{$vv}" <if condition="in_array($vv,$params1[$key])">checked</if> />{$vv}
+					</label>
+		  			</foreach>
+		  		</case>
+		  		<default>
+		  			<input type="text" name="value[{$key}]" value="{$params1[$key]}"/>
+		  		</default>
+		  		</switch> 
+			  	</td>
+			   	<td>{$vo.dsc}</td>
+			 </tr>
+			</foreach> 
+			</tbody>
+			 
+		</table>
+		 
+	</div>
+</div>
+</if>
+<script>
+ 
+$('#get_templates').click(function(){
+	var cid=$('.cate0').val();
+	template_set(cid);
+	return false;
+});
+function template_set(cid){
+	 
+	$.post("{:url('admin/goodsajax/template_set')}",{'cid':cid},function(data){
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		
+		$('#param table tbody').html('');
+		if(data.msg=='no'){ 
+			return false;
+		}
+		$('#param').show();
+		var list=data.data.list;
+		 
+		$('#template').html('');
+		var options='';
+		for(var i in list){
+			options+='<option value="'+i+'">'+list[i]+'</option>'; 
+		}
+		 
+		$('#template').append(options);
+	},'json');
+}
+$('#set_template').click(function(){
+	var t_id=$('#template').val();
+	 
+	$.post("{:url('admin/goodsajax/param_set')}",{'t_id':t_id},function(data){
+	  
+		if(data.code!=1){
+			alert(data.msg);
+			return false;
+		}
+		if(data.msg=='no'){
+			alert('该模板还未选择参数');
+			return false;
+		}
+		 $('#template_t').val(t_id);
+		var list=data.data.list;
+		 
+		var tr='';
+		var type=1;
+		var value='';
+		 $('#param table tbody').html('');
+		for(var i in list){
+			
+			type=parseInt(list[i]['type']);
+			value='';
+			var content=list[i]['content'];
+			 
+			switch(type){
+			case 1:
+				for(var j in content){
+					value+='<label class="radio-inline">'+
+					'<input type="radio" name="value['+i+']" value="'+content[j]+'"/>'+content[j]+
+					'</label>';
+				}
+				break;
+			case 2:
+				for(var j in content){
+					value+='<label class="checkbox-inline">'+
+					'<input type="checkbox" name="value['+i+'][]" value="'+content[j]+'"/>'+content[j]+
+					'</label>';
+				}
+				break;
+			default:
+				value='<input type="text" name="value['+i+']" value=""/>';
+				break;
+			}
+			tr+='<tr>'+ 
+				'<td >'+list[i]['name']+'</td>'+
+				'<td >'+value+'</td>'+
+				'<td >'+list[i]['dsc']+'</td>'+
+				'</tr>';
+			 
+		}
+		 
+		$('#param table tbody').append(tr);
+	},'json');
+});
+</script>

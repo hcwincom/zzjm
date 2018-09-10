@@ -16,5 +16,23 @@ function check_one(){
 	}
 	return check_id;
  }
-
+//获取城市信息
+function get_citys($select,fid=1,id=0){
+	$.post(city_url,{'fid':fid},function(data){
+		if(data.code!=1){ 
+			return false;
+		}
+		var options='<option value="0">请选择</option>';
+		var list=data.data.list;
+		
+		for(var i in list){
+			options+='<option value="'+i+'">'+list[i]+'</option>';
+		} 
+		$select.html(options); 
+		if(id>0){
+			$select.val(id);
+		}
+		
+	},'json');
+}
  
