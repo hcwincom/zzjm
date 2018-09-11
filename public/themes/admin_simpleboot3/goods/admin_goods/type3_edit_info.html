@@ -15,19 +15,19 @@
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" value="{$info1.pid}" readonly/>
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<a href="{:url('edit',['id'=>$info1.pid])}" target="_blank">{$info1.pname}--详情</a>
+					<a href="{:url('edit',['id'=>$info1.pid])}" target="{$zztarget['edit']}">{$info1.pname}--详情</a>
 					&nbsp;&nbsp;&nbsp;
-					<a href="{:url('edit_list',['type1'=>'id','name'=>$info1.pid])}" target="_blank">查看编辑记录</a>
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info1.pid])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
 		 
 			<div class="form-group goods_link">
 				<label for="" class="col-sm-2 control-label">产品关联</label>
 				<div class="col-md-6 col-sm-10">
-					 <a href="{:url('edit',['id'=>$label.pid1])}" target="_blank">{$label.pname1|default=$label.pid1}</a>
+					 <a href="{:url('edit',['id'=>$label.pid1])}" target="{$zztarget['edit']}">{$label.pname1|default=$label.pid1}</a>
 			<present name="change.pid1">
 			&nbsp;&nbsp;&nbsp;&nbsp;
-					  <a class="red" href="{:url('edit',['id'=>$change.pid1])}" target="_blank">{$change.pname1|default=$change.pid1}</a>
+					  <a class="red" href="{:url('edit',['id'=>$change.pid1])}" target="{$zztarget['edit']}">{$change.pname1|default=$change.pid1}</a>
 							 
 				</present>
 				</div>

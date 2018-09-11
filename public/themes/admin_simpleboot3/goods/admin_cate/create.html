@@ -109,12 +109,12 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="_blank">{$vo.name}</a></td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
 						<td>
 						<eq name="vo.fid" value="0">
 						一级分类
 						<else/>
-						<a href="{:url('edit',['id'=>$vo.fid])}"  target="_blank">{$vo.fname|default='未找到父类'}</a>
+						<a href="{:url('edit',['id'=>$vo.fid])}"  target="{$zztarget['edit']}">{$vo.fname|default='未找到父类'}</a>
 						</eq> 
 						</td>
 						<td>{$vo.code}</td>

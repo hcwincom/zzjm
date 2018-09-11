@@ -101,10 +101,10 @@
                     <td>
                         <notempty name="category">
                             <a href="{:cmf_url('portal/Article/index',array('id'=>$vo['id'],'cid'=>$vo['category_id']))}"
-                               target="_blank">{$vo.post_title}</a>
+                               target="$zztarget['edit']">{$vo.post_title}</a>
                             <else/>
                             <a href="{:cmf_url('portal/Article/index',array('id'=>$vo['id']))}"
-                               target="_blank">{$vo.post_title}</a>
+                               target="$zztarget['edit']">{$vo.post_title}</a>
                         </notempty>
                     </td>
                     <td>
@@ -112,7 +112,7 @@
                             <span class="label label-default">
                                 <a href="{:cmf_url('portal/List/index',array('id'=>$voo['id']))}"
                                    style="color: #fff;"
-                                   target="_blank"
+                                   target="$zztarget['edit']"
                                 >{$voo.name}</a>
                             </span>&nbsp;
                         </foreach>

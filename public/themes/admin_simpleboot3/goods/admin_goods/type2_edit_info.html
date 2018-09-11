@@ -15,9 +15,9 @@
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" value="{$info1.pid}" readonly/>
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<a href="{:url('edit',['id'=>$info1.pid])}" target="_blank">{$info1.pname}--详情</a>
+					<a href="{:url('edit',['id'=>$info1.pid])}" target="{$zztarget['edit']}">{$info1.pname}--详情</a>
 					&nbsp;&nbsp;&nbsp;
-					<a href="{:url('edit_list',['type1'=>'id','name'=>$info1.pid])}" target="_blank">查看编辑记录</a>
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info1.pid])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
 		 

@@ -4,7 +4,7 @@
 				<label for="" class="col-sm-2 control-label">ID</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/> 
-					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">查看编辑记录</a>
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
 					&nbsp;&nbsp;&nbsp;&nbsp;
 					<a class="js-ajax-delete" data-msg="确认收藏吗？" href="{:url('goods/goodsajax/goods_collect',array('pid'=>$info['id']))}">收藏</a>
 				</div>
@@ -429,7 +429,7 @@
 								<td >{$info.file_instructions}</td>
 								<td >{$info.file_other}</td>
 							  
-							  	<td ><a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="_blank">{$info.time|date='Y-m-d H:i',###}</a></td>
+							  	<td ><a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">{$info.time|date='Y-m-d H:i',###}</a></td>
 							  	<td >{$info.atime|date='Y-m-d H:i',###}</td>
 							</tr>
 						 </tbody>

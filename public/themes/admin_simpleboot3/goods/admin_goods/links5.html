@@ -149,11 +149,11 @@
 						{$vo.id}
 						</td>
 						<td>{$vo.sname|default=$vo.shop}</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="_blank">{$vo.name}</a></td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
 						 <td  > {$vo.code}</td>
 						  <td  > {$vo.goods_link}</td>
 						 
-						 <td><a href="{:url('edit',['id'=>$vo.pid1])}"  target="_blank">{$vo.link_name}</a></td>
+						 <td><a href="{:url('edit',['id'=>$vo.pid1])}"  target="{$zztarget['edit']}">{$vo.link_name}</a></td>
 						<td>{$vo.link_num}</td> 
 						
 						<td>{$vo.time|date='Y-m-d H:i',###}</td>

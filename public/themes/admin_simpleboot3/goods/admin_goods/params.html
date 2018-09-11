@@ -113,7 +113,7 @@
 						{$vo.id}
 						</td>
 						<td>{$vo.sname|default=$vo.shop}</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="_blank">{$vo.name}</a></td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
 						 <td  > 
 						{$vo.code}
 						</td>
