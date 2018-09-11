@@ -3,10 +3,10 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			 <include file="admin@goods/nav" />
+			 <include file="goods@admin_cate/nav" />
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
-			  <include file="admin@goods/base" />
+			  <include file="goods@admin_goods/base" />
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button> 
@@ -15,7 +15,7 @@
 		</form>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
-	 <include file="admin@goods/js" />
+	 <include file="goods@admin_goods/js" />
 </body>
 </html>
  

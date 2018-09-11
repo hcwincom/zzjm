@@ -3,7 +3,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			 <include file="admin@goods/nav" />
+			 <include file="goods@admin_goods/nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
 			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li>  
@@ -14,7 +14,7 @@
 		 
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
-			  <include file="admin@goods/base" />
+			  <include file="goods@admin_goods/base" />
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10"> 
 					<button type="submit" class="review btn btn-primary js-ajax-submit"  >审核状态</button> 
@@ -35,7 +35,7 @@
 	 
 	</div>
 	<script src="__STATIC__/js/admin.js"></script> 
-	<include file="admin@goods/js" />
+	<include file="goods@admin_goods/js" />
 </body>
 </html>
 <script>

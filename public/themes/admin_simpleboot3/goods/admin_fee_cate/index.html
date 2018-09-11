@@ -32,7 +32,7 @@
 			<select class="form-control" name="rid" >
 				<option value='0'>全部</option> 
 				 <foreach name="rids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -63,8 +63,7 @@
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
-				 
-				<button type="button" class="add btn-sm btn-primary ">添加</button> 
+
 				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
 			 
 			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
@@ -137,19 +136,7 @@
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
- var id=0;
- var fid=0;
- var hideall=0;
- 
- 
-$('.add').click(function(){
-	id=check_one();
-	if(id){
-		$('.error').text('');
-		location.href="{:url('add','',false,false)}"+'/id/'+id;
-	} 
-	return false;
-});
+
 $('.ban').click(function(){
 	$(this).parents('form').attr('action',"{:url('ban')}");
 });

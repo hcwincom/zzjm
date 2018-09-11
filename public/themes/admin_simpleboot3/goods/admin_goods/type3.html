@@ -1,4 +1,4 @@
-<include file="public@header" />
+`<include file="public@header" />
  <script type="text/html" id="files-item">
     <li id="saved-file{id}">
         <input id="file-{id}" type="hidden" name="files[]" value="{filepath}">
@@ -12,7 +12,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			 <include file="admin@goods/nav" />
+			 <include file="goods@admin_goods/nav" />
 			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
 			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li> 
@@ -67,7 +67,7 @@
 					   
 					 <a href="javascript:uploadOneImage('图片上传','#photo{$key}');">上传图片</a>
 				<notempty name="label['pic0'.$key]">
-					<a href="{:url('admin/goodsauth/label_load',['pid'=>$label.pid0,'key'=>$key])}">下载图片</a>
+					<a href="{:url('goods/goodsauth/label_load',['pid'=>$label.pid0,'key'=>$key])}">下载图片</a>
 				</notempty>
 				</div>
 			</div>

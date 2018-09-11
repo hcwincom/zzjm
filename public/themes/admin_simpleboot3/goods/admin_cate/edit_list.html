@@ -5,7 +5,7 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="admin@cate/nav" /> 
+			<include file="goods@admin_cate/nav" />
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
@@ -30,7 +30,7 @@
 			<select class="form-control" name="rid" >
 				<option value='0'>全部</option> 
 				 <foreach name="rids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;

@@ -609,10 +609,8 @@ class AdminInfo0Controller extends AdminBaseController
             $where['p.cid']=['eq',$data['cid']];
         }
         //查询字段
-        $types=config($table.'_search');
-        if(empty($types)){
-            $types=config('base_search');
-        }
+        $types=$this->search;
+
         //选择查询字段
         if(empty($data['type1'])){
             $data['type1']=key($types);

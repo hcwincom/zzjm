@@ -5,7 +5,7 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-		 <include file="admin@work/nav" />
+		 <include file="goods@admin_work/nav" />
 	 
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
@@ -99,7 +99,7 @@
 						{$vo.id}
 						</td>
 						 
-						<td><a href="{:url('goods/admingoods/edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
+						<td><a href="{:url('goods/admin_goods/edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
 						 <td  > 
 						{$vo.code}
 						</td>

@@ -4,7 +4,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			 <include file="admin@goods/nav" />
+			 <include file="goods@admin_goods/nav" />
 			 
 			<li class="active"><a href="{:url('type3_edit_info',['id'=>$info1.id])}">审核{$goods_type[$info1.ptype]}</a></li>   
 		</ul>
@@ -60,7 +60,7 @@
 					 
 					 
 				<notempty name="label['pic'.$key]">
-					<a href="{:url('admin/goodsauth/label_pic_load',['pid'=>$label.pid0,'key'=>$key])}">下载图片</a>
+					<a href="{:url('goods/goodsauth/label_pic_load',['pid'=>$label.pid0,'key'=>$key])}">下载图片</a>
 				</notempty>
 				
 				 <present name="change['pic'.$key]">

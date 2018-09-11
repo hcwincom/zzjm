@@ -1,6 +1,6 @@
 <?php
  
-namespace app\shop\controller;
+namespace app\goods\controller;
 
  
 use cmf\controller\AdminBaseController; 
