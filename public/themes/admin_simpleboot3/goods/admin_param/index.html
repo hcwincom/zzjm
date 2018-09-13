@@ -40,7 +40,7 @@
 			<select class="form-control" name="rid" >
 				<option value='0'>全部</option> 
 				 <foreach name="rids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;

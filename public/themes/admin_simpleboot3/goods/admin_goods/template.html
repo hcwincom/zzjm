@@ -97,7 +97,7 @@ function template_set(cid){
 $('#set_template').click(function(){
 	var t_id=$('#template').val();
 	 
-	$.post("{:url('admin/goodsajax/param_set')}",{'t_id':t_id},function(data){
+	$.post("{:url('goods/goodsajax/param_set')}",{'t_id':t_id},function(data){
 	  
 		if(data.code!=1){
 			alert(data.msg);

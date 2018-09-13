@@ -37,7 +37,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			 <include file="admin@goods/nav" />
+			 <include file="goods@admin_goods/nav" />
 			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 			<li class="active"><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
 			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li>
@@ -135,7 +135,7 @@
 		</form>
 	 
 	</div>
-	 <include file="admin@goods/big" />
+	 <include file="goods@admin_goods/big" />
 	<script src="__STATIC__/js/admin.js"></script> 
 	 
 </body>
