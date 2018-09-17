@@ -48,7 +48,7 @@
 
 						<td>{$vo.id}</td>
 						<td>{$types[$vo.type]}</td>
-						<td>{$vo.uname}</td>
+						<td>{$vo.uname|default=$vo.uid}</td>
 					 	<td><a href="{$vo.link}" target="{$zztarget['edit']}">快捷链接</a>{$vo.dsc}</td>
 						<td>{$vo.time|date='Y-m-d H:i',###}</td> 
 						<td>{$msg_status[$vo.status]}</td>

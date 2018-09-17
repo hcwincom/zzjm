@@ -37,23 +37,19 @@
 					<input type="text" class="form-control" id="input-user_email" name="user_email">
 				</div>
 			</div>
-		<notempty name="shops">
+		 
 			<div class="form-group">
-				<label for="input-shop" class="col-sm-2 control-label"><span class="form-required">*</span>所属商家</label>
+				<label for="input-department" class="col-sm-2 control-label"><span class="form-required">*</span>所属部门</label>
 				<div class="col-md-6 col-sm-10">
+				<notempty name="shops">
 					<select name="shop" id="input-shop">
 						 
 					<foreach name="shops" item="vo">
 						<option value="{$key}">{$vo}</option>
 					</foreach>
 					</select>
-					 
-				</div>
-			</div>
-		</notempty>
-			<div class="form-group">
-				<label for="input-department" class="col-sm-2 control-label"><span class="form-required">*</span>所属部门</label>
-				<div class="col-md-6 col-sm-10">
+				</notempty>
+				
 					<select name="department" id="input-department">
 						 
 					<foreach name="departments" item="vo">

@@ -63,7 +63,8 @@
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
-
+				 
+				 
 				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
 			 
 			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
@@ -108,7 +109,7 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="_blank">{$vo.name}</a></td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
 					 
 						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
@@ -136,7 +137,7 @@
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
-
+ 
 $('.ban').click(function(){
 	$(this).parents('form').attr('action',"{:url('ban')}");
 });

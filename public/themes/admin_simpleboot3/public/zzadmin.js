@@ -18,11 +18,16 @@ function check_one(){
  }
 //获取城市信息
 function get_citys($select,fid=1,id=0){
+	var options='<option value="0">请选择</option>';
+	if(fid==0){
+		$select.html(options); 
+		return false;
+	}
 	$.post(city_url,{'fid':fid},function(data){
 		if(data.code!=1){ 
 			return false;
 		}
-		var options='<option value="0">请选择</option>';
+		
 		var list=data.data.list;
 		
 		for(var i in list){
@@ -36,3 +41,26 @@ function get_citys($select,fid=1,id=0){
 	},'json');
 }
  
+//城市选择js初始化
+function city_js($province,province,$city,city,$area=null,area=0){
+	get_citys($province,1,province);
+	if(province>0){
+		get_citys($city,province,city);
+	}
+	if($area && city>0){
+		get_citys($area,city,area); 
+	}
+	$province.change(function(){
+		province=$(this).val();
+		get_citys($city,province,0);
+		if($area){
+			 get_citys($area,0,0); 
+		}
+	});
+	$city.change(function(){ 
+		if($area){
+			city=$(this).val();
+			 get_citys($area,city,0); 
+		}
+	});
+}

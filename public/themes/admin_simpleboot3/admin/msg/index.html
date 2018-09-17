@@ -26,14 +26,7 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-			 发信人: 
-			<select class="form-control" name="aid" style="width: 140px;">
-				<option value='0'>全部</option> 
-				 <foreach name="admins" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp; 
+			 
 			发送时间:
 			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
 			--
@@ -68,7 +61,7 @@
 
 						<td>{$vo.id}</td>
 						<td>{$types[$vo.type]}</td>
-						<td>{$vo.aname}</td>
+						<td>{$vo.aname|default=$vo.aid}</td>
 					 	<td>
 					 	<notempty name="vo.link">
 					 		<a href="{$vo.link}" target="{$zztarget['edit']}">快捷链接</a>

@@ -17,14 +17,7 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-			 发信人: 
-			<select class="form-control" name="aid" style="width: 140px;">
-				<option value='0'>全部</option> 
-				 <foreach name="admins" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp; 
+			 
 			<input type="submit"
 				class="btn btn-primary" value="搜索" />
 				&nbsp;&nbsp; &nbsp;&nbsp;  
@@ -56,8 +49,8 @@
 
 						<td>{$vo.id}</td>
 						<td>{$types[$vo.type]}</td>
-						<td>{$vo.aname}</td>
-						<td>{$vo.uname}</td>
+						<td>{$vo.aname|default=$vo.aid}</td>
+						<td>{$vo.uname|default=$vo.uid}</td>
 					 	<td><a href="{$vo.link}" target="{$zztarget['edit']}">快捷链接</a>{$vo.dsc}</td>
 						<td>{$vo.time|date='Y-m-d H:i',###}</td> 
 						<td>{$msg_status[$vo.status]}</td>
