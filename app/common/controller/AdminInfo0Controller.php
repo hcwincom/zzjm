@@ -219,21 +219,21 @@ class AdminInfo0Controller extends AdminBaseController
         $m->startTrans();
         $id=$m->insertGetId($data_add);
         
-        //记录操作记录
-        $flag=$this->flag;
-        $table=$this->table;
+        //记录操作记录 
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'添加'.$flag.$id.'-'.$data['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'添加'.($this->flag).$id.'-'.$data['name'],
+            'table'=>($this->table),
             'type'=>'add',
             'pid'=>$id,
             'link'=>url('edit',['id'=>$id]),
-            'shop'=>$admin['shop'],
+            'shop'=>$admin['shop'], 
+            
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
+        
         $m->commit();
         $this->success('添加成功',$url);
     }
@@ -294,35 +294,22 @@ class AdminInfo0Controller extends AdminBaseController
             $m->rollback();
             $this->error('审核失败，请刷新后重试');
         } 
-        //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag; 
-        $statuss=$this->statuss;
-        $table=$this->table;
-        //记录操作记录
-        $link=url('edit',['id'=>$info['id']]);
+        
+        //审核成功，记录操作记录,发送审核信息 
+        $statuss=$this->statuss; 
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$flag.$info['id'].'-'.$info['name'].'的状态为'.$statuss[$status],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'审核'.($this->flag).$info['id'].'-'.$info['name'].'的状态为'.$statuss[$status],
+            'table'=>($this->table),
             'type'=>'review',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url('edit',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
-        ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['id'].'-'.$info['name'].'已审核，状态为'.$statuss[$status],
-            'type'=>'review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
+        ]; 
+        zz_action($data_action);
+        
         $m->commit();
         $this->success('审核成功');
     }
@@ -554,20 +541,22 @@ class AdminInfo0Controller extends AdminBaseController
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+        
         //记录操作记录
-        $link=url('edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
-            'shop'=>$admin['shop'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'], 
         ];
-        Db::name('action')->insert($data_action);
+      
+        zz_action($data_action,['department'=>$admin['department']]);
+        
         $m_edit->commit();
         $this->success('已提交修改');
     }
@@ -610,7 +599,6 @@ class AdminInfo0Controller extends AdminBaseController
         }
         //查询字段
         $types=$this->search;
-
         //选择查询字段
         if(empty($data['type1'])){
             $data['type1']=key($types);
@@ -833,34 +821,21 @@ class AdminInfo0Controller extends AdminBaseController
             }
         }
           
-        //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
-        $review_status=$this->review_status;
-        //记录操作记录
-        $link=url('edit_info',['id'=>$info['id']]);
+        //审核成功，记录操作记录,发送审核信息 
+        $review_status=$this->review_status; 
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url('edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'], 
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
+         
+        zz_action($data_action);
          
         $m->commit(); 
         $this->success('审核成功');
@@ -901,34 +876,8 @@ class AdminInfo0Controller extends AdminBaseController
         }
         $eidss=implode(',',array_keys($list));
         
-        //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
         
-        //记录操作记录
-        $data_action=[
-            'aid'=>$admin['id'],
-            'time'=>$time,
-            'ip'=>get_client_ip(),
-            'action'=>'批量删除'.$flag.'编辑记录('.$eidss.')',
-            'table'=>$table,
-            'type'=>'edit_del',
-            'link'=>'',
-            'shop'=>$admin['shop'],
-        ];
         
-        foreach($list as $k=>$v){
-             
-            //发送审核信息
-            $data_msg[]=[
-                'aid'=>1,
-                'time'=>$time,
-                'uid'=>$v['aid'],
-                'dsc'=>date('Y-m-d H:i',$v['atime']).'对'.$flag.$v['pid'].'-'.$v['pname'].'的编辑记录已批量删除',
-                'type'=>'edit_del',
-                'link'=>'',
-                'shop'=>$admin['shop'],
-            ];
-        }
         $m_edit->startTrans();
         //id 删除
         $where_edit=[
@@ -943,8 +892,23 @@ class AdminInfo0Controller extends AdminBaseController
         } 
         //删除编辑详情
         Db::name('edit_info')->where(['eid'=>['in',$eids]])->delete();  
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insertAll($data_msg);
+       
+        //审核成功，记录操作记录,发送审核信息
+        $flag=$this->flag; 
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'批量删除'.$flag.'编辑记录('.$eidss.')',
+            'table'=>$table,
+            'type'=>'edit_del',
+            'link'=>'',
+            'pid'=>0,
+            'shop'=>$admin['shop'],
+        ]; 
+        zz_action($data_action,['eids'=>$eidss]);
+        
         $m_edit->commit();
         $this->success('已批量删除'.$rows.'条数据');
     }
@@ -980,19 +944,7 @@ class AdminInfo0Controller extends AdminBaseController
             $this->error('删除数据失败，请刷新重试');
         }
         
-        //记录操作记录
-        $idss=implode(',',$ids);
-        $data_action=[
-            'aid'=>$admin['id'],
-            'time'=>$time,
-            'ip'=>get_client_ip(),
-            'action'=>'批量删除'.$flag.'('.$idss.')',
-            'table'=>$table,
-            'type'=>'del',
-            'link'=>'',
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
+        
         
         //删除关联编辑记录
         $where_edit=[
@@ -1010,6 +962,21 @@ class AdminInfo0Controller extends AdminBaseController
             //模板表删除参数对应
            
         }
+        //记录操作记录
+        $idss=implode(',',$ids);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'批量删除'.$flag.'('.$idss.')',
+            'table'=>$table,
+            'type'=>'del',
+            'link'=>'',
+            'pid'=>0,
+            'shop'=>$admin['shop'],
+        ];
+       
+        zz_action($data_action,['pids'=>$idss]);
         $m->commit(); 
         $this->success('成功删除数据'.$tmp.'条');
        
@@ -1019,12 +986,13 @@ class AdminInfo0Controller extends AdminBaseController
      *   */
     public function cates(){
         $table=$this->table;
-        $where_cate=['status'=>2];
-        
         $cates=[];
         switch($table){
-            
+            case 'custom':
+                $cates=Db::name($table.'_cate')->where('status',2)->order('sort asc')->column('id,name');
+                break;
         }
+       
         $this->assign('cates',$cates);
     }
      

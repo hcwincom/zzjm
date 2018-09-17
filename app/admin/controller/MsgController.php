@@ -28,7 +28,7 @@ class MsgController extends AdminBaseController
     {
         parent::_initialize();
         $this->m=Db::name('msg');
-        $this->order='p.status asc,p.time desc';
+        $this->order='p.status asc,mt.time desc';
         $this->assign('flag','信息');
         $this->assign('types', config('msg_types'));
         $this->assign('msg_status', config('msg_status'));
@@ -55,7 +55,7 @@ class MsgController extends AdminBaseController
        
         $where=[
             'p.uid'=>['eq',$admin['id']],
-            'p.status'=>['neq',4]
+            'p.udelete'=>['eq',0]
         ];
         $data=$this->request->param();
         //状态
@@ -68,7 +68,7 @@ class MsgController extends AdminBaseController
         if(empty($data['type']) || $data['type']=='no'){
             $data['type']='no';
         }else{
-            $where['p.type']=$data['type'];
+            $where['mt.type']=$data['type'];
         }
         //发送者
         if(empty($data['aid'])){
@@ -86,28 +86,29 @@ class MsgController extends AdminBaseController
             }else{
                 //只有结束时间
                 $time2=strtotime($data['datetime2']);
-                $where['p.time']=['elt',$time2];
+                $where['mt.time']=['elt',$time2];
             }
         }else{
             //有开始时间
             $time1=strtotime($data['datetime1']);
             if(empty($data['datetime2'])){
                 $data['datetime2']=''; 
-                $where['p.time']=['egt',$time1];
+                $where['mt.time']=['egt',$time1];
             }else{
                 //有结束时间有开始时间between
                 $time2=strtotime($data['datetime2']);
                 if($time2<=$time1){
                     $this->error('结束时间必须大于起始时间');
                 }
-                $where['p.time']=['between',[$time1,$time2]];
+                $where['mt.time']=['between',[$time1,$time2]];
             }
         }
        
         $list= $m
         ->alias('p')
-        ->field('p.*,u.user_nickname as aname')
-        ->join('cmf_user u','u.id = p.uid','left')
+        ->field('p.*,mt.dsc,mt.type,mt.time,mt.link,a.user_nickname as aname')
+        ->join('cmf_msg_txt mt','mt.id = p.msg')
+        ->join('cmf_user a','a.id = p.aid','left')
         ->where($where)
         ->order($this->order)
         ->paginate();
@@ -119,19 +120,13 @@ class MsgController extends AdminBaseController
             'uid'=>['eq',$admin['id']],
             'status'=>['elt',2],
         ];
-        $update=['status'=>3,'time'=>time()];
+        $update=['status'=>3];
         $m->where($where)->update($update);
-        //得到所有发送管理员
-        $where_admin=[
-           'user_type'=>['eq',1],
-           'shop'=>['in',[1,$admin['shop']]],
-        ];
-         
-        $admins=Db::name('user')->where($where_admin)->column('id,user_nickname');
+        
         $this->assign('page',$page);
         $this->assign('list',$list); 
         $this->assign('data',$data); 
-        $this->assign('admins',$admins); 
+       
         return $this->fetch();
     }
     /**
@@ -154,7 +149,7 @@ class MsgController extends AdminBaseController
         
         $where=[
             'p.aid'=>['eq',$admin['id']],
-            'p.status'=>['neq',4]
+            'p.adelete'=>['eq',0]
         ];
         $data=$this->request->param();
         if(empty($data['status'])){
@@ -165,12 +160,12 @@ class MsgController extends AdminBaseController
         
         $list= $m
         ->alias('p')
-        ->field('p.*,u.user_nickname as uname')
+        ->field('p.*,mt.dsc,mt.type,mt.time,mt.link,u.user_nickname as uname')
+        ->join('cmf_msg_txt mt','mt.id = p.msg')
         ->join('cmf_user u','u.id = p.uid','left')
         ->where($where)
         ->order($this->order)
         ->paginate();
-        
         // 获取分页显示
         $page = $list->appends($data)->render();
         
@@ -247,8 +242,7 @@ class MsgController extends AdminBaseController
         $where=[];
         $where_admin=['user_type'=>1]; 
         if($admin['shop']!=1){
-            $where['p.shop']=$admin['shop'];
-            $where_admin['shop']=$admin['shop'];
+            $where['p.shop']=$admin['shop']; 
         } 
         
         $data=$this->request->param();
@@ -263,23 +257,22 @@ class MsgController extends AdminBaseController
             $where['p.aid']=$data['aid'];
         }
         $list= $m
-        ->alias('p')
-        ->field('p.*,u.user_nickname as uname,a.user_nickname as aname')
+        ->alias('p') 
+        ->field('p.*,mt.dsc,mt.type,mt.time,mt.link,u.user_nickname as uname,a.user_nickname as aname')
+        ->join('cmf_msg_txt mt','mt.id = p.msg')
         ->join('cmf_user u','u.id = p.uid','left')
-        ->join('cmf_user a','u.id = p.aid','left')
+        ->join('cmf_user a','a.id = p.aid','left')
         ->where($where)
         ->order($this->order)
         ->paginate();
         
         // 获取分页显示
         $page = $list->appends($data)->render();
-        
-        //发送者        
-        $admins=Db::name('user')->where($where_admin)->column('id,user_nickname');
+         
         $this->assign('page',$page);
         $this->assign('list',$list);
         $this->assign('data',$data);
-        $this->assign('admins',$admins);
+       
         return $this->fetch();
         
     }

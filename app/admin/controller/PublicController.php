@@ -241,6 +241,6 @@ class PublicController extends AdminBaseController
             'id'=>$id,
         ];
         $city=Db::name('area')->field('id,name,code,postcode,fid')->where($where)->find();
-        $this->success('ok','',['city'=>$city]);
+        $this->success('ok','',['name'=>$city['name'],'city_code'=>$city['code'],'postcode'=>$city['postcode'],'fid'=>$city['fid']]);
     }
 }

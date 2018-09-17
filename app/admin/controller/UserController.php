@@ -132,14 +132,14 @@ class UserController extends AdminBaseController
         $roles = Db::name('role')->where($where)->order("list_order asc,id asc")->select();
         //商家
         $m_shop=Db::name('shop');
-        $where_shop=['status'=>1];
+        $where_shop=['status'=>2];
         if($admin['shop']==1){ 
             $shops=$m_shop->where($where_shop)->column('id,name'); 
         }else{
             $shops=[];
         }
         //部门
-        $where_dt=['status'=>1];
+        $where_dt=['status'=>2];
         $departments=Db::name('department')->where($where_dt)->column('id,name');
         
         $this->assign("shops", $shops);
@@ -216,7 +216,7 @@ class UserController extends AdminBaseController
                         'user_pass'=>cmf_password($data['user_pass']),
                         'mobile'=>$data['mobile'],
                         //判断是总站添加还是分站添加
-                        'shop'=>(($admin['shop']==1)?$data['shop']:$admin['shop']),
+                        'shop'=>((empty($data['shop']))?$admin['shop']:$data['shop']),
                         'department'=>$data['department'],
                     ];
                     
@@ -262,11 +262,13 @@ class UserController extends AdminBaseController
         $role_ids = DB::name('RoleUser')->where(["user_id" => $id])->column("role_id");
         $this->assign("role_ids", $role_ids);
         //部门
-        $where_dt=['status'=>1];
+        $where_dt=['status'=>2];
         $departments=Db::name('department')->where($where_dt)->column('id,name');
          
         $this->assign("departments", $departments);
-        $user = DB::name('user')->where(["id" => $id])->find();
+        $user = DB::name('user') 
+        ->where(["id" => $id])
+        ->find();
         $this->assign($user);
         return $this->fetch();
     }

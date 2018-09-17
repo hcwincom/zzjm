@@ -308,18 +308,20 @@ class OldController extends AdminBaseController
     public function tel(){
         set_time_limit(300);
         $m_old=Db::connect($this->db_old);
+        $m_tel=Db::name('tel');
+        $m_account=Db::name('account');
+        $m_new=Db::name('freight');
+        
+        //开启事务
+        $m_tel->startTrans();
+        
         //联系人
         $sql='select id,user_id as uid,name,position,other,'.
             'sex,mobile,mobile1,mobile2,phone,phone1,province,city,area,street,postcode,fax,qq,'.
             'wechat,wechatphone,wechatname,email,taobaoid,aliid,ctype '.
             ' from sp_new_contacts '; 
         $data=$m_old->query($sql); 
-        $m_tel=Db::name('tel');
-        $m_account=Db::name('account');
-        $m_new=Db::name('freight'); 
-      
-        //开启事务
-        $m_tel->startTrans();
+       
         //先截取旧数据
         $m_tel->execute('truncate table cmf_tel');
         $m_tel->insertAll($data);
@@ -454,11 +456,11 @@ class OldController extends AdminBaseController
             ' from sp_customcate ';
         $data=$m_old->query($sql); 
         
-        $m_new=Db::name('customcate');
+        $m_new=Db::name('custom_cate');
         //开启事务
         $m_new->startTrans();
         //先截取旧数据
-        $m_new->execute('truncate table cmf_customcate');
+        $m_new->execute('truncate table cmf_custom_cate');
         $row_mew=$m_new->insertAll($data);
         $m_new->where($this->where_corrects)->update($this->corrects);
         
@@ -478,16 +480,12 @@ class OldController extends AdminBaseController
                 'id'=>$v['id'],
                 'name'=>$v['name'],
                 'company'=>intval($v['khly']),
-                'customcate'=>intval($v['customcate_id']),
+                'cid'=>intval($v['customcate_id']),
                 'city_code'=>$v['khqh'],
                 'code_num'=>intval($v['khbh']), 
                 'paytype'=>intval($v['suppaytype_id']),
                 'email'=>$v['email'],
-                'mobile'=>$v['mobile'],
-                'contacter'=>intval($v['contact_person']),
-                'receiver'=>intval($v['receiver']),
-                'checker'=>intval($v['check_person']),
-                'payer'=>intval($v['account1']),
+                'mobile'=>$v['mobile'], 
                 'level'=>intval($v['level']),
                 'url'=>$v['url'],
                 'shopurl'=>$v['shopurl'],
@@ -508,22 +506,26 @@ class OldController extends AdminBaseController
             ];
            
             //客户编号
-            $tmp['code']=$tmp['city_code'].'-'.$tmp['code_num'];
+            $tmp['code']='KF-'.
+                str_pad($tmp['city_code'], 4,'0',STR_PAD_LEFT).'-'.
+                str_pad($tmp['code_num'], 3,'0',STR_PAD_LEFT);
             
-            //默认收货人
-            if(!empty($tmp['default_receiver'])){
-                if($tmp['default_receiver']==1){
-                    $tmp['receiver']=$v['receiver1'];
-                }else{
-                    $tmp['receiver']=$v['receiver2'];
-                } 
-            }
-            $data_user[]=$tmp;
+            $i=1;
+            $receiver=1;
             //联系人信息更新
+            if(!empty($v['contact_person'])){
+                $tel=[
+                    'id'=>$v['contact_person'],
+                    'site'=>$i++,
+                    'uid'=>$v['id'],
+                    'type'=>1,
+                ];
+                $m_tel->update($tel);
+            }
             if(!empty($v['contact_person1'])){
                 $tel=[
                     'id'=>$v['contact_person1'],
-                    'site'=>1,
+                    'site'=>$i++,
                     'uid'=>$v['id'],
                     'type'=>1,
                 ]; 
@@ -532,16 +534,17 @@ class OldController extends AdminBaseController
             if(!empty($v['contact_person2'])){
                 $tel=[
                     'id'=>$v['contact_person2'],
-                    'site'=>2,
+                    'site'=>$i++,
                     'uid'=>$v['id'],
                     'type'=>1,
                 ];
                 $m_tel->update($tel);
             }
             if(!empty($v['receiver'])){
+                $receiver=$i++;
                 $tel=[
                     'id'=>$v['receiver'],
-                    'site'=>3,
+                    'site'=>$receiver,
                     'uid'=>$v['id'],
                     'type'=>1,
                 ];
@@ -550,7 +553,7 @@ class OldController extends AdminBaseController
             if(!empty($v['receiver1'])){
                 $tel=[
                     'id'=>$v['receiver1'],
-                    'site'=>4,
+                    'site'=>$i++,
                     'uid'=>$v['id'],
                     'type'=>1,
                 ];
@@ -559,21 +562,19 @@ class OldController extends AdminBaseController
             if(!empty($v['receiver2'])){
                 $tel=[
                     'id'=>$v['receiver2'],
-                    'site'=>5,
+                    'site'=>$i++,
                     'uid'=>$v['id'],
                     'type'=>1,
                 ];
                 $m_tel->update($tel);
             }
-            if(!empty($v['check_person'])){
-                $tel=[
-                    'id'=>$v['check_person'],
-                    'site'=>0,
-                    'uid'=>$v['id'],
-                    'type'=>1,
-                ];
-                $m_tel->update($tel);
+            //默认收货人
+            if(empty($v['default_receiver'])){
+                $tmp['receiver']=$receiver; 
+            }else{
+                $tmp['receiver']=$receiver+$v['default_receiver'];
             }
+            
             //付款账号更新
             if(!empty($v['account1'])){
                 $account=[
@@ -602,6 +603,8 @@ class OldController extends AdminBaseController
                 ];
                 $m_account->update($account);
             }
+            
+            $data_user[]=$tmp;
             
         }
        //客户主体数据

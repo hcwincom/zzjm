@@ -11,8 +11,64 @@ use think\Url;
 /**
  * 操作后记录和通知
  */
-function zz_action(){
+function zz_action($data_action,$data=[]){
+    
+    
+    Db::name('action')->insert($data_action);
+    
+    //发送审核信息
+    $data_msg_txt=[
+        'time'=>$data_action['time'],
+        'dsc'=>$data_action['action'],
+        'type'=>$data_action['type'],
+        'link'=>$data_action['link'],
+    ];
+    
+    $msg_id=Db::name('msg_txt')->insertGetId($data_msg_txt);
+   
+    $uids=[];
+    $m_user=Db::name('user');
+    //要获取需要发送消息的对象 
+    if(isset($data['department'])){
+        //如果是添加和编辑要通知经理 
+        $where=[
+            'shop'=>['eq',$data_action['shop']],
+            'department'=>['in',[1,$data['department']]],
+            'job'=>['eq',1],
+        ];
+        $uids=$m_user->where($where)->column('id');
+        
+        
+    }elseif(isset($data['pids'])){
+        //批量同意，删除
+        //暂时只有创建人员
+        $uids=Db::name($data_action['table'])->where('id','in','('.$data['pids'].')')->column('aid'); 
+    }elseif(isset($data['eids'])){
+        //批量同意，删除
+        //暂时只有创建人员
+        $uids=Db::name('edit')->where('id','in','('.$data['eids'].')')->column('aid'); 
+    }else{
+        //如果是审核要通知相关人员
+        //暂时只有创建人员
+        $uid=Db::name($data_action['table'])->where('id',$data_action['pid'])->value('aid');
+        if(!empty($uid)){
+            $uids[]=$uid;
+        }  
+    }
      
+    if(!empty($uids)){
+        $data_msg=[];
+        foreach($uids as $v){
+            $data_msg[]=[
+                'aid'=>$v,
+                'uid'=>$data_action['aid'], 
+                'msg'=>$msg_id,
+                'shop'=>$data_action['shop'],
+            ];
+        }
+        Db::name('msg')->insertAll($data_msg);
+    }
+    
     
 }
 /**
