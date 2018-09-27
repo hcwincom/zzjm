@@ -681,12 +681,25 @@ class AdminInfo0Controller extends AdminBaseController
         $table=$this->table;
         //获取编辑信息
         $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find();
+        $info1=$m_edit
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
+        
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
-        //获取原信息
-        $info=$m->where('id',$info1['pid'])->find();
+        //获取原信息 
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$info1['pid'])
+        ->find();
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
         } 

@@ -167,6 +167,39 @@
 				</present>
 				</div>
 			</div>
+		<notempty name="info.id">
+			 <div class="form-group fleft">
+				<label for="" class="col-sm-2 control-label">创建人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info.aname|default=$info['aid']}" readonly/> 
+				</div>
+			</div>
+		</notempty>
+		<notempty name="info.rid">
+			 <div class="form-group fleft">
+				<label for="" class="col-sm-2 control-label">创建审核人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info.rname|default=$info['rid']}" readonly/> 
+				</div>
+			</div>
+		</notempty>
+		<notempty name="info1.aid">
+			 <div class="form-group fleft">
+				<label for="" class="col-sm-2 control-label">修改人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/> 
+				</div>
+			</div>
+		</notempty>
+		<notempty name="info1.rid">
+			 <div class="form-group fleft">
+				<label for="" class="col-sm-2 control-label">修改审核人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info1.rname|default=$info1['rid']}" readonly/> 
+				</div>
+			</div>
+		</notempty>
+			 
 		<present name="info.id">
 			<div class="form-group fleft fleft-all"  >
 				<label class="col-sm-2 control-label">修改备注</label>
@@ -178,10 +211,10 @@
 		</present>
 		<present name="change">
 			<div class="form-group fleft fleft-all"  >
-				<label class="col-sm-2 control-label">审核备注</label>
+				<label class="col-sm-2 control-label">审核意见</label>
 				<div class="col-md-6 col-sm-10"> 
 					<input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  /> 
-				 	<p class="notice">修改审核人审核信息时可以填写</p> 
+				 	<p class="notice">审核人审核信息时可以填写</p> 
 				</div>
 			</div> 
 		</present>	
