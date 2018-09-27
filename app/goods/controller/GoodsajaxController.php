@@ -1,6 +1,6 @@
 <?php
  
-namespace app\shop\controller;
+namespace app\goods\controller;
 
  
 use cmf\controller\AdminBaseController; 
@@ -12,6 +12,7 @@ class GoodsajaxController extends AdminBaseController
     
     public function _initialize()
     { 
+        parent::_initialize();
         //计算小数位
         bcscale(2); 
     }
@@ -244,10 +245,9 @@ class GoodsajaxController extends AdminBaseController
             'cid'=>$cid,
             'status'=>2,
         ];
-        $admin=$this->admin;
-        if($admin['shop']!=1){
-            $where['shop']=$admin['shop'];
-        }
+        $admin=$this->admin; 
+        $where['shop']=($admin['shop']==1)?2:$admin['shop'];
+        
         $goods=Db::name('goods')->where($where)->column('id,name');
         $this->success('ok','',$goods);
     }
@@ -263,5 +263,31 @@ class GoodsajaxController extends AdminBaseController
         $goods['unit_name']=implode(',', $unit);
         $param=Db::name('goods_param')->where('pid',$pid)->column('param_id,value');
         $this->success('ok','',['goods'=>$goods,'param'=>$param]);
+    }
+    /*
+     * 根据fid获取分类 */
+    public function get_cates()
+    {
+        $fid=$this->request->param('fid',0,'intval'); 
+        $where=[
+            'status'=>2,
+            'fid'=>$fid,
+        ];
+        $list=Db::name('cate')->where($where)->order('sort asc,code_num asc')->column('id,name');
+        $this->success('ok','',$list);
+    }
+    /*
+     * 根据cid获取产品 */
+    public function get_goods()
+    {
+        $cid=$this->request->param('cid');
+        $where=[
+            'cid'=>$cid,
+            'status'=>2,
+        ];
+        $admin=$this->admin;
+        $where['shop']=($admin['shop']==1)?2:$admin['shop']; 
+        $goods=Db::name('goods')->where($where)->column('id,name');
+        $this->success('ok','',$goods);
     }
 }

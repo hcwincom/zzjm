@@ -1,0 +1,88 @@
+ 
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="name" value="{$info.name}" />
+				 <present name='change.name'>
+				 	<input type="text" class="red form-control" value="{$change.name}" />
+				 </present>
+				</div>
+			</div>
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">关联快递</label>
+				<div class="col-md-6 col-sm-10">
+					<select name="express" id="express" class=" form-control" required> 
+						<option value="0">未选择</option>
+					<foreach name="expresses" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.express">selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+					
+				 <present name='change.express'>
+				 	<select class="red form-control"  >  
+						<option value="{$change.express}"  >{$expresses[$change.express]|default='不存在'}</option> 
+					</select>
+				 </present>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">付款类型</label>
+				<div class="col-md-6 col-sm-10">
+				<select name="paytype" id="paytype"  class=" form-control"  required> 
+						<option value="0">未选择</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				<present name='change.paytype'>
+				 	<select class="red form-control"  >  
+						<option value="{$change.paytype}"  >{$paytypes[$change.paytype]|default='不存在'}</option> 
+					</select>
+				 </present>
+				</div>
+			</div>
+		  	<div class="form-group">
+				<label for="" class="col-sm-2 control-label">关联仓库</label>
+				<div class="col-md-6 col-sm-10">
+					<select name="store" class="form-control"   required> 
+						<option value="0">未选择</option>
+					<foreach name="stores" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.store">selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				<present name='change.store'>
+				 	<select class="red form-control"  >  
+						<option value="{$change.store}"  >{$stores[$change.store]|default='不存在'}</option> 
+					</select>
+				 </present> 
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">公司代码</label>
+				<div class="col-md-6 col-sm-10">
+					 <input type="text" class="form-control" name="code" value="{$info.code}" required/>
+				 <present name='change.code'>
+				 	<input type="text" class="red form-control" value="{$change.code}" />
+				 </present>
+				</div>
+			</div>
+			 <div class="form-group">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10">
+					 <input type="text" class="form-control" name="dsc" value="{$info.dsc}"  />
+				 <present name='change.dsc'>
+				 	<input type="text" class="red form-control" value="{$change.dsc}" />
+				 </present>
+					 
+				</div>
+			</div>
+			 <div class="form-group">
+				<label class="col-sm-2 control-label">排序</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" class="form-control" name="sort" value="{$info.sort|default=1000}" />
+				 <present name='change.sort'>
+				 	<input type="text" class="red form-control" value="{$change.sort}" />
+				 </present>
+				</div>
+			</div>
+			 

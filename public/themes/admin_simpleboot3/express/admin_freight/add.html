@@ -6,66 +6,7 @@
 			<include file="public@nav" />
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
-			 
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="" required/>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">关联快递</label>
-				<div class="col-md-6 col-sm-10">
-					<select name="express" id="express"  > 
-					<foreach name="expresses" item="vo">
-						<option value="{$key}">{$vo}</option>
-					</foreach>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">付款类型</label>
-				<div class="col-md-6 col-sm-10">
-				<select name="paytype" id="paytype"  > 
-					 
-					<foreach name="paytypes" item="vo">
-						<option value="{$key}">{$vo}</option>
-					</foreach>
-					</select>
-				</div>
-			</div>
-		  	<div class="form-group">
-				<label for="" class="col-sm-2 control-label">所在地区</label>
-				<div class="col-md-6 col-sm-10">
-					<select name="province" id="province"  style="width:100px;" required> 
-					 <option value="0">请选择</option>
-					</select>
-					<select name="city" id="city" style="width:100px;" required> 
-					 <option value="0">请选择</option>
-					</select>
-					<select name="area" id="area" style="width:100px;" required> 
-					 <option value="0">请选择</option>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">公司代码</label>
-				<div class="col-md-6 col-sm-10">
-					 <input type="text" class="form-control" name="code" value="" required/>
-				</div>
-			</div>
-			  <div class="form-group">
-				<label for="" class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control" name="dsc" rows="5"  maxlength="250"></textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="number" class="form-control" name="sort" value="1000" />
-				</div>
-			</div>
+			  <include file="express@admin_freight:base" />
 			 
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
@@ -76,30 +17,7 @@
 		</form>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
-<script>
  
-get_citys($('#province'),1);
- 
-$('#province').change(function(){
-	var fid=$(this).val();
-	if(fid>0){
-		get_citys($('#city'),fid);
-	}else{
-		$('#city').html('<option value="0">请选择</option>');
-	}
-	$('#area').html('<option value="0">请选择</option>');
-});
-$('#city').change(function(){
-	var fid=$(this).val();
-	if(fid>0){
-		get_citys($('#area'),fid);
-	}else{
-		$('#area').html('<option value="0">请选择</option>');
-	}
-});
- 
- 
-</script> 
 </body>
 </html>
  

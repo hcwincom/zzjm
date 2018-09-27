@@ -1,0 +1,203 @@
+ 			<div class="form-group fleft">
+				<label for="store" class="col-sm-2 control-label">仓库 </label>
+				<div class="col-md-6 col-sm-10"> 
+				
+					 <select name="store" id="store" class="form-control">
+					  <foreach name="stores" item="vo">
+					 	<option value="{$key}" <if condition="$key eq $info.store">selected</if>>{$vo}</option>
+					  </foreach>
+					 </select> 
+				
+				<p class="notice">仓库选择后不可更改</p>
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="num" class="col-sm-2 control-label">货架序号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="1" min="1" class="form-control" id="num" name="num" value="{$info.num}"  /> 
+				 <present name='change.num'>
+				 	<input type="text" class="red form-control" value="{$change.num}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="name" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="name" name="name" value="{$info.name}"  /> 
+					 
+				 <present name='change.name'>
+				 	<input type="text" class="red form-control" value="{$change.name}" readonly/>
+				 <else/>
+				 	 <p class="notice">为空默认为货架+序号</p>
+				 </present> 
+				
+				</div>
+			</div> 
+			 
+		 
+			 <div style="clear:both"></div>
+			  <div class="form-group fleft fleft-all"  >
+				<label for="length" class="col-sm-2 control-label">货架规格(米) </label>
+				<div class="col-md-6 col-sm-10">
+					长：<input type="number" min="0" step="0.01" class="form-control short" id="length" name="length" value="{$info.length|default=$shelf_size['length']}"  />
+				 
+				 <present name='change.length'>
+				 	<span class="red">{$change.length}</span>
+				 </present> 
+				 宽：<input type="number" min="0" step="0.01" class="form-control short" id="width" name="width" value="{$info.width|default=$shelf_size['width']}"  />
+				 
+				 <present name='change.width'>
+				 	<span class="red">{$change.width}</span>
+				 </present> 
+				 高：<input type="number" min="0" step="0.01" class="form-control short" id="height" name="height" value="{$info.height|default=$shelf_size['height']}"  />
+				 
+				 <present name='change.height'>
+				 	<span class="red">{$change.height}</span>
+				 </present> 
+				  层数：<input type="number" min="1" class="form-control short" id="floor" name="floor" value="{$info.floor|default=$shelf_size['floor']}"  />
+				仓库总高:<input type="number" min="1" class="form-control short" id="height0" name="height0" value="{$info.store_height|default=0}"  readonly/>
+				 
+				 <empty name="floors">
+				 <button id="add" type="button">生成层高</button>
+				 </empty>
+				  <p class="notice">生成层高保存后层数不可修改,未保存前可以重新生成</p> 
+				</div>
+			</div>  
+			  <div class="form-group fleft fleft-all"  >
+				<label for="floors1" class="col-sm-2 control-label">层高</label>
+				<div class="col-md-6 col-sm-10" id="floors">
+				<foreach name="floors" item="vo">
+					{$key}层：
+				 
+					<input type="number" min="0" step="0.01" class="form-control short" id="floors{$key}" name="floors[{$key}]" value="{$vo}"  />
+				 <present name="change['floors'][$key]">
+				 	<span class="red">{$change['floors'][$key]}</span>
+				 </present> 
+				</foreach> 
+				</div>
+			</div>  
+			<div class="form-group fleft">
+				<label for="" class="col-sm-2 control-label">货架空间</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text"  class="form-control"  value="{$info.space|default=0}" readonly/>
+				 
+				</div>
+			</div>	
+			<div class="form-group fleft">
+				<label for="" class="col-sm-2 control-label">货架空间利用率</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text"  class="form-control"  value="{$info.space_rate|default=0}%" readonly/>
+				 
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label for="" class="col-sm-2 control-label">排序</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" name="sort" class="form-control"  value="{$info.sort|default=1000}" />
+				<present name='change.sort'>
+				 	<input type="text" class="red form-control" value="{$change.sort}" readonly/>
+				 </present>
+				</div>
+			</div>
+			 <div style="clear:both"></div>
+				<div class="form-group fleft"  style="width:100%">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10"> 
+				<input type="text" class="form-control" name="dsc" value="{$info.dsc}"  /> 
+				<present name='change.dsc'>
+					<input type="text" class="red form-control"  value="{$change.dsc}" readonly /> 
+				</present>
+				</div>
+			</div>
+			 <div style="clear:both"></div>
+		 
+<script>
+ 
+var shelf_add="{:url('store/storeajax/shelf_add')}";
+var shelf_check="{:url('store/storeajax/shelf_check')}"; 
+var id="{$info.id|default=0}";
+var store=0;
+var shelf=0;
+var floor=0;
+if(id==0){
+	
+	store=$('#store').val();  
+	store_change(store);
+ 	$('#store').change(function(){
+ 		store=$(this).val(); 
+ 		store_change(store); 
+ 	});
+ 	 
+}
+function store_change(store){
+	 $.ajax({
+	        type: 'POST',
+	        url: shelf_add,
+	        dataType: 'json', 
+	        data:{'store':store},
+	        success: function (data) {
+	     	  
+	     	   $('#num').val(data.data.num);
+	     	  $('#height0').val(data.data.height);
+	     	   
+	        }, 
+	        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+	            msg(event.responseText,1);
+	        }
+	    });
+	}
+$('#num').change(function(){
+	store=$('#store').val(); 
+	var num= $('#num').val(); 
+	$.ajax({
+        type: 'POST',
+        url: shelf_check,
+        dataType: 'json', 
+        data:{'store':store,'num':num,'id':id},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    });
+});
+
+$('#add').click(function(){
+	var height0=$('#height0').val();
+	var height=$('#height').val();
+	if(height=='' || height<=0){
+		$('#height').focus();
+		return false;
+	}
+	var floor=$('#floor').val();
+	if(floor=='' || floor<=0){
+		$('#floor').focus();
+		return false;
+	}
+	if(height0==0){
+		alert('仓库高度未获取，请重试或重新选择仓库');
+		return false;
+	}
+	var floors='';
+	//如果一层直接是仓库高度
+	if(floor==1){
+		floors='1层：<input type="number" min="0" step="0.01" class="form-control short" id="floors1" name="floors[1]" value="'+height0+'"  />';
+	 }else{
+		//平均高度
+		 var height1=(height/(floor-1)).toFixed(2);
+		for(var i=1;i<floor;i++){
+			floors=floors+i+'层：<input type="number" min="0" step="0.01" class="form-control short" id="floors"'+i+' name="floors['+i+']" value="'+height1+'"  />';
+		}
+		floors=floors+floor+'层：<input type="number" min="0" step="0.01" class="form-control short" id="floors"'+floor+' name="floors['+floor+']" value="'+(height0-height)+'"  />';
+	}
+	$('#floors').html(floors);
+	
+});
+ 
+ 
+</script>			
+			 

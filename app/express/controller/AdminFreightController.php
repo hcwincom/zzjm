@@ -16,7 +16,7 @@ class AdminFreightController extends AdminInfo0Controller
         $this->flag='店铺合作快递';
         $this->table='freight';
         $this->m=Db::name('freight');
-        $this->edit=['name','sort','dsc','province','city','area','code','paytype','express'];
+        $this->edit=['name','sort','dsc','code','paytype','express','store'];
         
         //没有店铺区分
         $this->isshop=1;
@@ -59,21 +59,7 @@ class AdminFreightController extends AdminInfo0Controller
      */
     public function add()
     {
-        //获取付款类型
-        $admin=$this->admin;
-        $where=[
-            'status'=>2,
-            'shop'=>($admin['shop']==1)?2:$admin['shop'],
-        ]; 
-        $paytypes=Db::name('paytype')->where($where)->column('id,name');
-        $this->assign('paytypes',$paytypes);
-        
-        //关联快递
-        $where=[
-            'status'=>2, 
-        ];
-        $expresses=Db::name('express')->order('sort asc')->where($where)->column('id,name');
-        $this->assign('expresses',$expresses);
+        parent::add();
         return $this->fetch();  
         
     }
@@ -111,21 +97,7 @@ class AdminFreightController extends AdminInfo0Controller
     public function edit()
     {
         parent::edit();  
-        //获取付款类型
-        $admin=$this->admin;
-        $where=[
-            'status'=>2,
-            'shop'=>($admin['shop']==1)?2:$admin['shop'],
-        ];
-        $paytypes=Db::name('paytype')->where($where)->column('id,name');
-        $this->assign('paytypes',$paytypes);
         
-        //关联快递
-        $where=[
-            'status'=>2,
-        ];
-        $expresses=Db::name('express')->order('sort asc')->where($where)->column('id,name');
-        $this->assign('expresses',$expresses);
         return $this->fetch();  
     }
     /**
@@ -247,82 +219,7 @@ class AdminFreightController extends AdminInfo0Controller
      */
     public function edit_info()
     {
-        $m=$this->m;
-        $id=$this->request->param('id',0,'intval');
-        $table=$this->table;
-        //获取编辑信息
-        $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find();
-        if(empty($info1)){
-            $this->error('编辑信息不存在');
-        }
-        //获取原信息
-        $info=$m
-        ->field('p.*,paytype.name as paytype_name,express.name as express_name')
-        ->alias('p')
-        ->join('cmf_paytype paytype','paytype.id=p.paytype','left')
-        ->join('cmf_express express','express.id=p.express','left') 
-        ->where('p.id',$info1['pid'])
-        ->find();
-        if(empty($info)){
-            $this->error('编辑关联的信息不存在');
-        }
-        //获取改变的信息
-        $change=Db::name('edit_info')->where('eid',$id)->value('content');
-        $change=json_decode($change,true);
-        //获取城市信息
-     
-        $ids=[];
-        //判断有无修改
-        if(isset($change['province'])){
-            $ids[]=$change['province'];
-        }else{
-            $change['province']=-1;
-        }
-        if(isset($change['city'])){
-            $ids[]=$change['city'];
-        }else{
-            $change['city']=-1;
-        }
-        if(isset($change['area'])){
-            $ids[]=$change['area'];
-        }else{
-            $change['area']=-1;
-        }
-        if(empty($ids)){
-            $change['city_name']='';
-        } 
-        //继续添加原省市县
-        $ids[]=$info['province'];
-        $ids[]=$info['city'];
-        $ids[]=$info['area'];
-        $areas=Db::name('area')->where('id','in',$ids)->column('id,name');
-        $areas['0']='未选择';
-        $areas['-1']='未改变';
-        //拼接地区名
-        $info['city_name']=(isset($areas[$info['province']])?$areas[$info['province']]:'不存在').'--'.
-        (isset($areas[$info['city']])?$areas[$info['city']]:'不存在').'--'.
-        (isset($areas[$info['area']])?$areas[$info['area']]:'不存在');
-        //修改的地区名
-        if(!isset($change['city_name'])){
-            $change['city_name']=(isset($areas[$change['province']])?$areas[$change['province']]:'不存在').'--'.
-                (isset($areas[$change['city']])?$areas[$change['city']]:'不存在').'--'.
-                (isset($areas[$change['area']])?$areas[$change['area']]:'不存在');
-        }
-        
-        //付款类型 
-        if(isset($change['paytype'])){
-            $change['paytype_name']=Db::name('paytype')->where('id',$change['paytype'])->value('name');
-        }
-        
-        //关联快递 
-        if(isset($change['express'])){
-            $change['express_name']=Db::name('express')->where('id',$change['express'])->value('name');
-        }
-        
-        $this->assign('info',$info);
-        $this->assign('info1',$info1);
-        $this->assign('change',$change);
+        parent::edit_info();
         return $this->fetch();  
     }
     /**
@@ -611,20 +508,21 @@ class AdminFreightController extends AdminInfo0Controller
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+        
         //记录操作记录
-        $link=url('tel_edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'].'的关联信息',
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url('tel_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        
+        zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
         $this->success('已提交修改');
     }
@@ -863,36 +761,51 @@ class AdminFreightController extends AdminInfo0Controller
         }
         
         //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
+        
         $review_status=$this->review_status;
-        //记录操作记录
-        $link=url('tel_edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$info['pname'].'的关联信息编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url('tel_edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
         
+        zz_action($data_action);
         $m->commit();
         $this->success('审核成功');
     }
-     
+    /**
+     * 分类等关联信息
+     *   */
+    public function cates($type=3){
+        parent::cates($type);
+        //关联快递
+        $where=[
+            'status'=>2,
+        ];
+        $expresses=Db::name('express')->order('sort asc')->where($where)->column('id,name');
+        $this->assign('expresses',$expresses);
+        
+        //获取付款类型 
+        $where_shop=$this->where_shop;
+        if(!empty($where_shop)){
+            $where['shop']=$where_shop;
+        } 
+        
+        $paytypes=Db::name('paytype')->where($where)->column('id,name');
+        $this->assign('paytypes',$paytypes);
+        
+        //关联仓库
+        $where['type']=1; 
+        $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column('id,name');
+        $this->assign('stores',$stores);
+       
+        
+       
+    }
 }

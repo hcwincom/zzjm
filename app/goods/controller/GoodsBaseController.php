@@ -104,21 +104,21 @@ class GoodsbaseController extends AdminInfo0Controller
                 Db::name('template_param')->insertAll($data_param);
                 break; 
         }
+        
         //记录操作记录
-        $flag=$this->flag;
-        $table=$this->table;
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'添加'.$flag.$id.'-'.$data['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'添加'.($this->flag).$id.'-'.$data['name'],
+            'table'=>($this->table),
             'type'=>'add',
             'pid'=>$id,
             'link'=>url('edit',['id'=>$id]),
             'shop'=>$admin['shop'],
+            
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
         $m->commit();
         $this->success('添加成功',url('index'));
     }
@@ -296,20 +296,21 @@ class GoodsbaseController extends AdminInfo0Controller
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+       
         //记录操作记录
-        $link=url('edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url('edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        
+        zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
         $this->success('已提交修改');
     }
@@ -440,43 +441,31 @@ class GoodsbaseController extends AdminInfo0Controller
                 $this->error('信息更新失败，请刷新后重试');
             }
         }
-        
+         
         //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
         $review_status=$this->review_status;
-        //记录操作记录
-        $link=url('edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
-            'shop'=>$admin['shop'], 
-        ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
+            'link'=>url('edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
-         
+        
+        zz_action($data_action,['aid'=>$info['aid']]);
         $m->commit(); 
         $this->success('审核成功');
     }
     /**
-     * 分类信息
+     * 分类等关联信息
      *   */
-    public function cates(){
+    public function cates($type=3){
+        parent::cates($type);
+   
         $table=$this->table;
         $where_cate=['status'=>2];
        

@@ -15,60 +15,117 @@ function zz_action($data_action,$data=[]){
     
     
     Db::name('action')->insert($data_action);
-    
-    //发送审核信息
-    $data_msg_txt=[
-        'time'=>$data_action['time'],
-        'dsc'=>$data_action['action'],
-        'type'=>$data_action['type'],
-        'link'=>$data_action['link'],
-    ];
-    
-    $msg_id=Db::name('msg_txt')->insertGetId($data_msg_txt);
-   
+    $m_msg_txt=Db::name('msg_txt');
+    $data_msg=[];
     $uids=[];
     $m_user=Db::name('user');
+    $dsc=strstr($data_action['action'],'(',true);
     //要获取需要发送消息的对象 
-    if(isset($data['department'])){
-        //如果是添加和编辑要通知经理 
-        $where=[
+    switch($data_action['type']){
+        case 'add':
+        case 'edit':
+            //如果是添加和编辑要通知经理
+            $where=[
             'shop'=>['eq',$data_action['shop']],
             'department'=>['in',[1,$data['department']]],
             'job'=>['eq',1],
-        ];
-        $uids=$m_user->where($where)->column('id');
-        
-        
-    }elseif(isset($data['pids'])){
-        //批量同意，删除
-        //暂时只有创建人员
-        $uids=Db::name($data_action['table'])->where('id','in','('.$data['pids'].')')->column('aid'); 
-    }elseif(isset($data['eids'])){
-        //批量同意，删除
-        //暂时只有创建人员
-        $uids=Db::name('edit')->where('id','in','('.$data['eids'].')')->column('aid'); 
-    }else{
-        //如果是审核要通知相关人员
-        //暂时只有创建人员
-        $uid=Db::name($data_action['table'])->where('id',$data_action['pid'])->value('aid');
-        if(!empty($uid)){
-            $uids[]=$uid;
-        }  
+            ];
+            $uids=$m_user->where($where)->column('id');
+            break;
+        case 'review':
+        case 'edit_review':
+            //审核要通知编辑人员
+            $uids=[$data['aid']];
+            break;
+        case 'review_all':
+            //批量审核pids
+            $list=Db::name($data_action['table'])->where('id','in','('.$data['pids'].')')->column('id,aid,name');
+            //不同的人，不同的信息
+            foreach($list as $k=>$v){
+                $data_msg_txt=[
+                    'time'=>$data_action['time'],
+                    'dsc'=>$dsc.$v['id'].'-'.$v['name'],
+                    'type'=>$data_action['type'],
+                    'link'=>url('edit',['id'=>$v['id']]),
+                ];
+                $msg_id=$m_msg_txt->insertGetId($data_msg_txt);
+                $data_msg[]=[
+                    'uid'=>$v['aid'],
+                    'aid'=>$data_action['aid'],
+                    'msg'=>$msg_id,
+                    'shop'=>$data_action['shop'],
+                ];
+            }
+            break;
+        case 'edit_del':
+            //批量删除编辑记录
+            //暂时只有编辑人员 
+            $list=Db::name('edit')
+            ->alias('e')
+            ->join('cmf_'.$data_action['table'].' p','p.id=e.pid')
+            ->where('e.id','in','('.$data['eids'].')')
+            ->column('e.id as eid,p.id,e.aid,p.name');
+            //不同的人，不同的信息
+            foreach($list as $k=>$v){
+                $data_msg_txt=[
+                    'time'=>$data_action['time'],
+                    'dsc'=>$dsc.$v['id'].'-'.$v['name'],
+                    'type'=>$data_action['type'],
+                    'link'=>url('edit',['id'=>$v['id']]),
+                ];
+                $msg_id=$m_msg_txt->insertGetId($data_msg_txt);
+                $data_msg[]=[
+                    'uid'=>$v['aid'],
+                    'aid'=>$data_action['aid'],
+                    'msg'=>$msg_id,
+                    'shop'=>$data_action['shop'],
+                ];
+            }
+            break;
+        case 'del':
+            //批量 删除 
+            $list=Db::name($data_action['table'])->where('id','in','('.$data['pids'].')')->column('id,aid,name');
+            //不同的人，不同的信息
+            foreach($list as $k=>$v){
+                $data_msg_txt=[
+                    'time'=>$data_action['time'],
+                    'dsc'=>$dsc.$v['id'].'-'.$v['name'],
+                    'type'=>$data_action['type'],
+                    'link'=>'',
+                ];
+                $msg_id=$m_msg_txt->insertGetId($data_msg_txt);
+                $data_msg[]=[
+                    'uid'=>$v['aid'],
+                    'aid'=>$data_action['aid'],
+                    'msg'=>$msg_id,
+                    'shop'=>$data_action['shop'],
+                ];
+            }
+            break;
     }
-     
-    if(!empty($uids)){
-        $data_msg=[];
+   
+    if(empty($data_msg)){ 
+        //发送审核信息
+        $data_msg_txt=[
+            'time'=>$data_action['time'],
+            'dsc'=>$data_action['action'],
+            'type'=>$data_action['type'],
+            'link'=>$data_action['link'],
+        ];
+        $msg_id=Db::name('msg_txt')->insertGetId($data_msg_txt); 
         foreach($uids as $v){
             $data_msg[]=[
-                'aid'=>$v,
-                'uid'=>$data_action['aid'], 
+                'uid'=>$v,
+                'aid'=>$data_action['aid'], 
                 'msg'=>$msg_id,
                 'shop'=>$data_action['shop'],
             ];
-        }
+        } 
+    } 
+    if(!empty($data_msg)){
         Db::name('msg')->insertAll($data_msg);
     }
-    
+   
     
 }
 /**

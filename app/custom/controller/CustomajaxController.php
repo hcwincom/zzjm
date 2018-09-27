@@ -11,8 +11,7 @@ class CustomajaxController extends AdminBaseController
     
     public function _initialize()
     {
-        parent::_initialize();
-         
+        
     }
      
    

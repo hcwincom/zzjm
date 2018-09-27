@@ -5,8 +5,8 @@
 		<ul class="nav nav-tabs"> 
 			<include file="public@nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
-			<li class=""><a href="{:url('tel_edit',['id'=>$info.id])}">联系人和付款账号</a></li>  
-			<li class=""><a href="{:url('fee_edit',['id'=>$info.id])}">运费设置</a></li>  
+			<li class=""><a href="{:url('tel_edit',['id'=>$info.id])}">联系人和付款</a></li>  
+			 
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
 			<div class="form-group">
@@ -17,66 +17,8 @@
 					 
 				</div>
 			</div>
-			<div class="form-group">
-				<label  class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="{$info.name}" />
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">关联快递</label>
-				<div class="col-md-6 col-sm-10">
-					<select name="express" id="express"  > 
-					<foreach name="expresses" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.express">selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">付款类型</label>
-				<div class="col-md-6 col-sm-10">
-				<select name="paytype" id="paytype"  > 
-					 
-					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</div>
-			</div>
-		  	<div class="form-group">
-				<label for="" class="col-sm-2 control-label">所在地区</label>
-				<div class="col-md-6 col-sm-10">
-					<select name="province" id="province"  style="width:100px;" required> 
-					 <option value="0">请选择</option>
-					</select>
-					<select name="city" id="city" style="width:100px;" required> 
-					 <option value="0">请选择</option>
-					</select>
-					<select name="area" id="area" style="width:100px;" required> 
-					 <option value="0">请选择</option>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">公司代码</label>
-				<div class="col-md-6 col-sm-10">
-					 <input type="text" class="form-control" name="code" value="{$info.code}" required/>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10">
-					 
-					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="number" class="form-control" name="sort" value="{$info.sort}" />
-				</div>
-			</div>
+			<include file="express@admin_freight:base" />
+			 
 			<div class="form-group">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
@@ -124,32 +66,5 @@ $('.cancel_ban').click(function(){
 	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
 });
  
-var province="{$info.province}";
-var city="{$info.city}";
-var area="{$info.area}";
-get_citys($('#province'),1,province);
-if(province>0){ 
-	get_citys($('#city'),province,city);
-}
-if(city>0){ 
-	get_citys($('#area'),city,area);
-}
-$('#province').change(function(){
-	var fid=$(this).val();
-	if(fid>0){
-		get_citys($('#city'),fid);
-	}else{
-		$('#city').html('<option value="0">请选择</option>');
-	}
-	$('#area').html('<option value="0">请选择</option>');
-});
-$('#city').change(function(){
-	var fid=$(this).val();
-	if(fid>0){
-		get_citys($('#area'),fid);
-	}else{
-		$('#area').html('<option value="0">请选择</option>');
-	}
-});
   
 </script>

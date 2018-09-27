@@ -16,7 +16,7 @@ use think\View;
 
 class HomeBaseController extends BaseController
 {
-
+ 
     public function _initialize()
     {
 //         echo '网站暂未开放';

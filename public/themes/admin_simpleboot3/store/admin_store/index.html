@@ -10,7 +10,17 @@
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
-			状态: 
+		 <notempty name="shops">
+		  店铺:	<select class="form-control" name="shop" >
+				<option value='0'>全部</option> 
+				 <foreach name="shops" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp; 
+		  </notempty>
+		 状态:
 			<select class="form-control" name="status" >
 				<option value='0'>全部</option> 
 				 <foreach name="statuss" item="vo" k="key">
@@ -19,7 +29,7 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-		  
+		 
 			 创建人: 
 			<select class="form-control" name="aid"  >
 				<option value='0'>全部</option> 

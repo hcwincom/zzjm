@@ -739,9 +739,7 @@ class AdminCateController extends GoodsBaseController
             'status'=>2,
         ];
         $admin=$this->admin;
-        if($admin['shop']!=1){
-            $where['shop']=$admin['shop'];
-        }
+        $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         $goods=Db::name('goods')->where($where)->column('id,name');
         $this->success('ok','',$goods);
     }

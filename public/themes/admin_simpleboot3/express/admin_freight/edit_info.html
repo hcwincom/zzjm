@@ -14,75 +14,9 @@
 					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.name}" readonly/>
-				 
-				 <present name='change.name'>
-				 	<input type="text" class="red form-control" value="{$change.name}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			  <div class="form-group">
-				<label for="" class="col-sm-2 control-label">关联快递</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.express_name|default=$info.express}" readonly/>
-				 
-				 <present name='change.express'>
-				 	<input type="text" class="red form-control"  value="{$change.express_name|default=$change.express}" readonly/>
-				 </present>
-					 
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">付款类型</label>
-				<div class="col-md-6 col-sm-10"> 
-					<input type="text" class="form-control"  value="{$info.paytype_name|default=$info.paytype}" readonly/>
-				 
-				 <present name='change.paytype'>
-				 	<input type="text" class="red form-control"  value="{$change.paytype_name|default=$change.paytype}" readonly/>
-				 </present>
-				</div>
-			</div>
-		  	<div class="form-group">
-				<label for="" class="col-sm-2 control-label">所在地区</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.city_name}" readonly/>
-				<notempty name="change.city_name">
-				 	<input type="text" class="red form-control"  value="{$change.city_name}" readonly/> 
-				</notempty>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">公司代码</label>
-				<div class="col-md-6 col-sm-10">
-					 <input type="text" class="form-control" value="{$info.code}" readonly/>
-				 <present name='change.code'>
-				 	<input type="text" class="red form-control"  value="{$change.code}" readonly/>
-				 </present>
-				</div>
-			</div>
+		 <include file="express@admin_freight:base" />
 			 
-			  <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control"  rows="5" readonly>{$info.dsc}</textarea>
-				<present name='change.dsc'>
-				 	<textarea class="red form-control" rows="5" readonly>{$change.dsc}</textarea>
-				</present>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.sort}" readonly/>
-				<present name='change.sort'>
-				 	<input type="text" class="red form-control" value="{$change.sort}" readonly/>
-				 </present>
-				</div>
-			</div>
+		 
 			<div class="form-group">
 				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
 				<div class="col-md-6 col-sm-10">

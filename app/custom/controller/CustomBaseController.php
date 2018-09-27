@@ -423,14 +423,7 @@ class CustomBaseController extends AdminInfo0Controller
         $m_edit->commit();
         $this->success('已提交修改');
     }
-    /**
-     * 客户编辑列表
-     */
-    public function edit_list(){
-        parent::edit_list();
-        return $this->fetch();  
-    }
-    
+     
     /**
      * 客户审核详情
      */
@@ -663,9 +656,10 @@ class CustomBaseController extends AdminInfo0Controller
         parent::del_all();
     }
     /**
-     * 分类信息
+     * 分类等关联信息
      *   */
-    public function cates(){
+    public function cates($type=3){
+        parent::cates($type);
         $table=$this->table;
         $admin=$this->admin;
         //分类

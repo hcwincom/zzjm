@@ -16,6 +16,10 @@ class AdminInfo0Controller extends AdminBaseController
     protected $fields;
     protected $flag;
     protected $isshop;
+    //用于识别当前店铺,
+    protected $shop;
+    //分店铺查询
+    protected $where_shop;
     protected $edit;
     protected $search;
    
@@ -26,6 +30,8 @@ class AdminInfo0Controller extends AdminBaseController
         $this->statuss=config('info_status');
         $this->review_status=config('review_status'); 
         $this->isshop=0; 
+         
+        $this->shop=0; 
         $this->edit=['name','sort','dsc','code'];
         $this->search=[ 'name' => '名称','id' => 'id',];  
         $this->assign('statuss',$this->statuss);
@@ -50,9 +56,17 @@ class AdminInfo0Controller extends AdminBaseController
         $field='p.*,a.user_nickname as aname,r.user_nickname as rname';
         
         if($this->isshop){
-            if($admin['shop']!=1){ 
+            //店铺,分店只能看到自己的数据，总店可以选择店铺
+            if($admin['shop']==1){ 
+                if(empty($data['shop'])){
+                    $data['shop']=0;
+                }else{
+                    $where['p.shop']=['eq',$data['shop']];
+                }
+            }else{
                 $where['p.shop']=['eq',$admin['shop']];
             }
+             
             $join[]=['cmf_shop shop','p.shop=shop.id','left'];
             $field.=',shop.name as sname';
         } 
@@ -156,30 +170,16 @@ class AdminInfo0Controller extends AdminBaseController
         
         // 获取分页显示
         $page = $list->appends($data)->render();
-        
-        $m_user=Db::name('user');
-        //创建人//审核人
-        $where_aid=[
-            'user_type'=>['eq',1], 
-            'shop'=>['in',[1,$admin['shop']]],
-        ];
-        $aids=$m_user->where($where_aid)->order('shop desc,id asc')->column('id,user_nickname');
-        //审核人
-        $where_rid=[
-            'user_type'=>1,
-            'shop'=>['in',[1,$admin['shop']]],
-        ];
-        $rids=$m_user->where($where_rid)->column('id,user_nickname');
+         
         $this->assign('page',$page);
         $this->assign('list',$list);
-        $this->assign('aids',$aids);
-        $this->assign('rids',$rids);
+       
         $this->assign('data',$data);
         $this->assign('types',$types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
         
-        $this->cates();
+        $this->cates(1);
        
     } 
     /**
@@ -188,6 +188,7 @@ class AdminInfo0Controller extends AdminBaseController
     public function add()
     {
         $this->cates();
+        $this->assign("info", null);
     }
     /* 添加 */
     public function add_do()
@@ -255,6 +256,9 @@ class AdminInfo0Controller extends AdminBaseController
             $this->error('数据不存在');
         } 
         $this->assign('info',$info); 
+        if($this->isshop){
+            $this->shop=$info['shop'];
+        }
         //对应分类数据
         $this->cates(); 
     }
@@ -308,7 +312,7 @@ class AdminInfo0Controller extends AdminBaseController
             'link'=>url('edit',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ]; 
-        zz_action($data_action);
+        zz_action($data_action,['aid'=>$info['aid']]);
         
         $m->commit();
         $this->success('审核成功');
@@ -345,45 +349,36 @@ class AdminInfo0Controller extends AdminBaseController
             'rtime'=>$time,
         ];
         //得到要更改的数据
-        $list=$m->where($where)->column('id,aid,name');
-        $ids=implode(',',array_keys($list));
+        $list=$m->where($where)->column('id');
+        if(empty($list)){
+            $this->error('没有可以批量审核的数据');
+        }
+       
+        $ids=implode(',',$list);
         
         //审核成功，记录操作记录,发送审核信息
         $flag=$this->flag;
        
         $table=$this->table;
-        //记录操作记录 
+        //记录操作记录  
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'批量同意'.$flag.'('.$ids.')',
+            'action'=>$admin['user_nickname'].'批量同意'.$flag.'('.$ids.')',
             'table'=>$table,
             'type'=>'review_all',
             'link'=>'',
             'shop'=>$admin['shop'],
         ];
-        $link0=url('edit','',false,false);
-        foreach($list as $k=>$v){
-            //发送审核信息
-            $data_msg[]=[
-                'aid'=>1,
-                'time'=>$time,
-                'uid'=>$v['aid'],
-                'dsc'=>'对'.$flag.$v['id'].'-'.$v['name'].'已批量审核，结果为同意',
-                'type'=>'review',
-                'link'=>$link0.'/id/'.$v['id'],
-                'shop'=>$admin['shop'],
-            ];
-        }
         $m->startTrans();
-        $rows=$m->where($where)->update($update);
+        
+        zz_action($data_action,['pids'=>$ids]);
+        $rows=$m->where('id','in',$list)->update($update);
         if($rows<=0){
             $m->rollback();
             $this->error('没有数据审核成功，批量审核只能把未审核的数据审核为正常');
         } 
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insertAll($data_msg);
         $m->commit();
         $this->success('审核成功'.$rows.'条数据');
     }
@@ -467,9 +462,8 @@ class AdminInfo0Controller extends AdminBaseController
     /**
      * 编辑提交 
      */
-    public function edit_do()
-    {
-        
+    public function edit_do(){
+         
         $m=$this->m;
         $table=$this->table;
         $flag=$this->flag;
@@ -497,7 +491,7 @@ class AdminInfo0Controller extends AdminBaseController
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-       
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
         $fields=$this->edit;
        
         $content=[];
@@ -508,20 +502,6 @@ class AdminInfo0Controller extends AdminBaseController
                 $content[$v]=$data[$v];
             }
              
-        }
-        switch ($table){
-            //快递区域选择
-            case 'expressarea':
-                if(empty($data['citys'])){
-                    $this->error('请选择覆盖区域');
-                }
-                $ids=$data['citys'];
-                $ids0=Db::name('express_area')->where('area',$info['id'])->column('city');
-                //计算新旧参数的差级，没有差级就是完全一样
-                if(!empty(array_diff($ids,$ids0)) ||  !empty(array_diff($ids0,$ids))){
-                    $content['citys']=json_encode($ids);
-                }
-                break;
         }
         
         if(empty($content)){
@@ -573,6 +553,28 @@ class AdminInfo0Controller extends AdminBaseController
         $admin=$this->admin;
        //查找当前表的编辑
         $where=['e.table'=>['eq',$table]];
+        $join=[
+            ['cmf_user a','a.id=e.aid','left'],
+            ['cmf_user r','r.id=e.rid','left'],
+            ['cmf_'.$table.' p','e.pid=p.id','left'],
+        ];
+        
+        $field='e.*,a.user_nickname as aname,r.user_nickname as rname,p.name as pname';
+        //店铺,分店只能看到自己的数据，总店可以选择店铺
+        if($this->isshop){ 
+            if($admin['shop']==1){
+                if(empty($data['shop'])){
+                    $data['shop']=0;
+                }else{
+                    $where['e.shop']=['eq',$data['shop']];
+                }
+            }else{
+                $where['e.shop']=['eq',$admin['shop']];
+            }
+            
+            $join[]=['cmf_shop shop','e.shop=shop.id','left'];
+            $field.=',shop.name as sname';
+        } 
         //状态
         if(empty($data['status'])){
             $data['status']=0;
@@ -649,14 +651,7 @@ class AdminInfo0Controller extends AdminBaseController
                 }
             }
         }
-        $join=[
-            ['cmf_user a','a.id=e.aid','left'],
-            ['cmf_user r','r.id=e.rid','left'],
-            ['cmf_'.$table.' p','e.pid=p.id','left'],
-        ];
        
-        $field='e.*,a.user_nickname as aname,r.user_nickname as rname,p.name as pname';
-         
          
         $list=$m_edit
         ->alias('e')
@@ -668,26 +663,12 @@ class AdminInfo0Controller extends AdminBaseController
          
         // 获取分页显示
         $page = $list->appends($data)->render();
-        $m_user=Db::name('user');
-        //可以加权限判断，目前未加
-        //创建人
-        $where_aid=[
-            'user_type'=>1,
-            'shop'=>['in',[1,$admin['shop']]],
-        ];
-        $aids=$m_user->where($where_aid)->column('id,user_nickname');
-        //审核人
-        $where_rid=[
-            'user_type'=>1,
-            'shop'=>['in',[1,$admin['shop']]],
-        ];
-        $rids=$m_user->where($where_rid)->column('id,user_nickname');
+       
         //分类信息
-        $this->cates();
+        $this->cates(2);
         $this->assign('page',$page);
         $this->assign('list',$list);
-        $this->assign('aids',$aids);
-        $this->assign('rids',$rids);
+      
         $this->assign('data',$data);
         $this->assign('types',$types);
         $this->assign('times',$times);
@@ -712,7 +693,7 @@ class AdminInfo0Controller extends AdminBaseController
         $info=$m->where('id',$info1['pid'])->find();
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
-        }
+        } 
         //获取改变的信息
         $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
@@ -721,7 +702,12 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('info',$info);
         $this->assign('info1',$info1); 
         $this->assign('change',$change);
-       
+        
+        if($this->isshop){
+            $this->shop=$info['shop'];
+        }
+        //分类关联信息
+        $this->cates();
     }
     
     /**
@@ -767,6 +753,12 @@ class AdminInfo0Controller extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status, 
         ];
+        $review_status=$this->review_status; 
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
+        
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -790,30 +782,7 @@ class AdminInfo0Controller extends AdminBaseController
             foreach($change as $k=>$v){
                 $update_info[$k]=$v; 
             }
-             
-            switch ($table){
-                //快递区域选择
-                case 'expressarea':
-                    //处理覆盖区域
-                    if(isset($change['citys'])){
-                        $ids=json_decode($change['citys'],'true');
-                        unset($update_info['citys']);
-                    }  
-                    if(empty($ids)){
-                        break;
-                    }
-                    $m_ea=Db::name('express_area');
-                    $m_ea->where('area',$info['pid'])->delete();
-                    $data_city=[];
-                    foreach($ids as $v){
-                        $data_city[]=[
-                            'city'=>$v,
-                            'area'=>$info['pid'],
-                        ];
-                    }
-                    $m_ea->insertAll($data_city); 
-                    break;
-            }
+            
             $row=$m->where('id',$info['pid'])->update($update_info);
             if($row!==1){
                 $m->rollback();
@@ -822,7 +791,7 @@ class AdminInfo0Controller extends AdminBaseController
         }
           
         //审核成功，记录操作记录,发送审核信息 
-        $review_status=$this->review_status; 
+       
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -835,7 +804,7 @@ class AdminInfo0Controller extends AdminBaseController
             'shop'=>$admin['shop'], 
         ];
          
-        zz_action($data_action);
+        zz_action($data_action,['aid'=>$info['aid']]);
          
         $m->commit(); 
         $this->success('审核成功');
@@ -907,6 +876,7 @@ class AdminInfo0Controller extends AdminBaseController
             'pid'=>0,
             'shop'=>$admin['shop'],
         ]; 
+         
         zz_action($data_action,['eids'=>$eidss]);
         
         $m_edit->commit();
@@ -957,11 +927,7 @@ class AdminInfo0Controller extends AdminBaseController
             Db::name('edit_info')->where(['eid'=>['in',$eids]])->delete();
             Db::name('edit')->where(['id'=>['in',$eids]])->delete();
         }
-        //不同表处理
-        switch($table){
-            //模板表删除参数对应
-           
-        }
+        
         //记录操作记录
         $idss=implode(',',$ids);
         $data_action=[
@@ -982,18 +948,63 @@ class AdminInfo0Controller extends AdminBaseController
        
     }
     /**
-     * 分类信息
+     * 分类信息,1-index,2-edit_index,3-add,edit,edit_info
      *   */
-    public function cates(){
-        $table=$this->table;
-        $cates=[];
-        switch($table){
-            case 'custom':
-                $cates=Db::name($table.'_cate')->where('status',2)->order('sort asc')->column('id,name');
-                break;
+    public function cates($type=3){
+        $admin=$this->admin;
+        //计算所属商家
+        $shop=$this->shop;
+        if(empty($this->where_shop)){
+            if($type==3){
+                //添加时总站算极敏
+                if($shop==0){
+                    $where_shop=($admin['shop']==1)?2:$admin['shop'];
+                }else{
+                    $where_shop=$shop;
+                }
+            }else{
+                //总站列表中显示所有
+                if($admin['shop']>1){
+                    $where_shop=$admin['shop'];
+                }else{
+                    $where_shop=0;
+                }
+            }
+            $this->where_shop=$where_shop;
         }
-       
-        $this->assign('cates',$cates);
+         
+        if($type<3){
+            //显示编辑人和审核人
+            $m_user=Db::name('user');
+            //可以加权限判断，目前未加
+            //创建人
+            $where_aid=[
+                'user_type'=>1,
+                'shop'=>['in',[1,$admin['shop']]],
+            ];
+            $aids=$m_user->where($where_aid)->column('id,user_nickname');
+            //审核人
+            $where_rid=[
+                'user_type'=>1,
+                'shop'=>['in',[1,$admin['shop']]],
+            ];
+            $rids=$m_user->where($where_rid)->column('id,user_nickname');
+            $this->assign('aids',$aids);
+            $this->assign('rids',$rids);
+            
+            //如果分店铺又是列表页查找,显示所有店铺
+            if($admin['shop']==1 && ($this->isshop) ){
+                $shops=Db::name('shop')->where('status',2)->column('id,name');
+                //首页列表页去除总站
+                if($type==1){
+                    unset($shops[1]);
+                }
+               
+                $this->assign('shops',$shops);
+            }
+            
+        } 
+         
     }
-     
+    
 }

@@ -1,0 +1,348 @@
+ 			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">仓库类型</label>
+				<div class="col-md-6 col-sm-10"> 
+				
+					 <select name="type" id="" class="form-control">
+					  <foreach name="types" item="vo">
+					 	<option value="{$key}" <if condition="$key eq $info.type">selected</if>>{$vo}</option>
+					  </foreach>
+					 </select> 
+				
+				<p>仓库类型选择后不可更改</p>
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="name" value="{$info.name}"  />
+				 
+				 <present name='change.name'>
+				 	<input type="text" class="red form-control" value="{$change.name}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			 <div style="clear:both"></div>
+			 <div class="form-group fleft"  style="width:100%">
+				<label  class="col-sm-2 control-label">仓库地址</label>
+				<div class="col-md-6 col-sm-10" >
+				  省：<select class="form-control" name="province" id="province" style="width:100px;display:inline-block;"  >
+				  	<option value="0">请选择</option>
+				  </select>
+				  
+				<present name="change.province">
+					<span class="red">{$change['citys'][$change['province']]|default='不存在'}</span>
+				</present>
+				  市：<select  class="form-control" name="city" id="city"  style="width:100px;display:inline-block;"  >
+				  	<option value="0">请选择</option>
+				  </select>
+				 <present name="change.city">
+					<span class="red">{$change['citys'][$change['city']]|default='不存在'}</span>
+				</present>
+				 县：  <select class="form-control" name="area" id="area" style="width:100px;display:inline-block;">
+				   	<option value="0">请选择</option>
+				   </select>
+				 <present name="change.area">
+					<span class="red">{$change['citys'][$change['area']]|default='不存在'}</span>
+				</present>
+				
+				编号：<input type="text" class="form-control" id="city_code" name="city_code" value="{$info.city_code}" style="width:70px;" readonly/>
+				   
+				  -
+				   <input type="number" min="1" max="99" class="form-control" id="code_num" name="code_num" value="{$info.code_num|default=1}" style="width:70px;" required/>
+					<present name="change.code">
+				  		<span class="red">{$change.code}</span>
+					 </present>
+				</div>
+			</div>
+			<div class="form-group fleft" style="width:100%">
+				<label  class="col-sm-2 control-label">街道地址</label>
+				<div class="col-md-6 col-sm-10">
+				  <input type="text" class="form-control" name="street" value="{$info.street}" />
+				<present name="change.street">
+					<input type="text" class="form-control red"  value="{$change.street}" />
+				</present>
+				</div>
+			</div>
+		 
+		 
+			 <div style="clear:both"></div>
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">负责人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel_name" value="{$info.tel_name}"  />
+				 
+				 <present name='change.tel_name'>
+				 	<input type="text" class="red form-control" value="{$change.tel_name}" readonly/>
+				 </present>
+					
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">联系电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel_phone" value="{$info.tel_phone}"  />
+				 
+				 <present name='change.tel_phone'>
+				 	<input type="text" class="red form-control" value="{$change.tel_phone}" readonly/>
+				 </present>
+					
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">联系手机</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="tel_mobile" value="{$info.tel_mobile}"  />
+				 
+				 <present name='change.tel_mobile'>
+				 	<input type="text" class="red form-control" value="{$change.tel_mobile}" readonly/>
+				 </present>
+					
+				</div>
+			</div> 
+			 <div style="clear:both"></div>
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">租用面积(平方米)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0"  class="form-control" id="size0" name="size0" value="{$info.size0}"  />
+				 
+				 <present name='change.size0'>
+				 	<input type="text" class="red form-control" value="{$change.size0}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">使用面积(平方米)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0" class="form-control"  id="size" name="size" value="{$info.size}"  />
+				 
+				 <present name='change.size'>
+				 	<input type="text" class="red form-control" value="{$change.size}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">仓库长(米)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0"  class="form-control"  id="length" name="length" value="{$info.length}"  />
+				 
+				 <present name='change.length'>
+				 	<input type="text" class="red form-control" value="{$change.length}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">仓库宽(米)</label>
+				<div class="col-md-6 col-sm-10">
+				<input type="number" step="0.01" min="0"  class="form-control" id="width" name="width" value="{$info.width}"  />
+				 
+				 <present name='change.width'>
+				 	<input type="text" class="red form-control" value="{$change.width}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">仓库高(米)</label>
+				<div class="col-md-6 col-sm-10">
+				<input type="number" step="0.01" min="0"  class="form-control"  id="height" name="height" value="{$info.height}"  />
+				 
+				 <present name='change.height'>
+				 	<input type="text" class="red form-control" value="{$change.height}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			 <div style="clear:both"></div>
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">仓库租金(元/平方/月)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0"  class="form-control" id="price1" name="price1" value="{$info.price1}"  />
+				 
+				 <present name='change.price1'>
+				 	<input type="text" class="red form-control" value="{$change.price1}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">仓库物业费(元/平方/月)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0"  class="form-control" id="price2" name="price2" value="{$info.price2}"  />
+				 
+				 <present name='change.price2'>
+				 	<input type="text" class="red form-control" value="{$change.price2}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">租金总额(元/月)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0"  class="form-control"  id="fee1" name="fee1" value="{$info.fee1}"  />
+				 
+				 <present name='change.fee1'>
+				 	<input type="text" class="red form-control" value="{$change.fee1}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">物业费总额(元/月)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0"  class="form-control"  id="fee2" name="fee2" value="{$info.fee2}"  />
+				 
+				 <present name='change.fee2'>
+				 	<input type="text" class="red form-control" value="{$change.fee2}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">含物业费租金总额(元/月)</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" step="0.01" min="0" class="form-control"  id="fee0" name="fee0" value="{$info.fee0}" readonly />
+				 
+				 <present name='change.fee0'>
+				 	<input type="text" class="red form-control" value="{$change.fee0}" readonly/>
+				 </present> 
+				</div>
+			</div> 
+			 <div class="form-group fleft">
+				<label for="input-gender" class="col-sm-2 control-label">排序</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="number" class="form-control"  value="{$info.sort|default=1000}" />
+				<present name='change.sort'>
+				 	<input type="text" class="red form-control" value="{$change.sort}" readonly/>
+				 </present>
+				</div>
+			</div>
+			 <div style="clear:both"></div>
+				<div class="form-group fleft"  style="width:100%">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10"> 
+				<input type="text" class="form-control" name="dsc" value="{$info.dsc}"  />
+					 
+				<present name='change.dsc'>
+					<input type="text" class="red form-control"  value="{$change.dsc}" readonly /> 
+				</present>
+				</div>
+			</div>
+			 <div style="clear:both"></div>
+		 
+<script>
+	 var id="{$info.id|default=0}";
+	 var code_add="{:url('store/storeajax/code_add')}";
+	 var code_check="{:url('store/storeajax/code_check')}";
+ 
+	city_js2($('#province'),"{$info.province|default=0}",$('#city'),"{$info.city|default=0}",$('#area'),"{$info.area|default=0}");
+	//城市选择js初始化
+	function city_js2($province,province,$city,city,$area=null,area=0){
+		get_citys($province,1,province);
+		if(province>0){
+			get_citys($city,province,city);
+		}
+		if(city>0){
+			get_citys($area,city,area); 
+		}
+		$province.change(function(){
+			province=$(this).val();
+			get_citys($city,province,0);
+			get_citys($area,0,0); 
+			$('#city_code').val(''); 
+			 
+		});
+		$city.change(function(){ 
+			city=$(this).val();
+			get_citys($area,city,0);
+		 
+			if(city==0){
+				$('#city_code').val(''); 
+				return false;
+			}
+			$.ajax({
+                type: 'POST',
+                url: code_add,
+                dataType: 'json',
+                data:{'id':id,'city':city},
+                success: function (data) {
+                	$('#city_code').val(data.data.city_code); 
+    				$('#code_num').val(data.data.code_num); 
+                }, 
+                error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+                	msg(event.responseText,1);
+                }
+            });
+		 
+		});
+		 
+	}
+	 
+	
+	$('#code_num').change(function(){
+		var code_num=$(this).val();
+		var city=$('#city').val();
+		if(city==0){
+			$('#city_code').val('');
+			$('#code_num').val(1);
+			return false;
+		}
+		$.ajax({
+            type: 'POST',
+            url: code_check,
+            dataType: 'json',
+            data:{'id':id,'city':city,'code_num':code_num},
+            success: function (data) {
+            	if(data.code!=1){
+    				alert(data.msg);
+    				$('#code_num').focus();
+    			}
+            }, 
+            error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+               
+            	msg(event.responseText,1);
+            }
+        });
+		 
+	});
+var price1=0;
+var price2=0;
+var size0=0;
+var fee1=0;
+var fee2=0;
+var fee0=0;
+ 
+$('#price1,#price2,#size0').change(function(){
+	price1=(parseFloat($('#price1').val())).toFixed(2);
+	if(!(price1>=0)){
+		price1=0;
+	}
+	$('#price1').val(price1);
+	price2=(parseFloat($('#price2').val())).toFixed(2);
+	if(!(price2>=0)){
+		price2=0;
+	}
+	$('#price2').val(price2);
+	size0=(parseFloat($('#size0').val())).toFixed(2);
+	if(!(size0>=0)){
+		size0=0;
+	}
+	$('#size0').val(size0);
+	fee1=price1*size0;
+	fee2=price2*size0;
+	fee0=(fee1+fee2).toFixed(2);
+	$('#fee1').val(fee1.toFixed(2));
+	$('#fee2').val(fee2.toFixed(2));
+	$('#fee0').val(fee0);
+});
+$('#fee1,#fee2').change(function(){
+	fee1=(parseFloat($('#fee1').val()));
+	if(!(fee1>=0)){
+		fee1=0;
+	}
+
+	fee2=(parseFloat($('#fee2').val()));
+	if(!(fee2>=0)){
+		fee2=0;
+	}
+
+	fee0=(fee1+fee2).toFixed(2);
+	$('#fee1').val(fee1.toFixed(2));
+	$('#fee2').val(fee2.toFixed(2));
+	$('#fee0').val(fee0);
+});
+</script>			
+			 

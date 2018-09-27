@@ -5624,7 +5624,8 @@ class AdminGoodsController extends AdminBaseController
         
     }
     //获取分类信息
-    public function cates(){
+    public function cates($type=3){
+       
         //分类
         $m_cate=Db::name('cate');
         $where_cate=[
@@ -5639,6 +5640,7 @@ class AdminGoodsController extends AdminBaseController
         $cates=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,fid,code');
         $this->assign('cates0',$cates0);
         $this->assign('cates',$cates);
+         
     }
     //获取品牌信息
     public function brands(){
