@@ -29,7 +29,7 @@ class AdminInfo0Controller extends AdminBaseController
         
         $this->statuss=config('info_status');
         $this->review_status=config('review_status'); 
-        $this->isshop=0; 
+        $this->isshop=1; 
          
         $this->shop=0; 
         $this->edit=['name','sort','dsc','code'];
@@ -52,12 +52,15 @@ class AdminInfo0Controller extends AdminBaseController
         $join=[
             ['cmf_user a','a.id=p.aid','left'],
             ['cmf_user r','r.id=p.rid','left'],
+           
         ];
         $field='p.*,a.user_nickname as aname,r.user_nickname as rname';
-        
+        //店铺,分店只能看到自己的数据，总店可以选择店铺
         if($this->isshop){
+            $join[]= ['cmf_shop shop','p.shop=shop.id','left'];
+            $field.=',shop.name as sname';
             //店铺,分店只能看到自己的数据，总店可以选择店铺
-            if($admin['shop']==1){ 
+            if($admin['shop']==1){
                 if(empty($data['shop'])){
                     $data['shop']=0;
                 }else{
@@ -66,10 +69,10 @@ class AdminInfo0Controller extends AdminBaseController
             }else{
                 $where['p.shop']=['eq',$admin['shop']];
             }
-             
-            $join[]=['cmf_shop shop','p.shop=shop.id','left'];
-            $field.=',shop.name as sname';
-        } 
+        }
+      
+        
+         
         //状态
         if(empty($data['status'])){
             $data['status']=0;
@@ -82,12 +85,7 @@ class AdminInfo0Controller extends AdminBaseController
         }else{
             $where['p.cid']=['eq',$data['cid']];
         }
-        //字母
-        if(empty($data['char'])){
-            $data['char']='-1';
-        }else{
-            $where['p.char']=['eq',$data['char']];
-        }
+        
         //添加人
         if(empty($data['aid'])){
             $data['aid']=0;
@@ -178,7 +176,7 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('types',$types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
-        
+      
         $this->cates(1);
        
     } 
@@ -205,18 +203,17 @@ class AdminInfo0Controller extends AdminBaseController
         $time=time();
         $admin=$this->admin;
         $data_add=$data;
+        //判断是否有店铺
+        if($this->isshop){
+            $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
+        } 
         $data_add['sort']=intval($data['sort']);
         $data_add['status']=1;
       
         $data_add['aid']=$admin['id'];
         $data_add['atime']=$time;
         $data_add['time']=$time;
-        //判断是否有店铺
-        if($this->isshop){
-            $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
-        } elseif($admin['shop']!=1){
-            $this->error('店铺不能添加系统数据');
-        }
+        
         $m->startTrans();
         $id=$m->insertGetId($data_add);
         
@@ -954,13 +951,13 @@ class AdminInfo0Controller extends AdminBaseController
         $admin=$this->admin;
         //计算所属商家
         $shop=$this->shop;
-        if(empty($this->where_shop)){
+        if(empty($this->where_shop) && ($this->isshop)){
             if($type==3){
                 //添加时总站算极敏
                 if($shop==0){
                     $where_shop=($admin['shop']==1)?2:$admin['shop'];
                 }else{
-                    $where_shop=$shop;
+                    $where_shop=0;
                 }
             }else{
                 //总站列表中显示所有

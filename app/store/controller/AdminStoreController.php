@@ -87,18 +87,14 @@ class AdminStoreController extends AdminInfo0Controller
             $this->error('名称不能为空');
         }
         $admin=$this->admin;
-        //判断是否有店铺
-        if($this->isshop){
-            $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
-        } elseif($admin['shop']!=1){
-            $this->error('店铺不能添加系统数据');
-        }
+        
         $url=url('index');
         
         $table=$this->table;
         $time=time();
        
         $data_add=$data;
+        $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
         $data_add['city_code']=intval($data['city_code']);
         $data_add['code_num']=intval($data['code_num']);
         $data_add['code']=str_pad($data['city_code'], 4,'0',STR_PAD_LEFT).'-'.str_pad($data['code_num'], 2,'0',STR_PAD_LEFT);
@@ -115,6 +111,7 @@ class AdminStoreController extends AdminInfo0Controller
         $data_add['time']=$time;
        
         $m->startTrans();
+       
         $id=$m->insertGetId($data_add);
         
         //记录操作记录

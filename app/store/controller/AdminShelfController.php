@@ -809,7 +809,13 @@ class AdminShelfController extends AdminInfo0Controller
         }
         //关联仓库
         $where['type']=1;
-        $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column('id,name');
+        if($type==3){
+            $field='id,name';
+        }else{
+            $field='id,shop,name';
+        }
+        $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column($field);
+       
         $this->assign('stores',$stores);
         
         //默认长宽高

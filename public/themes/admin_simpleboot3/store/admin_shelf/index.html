@@ -9,16 +9,7 @@
 	 
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post" action="">
-			 <notempty name="shops">
-		  店铺:	<select class="form-control" name="shop" >
-				<option value='0'>全部</option> 
-				 <foreach name="shops" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 
-				 {$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp; 
-			</notempty>
+			
 			状态: 
 			<select class="form-control" name="status" >
 				<option value='0'>全部</option> 
@@ -27,15 +18,25 @@
 				 {$vo}
 				</option>
 				</foreach>
-			</select> &nbsp;&nbsp;  
-		   仓库:	<select class="form-control" name="store" >
+			</select> &nbsp;&nbsp; 
+			 <notempty name="shops">
+		  店铺:	<select class="form-control" id="shop" name="shop" >
 				<option value='0'>全部</option> 
-				 <foreach name="stores" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.store">selected</if>> 
+				 <foreach name="shops" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 
 				 {$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
+			</notempty> 
+		   仓库:	<select class="form-control" id="store" name="store" >
+				<option value='0'>全部</option> 
+				 <foreach name="stores" item="vo" k="key">
+				<option value="{$key}" class="store store{$vo.shop}" <if condition="$key eq $data.store">selected</if>> 
+				 {$vo.name}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;  
 			 创建人: 
 			<select class="form-control" name="aid"  >
 				<option value='0'>全部</option> 
@@ -127,7 +128,7 @@
 						{$vo.id}
 						</td>
 						<td > {$vo.sname}</td>
-						<td > {$stores[$vo['store']]}</td>
+						<td > {$stores[$vo['store']]['name']|default=$vo['store']}</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 					 
 						<td>{$vo.aname|default=$vo.aid}</td>
@@ -167,6 +168,18 @@ $('.review_all').click(function(){
 });
 $('.del_all').click(function(){
 	$(this).parents('form').attr('action',"{:url('del_all')}");
+});
+$('#shop').change(function(){
+	var shop=$(this).val();  
+	if(shop==0){
+		$('.store').show();
+	}else{
+		$('.store').hide();
+		$('.store'+shop).show();
+	}
+	$('#store').val(0);
+  
+  
 });
 </script>
 </body>

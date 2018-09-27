@@ -414,7 +414,7 @@ class AdminCateController extends GoodsBaseController
      */
     public function edit_list(){
         parent::edit_list();
-        return $this->fetch(); 
+        return $this->fetch();  
     }
     
     /**

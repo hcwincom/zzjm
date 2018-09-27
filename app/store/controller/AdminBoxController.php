@@ -51,12 +51,11 @@ class AdminBoxController extends AdminInfo0Controller
         //判断是否有店铺
         $join=[
             ['cmf_goods goods','goods.id=p.goods','left'],
-            ['cmf_shop shop','p.shop=shop.id','left'],
-            ['cmf_store store','p.store=store.id','left'],
+            ['cmf_shop shop','p.shop=shop.id','left'], 
             ['cmf_store_goods sg','p.store=sg.store and p.goods=sg.goods','left'],
         ];
         $field='p.*,goods.name as goods_name,goods.code as goods_code,'.
-        'shop.name as sname,store.name as store_name,sg.safe as sg_safe,sg.num as sg_num,sg.box_num'; 
+        'shop.name as sname,sg.safe as sg_safe,sg.num as sg_num,sg.box_num'; 
       
         //店铺,分店只能看到自己的数据，总店可以选择店铺
         if($admin['shop']==1){
@@ -68,7 +67,7 @@ class AdminBoxController extends AdminInfo0Controller
             }
         }else{
             $where['p.shop']=['eq',$admin['shop']];
-            $this->where_shop=$data['shop'];
+            $this->where_shop=$admin['shop'];
         }
          
         //状态
