@@ -16,9 +16,8 @@ class AdminInfo0Controller extends AdminBaseController
     protected $fields;
     protected $flag;
     protected $isshop;
-    //用于识别当前店铺,
-    protected $shop;
-    //分店铺查询
+    //用于详情页中识别当前店铺, 
+    //列表页中分店铺查询
     protected $where_shop;
     protected $edit;
     protected $search;
@@ -31,7 +30,7 @@ class AdminInfo0Controller extends AdminBaseController
         $this->review_status=config('review_status'); 
         $this->isshop=1; 
          
-        $this->shop=0; 
+        $this->where_shop=0; 
         $this->edit=['name','sort','dsc','code'];
         $this->search=[ 'name' => '名称','id' => 'id',];  
         $this->assign('statuss',$this->statuss);
@@ -254,7 +253,7 @@ class AdminInfo0Controller extends AdminBaseController
         } 
         $this->assign('info',$info); 
         if($this->isshop){
-            $this->shop=$info['shop'];
+            $this->where_shop=$info['shop'];
         }
         //对应分类数据
         $this->cates(); 
@@ -701,7 +700,7 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('change',$change);
         
         if($this->isshop){
-            $this->shop=$info['shop'];
+            $this->where_shop=$info['shop'];
         }
         //分类关联信息
         $this->cates();
@@ -949,26 +948,6 @@ class AdminInfo0Controller extends AdminBaseController
      *   */
     public function cates($type=3){
         $admin=$this->admin;
-        //计算所属商家
-        $shop=$this->shop;
-        if(empty($this->where_shop) && ($this->isshop)){
-            if($type==3){
-                //添加时总站算极敏
-                if($shop==0){
-                    $where_shop=($admin['shop']==1)?2:$admin['shop'];
-                }else{
-                    $where_shop=0;
-                }
-            }else{
-                //总站列表中显示所有
-                if($admin['shop']>1){
-                    $where_shop=$admin['shop'];
-                }else{
-                    $where_shop=0;
-                }
-            }
-            $this->where_shop=$where_shop;
-        }
          
         if($type<3){
             //显示编辑人和审核人

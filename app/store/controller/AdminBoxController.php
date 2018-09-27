@@ -306,7 +306,7 @@ class AdminBoxController extends AdminInfo0Controller
         }
         
         $this->assign('info',$info);
-        $this->shop=$info['shop']; 
+        $this->where_shop=$info['shop']; 
         
         return $this->fetch();  
     }
@@ -573,9 +573,9 @@ class AdminBoxController extends AdminInfo0Controller
         $this->assign('info1',$info1);
         $this->assign('change',$change);
         
-        if($this->isshop){
-            $this->shop=$info['shop'];
-        }
+       
+        $this->where_shop=$info['shop'];
+        
         //分类关联信息
         $this->cates();
         

@@ -297,9 +297,9 @@ class AdminShelfController extends AdminInfo0Controller
             $this->error('数据不存在');
         }
         $this->assign('info',$info);
-        if($this->isshop){
-            $this->shop=$info['shop'];
-        }
+       
+        $this->where_shop=$info['shop'];
+        
         //对应分类数据
         $this->cates(); 
         $floors=Db::name('store_floor')
@@ -560,10 +560,9 @@ class AdminShelfController extends AdminInfo0Controller
         $this->assign('info',$info);
         $this->assign('info1',$info1);
         $this->assign('change',$change);
+         
+        $this->where_shop=$info['shop'];
         
-        if($this->isshop){
-            $this->shop=$info['shop'];
-        }
         //分类关联信息
         $this->cates();
         $floors=Db::name('store_floor')
