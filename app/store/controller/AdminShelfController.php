@@ -423,7 +423,7 @@ class AdminShelfController extends AdminInfo0Controller
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-        
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
         $fields=$this->edit;
         
         $content=[];
@@ -540,14 +540,21 @@ class AdminShelfController extends AdminInfo0Controller
         $table=$this->table;
         //获取编辑信息
         $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find();
+        $info1=$m_edit
+            ->alias('p')
+            ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where('p.id',$id)
+            ->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
-        //获取原信息
         $info=$m->alias('p')
-        ->field('p.*,s.height as store_height')
+        ->field('p.*,s.height as store_height ,a.user_nickname as aname,r.user_nickname as rname')
         ->join('cmf_store s','s.id=p.store','left')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
         ->where('p.id',$info1['pid'])->find();
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
@@ -624,6 +631,11 @@ class AdminShelfController extends AdminInfo0Controller
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -737,7 +749,7 @@ class AdminShelfController extends AdminInfo0Controller
         }
         
         //审核成功，记录操作记录,发送审核信息
-        $review_status=$this->review_status;
+
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
