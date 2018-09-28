@@ -165,9 +165,12 @@ $('.cancel_ban').click(function(){
 });
 $('.review_all').click(function(){
 	$(this).parents('form').attr('action',"{:url('review_all')}");
+    return is_check('批量同意');
 });
+
 $('.del_all').click(function(){
 	$(this).parents('form').attr('action',"{:url('del_all')}");
+    return is_check('批量删除');
 });
 $('#shop').change(function(){
 	var shop=$(this).val();  
