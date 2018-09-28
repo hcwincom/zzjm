@@ -8,17 +8,36 @@ use think\Db;
   
 class AdminGoodsController extends AdminBaseController
 {
-    
+    protected $m;
+    protected $statuss;
+    protected $review_status;
+    protected $table;
+    protected $fields;
+    protected $flag;
+    protected $isshop;
+    //用于详情页中识别当前店铺,
+    //列表页中分店铺查询
+    protected $where_shop;
+    protected $edit;
+    protected $search;
     public function _initialize()
     {
         parent::_initialize();
-       
+        $this->statuss=config('info_status');
+        $this->review_status=config('review_status');
+        $this->isshop=1;
+        
+        $this->where_shop=0;
+        $this->edit=['name','sort','dsc','code'];
+        $this->search=[ 'name' => '名称','id' => 'id',];
+        $this->assign('statuss',$this->statuss);
+        $this->assign('review_status',$this->review_status);
+        $this->assign('html',$this->request->action());
         $this->flag='库存';
         $this->table='store_goods';
         $this->m=Db::name('store_goods');
         $this->edit=['safe','safe_max','safe_count'];
-        //没有店铺区分
-        $this->isshop=1;
+       
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
         
@@ -50,21 +69,21 @@ class AdminGoodsController extends AdminBaseController
         ];
         $field='p.*,';
         
-        if($this->isshop){
-            //店铺,分店只能看到自己的数据，总店可以选择店铺
-            if($admin['shop']==1){
-                if(empty($data['shop'])){
-                    $data['shop']=0;
-                }else{
-                    $where['p.shop']=['eq',$data['shop']];
-                }
+      
+        //店铺,分店只能看到自己的数据，总店可以选择店铺
+        if($admin['shop']==1){
+            if(empty($data['shop'])){
+                $data['shop']=0;
             }else{
-                $where['p.shop']=['eq',$admin['shop']];
+                $where['p.shop']=['eq',$data['shop']];
             }
-            
-            $join[]=['cmf_shop shop','p.shop=shop.id','left'];
-            $field.=',shop.name as sname';
+        }else{
+            $where['p.shop']=['eq',$admin['shop']];
         }
+        
+        $join[]=['cmf_shop shop','p.shop=shop.id','left'];
+        $field.=',shop.name as sname';
+       
         //状态
         if(empty($data['status'])){
             $data['status']=0;

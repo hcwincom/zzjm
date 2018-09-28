@@ -126,7 +126,7 @@ class ActionController extends AdminBaseController
     public function clear()
     {
         $m=$this->m;
-        $m->where('type','system')->delete();
+        $m->where('table','system')->delete();
         $this->success('已清空');
     }
     
