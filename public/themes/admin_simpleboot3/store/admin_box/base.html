@@ -1,6 +1,7 @@
  	 
  		 <div style="clear:both"></div>
-			  <div class="form-group fleft fleft-all"  >
+ 		 
+			  <div class="form-group fleft-all"  >
 				<label for="length" class="col-sm-2 control-label">料位位置</label>
 				<div class="col-md-6 col-sm-10">
 				<empty name="info.id">
@@ -27,7 +28,6 @@
 				</div>
 			</div> 
 			 
-			 <div style="clear:both"></div>
 			<div class="form-group fleft">
 				<label for="num" class="col-sm-2 control-label">{$flag}序号</label>
 				<div class="col-md-6 col-sm-10">
@@ -85,7 +85,7 @@
 				</div>
 			</div>
 			 <div style="clear:both"></div>
-			  <div class="form-group fleft fleft-all"  >
+			  <div class="form-group fleft-all"  >
 				<label for="length" class="col-sm-2 control-label">存放产品</label>
 				<div class="col-md-6 col-sm-10">
 				<empty name="info.goods">
@@ -117,7 +117,7 @@
 			 
 		<empty name="change.box">
 		<notempty name="info.goods">
-			<div class="form-group fleft fleft-all"  >
+			<div class="form-group  fleft-all"  >
 				<label for="length" class="col-sm-2 control-label">新料位选择</label>
 				<div class="col-md-6 col-sm-10">
 					 <select id="shelf" class="form-control short2" >  
@@ -134,13 +134,13 @@
 			</div>  
 		</notempty>
 		<else/>
-		  <div class="form-group fleft fleft-all red"  >
+		  <div class="form-group  fleft-all red"  >
 				<label for="length" class="col-sm-2 control-label">原存放产品</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" value="{$change.box_goods_name}"/> 
 				</div>
 			</div> 
-			<div class="form-group fleft fleft-all red"  >
+			<div class="form-group  fleft-all red"  >
 				<label for="length" class="col-sm-2 control-label">产品新料位</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" value="{$change.box_name}"/>
@@ -158,7 +158,7 @@
 				</div>
 			</div>
 			 <div style="clear:both"></div>
-			<div class="form-group fleft fleft-all"  >
+			<div class="form-group  fleft-all"  >
 				<label class="col-sm-2 control-label">备注</label>
 				<div class="col-md-6 col-sm-10"> 
 				<input type="text" class="form-control" name="dsc" value="{$info.dsc}"  /> 
@@ -201,7 +201,7 @@
 		</notempty>
 			 
 		<present name="info.id">
-			<div class="form-group fleft fleft-all"  >
+			<div class="form-group  fleft-all"  >
 				<label class="col-sm-2 control-label">修改备注</label>
 				<div class="col-md-6 col-sm-10"> 
 					<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  /> 
@@ -210,7 +210,7 @@
 			</div> 
 		</present>
 		<present name="change">
-			<div class="form-group fleft fleft-all"  >
+			<div class="form-group  fleft-all"  >
 				<label class="col-sm-2 control-label">审核意见</label>
 				<div class="col-md-6 col-sm-10"> 
 					<input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  /> 

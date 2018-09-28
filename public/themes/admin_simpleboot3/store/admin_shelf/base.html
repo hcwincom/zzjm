@@ -36,7 +36,7 @@
 			 
 		 
 			 <div style="clear:both"></div>
-			  <div class="form-group fleft fleft-all"  >
+			  <div class="form-group fleft-all"  >
 				<label for="length" class="col-sm-2 control-label">货架规格(米) </label>
 				<div class="col-md-6 col-sm-10">
 					长：<input type="number" min="0" step="0.01" class="form-control short" id="length" name="length" value="{$info.length|default=$shelf_size['length']}"  />
@@ -63,7 +63,7 @@
 				  <p class="notice">生成层高保存后层数不可修改,未保存前可以重新生成</p> 
 				</div>
 			</div>  
-			  <div class="form-group fleft fleft-all"  >
+			  <div class="form-group  fleft-all"  >
 				<label for="floors1" class="col-sm-2 control-label">层高</label>
 				<div class="col-md-6 col-sm-10" id="floors">
 				<foreach name="floors" item="vo">
@@ -99,6 +99,38 @@
 				 </present>
 				</div>
 			</div>
+			<notempty name="info.id">
+				<div class="form-group fleft">
+					<label for="" class="col-sm-2 control-label">创建人</label>
+					<div class="col-md-6 col-sm-10">
+						<input type="text" class="form-control"  value="{$info.aname|default=$info['aid']}" readonly/>
+					</div>
+				</div>
+			</notempty>
+			<notempty name="info.rid">
+				<div class="form-group fleft">
+					<label for="" class="col-sm-2 control-label">创建审核人</label>
+					<div class="col-md-6 col-sm-10">
+						<input type="text" class="form-control"  value="{$info.rname|default=$info['rid']}" readonly/>
+					</div>
+				</div>
+			</notempty>
+			<notempty name="info1.aid">
+				<div class="form-group fleft">
+					<label for="" class="col-sm-2 control-label">修改人</label>
+					<div class="col-md-6 col-sm-10">
+						<input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/>
+					</div>
+				</div>
+			</notempty>
+			<notempty name="info1.rid">
+				<div class="form-group fleft">
+					<label for="" class="col-sm-2 control-label">修改审核人</label>
+					<div class="col-md-6 col-sm-10">
+						<input type="text" class="form-control"  value="{$info1.rname|default=$info1['rid']}" readonly/>
+					</div>
+				</div>
+			</notempty>
 			 <div style="clear:both"></div>
 				<div class="form-group fleft"  style="width:100%">
 				<label class="col-sm-2 control-label">备注</label>
@@ -109,7 +141,25 @@
 				</present>
 				</div>
 			</div>
-			 <div style="clear:both"></div>
+			<present name="info.id">
+				<div class="form-group  fleft-all"  >
+					<label class="col-sm-2 control-label">修改备注</label>
+					<div class="col-md-6 col-sm-10">
+						<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
+						<p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
+					</div>
+				</div>
+			</present>
+			<present name="change">
+				<div class="form-group  fleft-all"  >
+					<label class="col-sm-2 control-label">审核意见</label>
+					<div class="col-md-6 col-sm-10">
+						<input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  />
+						<p class="notice">审核人审核信息时可以填写</p>
+					</div>
+				</div>
+			</present>
+			<div style="clear:both"></div>
 		 
 <script>
  

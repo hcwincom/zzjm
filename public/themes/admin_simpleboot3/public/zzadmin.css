@@ -13,9 +13,10 @@
 	 height: 60px; 
 }
 .fleft-all { 
-	width: 100%; 
+	float: left;
+	width: 100%;  
 }
- .fleft .control-label {
+ .fleft .control-label,.fleft-all .control-label {
 	width: 150px;
 }  
 .short{ 
