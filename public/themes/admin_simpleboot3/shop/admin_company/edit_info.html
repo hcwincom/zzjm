@@ -10,137 +10,19 @@
 			<div class="form-group">
 				<label  class="col-sm-2 control-label">id</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" value="{$info.id}" readonly/>
+					<input type="text" class="form-control" value="{$info.id}" />
 					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
 				</div>
 			</div>
+			<include file="shop@admin_company:base" />
 			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">名称</label>
+				<label for="" class="col-sm-2 control-label">{$flag}状态</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.name}" readonly/>
-				 
-				 <present name='change.name'>
-				 	<input type="text" class="red form-control" value="{$change.name}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">公司代码</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.code}" readonly/>
-				 
-				 <present name='change.code'>
-				 	<input type="text" class="red form-control" value="{$change.code}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">公司全称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.allname}" readonly/>
-				 
-				 <present name='change.allname'>
-				 	<input type="text" class="red form-control" value="{$change.allname}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.account_bank}" readonly/>
-				 
-				 <present name='change.account_bank'>
-				 	<input type="text" class="red form-control" value="{$change.account_bank}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">账户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.account_name}" readonly/>
-				 
-				 <present name='change.account_name'>
-				 	<input type="text" class="red form-control" value="{$change.account_name}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.account_num}" readonly/>
-				 
-				 <present name='change.account_num'>
-				 	<input type="text" class="red form-control" value="{$change.account_num}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">公司税号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.feenum}" readonly/>
-				 
-				 <present name='change.feenum'>
-				 	<input type="text" class="red form-control" value="{$change.feenum}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">联系电话</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.contact}" readonly/>
-				 
-				 <present name='change.contact'>
-				 	<input type="text" class="red form-control" value="{$change.contact}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">公司地址</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.address}" readonly/>
-				 
-				 <present name='change.address'>
-				 	<input type="text" class="red form-control" value="{$change.address}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			 
-			  <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control"  rows="5" readonly>{$info.dsc}</textarea>
-				<present name='change.dsc'>
-				 	<textarea class="red form-control" rows="5" readonly>{$change.dsc}</textarea>
-				</present>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.sort}" readonly/>
-				<present name='change.sort'>
-				 	<input type="text" class="red form-control" value="{$change.sort}" readonly/>
-				 </present>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
-				<div class="col-md-6 col-sm-10">
-				 	<input type="text" class="form-control" value="{$statuss[$info.status]}" readonly/>  
+				 	<input type="text" class="form-control"  name="status" value="{$statuss[$info.status]}" />  
 				</div>
 			</div>
 			<div class="form-group rstatus">
-				<label for="input-gender" class="col-sm-2 control-label">审核状态</label>
+				<label for="" class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
 				 <foreach name="review_status" item="vo">
 				 <label class="radio-inline">
@@ -151,7 +33,7 @@
 			</div>
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10"> 
-					<input type="hidden" name="id" value="{$info1.id}" /> 
+					<input type="hidden" name="id" name="id" value="{$info1.id}" />
 					<eq name="info1.rstatus" value="1">
 					<button type="submit" class="review_edit btn btn-primary js-ajax-submit"  >审核</button> 
 					 </eq> 

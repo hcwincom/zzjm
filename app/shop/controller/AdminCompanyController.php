@@ -1,8 +1,6 @@
 <?php
  
 namespace app\shop\controller;
-
- 
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
   
