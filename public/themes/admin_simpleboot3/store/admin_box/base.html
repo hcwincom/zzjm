@@ -167,30 +167,34 @@
 				</present>
 				</div>
 			</div>
-		<notempty name="info.id">
-			 <div class="form-group fleft">
-				<label for="" class="col-sm-2 control-label">创建人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.aname|default=$info['aid']}" readonly/> 
-				</div>
-			</div>
-		</notempty>
-		<notempty name="info.rid">
-			 <div class="form-group fleft">
-				<label for="" class="col-sm-2 control-label">创建审核人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.rname|default=$info['rid']}" readonly/> 
-				</div>
-			</div>
-		</notempty>
-		<notempty name="info1.aid">
-			 <div class="form-group fleft">
-				<label for="" class="col-sm-2 control-label">修改人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/> 
-				</div>
-			</div>
-		</notempty>
+		 <div style="clear:both"></div>
+			 <notempty name="info.id">
+				 <div class="form-group fleft">
+					 <label for="" class="col-sm-2 control-label">创建人</label>
+					 <div class="col-md-6 col-sm-10">
+						 <input type="text" class="form-control"  value="{$info.aname|default=$info['aid']}" readonly/>
+					 </div>
+				 </div>
+			 </notempty>
+			 <notempty name="info.rid">
+				 <div class="form-group fleft">
+					 <label for="" class="col-sm-2 control-label">创建审核人</label>
+					 <div class="col-md-6 col-sm-10">
+						 <input type="text" class="form-control"  value="{$info.rname|default=$info['rid']}" readonly/>
+					 </div>
+				 </div>
+			 </notempty>
+			 <notempty name="info1.aid">
+				 <div class="form-group fleft">
+					 <label for="" class="col-sm-2 control-label">修改人</label>
+					 <div class="col-md-6 col-sm-10">
+						 <input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/>
+					 </div>
+				 </div>
+			 </notempty>
+
+
+
 		<notempty name="info1.rid">
 			 <div class="form-group fleft">
 				<label for="" class="col-sm-2 control-label">修改审核人</label>
