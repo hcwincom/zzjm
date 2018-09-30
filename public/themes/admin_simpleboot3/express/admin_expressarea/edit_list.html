@@ -77,7 +77,7 @@
 								data-checklist="js-check-x">
 						</label>
 						</th>
-						<th width="100">ID</th>
+						<th >ID</th>
 						 
 						<th>{$flag}id-名称</th> 
 						 
@@ -100,10 +100,10 @@
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						<a href="{:url('edit_info',['id'=>$vo.id])}">{$vo.id}</a>
+						<a href="{:url('edit_info',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.id}-{$vo.adsc}</a>
 						</td>
 						<td>  
-						 <a href="{:url('edit',['id'=>$vo.pid])}">{$vo.pid}-{$vo.pname}</a>
+						 <a href="{:url('edit',['id'=>$vo.pid])}"  target="{$zztarget['other']}">{$vo.pid}-{$vo.pname}</a>
 						 </td>
 						 
 						<td>{$vo.aname|default=$vo.aid}</td>

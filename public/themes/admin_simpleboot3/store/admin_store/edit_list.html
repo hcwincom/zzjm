@@ -88,7 +88,7 @@
 						</label>
 						</th>
 						<th >ID</th>
-						 
+						<th>所属店铺</th>
 						<th>{$flag}id-名称</th> 
 						 
 						<th>编辑人</th>
@@ -112,6 +112,7 @@
 						<td class='id'>
 							<a href="{$vo.url}/id/{$vo.id}" target="{$zztarget['list']}">{$vo.id}-{$vo.adsc}</a>
 						</td>
+						<td>{$vo.sname}</td>
 						<td>  
 						 <a href="{:url('edit',['id'=>$vo.pid])}" target="{$zztarget['other']}">{$vo.pid}-{$vo.pname}</a>
 						 </td>

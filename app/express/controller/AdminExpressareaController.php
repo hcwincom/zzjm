@@ -57,7 +57,7 @@ class AdminExpressareaController extends AdminInfo0Controller
      */
     public function add()
     {
-       
+       parent::add();
         return $this->fetch();  
         
     }
@@ -241,7 +241,7 @@ class AdminExpressareaController extends AdminInfo0Controller
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-        
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
         $fields=$this->edit;
         
         $content=[];
@@ -265,8 +265,7 @@ class AdminExpressareaController extends AdminInfo0Controller
         if(!empty(array_diff($ids,$ids0)) ||  !empty(array_diff($ids0,$ids))){
             $content['citys']=json_encode($ids);
         }
-               
-        
+
         if(empty($content)){
             $this->error('未修改');
         }
@@ -341,7 +340,13 @@ class AdminExpressareaController extends AdminInfo0Controller
         $table=$this->table;
         //获取编辑信息
         $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find();
+        $info1=$m_edit
+            ->alias('p')
+            ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where('p.id',$id)
+            ->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
@@ -365,7 +370,8 @@ class AdminExpressareaController extends AdminInfo0Controller
         foreach($citys as $k=>$v){
             $list0[$v['fid']][$k]=$v['name'];
         }
-        
+        //按省分组
+        $list1=[];
         //新关联产品
         if(isset($change['citys'])){
             $ids1=json_decode($change['citys'],true);
@@ -374,8 +380,7 @@ class AdminExpressareaController extends AdminInfo0Controller
                 ->where('id','in',$ids1)
                 ->order('fid asc,sort asc,name asc')
                 ->column('id,name,fid');
-                //按省分组
-                $list1=[];
+
                 foreach($citys as $k=>$v){
                     $list1[$v['fid']][$k]=$v['name'];
                 }
@@ -449,6 +454,11 @@ class AdminExpressareaController extends AdminInfo0Controller
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
         //只有未审核的才能更新
         $where=[
             'id'=>$id,

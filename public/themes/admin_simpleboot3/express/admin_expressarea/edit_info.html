@@ -10,77 +10,19 @@
 			<div class="form-group">
 				<label  class="col-sm-2 control-label">id</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" value="{$info.id}" readonly/>
+					<input type="text" class="form-control" value="{$info.id}" />
 					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
 				</div>
 			</div>
+			<include file="express@admin_expressarea:base"/>
 			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">名称</label>
+				<label for="" class="col-sm-2 control-label">{$flag}状态</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.name}" readonly/>
-				 
-				 <present name='change.name'>
-				 	<input type="text" class="red form-control" value="{$change.name}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-sm-2 control-label">包含地区</label>
-				<div class="col-md-6 col-sm-10" >
-					 
-	 			<foreach name="list0" item="vo" key="key">
-	 				<br/><br/><h4>----{$city1s[$key]}----</h4>
-	 				<foreach name="vo" item="vv" key="kk">
-	 					<label class="checkbox-inline"> 
-	 					<input type="checkbox" value="{$kk}"  checked/>{$vv}
-	 					</label>
-	 				</foreach>
-	 			</foreach>
-				</div>
-			</div>
-		<present name='change.citys'>
-			<div class="form-group red">
-				<label class="col-sm-2 control-label">新包含地区</label>
-				<div class="col-md-6 col-sm-10" >
-					 
-	 			<foreach name="list1" item="vo" key="key">
-	 				<br/><br/><h4>----{$city1s[$key]}----</h4>
-	 				<foreach name="vo" item="vv" key="kk">
-	 					<label class="checkbox-inline"> 
-	 					<input type="checkbox" value="{$kk}" checked/>{$vv}
-	 					</label>
-	 				</foreach>
-	 			</foreach>
-				</div>
-			</div>
-		</present>	 
-			  <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control"  rows="5" readonly>{$info.dsc}</textarea>
-				<present name='change.dsc'>
-				 	<textarea class="red form-control" rows="5" readonly>{$change.dsc}</textarea>
-				</present>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.sort}" readonly/>
-				<present name='change.sort'>
-				 	<input type="text" class="red form-control" value="{$change.sort}" readonly/>
-				 </present>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
-				<div class="col-md-6 col-sm-10">
-				 	<input type="text" class="form-control" value="{$statuss[$info.status]}" readonly/>  
+				 	<input type="text" class="form-control" value="{$statuss[$info.status]}" />  
 				</div>
 			</div>
 			<div class="form-group rstatus">
-				<label for="input-gender" class="col-sm-2 control-label">审核状态</label>
+				<label for="" class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
 				 <foreach name="review_status" item="vo">
 				 <label class="radio-inline">
