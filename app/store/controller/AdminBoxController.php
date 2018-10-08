@@ -53,9 +53,10 @@ class AdminBoxController extends AdminInfo0Controller
             ['cmf_goods goods','goods.id=p.goods','left'],
             ['cmf_shop shop','p.shop=shop.id','left'], 
             ['cmf_store_goods sg','p.store=sg.store and p.goods=sg.goods','left'],
+           
         ];
-        $field='p.*,goods.name as goods_name,goods.code as goods_code,'.
-        'shop.name as sname,sg.safe as sg_safe,sg.num as sg_num,sg.box_num'; 
+        $field='p.*,goods.name as goods_name,goods.code as goods_code,shop.name as sname,'.
+        'sg.safe as sg_safe,sg.num as sg_num,sg.num1 as sg_num1,sg.box_num'; 
       
         //店铺,分店只能看到自己的数据，总店可以选择店铺
         if($admin['shop']==1){
@@ -246,10 +247,37 @@ class AdminBoxController extends AdminInfo0Controller
         $data_add['aid']=$admin['id'];
         $data_add['atime']=$time;
         $data_add['time']=$time;
-        
+        $data_add['num']=0;
         $m->startTrans();
         $id=$m->insertGetId($data_add);
-        
+        //是否初次审核,添加入库
+        if(!empty($data_add['goods'])){
+            $tmp=Db::name('goods')->where('id',$data_add['goods'])->value('code');
+            if(empty($tmp)){
+                $m->rollback();
+                $this->error('产品编号不存在');
+            }
+            $data_instore=[
+                'store'=>$data_add['store'],
+                'goods'=>$data_add['goods'],
+                'box_code'=>$data_add['code'],
+                'goods_code'=>$tmp,
+                'shop'=>$data_add['shop'],
+                'time'=>$data_add['time'],
+                'num'=>$data['num'],
+                'box'=>$id,
+                'type'=>30,
+                'about'=>$id,
+                'aid'=>$data_add['aid'],
+                'atime'=>$data_add['time'],
+                'adsc'=>'管理员添加料位入库',
+            ];
+            $tmp=zz_instore($data_instore);
+            if($tmp!==true){
+                $m->rollback();
+                $this->error($tmp);
+            }
+        }
         //记录操作记录
         $data_action=[
             'aid'=>$admin['id'],
@@ -264,7 +292,7 @@ class AdminBoxController extends AdminInfo0Controller
             
         ];
         zz_action($data_action,['department'=>$admin['department']]);
-        
+       
         $m->commit();
         $this->success('添加成功',$url);
         
@@ -325,7 +353,58 @@ class AdminBoxController extends AdminInfo0Controller
      */
     public function review()
     {
-        parent::review();
+        $status=$this->request->param('status',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        if($status<1 || $status>4 || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        //查找信息
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('信息不存在');
+        }
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
+        $time=time();
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'status'=>$status,
+            'time'=>$time,
+        ];
+        
+        $row=$m->where('id',$id)->update($update);
+        
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        
+        //审核成功，记录操作记录,发送审核信息
+        $statuss=$this->statuss;
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'审核'.($this->flag).$info['id'].'-'.$info['name'].'的状态为'.$statuss[$status],
+            'table'=>($this->table),
+            'type'=>'review',
+            'pid'=>$info['id'],
+            'link'=>url('edit',['id'=>$info['id']]),
+            'shop'=>$admin['shop'],
+        ];
+        zz_action($data_action,['aid'=>$info['aid']]);
+        
+        $m->commit();
+        $this->success('审核成功');
+        
+       
     }
     /**
      * 料位状态批量同意
@@ -449,7 +528,7 @@ class AdminBoxController extends AdminInfo0Controller
             }
             $content['box']=$data['box'];
             $content['box_goods']=$info['goods'];
-           
+            
         }
         
         
@@ -485,7 +564,28 @@ class AdminBoxController extends AdminInfo0Controller
         ];
         
         zz_action($data_action,['department'=>$admin['department']]);
-        
+        if(!empty($content['goods'])){
+            if(!empty($data_add['goods'])){
+                $data_instore=[
+                    'store'=>$data_add['store'],
+                    'goods'=>$data_add['goods'],
+                    'shop'=>$data_add['shop'],
+                    'time'=>$data_add['time'],
+                    'num'=>$data_add['num'],
+                    'box'=>$id,
+                    'type'=>30,
+                    'about'=>$id,
+                    'aid'=>$data_add['aid'],
+                    'atime'=>$data_add['time'],
+                    'adsc'=>'管理员添加料位入库',
+                ];
+                $tmp=zz_instore($data_instore);
+                if($tmp!==true){
+                    $m->rollback();
+                    $this->error($tmp);
+                }
+            }
+        }
         $m_edit->commit();
         $this->success('已提交修改');
         
@@ -769,8 +869,54 @@ class AdminBoxController extends AdminInfo0Controller
      */
     public function del_all()
     {
-         
+         //检查库存
+        if(empty($_POST['ids'])){
+            $this->error('未选中信息');
+        }
+        $ids=$_POST['ids'];
+        
+        $m=$this->m; 
+        $where=['id'=>['in',$ids],'num'=>['gt',0]];
+        $tmp=$m->where($where)->find();
+        if(!empty($tmp)){
+            $this->error('只能删除产品数量为0的料位');
+        }
         parent::del_all();
+    }
+    /**
+     * 料位产品清除
+     * @adminMenu(
+     *     'name'   => '料位产品清除',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '料位产品清除',
+     *     'param'  => ''
+     * )
+     */
+    public function goods_cancel()
+    {
+        $id=$this->request->param('id',0,'intval');
+        $m=$this->m;
+        $info=$m->where('id',$id)->find();
+        if( $info['num']>0 || $info['goods']==0){
+            $this->error('不存在关联产品或产品数量不为0，不能清除产品');
+        }
+        $m->startTrans();
+        $m->where('id',$id)->setField('goods',0);
+        //如果库存也没有，清除库存
+        $where=[
+            'store'=>$info['store'],
+            'goods'=>$info['goods'],
+        ];
+        $store_num=Db::name('store_goods')->where($where)->value('num');
+        if(empty($store_num)){
+            Db::name('store_goods')->where($where)->delete();
+        }
+        $m->commit();
+        $this->success('清除产品成功');
     }
     
     
@@ -829,6 +975,7 @@ class AdminBoxController extends AdminInfo0Controller
         }
         $data['code_num']=intval($data['code_num']);
         $data['code']=$floor['code'].'-'.str_pad( $data['code_num'], 2,'0',STR_PAD_LEFT);
+     
         $data['num']=intval($data['num']);
         $data['sort']=intval($data['sort']); 
         $where=[

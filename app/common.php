@@ -7,6 +7,42 @@ use think\Db;
 use think\Url;
  
 // 应用公共文件
+/* 申请入库 */
+function zz_instore($data){
+    $m_store_goods=Db::name('store_goods');
+    $where=[
+        'store'=>['eq',$data['store']],
+        'goods'=>['eq',$data['goods']], 
+    ];
+    $tmp=$m_store_goods->where($where)->find();
+    if(empty($tmp)){
+        if($data['num']<0 ){
+            return '该没有库存，请选择其他产品或仓库';
+        }
+        //不存在，要添加
+       $data_store=[
+           'store'=>$data['store'],
+           'goods'=>$data['goods'], 
+           'shop'=>$data['shop'],
+           'time'=>$data['time'],
+           'num1'=>$data['num'],
+       ];
+       $m_store_goods->insert($data_store);
+       
+    }
+    if($data['num']!=0){  
+        $tmp_num=abs($data['num']);
+        //冻结库存,如果num<0是出库，要检查库存是否足够
+        if($data['num']<0 && abs($data['num'])>$tmp['num']){
+            return '库存不足';
+        }
+        $num1=$m_store_goods->where('id',$tmp['id'])->inc('num1',$data['num'])->setField('time',$data['time']);
+        //入库
+        Db::name('store_in')->insert($data); 
+    } 
+     
+    return true;
+}
 
 /**
  * 操作后记录和通知
@@ -124,9 +160,7 @@ function zz_action($data_action,$data=[]){
     } 
     if(!empty($data_msg)){
         Db::name('msg')->insertAll($data_msg);
-    }
-   
-    
+    } 
 }
 /**
  * 下载文件

@@ -18,7 +18,7 @@ class AdminStoreController extends AdminInfo0Controller
         $this->m=Db::name('store');
         $this->edit=['name','sort','dsc','province','city','area',
             'street','tel_name','tel_phone','tel_mobile','size0','size',
-            'length','width','height','price1','price2','fee1','fee2','fee0',
+            'length','width','height','space','price1','price2','fee1','fee2','fee0',
             'city_code','code_num', 
         ];
         //没有店铺区分

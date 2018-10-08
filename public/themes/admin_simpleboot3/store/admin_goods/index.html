@@ -9,15 +9,7 @@
 	 
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post" action="">
-			状态: 
-			<select class="form-control" name="status" >
-				<option value='0'>全部</option> 
-				 <foreach name="statuss" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
-				 {$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp;
+			 
 		 <notempty name="shops"> 
 	  	店铺:<select class="form-control" id="shop" name="shop" >
 				<option value='0'>全部</option> 
@@ -31,38 +23,14 @@
 			  
 		   仓库:	<select class="form-control" id="store" name="store" >
 				<option value='0'>全部</option> 
+				<option value='-1' <eq name="data.store" value="-1">selected</eq>>店铺总库存</option> 
 				 <foreach name="stores" item="vo" k="key">
 				<option value="{$key}" class="store store{$vo.shop}" <if condition="$key eq $data.store">selected</if>> 
 				 {$vo.name}
 				</option>
 				</foreach>
-			</select> &nbsp;&nbsp; 
-		货架:	<select class="form-control" id="shelf" name="shelf" >
-				<option value='0'>全部</option> 
-				 
-				</foreach>
-			</select> &nbsp;&nbsp; 
-			层号:	<select class="form-control" id="floor" name="floor" >
-				<option value='0'>全部</option> 
-				 
-				</foreach>
-			</select> &nbsp;&nbsp; 
-			 创建人: 
-			<select class="form-control" name="aid"  >
-				<option value='0'>全部</option> 
-				 <foreach name="aids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp; 
-			审核人: 
-			<select class="form-control" name="rid" >
-				<option value='0'>全部</option> 
-				 <foreach name="rids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp;
+			</select> &nbsp;&nbsp;  
+			 
 			<select class="form-control" name="type1" id="">
 	        <foreach name="types" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
@@ -88,16 +56,13 @@
 				 
 		</form>
 		 
-		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
+		<form method="post" class=" margin-top-20" action="">
 			<div class="table-actions">
 				 
-
-				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
-			 
-			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
-			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
-			 	 
-			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
+ 
+			 	
+			 	<button type="submit" class="store_search btn-sm btn-primary ">查库存</button>
+			 	<button type="submit" class="store_set btn-sm btn-primary ">安全库存调整</button>
 			 	<p class='error'></p>
 			</div>
 
@@ -112,28 +77,23 @@
 						</th>
 						<th width="100">{$flag}ID</th>
 						<th>店铺</th> 
-						<th>仓库</th> 
-						<th>{$flag}名</th> 
-						<th>{$flag}编号</th> 
-						<th>{$flag}长度</th> 
+						<th>仓库</th>  
 						<th>产品名</th> 
 						<th>产品编号</th> 
 						<th>数量</th>
 						<th>料位数</th>  
 						<th>库存</th> 
+						<th>库存金额</th> 
 						<th>安全库存</th> 
-						<th>创建时间</th> 
-						<th>审核时间</th>
+					  
 						<th>最近更新时间</th>
-						<th>排序</th>
-						<th>状态</th>
-						 
+					 
 					</tr>
 				</thead>
 				<tbody>
 					<foreach name="list" item="vo">
 				 
-					<tr class="status{$vo.status}">
+					<tr >
 						<td>
 							<input type="checkbox" class="js-check"
 							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
@@ -143,33 +103,20 @@
 						{$vo.id}
 						</td>
 						<td > {$vo.sname}</td>
-						<td > {$stores[$vo['store']]['name']|default=$vo['store']}</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
-					 	<td>{$vo.code}</td>
-					 	<td>{$vo.length}米</td>
+						<td> <empty name="vo.store">店铺总库存<else/>{$stores[$vo['store']]['name']|default=$vo['store']}</empty></td>
+						  
 					 	<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vo.goods])}"  target="{$zztarget['other']}">{$vo.goods_name}</a></td>
 					 
 					 	<td>{$vo.goods_code}</td>
 					 
 						<td>{$vo.num}</td>
 						<td>{$vo.box_num}</td>
-						<td>{$vo.sg_num}</td>
-						<td>{$vo.sg_safe}</td>
-						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
-						
-						<td>
-						<eq name="vo.rid" value="0"> 
-							-
-						<else/> 
-							{$vo.rtime|date='Y-m-d H:i',###}
-						</eq>
-						</td> 
-						
-						
-						<td>{$vo.time|date='Y-m-d H:i',###}</td>
-						<td>{$vo.sort}</td>
-						<td>{$statuss[$vo.status]}</td>
+						<td class="<if condition='$vo.num elt $vo.safe'>red</if>">{$vo.num}({$vo.num1})</td>
+						<td>{$vo.money}</td>
+						 <td><a href="{:url('edit',['id'=>$vo.id])}">{$vo.safe}</a></td>
 						 
+						<td>{$vo.time|date='Y-m-d H:i',###}</td>
+					 
 					</tr>
 				 
 					</foreach>
@@ -182,35 +129,7 @@
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
-$('.ban').click(function(){
-	$(this).parents('form').attr('action',"{:url('ban')}");
-	 return is_check('批量禁用');
-});
-$('.cancel_ban').click(function(){
-	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
-	 return is_check('批量恢复');
-});
-$('.review_all').click(function(){
-	$(this).parents('form').attr('action',"{:url('review_all')}");
-	 return is_check('批量同意');
-});
-$('.del_all').click(function(){
-	$(this).parents('form').attr('action',"{:url('del_all')}");
-	 return is_check('批量删除');
-});
-var get_shelfs_url="{:url('store/Storeajax/get_shelfs')}";
-var get_floors_url="{:url('store/Storeajax/get_floors')}"; 
  
-var store="{$data.store|default=0}";  
-var shelf="{$data.shelf|default=0}";  
-var floor="{$data.floor|default=0}";
- 
-if(store>0){ 
-	store_change(store,shelf);
-}
-if(shelf>0){ 
-	shelf_change(shelf,floor);
-}
  
 $('#shop').change(function(){
 	var shop=$(this).val();  
@@ -220,80 +139,14 @@ $('#shop').change(function(){
 		$('.store').hide();
 		$('.store'+shop).show();
 	}
-	$('#store').val(0);
- 
-	var options0='<option value="0">请选择层号</option>';
-	var options1='<option value="0">请选择货架</option>';
-	 
-	 $('#shelf').html(options1);
-	$('#floor').html(options0); 
-  
+	$('#store').val(0); 
 });
-$('#store').change(function(){
-	store=$(this).val(); 
-	store_change(store); 
+
+$('.store_search').click(function(){
+	
+	$(this).parents('form').attr('action',"{:url('store_search')}");
+	 return is_check('查库存',0);
 });
-$('#shelf').change(function(){
-	shelf=$(this).val(); 
-	shelf_change(shelf); 
-}); 
-function store_change(store,shelf0=0){
-	var options='<option value="0">请选择货架</option>';
-	var options0='<option value="0">请选择层号</option>';
-	if(store==0){
-		$('#shelf').html(options);
-		$('#floor').html(options0);
-		return false;
-	}
- $.ajax({
-        type: 'POST',
-        url: get_shelfs_url,
-        dataType: 'json', 
-        data:{'store':store},
-        success: function (data) {
-     	    var list=data.data; 
-     	    for(var i in list){
-     	    	options+='<option value="'+i+'">'+list[i]+'</option>';
-     	    }
-     	    $('#shelf').html(options);
-   			$('#floor').html(options0); 
-   			if(shelf0>0){
-   				$('#shelf').val(shelf0);
-   			}
-   		 	
-        }, 
-        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-            msg(event.responseText,1);
-        }
-    });
-}
-function shelf_change(shelf,floor0=0){
-	var options='<option value="0">请选择层号</option>';
-	if(shelf==0){ 
-		$('#floor').html(options);
-		return false;
-	}
-	$.ajax({
-        type: 'POST',
-        url: get_floors_url,
-        dataType: 'json', 
-        data:{'shelf':shelf},
-        success: function (data) {
-     	    var list=data.data; 
-     	    for(var i in list){
-     	    	options+='<option value="'+i+'">'+list[i]+'</option>';
-     	    } 
-   			$('#floor').html(options); 
-   			if(floor0>0){
-   				$('#floor').val(floor0);
-   			}
-   			
-        }, 
-        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-            msg(event.responseText,1);
-        }
-    });
-}
 </script>
 </body>
 </html>

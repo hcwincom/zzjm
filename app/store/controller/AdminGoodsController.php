@@ -62,14 +62,7 @@ class AdminGoodsController extends AdminBaseController
         $admin=$this->admin;
         $data=$this->request->param();
         $where=[];
-        //判断是否有店铺
-        $join=[
-            ['cmf_store store','store.id=p.store','left'],
-            ['cmf_user r','r.id=p.rid','left'],
-        ];
-        $field='p.*,';
-        
-      
+         
         //店铺,分店只能看到自己的数据，总店可以选择店铺
         if($admin['shop']==1){
             if(empty($data['shop'])){
@@ -79,35 +72,6 @@ class AdminGoodsController extends AdminBaseController
             }
         }else{
             $where['p.shop']=['eq',$admin['shop']];
-        }
-        
-        $join[]=['cmf_shop shop','p.shop=shop.id','left'];
-        $field.=',shop.name as sname';
-       
-        //状态
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
-        //仓库
-        if(empty($data['store'])){
-            $data['store']=0;
-        }else{
-            $where['p.store']=['eq',$data['store']];
-        }
-        
-        //添加人
-        if(empty($data['aid'])){
-            $data['aid']=0;
-        }else{
-            $where['p.aid']=['eq',$data['aid']];
-        }
-        //审核人
-        if(empty($data['rid'])){
-            $data['rid']=0;
-        }else{
-            $where['p.rid']=['eq',$data['rid']];
         }
          
         //查询字段
@@ -163,17 +127,56 @@ class AdminGoodsController extends AdminBaseController
                 }
             }
         }
-        $list=$m
+        //仓库为0，
+        if(empty($data['store'])){
+            $data['store']=0; 
+        }
+        $join=[
+            ['cmf_shop shop','p.shop=shop.id','left'],
+            ['cmf_goods goods','p.goods=goods.id','left'],
+        ];
+        $field='p.id,p.goods,p.shop,shop.name as sname,goods.name as goods_name,goods.code as goods_code';
+       
+        if($data['store']==-1){
+            $field.=',sum(p.safe) as safe,sum(p.num) as num,sum(p.num1) as num1,sum(p.box_num) as box_num'.
+            ',(sum(p.num)*goods.price_in) as money,max(p.time) as time';
+            $list=$m
+            ->alias('p')
+            ->field($field)
+            ->join($join)
+            ->where($where)
+            ->group('p.goods')
+            ->order('p.time desc')
+            ->paginate();
+            
+        }else{
+            $field.=',p.store,p.safe,p.num,p.num1,p.box_num,p.time,(p.num*goods.price_in) as money';
+            if($data['store']>0){
+                $where['p.store']=['eq',$data['store']];
+           }
+           
+            $list=$m
+            ->alias('p')
+            ->field($field)
+            ->join($join)
+            ->where($where)
+            ->order('p.time desc')
+            ->paginate();
+            
+        }
+        
+             
+       /*  $list=$m
         ->alias('p')
         ->field($field)
         ->join($join)
         ->where($where)
-        ->order('p.status asc,p.sort asc,p.time desc')
-        ->paginate();
+        ->order('p.time desc')
+        ->paginate(); */
         
         // 获取分页显示
         $page = $list->appends($data)->render();
-        
+      
         $this->assign('page',$page);
         $this->assign('list',$list);
         
@@ -183,7 +186,7 @@ class AdminGoodsController extends AdminBaseController
         $this->assign("search_types", $search_types);
         
         $this->cates(1);
-         
+        
         return $this->fetch();
     }
      
@@ -598,29 +601,13 @@ class AdminGoodsController extends AdminBaseController
         $m->commit();
         $this->success('审核成功');
     }
-    /**
-     * 库存编辑记录批量删除
-     * @adminMenu(
-     *     'name'   => '库存编辑记录批量删除',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 10,
-     *     'icon'   => '',
-     *     'remark' => '库存编辑记录批量删除',
-     *     'param'  => ''
-     * )
-     */
-    public function edit_del_all()
-    {
-        parent::edit_del_all();
-    }
+    
      
     //相关信息
     public function cates($type=3)
     {
-        parent::cates($type);
-        $admin=$this->admin;
+       
+        $admin=$this->admin;  
         //仓库
         $where=[
             'status'=>2, 
@@ -631,12 +618,39 @@ class AdminGoodsController extends AdminBaseController
         }
         //关联仓库
         $where['type']=1;
-        $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column('id,name');
+        if($type==3){
+            $field='id,name';
+        }else{
+            $field='id,shop,name';
+            //如果分店铺又是列表页查找,显示所有店铺
+            if($admin['shop']==1){
+                $shops=Db::name('shop')->where('status',2)->column('id,name');
+                //首页列表页去除总站
+                if($type==1){
+                    unset($shops[1]);
+                } 
+                
+                $this->assign('shops',$shops);
+            } 
+        }
+        $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column($field);
+         
           
         $this->assign('stores',$stores);
         
          
     }
     
+    public function store_search(){
+        if(empty($_POST['ids'])){
+            $this->error('未选中信息');
+        }
+        $ids=$_POST['ids'];
+        
+        $m=$this->m;
+        $goods=$m->where('id','in',$ids)->column('goods');
+        
+        return $this->fetch();
+    }
      
 }

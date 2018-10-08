@@ -551,26 +551,22 @@ class AdminInfo0Controller extends AdminBaseController
         $where=['e.table'=>['eq',$table]];
         $join=[
             ['cmf_user a','a.id=e.aid','left'],
-            ['cmf_user r','r.id=e.rid','left'],
+            ['cmf_user r','r.id=e.rid','left'], 
             ['cmf_'.$table.' p','e.pid=p.id','left'],
+            ['cmf_shop shop','e.shop=shop.id','left'],
         ];
         
-        $field='e.*,a.user_nickname as aname,r.user_nickname as rname,p.name as pname';
-        //店铺,分店只能看到自己的数据，总店可以选择店铺
-        if($this->isshop){ 
-            if($admin['shop']==1){
-                if(empty($data['shop'])){
-                    $data['shop']=0;
-                }else{
-                    $where['e.shop']=['eq',$data['shop']];
-                }
+        $field='e.*,a.user_nickname as aname,r.user_nickname as rname,p.name as pname,shop.name as sname';
+        //店铺
+        if($admin['shop']==1){
+            if(empty($data['shop'])){
+                $data['shop']=0;
             }else{
-                $where['e.shop']=['eq',$admin['shop']];
+                $where['e.shop']=['eq',$data['shop']];
             }
-            
-            $join[]=['cmf_shop shop','e.shop=shop.id','left'];
-            $field.=',shop.name as sname';
-        } 
+        }else{
+            $where['e.shop']=['eq',$data['shop']];
+        }
         //状态
         if(empty($data['status'])){
             $data['status']=0;
