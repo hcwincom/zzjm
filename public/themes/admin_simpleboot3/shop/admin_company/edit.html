@@ -14,83 +14,8 @@
 					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
-			<div class="form-group">
-				<label  class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="{$info.name}" />
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">代码</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="code" value="{$info.code}" required/> 
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">全称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="allname" value="{$info.allname}" required/> 
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">帐户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="account_name" value="{$info.account_name}" /> 
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="account_bank" value="{$info.account_bank}" /> 
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="account_num" value="{$info.account_num}" /> 
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">税号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="feenum" value="{$info.feenum}" /> 
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">电话</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="contact" value="{$info.contact}" /> 
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">地址</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="address" value="{$info.address}" /> 
-				</div>
-			</div> 
-		  
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10">
 
-					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="number" class="form-control" name="sort" value="{$info.sort}" required/>
-				</div>
-			</div>
-			<present name="info.id">
-				<div class="form-group  "  >
-					<label class="col-sm-2 control-label">修改备注</label>
-					<div class="col-md-6 col-sm-10">
-						<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
-						<p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
-					</div>
-				</div>
-			</present>
+			<include file="shop@admin_company:base"/>
 			<div class="form-group">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">

@@ -15,11 +15,11 @@
         <label class="col-sm-2 control-label">包含地区</label>
         <div class="col-md-6 col-sm-10" >
 
-            <foreach name="list0" item="vo" key="key">
+            <foreach name="citys" item="vo" key="key">
                 <br/><br/><h4>----{$city1s[$key]}----</h4>
                 <foreach name="vo" item="vv" key="kk">
                     <label class="checkbox-inline">
-                        <input type="checkbox" value="{$kk}"  checked/>{$vv}
+                        <input type="checkbox" value="citys{$kk}"  checked/>{$vv}
                     </label>
                 </foreach>
             </foreach>

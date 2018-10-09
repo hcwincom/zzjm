@@ -14,62 +14,7 @@
 					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
-			<div class="form-group">
-				<label  class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="{$info.name}" />
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">选择地区</label>
-				<div class="col-md-6 col-sm-10">
-					 <select id="city1">
-					 
-					 <foreach name="city1s" item="vo">
-					 	<option class="city1{$key}" value="{$key}">{$vo}</option>
-					 </foreach>
-					 </select>
-					 <button type="button" id="add">添加</button>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">包含地区</label>
-				<div class="col-md-6 col-sm-10" id="citys">
-					 
-	 			<foreach name="citys" item="vo" key="key"> 
-	 			<br/><br/>
-	 				<h4>----{$city1s[$key]}----</h4>
-	 				<foreach name="vo" item="vv" key="kk">
-	 					<label class="checkbox-inline"> 
-	 					<input type="checkbox" value="{$kk}" name="citys[{$kk}]" checked/>{$vv}
-	 					</label>
-	 				</foreach>
-	 			</foreach>
-				</div>
-			</div>
-		  
-			<div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10">
-					 
-					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="number" class="form-control" name="sort" value="{$info.sort}" />
-				</div>
-			</div>
-			<present name="info.id">
-				<div class="form-group  "  >
-					<label class="col-sm-2 control-label">修改备注</label>
-					<div class="col-md-6 col-sm-10">
-						<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
-						<p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
-					</div>
-				</div>
-			</present>
+			<include file="express@admin_expressarea:base"/>
 			<div class="form-group">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">

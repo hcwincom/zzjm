@@ -1,4 +1,5 @@
- 			<div class="form-group fleft">
+<div style="clear:both"></div>
+<div class="form-group ">
 				<label for="store" class="col-sm-2 control-label">仓库 </label>
 				<div class="col-md-6 col-sm-10"> 
 				
@@ -11,7 +12,7 @@
 				<p class="notice">仓库选择后不可更改</p>
 				</div>
 			</div> 
-			<div class="form-group fleft">
+			<div class="form-group ">
 				<label for="num" class="col-sm-2 control-label">货架序号</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="number" step="1" min="1" class="form-control" id="num" name="num" value="{$info.num}"  /> 
@@ -20,7 +21,7 @@
 				 </present> 
 				</div>
 			</div> 
-			<div class="form-group fleft">
+			<div class="form-group ">
 				<label for="name" class="col-sm-2 control-label">名称</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" id="name" name="name" value="{$info.name}"  /> 
@@ -36,7 +37,7 @@
 			 
 		 
 			 <div style="clear:both"></div>
-			  <div class="form-group fleft-all"  >
+			  <div class="form-group "  >
 				<label for="length" class="col-sm-2 control-label">货架规格(米) </label>
 				<div class="col-md-6 col-sm-10">
 					长：<input type="number" min="0" step="0.01" class="form-control short" id="length" name="length" value="{$info.length|default=$shelf_size['length']}"  />
@@ -63,7 +64,7 @@
 				  <p class="notice">生成层高保存后层数不可修改,未保存前可以重新生成</p> 
 				</div>
 			</div>  
-			  <div class="form-group  fleft-all"  >
+			  <div class="form-group "  >
 				<label for="floors1" class="col-sm-2 control-label">层高</label>
 				<div class="col-md-6 col-sm-10" id="floors">
 				<foreach name="floors" item="vo">
@@ -76,21 +77,21 @@
 				</foreach> 
 				</div>
 			</div>  
-			<div class="form-group fleft">
+			<div class="form-group ">
 				<label for="" class="col-sm-2 control-label">货架空间</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text"  class="form-control"  value="{$info.space|default=0}" readonly/>
 				 
 				</div>
 			</div>	
-			<div class="form-group fleft">
+			<div class="form-group ">
 				<label for="" class="col-sm-2 control-label">货架空间利用率</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text"  class="form-control"  value="{$info.space_rate|default=0}%" readonly/>
 				 
 				</div>
 			</div>
-			 <div class="form-group fleft">
+			 <div class="form-group ">
 				<label for="" class="col-sm-2 control-label">排序</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="number" name="sort" class="form-control"  value="{$info.sort|default=1000}" />
@@ -101,7 +102,7 @@
 			</div>
 			<div style="clear:both"></div>
 			<notempty name="info.id">
-				<div class="form-group fleft">
+				<div class="form-group ">
 					<label for="" class="col-sm-2 control-label">创建人</label>
 					<div class="col-md-6 col-sm-10">
 						<input type="text" class="form-control"  value="{$info.aname|default=$info['aid']}" readonly/>
@@ -109,7 +110,7 @@
 				</div>
 			</notempty>
 			<notempty name="info.rid">
-				<div class="form-group fleft">
+				<div class="form-group ">
 					<label for="" class="col-sm-2 control-label">创建审核人</label>
 					<div class="col-md-6 col-sm-10">
 						<input type="text" class="form-control"  value="{$info.rname|default=$info['rid']}" readonly/>
@@ -117,7 +118,7 @@
 				</div>
 			</notempty>
 			<notempty name="info1.aid">
-				<div class="form-group fleft">
+				<div class="form-group ">
 					<label for="" class="col-sm-2 control-label">修改人</label>
 					<div class="col-md-6 col-sm-10">
 						<input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/>
@@ -125,7 +126,7 @@
 				</div>
 			</notempty>
 			<notempty name="info1.rid">
-				<div class="form-group fleft">
+				<div class="form-group ">
 					<label for="" class="col-sm-2 control-label">修改审核人</label>
 					<div class="col-md-6 col-sm-10">
 						<input type="text" class="form-control"  value="{$info1.rname|default=$info1['rid']}" readonly/>
@@ -133,7 +134,7 @@
 				</div>
 			</notempty>
 			 <div style="clear:both"></div>
-				<div class="form-group fleft"  style="width:100%">
+				<div class="form-group "  style="width:100%">
 				<label class="col-sm-2 control-label">备注</label>
 				<div class="col-md-6 col-sm-10"> 
 				<input type="text" class="form-control" name="dsc" value="{$info.dsc}"  /> 
@@ -143,7 +144,7 @@
 				</div>
 			</div>
 			<present name="info.id">
-				<div class="form-group  fleft-all"  >
+				<div class="form-group "  >
 					<label class="col-sm-2 control-label">修改备注</label>
 					<div class="col-md-6 col-sm-10">
 						<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
@@ -152,7 +153,7 @@
 				</div>
 			</present>
 			<present name="change">
-				<div class="form-group  fleft-all"  >
+				<div class="form-group "  >
 					<label class="col-sm-2 control-label">审核意见</label>
 					<div class="col-md-6 col-sm-10">
 						<input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  />

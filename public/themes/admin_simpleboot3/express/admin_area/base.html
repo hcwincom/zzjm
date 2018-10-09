@@ -41,7 +41,7 @@
         </present>
     </div>
 </div>
-
+<empty name="info.id">
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">级别</label>
     <div class="col-md-6 col-sm-10">
@@ -67,16 +67,17 @@
         </select>
     </div>
 </div>
+</empty>
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">区号</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="code" value="0" required/>
+        <input type="text" class="form-control" name="code" value="{$info.code}" required/>
     </div>
 </div>
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">邮编</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="code" value="0" required/>
+        <input type="text" class="form-control" name="postcode" value="{$info.postcode}" required/>
     </div>
 </div>
 
