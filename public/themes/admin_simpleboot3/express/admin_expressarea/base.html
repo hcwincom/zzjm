@@ -11,20 +11,53 @@
     </div>
 </div>
 <notempty name="info.id">
-    <div class="form-group">
-        <label class="col-sm-2 control-label">包含地区</label>
-        <div class="col-md-6 col-sm-10" >
 
-            <foreach name="citys" item="vo" key="key">
-                <br/><br/><h4>----{$city1s[$key]}----</h4>
-                <foreach name="vo" item="vv" key="kk">
-                    <label class="checkbox-inline">
-                        <input type="checkbox" value="citys{$kk}"  checked/>{$vv}
-                    </label>
-                </foreach>
-            </foreach>
+    <empty name="info1.id">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">选择地区</label>
+            <div class="col-md-6 col-sm-10">
+                <select id="city1">
+
+                    <foreach name="city1s" item="vo">
+                        <option class="city1{$key}" value="{$key}">{$vo}</option>
+                    </foreach>
+                </select>
+                <button type="button" id="add">添加</button>
+            </div>
         </div>
-    </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">包含地区</label>
+            <div class="col-md-6 col-sm-10" id="citys">
+
+                <foreach name="citys" item="vo" key="key">
+                    <br/><br/>
+                    <h4>----{$city1s[$key]}----</h4>
+                    <foreach name="vo" item="vv" key="kk">
+                        <label class="checkbox-inline">
+                            <input type="checkbox" value="{$kk}" name="citys[{$kk}]" checked/>{$vv}
+                        </label>
+                    </foreach>
+                </foreach>
+            </div>
+        </div>
+       <else/>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">包含地区</label>
+            <div class="col-md-6 col-sm-10" >
+
+                <foreach name="list0" item="vo" key="key">
+                    <br/><br/><h4>----{$city1s[$key]}----</h4>
+                    <foreach name="vo" item="vv" key="kk">
+                        <label class="checkbox-inline">
+                            <input type="checkbox" value="{$kk}"  checked/>{$vv}
+                        </label>
+                    </foreach>
+                </foreach>
+            </div>
+        </div>
+
+    </empty>
+
 </notempty>
 
 <present name='change.citys'>
@@ -97,7 +130,7 @@
     </div>
 </notempty>
 <notempty name="info1.rid">
-    <div class="form-group fleft">
+    <div class="form-group ">
         <label for="" class="col-sm-2 control-label">修改审核人</label>
         <div class="col-md-6 col-sm-10">
             <input type="text" class="form-control"  value="{$info1.rname|default=$info1['rid']}" readonly/>
