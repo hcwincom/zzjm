@@ -9,7 +9,6 @@
 // | Author: 小夏 < 449134904@qq.com>
 // +----------------------------------------------------------------------
 namespace cmf\controller;
-
 use think\Db;
 use think\View;
 class AdminBaseController extends BaseController

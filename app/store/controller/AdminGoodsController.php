@@ -189,6 +189,12 @@ class AdminGoodsController extends AdminBaseController
         
         return $this->fetch();
     }
+
+
+    public function add()
+    {
+        return $this->fetch();
+    }
      
     /**
      * 库存详情

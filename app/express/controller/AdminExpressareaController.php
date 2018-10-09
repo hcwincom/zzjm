@@ -263,7 +263,7 @@ class AdminExpressareaController extends AdminInfo0Controller
         $ids0=Db::name('express_area')->where('area',$info['id'])->column('city');
         //计算新旧参数的差级，没有差级就是完全一样
         if(!empty(array_diff($ids,$ids0)) ||  !empty(array_diff($ids0,$ids))){
-            $content['citys']=json_encode($ids);
+            $content['citys']=$ids;
         }
 
         if(empty($content)){
@@ -374,7 +374,7 @@ class AdminExpressareaController extends AdminInfo0Controller
         $list1=[];
         //新关联产品
         if(isset($change['citys'])){
-            $ids1=json_decode($change['citys'],true);
+            $ids1=$change['citys'];
             if(!empty($ids1)){
                 $citys=Db::name('area')
                 ->where('id','in',$ids1)
@@ -486,23 +486,23 @@ class AdminExpressareaController extends AdminInfo0Controller
            
             //处理覆盖区域
             if(isset($change['citys'])){
-                $ids=json_decode($change['citys'],'true');
+                $ids=$change['citys'];
                 unset($update_info['citys']);
+
+                if(empty($ids)){
+                 $this->error('请选择配送区域');
+                }
+                $m_ea=Db::name('express_area');
+                $m_ea->where('area',$info['pid'])->delete();
+                $data_city=[];
+                foreach($ids as $v){
+                    $data_city[]=[
+                        'city'=>$v,
+                        'area'=>$info['pid'],
+                    ];
+                }
+                $m_ea->insertAll($data_city);
             }
-            if(empty($ids)){
-                break;
-            }
-            $m_ea=Db::name('express_area');
-            $m_ea->where('area',$info['pid'])->delete();
-            $data_city=[];
-            foreach($ids as $v){
-                $data_city[]=[
-                    'city'=>$v,
-                    'area'=>$info['pid'],
-                ];
-            }
-            $m_ea->insertAll($data_city);
-                    
             $row=$m->where('id',$info['pid'])->update($update_info);
             if($row!==1){
                 $m->rollback();
