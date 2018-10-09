@@ -256,7 +256,7 @@ class CustomBaseController extends AdminInfo0Controller
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-        
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
         $fields=$this->edit;
         
         $content=[];
@@ -641,7 +641,7 @@ class CustomBaseController extends AdminInfo0Controller
             'shop'=>$admin['shop'],
         ];
         
-        zz_action($data_action);
+        zz_action($data_action ,['aid'=>$info['aid']]);
         
         $m->commit();
         $this->success('审核成功');
@@ -760,7 +760,7 @@ class CustomBaseController extends AdminInfo0Controller
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-        
+
         $fields=['contacter','receiver','checker'];
         
         $content=[];

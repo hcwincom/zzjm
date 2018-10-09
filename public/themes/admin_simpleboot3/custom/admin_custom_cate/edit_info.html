@@ -14,37 +14,8 @@
 					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.name}" readonly/>
-				 
-				 <present name='change.name'>
-				 	<input type="text" class="red form-control" value="{$change.name}" readonly/>
-				 </present>
-					
-				</div>
-			</div>
-			 
-			 
-			  <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control"  rows="5" readonly>{$info.dsc}</textarea>
-				<present name='change.dsc'>
-				 	<textarea class="red form-control" rows="5" readonly>{$change.dsc}</textarea>
-				</present>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="input-gender" class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.sort}" readonly/>
-				<present name='change.sort'>
-				 	<input type="text" class="red form-control" value="{$change.sort}" readonly/>
-				 </present>
-				</div>
-			</div>
+
+			<include file="custom@admin_custom_cate:base"/>
 			<div class="form-group">
 				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
 				<div class="col-md-6 col-sm-10">
