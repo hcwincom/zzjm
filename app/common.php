@@ -17,15 +17,16 @@ function zz_instore($data){
     $tmp=$m_store_goods->where($where)->find();
     if(empty($tmp)){
         if($data['num']<0 ){
-            return '该没有库存，请选择其他产品或仓库';
+            return '没有库存，请选择其他产品或仓库';
         }
+       
         //不存在，要添加
        $data_store=[
            'store'=>$data['store'],
            'goods'=>$data['goods'], 
            'shop'=>$data['shop'],
            'time'=>$data['time'],
-           'num1'=>$data['num'],
+           'num1'=>$data['num'], 
        ];
        $m_store_goods->insert($data_store);
        

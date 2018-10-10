@@ -10,33 +10,32 @@ class AdminGoodsController extends AdminBaseController
 {
     protected $m;
     protected $statuss;
-    protected $review_status;
+   
     protected $table;
-    protected $fields;
+    
     protected $flag;
     protected $isshop;
     //用于详情页中识别当前店铺,
     //列表页中分店铺查询
     protected $where_shop;
-    protected $edit;
-    protected $search;
+   
     public function _initialize()
     {
         parent::_initialize();
         $this->statuss=config('info_status');
-        $this->review_status=config('review_status');
-        $this->isshop=1;
         
-        $this->where_shop=0;
-        $this->edit=['name','sort','dsc','code'];
-        $this->search=[ 'name' => '名称','id' => 'id',];
+       
         $this->assign('statuss',$this->statuss);
-        $this->assign('review_status',$this->review_status);
+      
         $this->assign('html',$this->request->action());
+        
+        $this->isshop=1; 
+        $this->where_shop=0;
+       
         $this->flag='库存';
         $this->table='store_goods';
         $this->m=Db::name('store_goods');
-        $this->edit=['safe','safe_max','safe_count'];
+      
        
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
@@ -65,18 +64,38 @@ class AdminGoodsController extends AdminBaseController
          
         //店铺,分店只能看到自己的数据，总店可以选择店铺
         if($admin['shop']==1){
+            $shops=Db::name('shop')->where('status',2)->column('id,name');
+            //首页列表页去除总站
+            unset($shops[1]); 
+            $this->assign('shops',$shops);
             if(empty($data['shop'])){
                 $data['shop']=0;
             }else{
                 $where['p.shop']=['eq',$data['shop']];
             }
         }else{
+            $where_shop=$admin['shop'];
             $where['p.shop']=['eq',$admin['shop']];
         }
-         
-        //查询字段
-        $types=$this->search;
-        
+        //产品分类
+         if(empty($data['cid0'])){
+             $data['cid0']=0;
+         }else{
+             $where['goods.cid0']=['eq',$data['cid0']];
+         }
+         if(empty($data['cid'])){
+             $data['cid']=0;
+         }else{
+             $where['goods.cid']=['eq',$data['cid']];
+         }
+        //查询字段 
+        $types=[
+            'name' => '产品名称',
+            'code'=>'产品编码',
+            'id' => '产品id',
+            'sn'=>'产品条码',
+            
+        ];
         //选择查询字段
         if(empty($data['type1'])){
             $data['type1']=key($types);
@@ -89,11 +108,54 @@ class AdminGoodsController extends AdminBaseController
         if(!isset($data['name']) || $data['name']==''){
             $data['name']='';
         }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+            $where['goods.'.$data['type1']]=zz_search($data['type2'],$data['name']);
         }
-        
+        //库存数量
+        if(empty($data['num'])){
+            $data['num']=0;
+        }else{
+            switch($data['num']){
+                case 1:
+                    $where['p.num']=['eq',0];
+                    break;
+                case 2:
+                    $where['p.num']=['between',[1,10]];
+                    break;
+                case 3:
+                    $where['p.num']=['between',[11,100]];
+                    break;
+                case 4:
+                    $where['p.num']=['gt',100];
+                    break; 
+           }
+        }
+        //料位数量
+        if(empty($data['box_num'])){
+            $data['box_num']=0;
+        }else{
+            switch($data['box_num']){
+                case 1:
+                    $where['p.box_num']=['eq',1];
+                    break;
+                case 2:
+                    $where['p.box_num']=['eq',2];
+                    break;
+                case 3:
+                    $where['p.box_num']=['eq',3];
+                    break;
+                case 4:
+                    $where['p.box_num']=['eq',4];
+                    break;
+                case 5:
+                    $where['p.box_num']=['eq',5];
+                    break;
+                case 6:
+                    $where['p.box_num']=['gt',5];
+                    break;
+            }
+        }
         //时间类别
-        $times=config('time1_search');
+        $times=['time' => '更新时间'];
         if(empty($data['time'])){
             $data['time']=key($times);
             $data['datetime1']='';
@@ -127,56 +189,65 @@ class AdminGoodsController extends AdminBaseController
                 }
             }
         }
-        //仓库为0，
-        if(empty($data['store'])){
-            $data['store']=0; 
-        }
+       
         $join=[
             ['cmf_shop shop','p.shop=shop.id','left'],
             ['cmf_goods goods','p.goods=goods.id','left'],
         ];
-        $field='p.id,p.goods,p.shop,shop.name as sname,goods.name as goods_name,goods.code as goods_code';
-       
-        if($data['store']==-1){
-            $field.=',sum(p.safe) as safe,sum(p.num) as num,sum(p.num1) as num1,sum(p.box_num) as box_num'.
-            ',(sum(p.num)*goods.price_in) as money,max(p.time) as time';
-            $list=$m
-            ->alias('p')
-            ->field($field)
-            ->join($join)
-            ->where($where)
-            ->group('p.goods')
-            ->order('p.time desc')
-            ->paginate();
-            
+        $field='p.id,p.goods,p.shop,shop.name as sname,goods.name as goods_name,goods.code as goods_code'.
+        ',p.store,p.safe,p.num,p.num1,p.box_num,p.time,(p.num*goods.price_in) as money';
+        /*  $field.=',sum(p.safe) as safe,sum(p.num) as num,sum(p.num1) as num1,sum(p.box_num) as box_num'.
+         ',(sum(p.num)*goods.price_in) as money,max(p.time) as time';*/
+        //仓库为0，
+        if(empty($data['store'])){
+            $data['store']=0;
+        }elseif($data['store']==-1){
+            //-1为店铺总库存
+            $where['p.store']=['eq',0]; 
         }else{
-            $field.=',p.store,p.safe,p.num,p.num1,p.box_num,p.time,(p.num*goods.price_in) as money';
-            if($data['store']>0){
-                $where['p.store']=['eq',$data['store']];
-           }
-           
-            $list=$m
-            ->alias('p')
-            ->field($field)
-            ->join($join)
-            ->where($where)
-            ->order('p.time desc')
-            ->paginate();
-            
+            $where['p.store']=['eq',$data['store']]; 
         }
-        
-             
-       /*  $list=$m
+        $list=$m
         ->alias('p')
         ->field($field)
         ->join($join)
         ->where($where)
-        ->order('p.time desc')
-        ->paginate(); */
+        ->order('shop.sort asc,shop.id asc,p.time desc')
+        ->paginate();
         
         // 获取分页显示
         $page = $list->appends($data)->render();
       
+        //仓库
+        $where=[
+            'status'=>['eq',2],
+            'type'=>['in',[1,2]],
+        ]; 
+        if(!empty($where_shop)){
+            $where['shop']=$where_shop;
+        }
+         
+        $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column('id,shop,name');
+        $this->assign('stores',$stores); 
+        
+        //分类 
+        $m_cate=Db::name('cate');
+        $where_cate=[
+            'fid'=>0,
+            'status'=>2,
+        ];
+        $cates0=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,code');
+        $where_cate=[
+            'status'=>['eq',2],
+            'fid'=>['gt',0], 
+        ];
+        $cates=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,fid,code');
+        $this->assign('cates0',$cates0);
+        $this->assign('cates',$cates);
+        $this->assign('cid0',$data['cid0']);
+        $this->assign('cid',$data['cid']);
+        $this->assign('select_class','form-control');
+        
         $this->assign('page',$page);
         $this->assign('list',$list);
         
@@ -184,479 +255,347 @@ class AdminGoodsController extends AdminBaseController
         $this->assign('types',$types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
-        
-        $this->cates(1);
-        
-        return $this->fetch();
-    }
-
-
-    public function add()
-    {
+         
         return $this->fetch();
     }
      
     /**
-     * 库存详情
+     * 安全库存详情
      * @adminMenu(
-     *     'name'   => '库存详情',
+     *     'name'   => '安全库存详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '库存详情',
+     *     'remark' => '安全库存详情',
      *     'param'  => ''
      * )
      */
     public function edit()
     {
-        $m=$this->m;
-        $id=$this->request->param('id',0,'intval');
-        $field='p.*,floor.floor as floor_name,shelf.name as shelf_name,store.name as store_name,'.
-        'goods.name as goods_name,cate1.name as cate1_name,cate2.name as cate2_name,a.user_nickname as aname,r.user_nickname as rname';
-        $info=$m
-        ->alias('p')
-        ->field($field)
-        ->join('cmf_store_floor floor','floor.id=p.floor','left') 
-        ->join('cmf_store_shelf shelf','shelf.id=p.shelf','left')
-        ->join('cmf_store store','store.id=p.store','left') 
-        ->join('cmf_goods goods','goods.id=p.goods','left') 
-        ->join('cmf_cate cate2','cate2.id=goods.cid','left') 
-        ->join('cmf_cate cate1','cate1.id=goods.cid0','left') 
-        ->join('cmf_user a','a.id=p.aid','left')
-        ->join('cmf_user r','r.id=p.rid','left')
-        ->where('p.id',$id)
-        ->find();
-        if(empty($info)){
-            $this->error('数据不存在');
+        $back=url('index');
+        if(empty($_POST['ids'])){
+            $this->error('未选中信息',$back);
         }
+        $ids=$_POST['ids'];
         
-        $this->assign('info',$info);
-        $this->shop=$info['shop']; 
+        $m=$this->m;
+        //获取临时数据
+        $tmp=$m->where('id','in',$ids)->column('goods,shop');
+        $shop=current($tmp);
+        //检查店铺
+        $admin=$this->admin;
+        if($admin['shop']!=1 && $admin['shop']!=$shop){
+            $this->error('只能查看本店铺的数据',$back);
+        }
+        //获取所有产品
+        $goods_id=array_keys($tmp);
+        $where=[
+            'id'=>['in',$goods_id],
+            'shop'=>['eq',$shop],
+        ];
+        $goods=Db::name('goods')->where($where)->column('id,name,pic,code');
+        //获取所有仓库
+        $where=[
+            'shop'=>$shop,
+            'status'=>2,
+        ];
+        $stores=Db::name('store')->where($where)->order('sort asc')->column('id,name');
         
-        return $this->fetch();  
+        //获取所有库存
+        $where=[
+            'id'=>['in',$ids],
+            'shop'=>['eq',$shop],
+        ];
+        $list=$m->where($where)->column('id,store,goods,safe,safe_max,safe_count');
+        //循环得到数据
+        $res=[];
+        foreach($list as $k=>$v){
+            $res[$v['goods']][$v['store']]=[
+                'id'=>$v['id'],
+                'safe'=>$v['safe'],
+                'safe_max'=>$v['safe_max'],
+                'safe_count'=>$v['safe_count'],
+            ];
+        }
+         
+        $this->assign('stores',$stores);
+        $this->assign('goods',$goods);
+        $this->assign('res',$res);
+        return $this->fetch();
     }
+     
     /**
-     * 库存状态审核
+     * 安全库存编辑提交
      * @adminMenu(
-     *     'name'   => '库存状态审核',
+     *     'name'   => '安全库存编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '库存状态审核',
-     *     'param'  => ''
-     * )
-     */
-    public function review()
-    {
-        parent::review();
-    }
-    
-    /**
-     * 库存编辑提交
-     * @adminMenu(
-     *     'name'   => '库存编辑提交',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 10,
-     *     'icon'   => '',
-     *     'remark' => '库存编辑提交',
+     *     'remark' => '安全库存编辑提交',
      *     'param'  => ''
      * )
      */
     public function edit_do()
     {
+        $back=url('index');
         $m=$this->m;
         $table=$this->table;
         $flag=$this->flag;
         $data=$this->request->param();
-        $data=$this->param_check($data);
-        if(!is_array($data)){
-            $this->error($data);
-        }
         
-        $info=$m->where('id',$data['id'])->find();
+        $admin=$this->admin; 
+      
+        if(empty($data['safe'])){
+            $this->error('数据错误',$back);
+        }
+        $safes=$data['safe'];
+        $id0=key($safes);
+        $info=$m->where('id',$id0)->find();
+        
         if(empty($info)){
-            $this->error('数据不存在');
+            $this->error('数据错误',$back);
         }
-        $time=time();
-        $admin=$this->admin;
-        //其他店铺的审核判断
-        if($admin['shop']!=1){
-            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
-                $this->error('不能编辑其他店铺的信息');
-            }
-        }
-        $update=[
-            'pid'=>$info['id'],
-            'aid'=>$admin['id'],
-            'atime'=>$time,
-            'table'=>$table,
-            'url'=>url('edit_info','',false,false),
-            'rstatus'=>1,
-            'rid'=>0,
-            'rtime'=>0,
-            'shop'=>$admin['shop'],
-        ];
-        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
-        $fields=$this->edit;
-        
-        $content=[];
-        //检测改变了哪些字段
-        foreach($fields as $k=>$v){
-            //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
-            if(isset($data[$v]) && $info[$v]!=$data[$v]){
-                $content[$v]=$data[$v];
+       
+        if($admin['shop']!=1 ){ 
+            if($admin['shop']!=$info['shop']){
+                $this->error('店铺数据错误',$back);
             } 
         }
-         
-        //选择了新库存
-        if(!empty($data['box'])){
-            if($data['box']==$info['id']){
-                $this->error('新库存不能为原库存');
+        $m->startTrans();
+        $time=time();
+        $ids=[];
+        //循环设置所有输入的值
+        foreach ($safes as $k=>$v){
+            if($v!==''){
+                $ids[]=$k;
+                $update_info=[
+                    'time'=>$time,
+                    'safe'=>intval($v),
+                ];
+                $where=[
+                    'id'=>$k,
+                    'shop'=>$info['shop'], 
+                ]; 
+                $m->where($where)->update($update_info);
             }
-            //检查新库存是否有产品
-            $tmp=$m->where('id',$data['box'])->find();
-            if(empty($tmp) || $tmp['status']!=2 || $tmp['goods']!=0){
-                $this->error('新库存不是可选空库存');
-            }
-            $content['box']=$data['box'];
-            $content['box_goods']=$info['goods'];
            
         }
-        
-        
-        if(empty($content)){
-            $this->error('未修改');
+        if(empty($ids)){
+            $m->rollback();
+            $this->error('未修改',$back);
         }
-        //保存更改
-        $m_edit=Db::name('edit');
-        $m_edit->startTrans();
-        $eid=$m_edit->insertGetId($update);
-        if($eid>0){
-            $data_content=[
-                'eid'=>$eid,
-                'content'=>json_encode($content),
-            ];
-            Db::name('edit_info')->insert($data_content);
-        }else{
-            $m_edit->rollback();
-            $this->error('保存数据错误，请重试');
+        //先获取所有产品
+        $goods=$m->where('id','in',$ids)->column('goods');
+        //调整店铺总安全库存
+        $where_store=[
+            'shop'=>['eq',$info['shop']], 
+        ];
+        //先得到总库存在更新
+        foreach($goods as $k=>$v){
+            $where_store['store']=['gt',0];
+            $where_store['goods']=['eq',$v];
+            $safe_sum=$m->where($where_store)->sum('safe');
+            $where_store['store']=['eq',0];
+            $m->where($where_store)->setField('safe',$safe_sum);
         }
-        
+        $ids=implode(',',$ids);
         //记录操作记录
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'],
+            'action'=>$admin['user_nickname'].'调整了安全库存'.$ids,
             'table'=>($this->table),
             'type'=>'edit',
-            'pid'=>$info['id'],
-            'link'=>url('edit_info',['id'=>$eid]),
+            'pid'=>0,
+            'link'=>'',
             'shop'=>$admin['shop'],
         ];
-        
-        zz_action($data_action,['department'=>$admin['department']]);
-        
-        $m_edit->commit();
-        $this->success('已提交修改');
-        
+        Db::name('action')->insert($data_action);
+        $m->commit();
+        $this->success('已修改',$back);
     }
-    /**
-     * 库存编辑列表
+     
+     /**
+     * 查库存
      * @adminMenu(
-     *     'name'   => '库存编辑列表',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> true,
-     *     'order'  => 10,
-     *     'icon'   => '',
-     *     'remark' => '库存编辑列表',
-     *     'param'  => ''
-     * )
-     */
-    public function edit_list(){
-        parent::edit_list();
-        return $this->fetch();  
-    }
-    
-    /**
-     * 库存审核详情
-     * @adminMenu(
-     *     'name'   => '库存审核详情',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> true,
-     *     'order'  => 10,
-     *     'icon'   => '',
-     *     'remark' => '库存审核详情',
-     *     'param'  => ''
-     * )
-     */
-    public function edit_info()
-    {
-        $m=$this->m;
-        $id=$this->request->param('id',0,'intval');
-        $table=$this->table;
-        //获取编辑信息
-        $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find();
-        if(empty($info1)){
-            $this->error('编辑信息不存在');
-        }
-        //获取原信息 
-        $field='p.*,floor.floor as floor_name,shelf.name as shelf_name,store.name as store_name,'.
-            'goods.name as goods_name,cate1.name as cate1_name,cate2.name as cate2_name,a.user_nickname as aname,r.user_nickname as rname';
-        $info=$m
-        ->alias('p')
-        ->field($field)
-        ->join('cmf_store_floor floor','floor.id=p.floor','left')
-        ->join('cmf_store_shelf shelf','shelf.id=p.shelf','left')
-        ->join('cmf_store store','store.id=p.store','left')
-        ->join('cmf_goods goods','goods.id=p.goods','left')
-        ->join('cmf_cate cate2','cate2.id=goods.cid','left')
-        ->join('cmf_cate cate1','cate1.id=goods.cid0','left')
-        ->join('cmf_user a','a.id=p.aid','left')
-        ->join('cmf_user r','r.id=p.rid','left')
-        ->where('p.id',$info1['pid'])
-        ->find();
-        if(empty($info)){
-            $this->error('编辑关联的信息不存在');
-        }
-        //获取改变的信息
-        $change=Db::name('edit_info')->where('eid',$id)->value('content');
-        $change=json_decode($change,true);
-       
-        //库存调整
-        if(isset($change['box'])){
-            $change['box_name']=$m->where('id',$change['box'])->value('name');
-          
-            $tmp=Db::name('goods')
-            ->alias('goods')
-            ->field('goods.name as gname,cate1.name as cname1,cate2.name as cname2')
-            ->where('goods.id',$change['box_goods'])
-            ->join('cmf_cate cate2','cate2.id=goods.cid')
-            ->join('cmf_cate cate1','cate1.id=goods.cid0')
-            ->find();
-            $change['box_goods_name']=$tmp['cname1'].'-'.$tmp['cname2'].'-'.$tmp['gname'];
-        }
-        
-        $this->assign('info',$info);
-        $this->assign('info1',$info1);
-        $this->assign('change',$change);
-        
-        if($this->isshop){
-            $this->shop=$info['shop'];
-        }
-        //分类关联信息
-        $this->cates();
-        
-        return $this->fetch();  
-    }
-    /**
-     * 库存信息编辑审核
-     * @adminMenu(
-     *     'name'   => '库存编辑审核',
+     *     'name'   => '查库存',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '库存编辑审核',
+     *     'remark' => '查库存',
      *     'param'  => ''
      * )
      */
-    public function edit_review()
-    {
-        //审核编辑的信息
-        $status=$this->request->param('rstatus',0,'intval');
-        $id=$this->request->param('id',0,'intval');
-        if(($status!=2 && $status!=3) || $id<=0){
-            $this->error('信息错误');
-        }
-        $m=$this->m;
-        $table=$this->table;
-        $m_edit=Db::name('edit');
-        $info=$m_edit
-        ->field('e.*,p.name as pname,p.store,p.num,p.goods,p.shop as pshop,a.user_nickname as aname')
-        ->alias('e')
-        ->join('cmf_'.$table.' p','p.id=e.pid')
-        ->join('cmf_user a','a.id=e.aid')
-        ->where('e.id',$id)
-        ->find();
-        if(empty($info)){
-            $this->error('无效信息');
-        }
-        if($info['rstatus']!=1){
-            $this->error('编辑信息已被审核！不能重复审核');
-        }
-        
-        $admin=$this->admin;
-        //其他店铺的审核判断
-        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
-            $this->error('不能审核其他店铺的信息');
-        }
-        
-        $time=time();
-        
-        $m->startTrans();
-        
-        $update=[
-            'rid'=>$admin['id'],
-            'rtime'=>$time,
-            'rstatus'=>$status,
-        ];
-        $review_status=$this->review_status;
-        $update['rdsc']=$this->request->param('rdsc','');
-        if(empty($update['rdsc'])){
-            $update['rdsc']=$review_status[$status];
-        }
-        //只有未审核的才能更新
-        $where=[
-            'id'=>$id,
-            'rstatus'=>1,
-        ];
-        $row=$m_edit->where($where)->update($update);
-        if($row!==1){
-            $m->rollback();
-            $this->error('审核失败，请刷新后重试');
-        }
-        //是否更新,2同意，3不同意
-        if($status==2){
-            //组装更新数据
-            $update_info=[
-                'time'=>$time,
-            ];
-            //得到修改的字段
-            $change=Db::name('edit_info')->where('eid',$id)->value('content');
-            $change=json_decode($change,true);
-            
-            foreach($change as $k=>$v){
-                $update_info[$k]=$v;
-            }
-            //是否有更新库存号
-            if(isset($update_info['code'])){ 
-                //检查是否有重复
-                $where=[ 
-                    'code'=>['eq',$update_info['code']],
-                    'id'=>['neq',$info['pid']],
-                ]; 
-                $tmp=$m->where($where)->value('id');
-                if(!empty($tmp)){
-                    $m->rollback();
-                    $this->error('库存号已存在');
-                }
-            } 
-           //是否调整库存
-            if(isset($update_info['box'])){
-                if($info['goods'] != $update_info['box_goods']){
-                    $m->rollback();
-                    $this->error('库存号产品已改变，此次编辑失效');
-                }
-               
-                //原库存清空
-                $update_info['goods']=0;
-                $update_info['num']=0;
-                //新库存赋值
-                $box_data=[
-                    'goods'=>$info['goods'],
-                    'num'=>$info['num'],
-                    'time'=>$time,
-                ];
-                $where=[
-                    'id'=>['eq',$update_info['box']],
-                    'status'=>['eq',2],
-                    'goods'=>['eq',0],
-                ];
-                $row=$m->where($where)->update($box_data);
-                if($row!==1){
-                    $m->rollback();
-                    $this->error('新库存更新失败，可能状态不正常或已有产品');
-                }
-                unset($update_info['box']);
-                unset($update_info['box_goods']);
-            } 
-            $row=$m->where('id',$info['pid'])->update($update_info);
-            if($row!==1){
-                $m->rollback();
-                $this->error('信息更新失败，请刷新后重试');
-            }
-        }
-        
-        //审核成功，记录操作记录,发送审核信息
-        
-        $data_action=[
-            'aid'=>$admin['id'],
-            'time'=>$time,
-            'ip'=>get_client_ip(),
-            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
-            'table'=>$table,
-            'type'=>'edit_review',
-            'pid'=>$info['pid'],
-            'link'=>url('edit_info',['id'=>$info['id']]),
-            'shop'=>$admin['shop'],
-        ];
-        
-        zz_action($data_action,['aid'=>$info['aid']]);
-        
-        $m->commit();
-        $this->success('审核成功');
-    }
-    
-     
-    //相关信息
-    public function cates($type=3)
-    {
-       
-        $admin=$this->admin;  
-        //仓库
-        $where=[
-            'status'=>2, 
-        ];
-        $where_shop=$this->where_shop;
-        if(!empty($where_shop)){
-            $where['shop']=$where_shop;
-        }
-        //关联仓库
-        $where['type']=1;
-        if($type==3){
-            $field='id,name';
-        }else{
-            $field='id,shop,name';
-            //如果分店铺又是列表页查找,显示所有店铺
-            if($admin['shop']==1){
-                $shops=Db::name('shop')->where('status',2)->column('id,name');
-                //首页列表页去除总站
-                if($type==1){
-                    unset($shops[1]);
-                } 
-                
-                $this->assign('shops',$shops);
-            } 
-        }
-        $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column($field);
-         
-          
-        $this->assign('stores',$stores);
-        
-         
-    }
-    
     public function store_search(){
+        $back=url('index');
         if(empty($_POST['ids'])){
-            $this->error('未选中信息');
+            $this->error('未选中信息',$back);
         }
         $ids=$_POST['ids'];
         
         $m=$this->m;
-        $goods=$m->where('id','in',$ids)->column('goods');
+        //获取临时数据
+        $tmp=$m->where('id','in',$ids)->column('goods,shop'); 
+        $shop=current($tmp); 
+        //检查店铺
+        $admin=$this->admin;
+        if($admin['shop']!=1 && $admin['shop']!=$shop){
+            $this->error('只能查看本店铺的数据',$back);
+        }
+        //获取所有产品
+        $goods_id=array_keys($tmp);
+        $where=[
+            'id'=>['in',$goods_id],
+            'shop'=>['eq',$shop],
+        ];
+        $goods=Db::name('goods')->where($where)->column('id,name,pic,code');
+        //获取所有仓库
+        $where=[
+            'shop'=>$shop,
+            'status'=>2,
+        ];
+        $stores=Db::name('store')->where($where)->order('sort asc')->column('id,name');
+        $stores[0]='总库存';
+        //获取所有库存
+        $where=[ 
+            'id'=>['in',$ids],
+            'shop'=>['eq',$shop],
+        ];
+        $list=$m->where($where)->column('id,store,goods,num,num1');
+        //循环得到数据
+        $res=[];
+        foreach($list as $k=>$v){
+            $res[$v['goods']][$v['store']]=[
+                'num'=>$v['num'].'('.$v['num1'].')',
+                'id'=>$v['id'],
+            ];
+             
+        }
         
+        $this->assign('stores',$stores);
+        $this->assign('goods',$goods);
+        $this->assign('res',$res);
         return $this->fetch();
     }
-     
+    /**
+     * 库存调整
+     * @adminMenu(
+     *     'name'   => '库存调整',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '库存调整',
+     *     'param'  => ''
+     * )
+     */
+    public function store_do()
+    {
+        $back=url('index');
+        $m=$this->m;
+        $table=$this->table;
+        $flag=$this->flag;
+        $data=$this->request->param();
+        
+        $admin=$this->admin;
+        
+        if(empty($data['num'])){
+            $this->error('数据错误',$back);
+        }
+       
+        ////循环得到所有更改
+        $ids=[];
+        foreach ($data['num'] as $k=>$v){
+            if($v!=='' || $data['num1'][$k]!==''){
+                $ids[]=$k;
+            }
+        }
+        //先获取所有库存
+        $nums=$m
+        ->alias('p')
+        ->join('cmf_goods goods','goods.id=p.goods','left')
+        ->join('cmf_store store','store.id=p.store','left')
+        ->where('p.id','in',$ids)
+        ->column('p.id,p.num,p.num1,p.store,p.goods,p.shop,goods.name as goods_name,store.name as store_name');
+        if(empty($ids) || empty($nums)){
+            $this->error('未更改',$back);
+        }
+        
+        $info=current($nums); 
+      
+        if($admin['shop']!=1 ){
+            if($admin['shop']!=$info['shop']){
+                $this->error('店铺数据错误',$back);
+            }
+        }
+        $time=time();
+        $m->startTrans();
+         
+        //记录操作记录
+        $data_action0=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'调整了库存',
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>0,
+            'link'=>'',
+            'shop'=>$admin['shop'],
+        ];
+        $data_action=[];
+        $goods=[];
+        //循环设置所有输入的值
+        foreach ($nums as $k=>$v){
+            if($v['shop']!=$info['shop']){
+                $m->rollback();
+                $this->error('店铺数据错误',$back);
+            }
+            $tmp=$data_action0;
+            $goods[$v['goods']]=$v['goods'];
+            $update_info=[
+                'time'=>$time, 
+            ];
+            $tmp['action'].=$v['store_name'].'-'.$v['goods_name'];
+            if($data['num'][$k]!==''){
+                $update_info['num']=intval($data['num'][$k]);
+                $tmp['action'].='，库存'.$v['num'].'调整为'.$update_info['num'];
+            }
+            if($data['num1'][$k]!==''){
+                $update_info['num1']=intval($data['num1'][$k]);
+                $tmp['action'].='，冻结库存'.$v['num1'].'调整为'.$update_info['num1'];
+            } 
+            $m->where('id',$k)->update($update_info);
+            $data_action[]=$tmp; 
+        }
+        if(empty($ids)){
+            $m->rollback();
+            $this->error('未修改',$back);
+        }
+        
+        //调整店铺总安全库存
+        $where_store=[
+            'shop'=>['eq',$info['shop']],
+        ];
+        //先得到总库存在更新,按产品更新
+        foreach($goods as $k=>$v){
+            $where_store['store']=['gt',0];
+            $where_store['goods']=['eq',$v];
+            $safe_sum=$m->where($where_store)->sum('safe');
+            $where_store['store']=['eq',0];
+            $m->where($where_store)->setField('safe',$safe_sum);
+        }
+        
+        Db::name('action')->insertAll($data_action);
+        $m->commit();
+        $this->success('已修改',$back);
+    }
 }

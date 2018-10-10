@@ -1,0 +1,81 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="store@admin_storein:nav" />
+			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">出入库审核</a></li>  
+		 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}">
+			<div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">出入库id</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">入库类型</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control"  value="{$about_type[$info['type']]|default='未知'}"  />
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">关联单号</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control"  value="{$info.about_no}"  />
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">仓库</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" value="{$info.store_name}" />
+				</div>
+			</div> 
+			<div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">产品</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" value="{$info.goods_name}-{$info.goods_code}*{$info.num}" />
+				</div>
+			</div> 
+		 
+			<div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">库存情况</label>
+				<div class="col-md-6 col-sm-10">  
+					 <table class="table table-hover table-bordered table-list">
+					 	<tr> 
+					 	<foreach name="stores" item="vo">
+					 		<td>{$vo}</td>
+					 	</foreach>
+					 	</tr> 
+					 	<tr class=""> 
+					 	<foreach name="stores" item="vo"> 
+					 		<td>
+					 		<empty name="goods[$key]">
+					 		  	--
+					 		<else/>
+					 		    {$goods[$key]['num']}({$goods[$key]['num1']})
+					 		 </empty>
+					 		 </td>
+					 	</foreach>
+					 	</tr> 
+		 			</table>
+				</div>
+			</div> 
+		 <div style="clear:both;"></div>
+		 <div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+				 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >确认保存</button>
+					 <p class="notice">	新指可以填入更新的安全库存，旧为原安全库存，理论安全库存数是根据库存进出数据，按公式算得，最大是指该产品在一定期间内单个订单最大订购数。</p>
+		 			 <p class="notice">	确认后安全库存更新，无需审核。</p>
+				</div>
+				
+			</div>
+		</form>
+		
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+ 

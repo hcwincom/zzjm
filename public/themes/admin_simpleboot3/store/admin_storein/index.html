@@ -5,8 +5,8 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-		<include file="store@admin_goods:nav" />
-	 <li><a href="{:url('store/AdminStorein/index')}">AdminStorein</a></li>
+			<include file="store@admin_storein:nav" />
+	 
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post" action="">
 			 
@@ -45,22 +45,7 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
-            <select class="form-control" name="num" id="">
-            	<option value="0" <eq name="data.num" value="0">selected</eq>>数量</option>
-            	<option value="1" <eq name="data.num" value="1">selected</eq>>0</option>
-            	<option value="2" <eq name="data.num" value="2">selected</eq>>1-10</option>
-            	<option value="3" <eq name="data.num" value="3">selected</eq>>11-100</option>
-            	<option value="4" <eq name="data.num" value="4">selected</eq>>100以上</option>
-            </select>
-            <select class="form-control" name="box_num" id="">
-            	<option value="0" <eq name="data.box_num" value="0">selected</eq>>料位数</option>
-            	<option value="1" <eq name="data.box_num" value="1">selected</eq>>1</option>
-            	<option value="2" <eq name="data.box_num" value="2">selected</eq>>2</option>
-            	<option value="3" <eq name="data.box_num" value="3">selected</eq>>3</option>
-            	<option value="4" <eq name="data.box_num" value="4">selected</eq>>4</option>
-            	<option value="5" <eq name="data.box_num" value="5">selected</eq>>5</option>
-            	<option value="6" <eq name="data.box_num" value="6">selected</eq>>5以上</option>
-            </select>
+            
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
@@ -70,6 +55,15 @@
 			--
 			<input class="js-datetime form-control" type="text" id="datetime2" name="datetime2" value="{$data.datetime2}">
 			
+			<select class="form-control" name="num" id="">
+	        <foreach name="nums" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.num">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+			<input class=" form-control" type="number" name="num1" value="{$data.num1}">
+			--
+			<input class=" form-control" type="number" name="num2" value="{$data.num2}">
+			
 			<input type="submit" class="btn btn-primary" value="搜索" />
 				 
 		</form>
@@ -77,10 +71,6 @@
 		<form method="post" class=" margin-top-20" action="">
 			<div class="table-actions">
 				 
- 
-			 	
-			 	<button type="submit" class="store_search btn-sm btn-primary ">查库存</button>
-			 	<button type="submit" class="store_set btn-sm btn-primary ">安全库存调整</button>
 			 	<p class='error'></p>
 			</div>
 
@@ -96,16 +86,18 @@
 						<th width="100">{$flag}ID</th>
 						<th>店铺</th> 
 						<th>仓库</th>  
+						<th>下单时间</th>  
+						<th>下单人</th> 
+						<th>下单类型</th>  
+						<th>关联单号</th> 
 						<th>产品名</th> 
 						<th>产品编号</th> 
-						<th>数量</th>
-						<th>料位数</th>  
-						<th>库存</th> 
-						<th>库存金额</th> 
-						<th>安全库存</th> 
-					  
-						<th>最近更新时间</th>
-					 
+						<th>料位编号</th> 
+						<th>数量</th> 
+						<th>金额</th> 
+						<th>备注</th>
+						<th>状态</th>  
+						<th>审核人-时间</th> 
 					</tr>
 				</thead>
 				<tbody>
@@ -118,32 +110,35 @@
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						{$vo.id}
+						<a href="{:url('edit',['id'=>$vo.id])}">{$vo.id}</a>
 						</td>
 						<td > {$vo.sname}</td>
-						<td> <empty name="vo.store">店铺总库存<else/>{$stores[$vo['store']]['name']|default=$vo['store']}</empty></td>
+						<td> {$stores[$vo['store']]['name']|default=$vo['store']}</td>
+						<td>{$vo.atime|date='Y-m-d H:i',###}</td> 
+						<td>{$vo.aname|default=$vo['aid']}</td> 
+						<td>{$about_type[$vo['type']]|default='未知'}</td> 
+						<td > {$vo.about_no}</td>
 						<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vo.goods])}"  target="{$zztarget['other']}">{$vo.goods_name}</a></td>
 					    <td>{$vo.goods_code}</td> 
+					    <td>{$vo.box_code}</td>
 						<td>{$vo.num}</td>
-						<td>{$vo.box_num}</td>
-						<td class="<if condition='$vo.num elt $vo.safe'>red</if>">
-								{$vo.num}({$vo.num1})
-						</td>
-						<td>{$vo.money}</td>
-						<td>{$vo.safe}</td> 
-						<td>{$vo.time|date='Y-m-d H:i',###}</td> 
+						<td>{$vo.money|default=0}</td>
+						 
+						<td>{$vo.adsc}</td>
+						<td>{$review_status[$vo['rstatus']]}</td> 
+						<td><eq name="vo.rid" value="0">--<else/>{$vo.rname|default=$vo['rid']}--{$vo.rtime|date='Y-m-d H:i',###}</eq></td> 
 					</tr> 
 					</foreach>
 				</tbody> 
 			</table> 
 		</form>
 	 	<div class="pagination">{$page}</div>
-	 	<p>查库存和安全库存调整只能选择同一店铺的产品</p>
+	 	<p>数值查询请输入整数</p>
+	 	<p>审核结果无法修改</p>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
- 
- 
+  
 $('#shop').change(function(){
 	var shop=$(this).val();  
 	if(shop==0){
@@ -154,17 +149,7 @@ $('#shop').change(function(){
 	}
 	$('#store').val(0); 
 });
-
-$('.store_search').click(function(){
-	
-	$(this).parents('form').attr('action',"{:url('store_search')}");
-	 return is_check('查库存',0);
-});
-$('.store_set').click(function(){
-	
-	$(this).parents('form').attr('action',"{:url('edit')}");
-	 return is_check('安全库存调整',0);
-});
+ 
  
 </script>
 </body>

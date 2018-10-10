@@ -150,7 +150,7 @@ function msg(text,type=0){
 	}
 }
 
-function is_check(txt='删除',check='.js-check',error='.error'){
+function is_check(txt='批量删除',isconfirm=1,check='.js-check',error='.error'){
 	
 	var i=0;
 	$(check).each(function(){
@@ -164,7 +164,7 @@ function is_check(txt='删除',check='.js-check',error='.error'){
 		return false;
 	}else{
 		$(error).text('');
-		if(!confirm('确认'+txt+'吗？')){
+		if(isconfirm==1 && !confirm('确认'+txt+'吗？')){
 			return false;
 		}
 		return true;

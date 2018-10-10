@@ -3,73 +3,53 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="public@nav" />
-			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<include file="store@admin_goods:nav" />
+			<li class="active"><a >安全库存调整</a></li>  
 		 
 		</ul>
-		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">id</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
-					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
-				</div>
-			</div>
-		 
-			 	 <include file="store@admin_goods:base" />
-			<present name="info.id">
-				<div class="form-group  "  >
-					<label class="col-sm-2 control-label">修改备注</label>
-					<div class="col-md-6 col-sm-10">
-						<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
-						<p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
-					</div>
-				</div>
-			</present>
-		  <div style="clear:both"></div>
-			<div class="form-group">
-				<label   class="col-sm-2 control-label">审核状态</label>
-				<div class="col-md-6 col-sm-10">
-				 
-				 <foreach name="statuss" item="vo">
-				  	<label class="radio-inline">
-				 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
-				 	</label>
-				 </foreach>
-				</div>
-			</div>
-			<div class="form-group">
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}">
+		
+		  <table class="table table-hover table-bordered table-list">
+		 	<tr>
+		 	<td>产品名称</td>
+		 	<td>产品编码</td>
+		 	<td>产品图片</td>
+		 	<foreach name="stores" item="vo">
+		 	<td>{$vo}安全库存<br/>新-旧-理论-最大</td>
+		 	</foreach>
+		 	</tr>
+		 <foreach name="goods" item="vv" key="kk">
+		 	<tr class="">
+		 		<td>{$vv.name}</td>
+		 		<td>{$vv.code}</td>
+		 		<td>{$vv.pic}</td>
+		 	<foreach name="stores" item="v" key="k">
+		 		 
+		 		 <empty name="res[$kk][$k]">
+		 		  <td>--</td>
+		 		 <else/>
+		 		  <td>
+		 		  <input type="text" name="safe[{$res[$kk][$k]['id']}]" style="width:50px;"/>
+		 		  -{$res[$kk][$k]['safe']}- {$res[$kk][$k]['safe_count']}- {$res[$kk][$k]['safe_max']}
+		 		  </td>
+		 		 </empty>
+		 	</foreach>
+		 	</tr>
+		 </foreach>
+		 </table>
+		 <div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10"> 
-					<button type="submit" class="review btn btn-primary js-ajax-submit"  >审核状态</button> 
-					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
-					 
-					<eq name="info.status" value="4">
-					 	<button type="submit" class="cancel_ban btn btn-primary js-ajax-submit">恢复</button> 
-					</eq>
-					<eq name="info.status" value="2">
-					 	  <button type="submit" class="ban btn btn-primary  js-ajax-submit" >禁用</button> 
-					</eq>
-					 
+				 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >确认保存</button>
+					 <p class="notice">	新指可以填入更新的安全库存，不填表示不修改。旧为原安全库存，理论安全库存数是根据库存进出数据，按公式算得，最大是指该产品在一定期间内单个订单最大订购数。</p>
+		 			 <p class="notice">	确认后安全库存更新，无需审核。</p>
 				</div>
 				
 			</div>
 		</form>
-	 
+		
 	</div>
 	<script src="__STATIC__/js/admin.js"></script> 
 </body>
 </html>
-<script>
-$('.review').click(function(){
-	$('form').attr('action',"{:url('review')}");
-});
-$('.save').click(function(){
-	$('form').attr('action',"{:url('edit_do')}");
-});
-$('.ban').click(function(){
-	$(this).parents('form').attr('action',"{:url('ban')}");
-});
-$('.cancel_ban').click(function(){
-	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
-});
-</script>
+ 

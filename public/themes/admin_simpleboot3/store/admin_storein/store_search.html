@@ -31,12 +31,7 @@
 		 		 <td>
 			 	<present name="res[$kk][$k]">
 			 		<label class="checkbox-inline">
-				 		<input type="checkbox" class="check_store" value="{$kk}-{$k}" name="store[]" />
-				 		{$res[$kk][$k]['num']}
-				 		<neq name="k" value="0">
-				 			<input type="number" name="num[{$res[$kk][$k]['id']}]" style="width:60px;"/>-
-				 			<input type="number" name="num1[{$res[$kk][$k]['id']}]" style="width:60px;"/>
-				 		</neq>
+				 		<input type="checkbox" class="check_store" value="{$kk}-{$k}" name="store[]" />{$res[$kk][$k]}
 				 	</label> 
 			 	<else/> 
 			 		--
@@ -48,11 +43,11 @@
 		 </table>
 		 <div class="form-group">
 			<div class="col-sm-offset-2 col-sm-10"> 
-				 <button type="submit" class="store_do btn btn-primary js-ajax-submit" >确认调整库存</button>
-				 <button type="submit" class="search_do btn btn-primary js-ajax-submit" >生成库存曲线</button>
-				 <p class="notice">确认调整库存后，即时生效，请谨慎操作</p>
-				 <p class="notice">选择需要的库存生成曲线，暂无</p>
-			</div> 
+				 
+				<button type="submit" class="save btn btn-primary js-ajax-submit" >生成库存曲线</button>
+				 <p>选择需要的库存生成曲线，暂无</p>
+			</div>
+			
 		</div>
 		</form>
 	</div>
@@ -60,17 +55,9 @@
 </body>
 </html>
 <script>
-$('.store_do').click(function(){
-	if(!confirm('确认调整库存吗？')){
-		return false;
-	}
-	$('form').attr('action',"{:url('store_do')}");
-	 
-});
-$('.search_do').click(function(){
- 
-	$('form').attr('action',"{:url('search_do')}");
-	 return false;
+$('.save').click(function(){
+	$('form').attr('action',"{:url('history_pic')}");
+	return false;
 });
 $('.check_goods').change(function(){ 
 	$(this).parents('tr').find('.check_store').prop('checked',$(this).prop('checked')); 
