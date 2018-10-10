@@ -154,18 +154,22 @@
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
 
-$('.ban').click(function(){
-	$(this).parents('form').attr('action',"{:url('ban')}");
-});
-$('.cancel_ban').click(function(){
-	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
-});
-$('.review_all').click(function(){
-	$(this).parents('form').attr('action',"{:url('review_all')}");
-});
-$('.del_all').click(function(){
-	$(this).parents('form').attr('action',"{:url('del_all')}");
-});
+    $('.ban').click(function(){
+        $(this).parents('form').attr('action',"{:url('ban')}");
+        return is_check('批量禁用');
+    });
+    $('.cancel_ban').click(function(){
+        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
+        return is_check('批量恢复');
+    });
+    $('.review_all').click(function(){
+        $(this).parents('form').attr('action',"{:url('review_all')}");
+        return is_check('批量同意');
+    });
+    $('.del_all').click(function(){
+        $(this).parents('form').attr('action',"{:url('del_all')}");
+        return is_check('批量删除');
+    });
 </script>
 </body>
 </html>

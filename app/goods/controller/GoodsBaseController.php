@@ -155,7 +155,7 @@ class GoodsbaseController extends AdminInfo0Controller
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-       
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
         $fields=$this->edit;
         
         $content=[];

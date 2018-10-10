@@ -14,31 +14,8 @@
 					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
-			<div class="form-group">
-				<label  class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="{$info.name}" />
-				</div>
-			</div>
-			 
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10">
-					 
-					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="sort" value="{$info.sort}" />
-					<p>排序和价格计算关联， 
-					<foreach name="prices" item="vo">
-					排序为{$key*10-1}-{$key*10+9}的归于{$key}-{$vo}计算，
-					</foreach>  
-					</p>
-				</div>
-			</div>
+
+			<include file="goods@admin_fee_cate:base" />
 			<div class="form-group">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
