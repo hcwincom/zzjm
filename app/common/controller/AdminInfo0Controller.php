@@ -28,7 +28,7 @@ class AdminInfo0Controller extends AdminBaseController
         
         $this->statuss=config('info_status');
         $this->review_status=config('review_status'); 
-        $this->isshop=1; 
+        $this->isshop=0;
          
         $this->where_shop=0; 
         $this->edit=['name','sort','dsc','code'];

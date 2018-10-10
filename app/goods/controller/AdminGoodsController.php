@@ -77,7 +77,7 @@ class AdminGoodsController extends AdminBaseController
     public function index()
     { 
         
-        $admin=$this->admin;
+
          
         $m=$this->m;
         $data=$this->request->param();
@@ -2407,6 +2407,7 @@ class AdminGoodsController extends AdminBaseController
         $list=[];
         $path='upload/';
         foreach($tmp as $k=>$v){
+
             if(is_file($path.$v['file'])){
                 //直接加判断，防止错误
                 //if(in_array($v['type'],[1,2,3])){

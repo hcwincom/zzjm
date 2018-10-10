@@ -38,7 +38,125 @@ class AdminBrandController extends GoodsBaseController
      */
     public function index()
     {
-        parent::index();
+        $table=$this->table;
+        $m=$this->m;
+        $admin=$this->admin;
+        $data=$this->request->param();
+        $where=[];
+        //判断是否有店铺
+        $join=[
+            ['cmf_user a','a.id=p.aid','left'],
+            ['cmf_user r','r.id=p.rid','left'],
+            
+        ];
+        $field='p.*,a.user_nickname as aname,r.user_nickname as rname';
+        
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
+       
+        //字母
+        if(empty($data['char'])){
+            $data['char']=-1;
+        }else{
+            $where['p.char']=['eq',$data['char']];
+        }
+        
+        //添加人
+        if(empty($data['aid'])){
+            $data['aid']=0;
+        }else{
+            $where['p.aid']=['eq',$data['aid']];
+        }
+        //审核人
+        if(empty($data['rid'])){
+            $data['rid']=0;
+        }else{
+            $where['p.rid']=['eq',$data['rid']];
+        }
+        
+        //类型
+        if(empty($data['type'])){
+            $data['type']=0;
+        }else{
+            $where['p.type']=['eq',$data['type']];
+        }
+        //查询字段
+        $types=$this->search;
+        
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        }
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        if(!isset($data['name']) || $data['name']==''){
+            $data['name']='';
+        }else{
+            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+        }
+        
+        //时间类别
+        $times=config('time1_search');
+        if(empty($data['time'])){
+            $data['time']=key($times);
+            $data['datetime1']='';
+            $data['datetime2']='';
+        }else{
+            //时间处理
+            if(empty($data['datetime1'])){
+                $data['datetime1']='';
+                $time1=0;
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $time2=0;
+                }else{
+                    //只有结束时间
+                    $time2=strtotime($data['datetime2']);
+                    $where['p.'.$data['time']]=['elt',$time2];
+                }
+            }else{
+                //有开始时间
+                $time1=strtotime($data['datetime1']);
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $where['p.'.$data['time']]=['egt',$time1];
+                }else{
+                    //有结束时间有开始时间between
+                    $time2=strtotime($data['datetime2']);
+                    if($time2<=$time1){
+                        $this->error('结束时间必须大于起始时间');
+                    }
+                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
+                }
+            }
+        }
+        $list=$m
+        ->alias('p')
+        ->field($field)
+        ->join($join)
+        ->where($where)
+        ->order('p.status asc,p.sort asc,p.time desc')
+        ->paginate();
+        
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        $this->assign('types',$types);
+        $this->assign('times',$times);
+        $this->assign("search_types", $search_types);
+        
+        $this->cates(1);
         return $this->fetch();
        
     }
