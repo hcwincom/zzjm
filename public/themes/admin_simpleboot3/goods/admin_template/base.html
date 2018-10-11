@@ -1,4 +1,5 @@
-<div style="clear:both"></div>
+
+
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">名称</label>
     <div class="col-md-6 col-sm-10">
@@ -6,45 +7,98 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="" class="col-sm-2 control-label">分类</label>
+    <label for="" class="col-sm-2 control-label">所属大类: </label>
     <div class="col-md-6 col-sm-10">
-        <select class="" name="cid" >
-
-            <foreach name="cates" item="vo" k="key">
-                <option value="{$key}"  >
-                    {$vo}
-                </option>
+        <select   name="cid" id="">
+            <foreach name="cates" item="vo">
+                <option value="{$key}">{$vo}</option>
             </foreach>
         </select>
     </div>
 </div>
-<div class="form-group">
-    <label for="" class="col-sm-2 control-label">类型</label>
-    <div class="col-md-6 col-sm-10">
-        <foreach name="param_types" item="vo">
-            <label class="radio-inline">
-                <input type="radio" name="type" value="{$key}" required/>{$vo}
-            </label>
-        </foreach>
-    </div>
-</div>
-<div class="form-group">
-    <label for="" class="col-sm-2 control-label">默认值(最多4位小数)</label>
-    <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="fee" value="0" required/>
-    </div>
-</div>
+
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">简介</label>
     <div class="col-md-6 col-sm-10">
 
-        <textarea class="form-control" name="dsc" rows="5"  maxlength="250"></textarea>
+        <textarea class="form-control" name="dsc" rows="5" maxlength="250"></textarea>
     </div>
 </div>
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">排序</label>
     <div class="col-md-6 col-sm-10">
         <input type="text" class="form-control" name="sort" value="10" />
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">参数项</label>
+    <div class="col-md-6 col-sm-10">
+        <table class="table table-hover table-bordered table-list">
+            <thead>
+            <tr>
+                <th width="15">
+
+                </th>
+                <th >参数id-名</th>
+                <th >类型</th>
+                <th >可选值</th>
+                <th width="15">
+
+                </th>
+                <th >参数id-名</th>
+                <th >类型</th>
+                <th >可选值</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <for start="0" end="$end" step="2" name="i" >
+
+                <tr >
+                    <td>
+                        <input type="checkbox" class="js-check"
+                               data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+                               value="{$params[$i]['id']}">
+                    </td>
+                    <td>{$params[$i]['id']}-{$params[$i]['name']}</td>
+                    <td>{$param_types[$params[$i]['type']]}</td>
+                    <td>{$params[$i]['content']}</td>
+
+                    <td>
+                        <input type="checkbox" class="js-check"
+                               data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+                               value="{$params[$i+1]['id']}">
+                    </td>
+                    <td>{$params[$i+1]['id']}-{$params[$i+1]['name']}</td>
+                    <td>{$param_types[$params[$i+1]['type']]}</td>
+                    <td>{$params[$i+1]['content']}</td>
+
+                </tr>
+
+            </for>
+            <if condition="$end eq $i">
+                <tr >
+                    <td>
+                        <input type="checkbox" class="js-check"
+                               data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+                               value="{$params[$end]['id']}">
+                    </td>
+                    <td>{$params[$end]['id']}-{$params[$end]['name']}</td>
+                    <td>{$param_types[$params[$end]['type']]}</td>
+                    <td>{$params[$end]['content']}</td>
+
+                    <td>
+
+                    </td>
+                    <td> </td>
+                    <td> </td>
+                    <td> </td>
+
+                </tr>
+            </if>
+            </tbody>
+        </table>
+
     </div>
 </div>
 

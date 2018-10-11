@@ -14,42 +14,8 @@
 					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
-			<div class="form-group">
-				<label  class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="{$info.name}" />
-				</div>
-			</div>
-			  <div class="form-group">
-				<label for="" class="col-sm-2 control-label">类型</label>
-				<div class="col-md-6 col-sm-10">
-					<foreach name="param_types" item="vo"> 
-					 <label class="radio-inline">
-	                    <input type="radio" name="type" value="{$key}" <if condition="$key eq $info.type">checked</if> />
-	                    {$vo}
-	                </label>
-					</foreach>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">可选数据(用,分隔)</label>
-				<div class="col-md-6 col-sm-10"> 
-					<textarea class="form-control" name="content" rows="5"  maxlength="250">{$info.content}</textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10">
-					 
-					<textarea class="form-control" name="dsc" rows="5"  maxlength="250">{$info.dsc}</textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="sort" value="{$info.sort}" />
-				</div>
-			</div>
+
+			<include file="goods@admin_param:base" />
 			<div class="form-group">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">

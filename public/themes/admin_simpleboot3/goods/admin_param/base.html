@@ -6,19 +6,6 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="" class="col-sm-2 control-label">分类</label>
-    <div class="col-md-6 col-sm-10">
-        <select class="" name="cid" >
-
-            <foreach name="cates" item="vo" k="key">
-                <option value="{$key}"  >
-                    {$vo}
-                </option>
-            </foreach>
-        </select>
-    </div>
-</div>
-<div class="form-group">
     <label for="" class="col-sm-2 control-label">类型</label>
     <div class="col-md-6 col-sm-10">
         <foreach name="param_types" item="vo">
@@ -29,9 +16,9 @@
     </div>
 </div>
 <div class="form-group">
-    <label for="" class="col-sm-2 control-label">默认值(最多4位小数)</label>
+    <label for="" class="col-sm-2 control-label">可选数据(用,分隔)</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="fee" value="0" required/>
+        <textarea class="form-control" name="content" rows="5"  maxlength="250"></textarea>
     </div>
 </div>
 <div class="form-group">
@@ -47,7 +34,6 @@
         <input type="text" class="form-control" name="sort" value="10" />
     </div>
 </div>
-
 <div class="form-group "  >
     <label class="col-sm-2 control-label">备注</label>
     <div class="col-md-6 col-sm-10">

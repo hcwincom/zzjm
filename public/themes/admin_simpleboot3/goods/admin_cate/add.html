@@ -6,47 +6,8 @@
 			<include file="goods@admin_cate/nav" />
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">父级分类</label>
-				<div class="col-md-6 col-sm-10 ">
-					<select name="fid" id="cid">
-						<option value="0">作为一级分类</option>
-					<foreach name="cates" item="vo">
-						<option value="{$key}" <if condition="$fid eq $key">selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="" required/>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">同级编码</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" name="code_num" id="code_num" value="" required/>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">类型</label>
-				<div class="col-md-6 col-sm-10">
-					 <label class="radio-inline">
-				 		<input type="radio" value="1" name="type"  checked />产品
-				 	</label>
-				 	 <label class="radio-inline">
-				 		<input type="radio" value="2" name="type"    />设备
-				 	</label>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="sort" value="10" />
-				</div>
-			</div>
-			 
+
+			<include file="goods@admin_cate:base" />
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>

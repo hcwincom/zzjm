@@ -6,55 +6,8 @@
 			<include file="public@nav" />
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
-			 
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">名称</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="" required/>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">分类</label>
-				<div class="col-md-6 col-sm-10">
-					 <select class="" name="cid" >
-					 
-						 <foreach name="cates" item="vo" k="key">
-						<option value="{$key}"  > 
-						 {$vo}
-						</option>
-						</foreach>
-					</select>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">类型</label>
-				<div class="col-md-6 col-sm-10">
-					<foreach name="param_types" item="vo"> 
-					 <label class="radio-inline">
-	                    <input type="radio" name="type" value="{$key}" required/>{$vo}
-	                </label>
-					</foreach>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">默认值(最多4位小数)</label>
-				<div class="col-md-6 col-sm-10"> 
-					<input type="text" class="form-control" name="fee" value="0" required/>
-				</div>
-			</div>
-			  <div class="form-group">
-				<label for="" class="col-sm-2 control-label">简介</label>
-				<div class="col-md-6 col-sm-10">
-					 
-					<textarea class="form-control" name="dsc" rows="5"  maxlength="250"></textarea>
-				</div>
-			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="sort" value="10" />
-				</div>
-			</div>
+
+			<include file="goods@admin_fee:base" />
 			 
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
