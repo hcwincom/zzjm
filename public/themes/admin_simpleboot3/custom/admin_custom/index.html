@@ -19,7 +19,16 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-		  
+		   <notempty name="shops"> 
+	  	店铺:<select class="form-control" id="shop" name="shop" >
+				<option value='0'>全部</option> 
+			 <foreach name="shops" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 
+			 	{$vo}
+				</option>
+			</foreach>
+			</select> &nbsp;&nbsp; 
+		</notempty>
 			 创建人: 
 			<select class="form-control" name="aid"  >
 				<option value='0'>全部</option> 
@@ -36,6 +45,36 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
+			<select class="form-control" name="cid" >
+				<option value='0'>客户类型</option> 
+				 <foreach name="cates" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.cid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<select class="form-control" name="company" id="company">
+				<option value='0'>所属公司</option> 
+				 <foreach name="companys" item="vo" k="key">
+				<option class="shop shop{$vo.shop}" value="{$key}" <if condition="$key eq $data.company">selected</if>>{$vo.name}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			
+			<select class="form-control" name="paytype" id="paytype">
+				<option value='0'>付款类型</option> 
+				 <foreach name="paytypes" item="vo" k="key">
+				<option class="shop shop{$vo.shop}" value="{$key} " <if condition="$key eq $data.paytype">selected</if>>{$vo.name}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			  省：<select class="form-control" name="province" id="province" style="width:100px;display:inline-block;"  >
+				  	<option value="0">请选择</option>
+				  </select>
+			  市：<select  class="form-control" name="city" id="city"  style="width:100px;display:inline-block;"  >
+				  	<option value="0">请选择</option>
+				  </select>	  
+			
+			<br/>
 			<select class="form-control" name="type1" id="">
 	        <foreach name="types" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
@@ -83,18 +122,20 @@
 								data-checklist="js-check-x">
 						</label>
 						</th>
-						<th width="100">{$flag}ID</th>
-						 
-						<th>{$flag}名</th> 
-						 
-						<th>创建人</th>
-						<th>创建时间</th>
-						<th>审核人</th>
-						<th>审核时间</th>
+						<th width="100">{$flag}ID</th> 
+						<th>{$flag}名</th>  
+						<th>客户编码</th>
+						 <th>产品数</th>
+						<th>总订购金额</th>
+						<th>总笔数</th>
+						<th>客户电话</th>
+						<th>主要负责人</th>
+						<th>负责人手机</th>  
+						<th>负责人QQ</th>
+						<th>负责人微信</th>  
 						<th>最近更新时间</th>
 						<th>排序</th>
-						<th>状态</th>
-						 
+						<th>状态</th> 
 					</tr>
 				</thead>
 				<tbody>
@@ -109,18 +150,17 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
-					 
-						<td>{$vo.aname|default=$vo.aid}</td>
-						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
-						<eq name="vo.rid" value="0">
-						<td>-</td>
-						<td>-</td>
-						<else/>
-						<td>{$vo.rname|default=$vo.rid}</td>
-						<td>{$vo.rtime|date='Y-m-d H:i',###}</td>
-						</eq>
-						
+						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.name}</a></td>
+					  	<td>{$vo.code}</td>
+					  	<td>{$vo.goods_num}</td>
+					  	<td>{$vo.order_money}</td>
+					  	<td>{$vo.order_num}</td>
+					  	<td>{$vo.mobile}</td>
+						<td>{$vo.tel_name|default='--'}</td>
+						<td>{$vo.tel_mobile}</td>
+						<td>{$vo.tel_qq}</td>
+						<td>{$vo.tel_wechat}</td>
+						  
 						<td>{$vo.time|date='Y-m-d H:i',###}</td>
 						<td>{$vo.sort}</td>
 						<td>{$statuss[$vo.status]}</td>
@@ -137,23 +177,36 @@
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
+city_js($('#province'),"{$data.province|default=0}",$('#city'),"{$data.city|default=0}");
 
-    $('.ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('ban')}");
-        return is_check('批量禁用');
-    });
-    $('.cancel_ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
-        return is_check('批量恢复');
-    });
-    $('.review_all').click(function(){
-        $(this).parents('form').attr('action',"{:url('review_all')}");
-        return is_check('批量同意');
-    });
-    $('.del_all').click(function(){
-        $(this).parents('form').attr('action',"{:url('del_all')}");
-        return is_check('批量删除');
-    });
+$('#shop').change(function(){
+	var shop=$(this).val();  
+	if(shop==0){
+		$('.shop').show();
+	}else{
+		$('.shop').hide();
+		$('.shop'+shop).show();
+	}
+	$('#company').val(0);
+	$('#paytype').val(0);
+   
+});
+$('.ban').click(function(){
+    $(this).parents('form').attr('action',"{:url('ban')}");
+    return is_check('批量禁用');
+});
+$('.cancel_ban').click(function(){
+    $(this).parents('form').attr('action',"{:url('cancel_ban')}");
+    return is_check('批量恢复');
+});
+$('.review_all').click(function(){
+    $(this).parents('form').attr('action',"{:url('review_all')}");
+    return is_check('批量同意');
+});
+$('.del_all').click(function(){
+    $(this).parents('form').attr('action',"{:url('del_all')}");
+    return is_check('批量删除');
+});
 </script>
 </body>
 </html>

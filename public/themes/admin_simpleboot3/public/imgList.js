@@ -1,7 +1,7 @@
 $(function () {
     // 点击弹出图片列表
-
-    var h2 = $("#mytable tr:nth-child(2)").height();
+ 
+    var h2 = $("tbody tr:nth-child(2)").height();
     $("table tr td").find(".tdImg").click(function () {
 
         $(this).next(".listposi").fadeIn().parent().parent().siblings().find(".listposi").fadeOut();
