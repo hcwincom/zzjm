@@ -49,6 +49,66 @@
             left: 30px;
         }
         /*----------------导航hack--------------------*/
+        
+        /* 页面弹出小窗口 */
+        #pageWin{
+            position: fixed;
+            bottom: 10px;
+            right: 2%;
+            display: none;
+        }
+        .pageCont{
+            position: relative;
+            width: 260px;
+            min-height: 60px;
+            padding: 10px 5px 10px 10px;
+            background: #ffff;
+            border: 1px solid #f5f5f5;
+            box-shadow:-1px -1px 5px #999;
+            z-index: 10;
+            overflow: hidden;
+        }
+        .pageHead{
+            position: absolute;
+            top: 5px;
+            right: 10px;
+        }
+        .pageHead span{
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            line-height: 24px;
+            text-align: center;
+            color: #999;
+            cursor: pointer;
+        }
+        .pageTitle{font-size:16px;font-weight:600;letter-spacing:2px;border-bottom: 1px dashed #333;padding-bottom: 5px;}
+        .pagecontainer{
+            width: 260px;
+            max-height: 500px;
+            padding: 0 15px 0 0;
+            overflow-y: auto;
+            overflow-x: hidden; 
+        }
+        .pageList{border-bottom: 1px dashed #333;padding-top: 5px;}
+        .pageList_first{display:flex;justify-content: space-between;}
+        .pageList_a{text-align:right;}
+        .pageList p{
+            line-height: 22px;
+            font-size: 12px;
+            color: #333;
+            letter-spacing: 1px;
+            margin: 0;
+            white-space:normal;
+            word-wrap:break-word;
+        }
+        .pageList p span{
+            font-weight: 600;
+            line-height: 24px;
+           
+        }
+       
     </style>
 
     <script>
@@ -318,6 +378,20 @@
         </div>
     </div>
 </div>
+<!-- 页面加载出现弹窗 -->
+<div id="pageWin">
+    <div class="pageCont">
+        <div class="pageHead">
+            <span class="glyphicon glyphicon-remove"></span>
+        </div>
+        <div class="pageTitle"><a href="{:url('admin/Msg/index')}" target="_blank">站内消息</a></div>
+        
+        <div class="pagecontainer">
+           
+        </div>
+
+    </div>
+</div>
 
 <script src="__TMPL__/public/assets/js/jquery-1.10.2.min.js"></script>
 <script src="__STATIC__/js/wind.js"></script>
@@ -351,9 +425,6 @@
                 }
             }
         }
-
-
-
 
     });
 
@@ -392,6 +463,60 @@
     });
 
  
+</script>
+<script>
+     var msg_url = "{:url('admin/Public/msg_new')}";
+     setInterval(function(){
+         
+         $.ajax({
+            type: 'POST',
+            url: msg_url,
+            dataType: 'json',
+            data: {},
+            success: function (data) {
+                
+                if (data.code != 1) {
+                    return false;
+                }
+                var list = data.data;
+               
+                 var tchtml = "";
+               $.each(list,function (index,item) {
+                
+                 var timer = timestampToTime(item.time);
+                 var lookHref;
+                var look = "";
+                if(item.link= ""){
+                    lookHref = "";
+                    look = "";
+                }else{
+                    lookHref = item.link;
+                    look = "点击查看";
+                }
+
+                 tchtml += '<div class="pageList"><div class="pageList_first"><p><span>发送人：</span>' + item.aname +'</p><p>'+timer+'</p></div><p>'+ item.dsc +'</p><div class="pageList_a"><a href="'+ lookHref+'">'+look+'</a></div></div>';
+               });
+             
+             $(".pagecontainer").append(tchtml);
+            },
+            error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+                	$('body').append(event.responseText);
+            }
+        });
+        $("#pageWin").stop().slideToggle("fast");
+    }, 10000);
+    $(".pageHead span").click(function () {
+         $("#pageWin").stop().slideToggle("slow");
+    });
+   function timestampToTime(timestamp) {
+        var date = new Date(timestamp * 1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        var Y = date.getFullYear() + '-';
+        var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+        var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+        var h = date.getHours() + ':';
+        var m = date.getMinutes() + ':';
+        return Y + M + D + h + m;
+    }
 </script>
 </body>
 </html>

@@ -154,8 +154,8 @@ class GoodsbaseController extends AdminInfo0Controller
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
-        ];
-        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
+        ]; 
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag.'信息':$data['adsc'];
         $fields=$this->edit;
         
         $content=[];
@@ -360,6 +360,9 @@ class GoodsbaseController extends AdminInfo0Controller
             'rtime'=>$time,
             'rstatus'=>$status, 
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -443,7 +446,7 @@ class GoodsbaseController extends AdminInfo0Controller
         }
          
         //审核成功，记录操作记录,发送审核信息
-        $review_status=$this->review_status;
+      
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,

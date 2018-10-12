@@ -1,12 +1,12 @@
 <?php
  
-namespace app\custom\controller;
+namespace app\order\controller;
 
  
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
   
-class CustomBaseController extends AdminInfo0Controller
+class OrderBaseController extends AdminInfo0Controller
 {
     
     public function _initialize()
@@ -44,12 +44,7 @@ class CustomBaseController extends AdminInfo0Controller
         $admin=$this->admin;
         $data=$this->request->param();
         $where=[];
-        //客户还是供货商
-          if($table=='custom'){
-              $tel_type=1; 
-         }else{
-             $tel_type=2;
-         } 
+       
         
         //店铺,分店只能看到自己的数据，总店可以选择店铺
         if($admin['shop']==1){
@@ -183,10 +178,7 @@ class CustomBaseController extends AdminInfo0Controller
         //先查询得到id再关联得到数据，否则sql查询太慢
         $list=$m
         ->alias('p')
-        ->field('p.id')
-        ->join('cmf_tel tels','p.id=tels.uid and tels.type='.$tel_type,'left')
-        ->where($where) 
-        ->order('p.status asc,p.sort asc,p.time desc')
+        ->field('p.id')   
         ->paginate();
         // 获取分页显示
         $page = $list->appends($data)->render();
@@ -203,17 +195,17 @@ class CustomBaseController extends AdminInfo0Controller
                 ['cmf_user a','a.id=p.aid','left'],
                 ['cmf_user r','r.id=p.rid','left'],
                 ['cmf_shop shop','p.shop=shop.id','left'], 
-                ['cmf_tel tel','p.id=tel.uid and tel.site=p.contacter and tel.type='.$tel_type,'left'], 
+                
             ];
             $field='p.*,a.user_nickname as aname,r.user_nickname as rname,shop.name as sname'.
                 ',tel.name as tel_name,tel.mobile as tel_mobile,tel.qq as tel_qq,tel.wechat as tel_wechat'.
                 ',tel.taobaoid as tel_taobaoid,tel.aliid as tel_aliid';
+            $join=[];
+            
             $list=$m
             ->alias('p')
-            ->field($field)
-            ->join($join)
-            ->where('p.id','in',$ids)
-            ->order('p.status asc,p.sort asc,p.time desc')
+            ->field('p.*') 
+            ->where('p.id','in',$ids) 
             ->select(); 
         }
        

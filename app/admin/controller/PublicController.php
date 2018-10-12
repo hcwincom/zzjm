@@ -134,14 +134,21 @@ class PublicController extends AdminBaseController
         $uid=session('ADMIN_ID');
         $m=db('msg');
         $where=[
-            'uid'=>$uid,
-            'status'=>1,
+            'm.uid'=>$uid,
+            'm.status'=>1,
         ];
-        $list=$m->where($where)->column('id,dsc,link');
+        $list=$m
+        ->alias('m')
+        ->join('cmf_user a','a.id=m.aid','left')
+        ->join('cmf_msg_txt mt','mt.id=m.msg','left')
+        ->where($where)
+        ->column('m.id,a.user_nickname as aname,mt.link,mt.dsc,mt.time');
         if(empty($list)){
-            return null;
+           $this->error('没有未接收消息');
         }else{
-            return json_encode($list);
+            $ids=array_keys($list);
+            $m->where('id','in',$ids)->setField('status',2);
+            $this->success('ok','',$list);
         }
        
     }

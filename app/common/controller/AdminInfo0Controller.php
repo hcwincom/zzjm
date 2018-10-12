@@ -38,7 +38,7 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('html',$this->request->action());
     }
     /**
-     * 信息公共类 
+     *首页
      */
      public function index()
     {
@@ -967,6 +967,7 @@ class AdminInfo0Controller extends AdminBaseController
                 'user_type'=>1,
                 'shop'=>['in',[1,$admin['shop']]],
             ];
+            
             $aids=$m_user->where($where_aid)->column('id,user_nickname');
             //审核人
             $where_rid=[

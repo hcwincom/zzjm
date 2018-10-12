@@ -356,19 +356,64 @@ class AdminGoodsController extends AdminBaseController
                 }
             }
         }
+        //先获取id和分页
         $list=$m
         ->alias('p')
-        ->field('p.*,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
-        ->join('cmf_shop s','s.id=p.shop','left')
-        ->join('cmf_brand b','b.id=p.brand','left') 
-        ->join('cmf_user a','a.id=p.aid','left') 
-        ->join('cmf_user r','r.id=p.rid','left') 
+        ->field('p.id') 
         ->where($where)
         ->order('p.status asc,p.time desc')
         ->paginate();
         // 获取分页显示
         $page = $list->appends($data)->render();
-       
+        $ids=[];
+        foreach($list as $k=>$v){
+            $ids[]=$v['id'];
+        }
+        if(empty($ids)){
+            $list=[];
+        }else{
+            $list=$m
+            ->alias('p')
+            ->join('cmf_shop s','s.id=p.shop','left')
+            ->join('cmf_brand b','b.id=p.brand','left')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where('p.id','in',$ids)
+            ->order('p.status asc,p.time desc')
+            ->column('p.*,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname');
+            //只取商城图片
+            $where=[
+                'pid'=>['in',$ids],
+                'type'=>['eq',1],
+            ];
+            $pics=Db::name('goods_file')->where('pid','in',$ids)->column('id,file,pid');
+            $path='upload/';
+            foreach($pics as $k=>$v){
+                
+                if(is_file($path.$v['file'])){
+                    //直接加判断，防止错误 
+                    if(is_file($path.$v['file'].'1.jpg')){
+                        $v['file1']=$v['file'].'1.jpg';
+                    }else{
+                        $v['file1']=$v['file'];
+                    }
+                    if(is_file($path.$v['file'].'3.jpg')){
+                        $v['file3']=$v['file'].'3.jpg';
+                    }else{
+                        $v['file3']=$v['file'];
+                    }
+                    
+                    $list[$v['pid']]['pics'][]=[
+                        'file1'=>$v['file1'],
+                        'file3'=>$v['file3'],
+                    ];
+                    
+                } 
+                
+            }
+        }
+        
+        
         $this->assign('page',$page);
         $this->assign('list',$list);
        
