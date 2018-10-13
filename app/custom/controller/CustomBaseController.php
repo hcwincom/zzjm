@@ -733,6 +733,17 @@ class CustomBaseController extends AdminInfo0Controller
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+        ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
+
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -1170,6 +1181,11 @@ class CustomBaseController extends AdminInfo0Controller
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
