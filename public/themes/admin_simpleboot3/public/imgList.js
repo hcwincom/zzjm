@@ -14,18 +14,47 @@ $(function () {
     });
 
     // 点击弹出大图
-    var listImgUrl = "{:cmf_get_image_url('')}";
-    $(".imgList li").click(function () {
+
+    $(document).on("click", '.imgList li', function () {
+        var inbigimgUrl = $(this).find("input").val();
+        $(".lbigImg").attr("src", inbigimgUrl);
+        
+        $("<img />").attr("src", inbigimgUrl).load(function () {
+            var imgWidth = this.width,
+                imgHeight = this.height;
+            $("#backBigImg").css({
+                "width": imgWidth,
+                "height": imgHeight,
+                "background-image": "url(" + inbigimgUrl + ")"
+            });
+        });
+
         $("#outdiv").fadeIn();
         $(document.body).toggleClass("html_overflow");
-        var inbigimgUrl = $(this).find("input").val();
-        $("#inbigImg img").attr("src", inbigimgUrl);
     });
 
     $("#innerdiv #imgClose").click(function () {
         $("#outdiv").fadeOut();
         $(document.body).toggleClass("html_overflow");
     });
+
+    // 订单详细分类弹窗
+    $("table tr").find(".clickInfo").on("click", function (e) {
+        var widthG = $(this).find(".goInfo").attr("data-width");
+        console.log(widthG);
+        if (widthG == 0) {
+            $(this).find(".goodsInfo").width(600);
+
+        } else {
+            $(this).find(".goodsInfo").width("auto");
+        }
+        $(this).find(".goodsInfo").toggle().parent().parent().siblings().find(".goodsInfo").hide();
+        $(document).on('click', function () {
+            $('.goodsInfo').hide();
+        })
+        e.stopPropagation();
+    });
+
     
     // 轮播
     var imgListli = $('.imgList>li');

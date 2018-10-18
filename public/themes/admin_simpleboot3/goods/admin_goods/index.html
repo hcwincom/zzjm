@@ -158,7 +158,32 @@
 						<td>{$vo.sname|default=$vo.shop}</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 						<td  > {$vo.code}</td>
-						<td  > {$goods_type[$vo.type]}</td>
+						<td  class="clickInfo"> 
+							<div style="position:relative;" class="goInfo" data-width="0">
+								{$goods_type[$vo.type]}
+							</div>
+							<!-- {$goods_type[$vo.type]} -->
+							<div class="goodsInfo">
+								<table class="table table-hover table-bordered">
+									<thead>
+										<tr>
+											<th class="nameWidth" width="30%">产品名称</th>
+											<th>编号</th>
+											<th>数量</th>
+											<th>单价</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>吾问无为谓的点点滴滴无无无无所多付付付过晕晕拖拖拖付过过</td>
+											<td>5555555</td>
+											<td>444444444</td>
+											<td><span>¥</span>2222222</td>
+										</tr>
+									</tbody>
+								</table>							
+							</div>
+						</td>
 						<td >
 							
 						 <eq name="vo.pic" value="">
@@ -190,7 +215,7 @@
 						</present>
 						
 						</td>
-						<td>{$vo.aname|default=$vo.aid}</td>
+						<td>{$vo.aname|default=$vo.aid}--<a href="{:url('print1')}">print1</a>--<a href="{:url('print2')}">print2</a>--<a href="{:url('print3')}">print3</a></td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">
 						<td>-</td>
@@ -212,6 +237,17 @@
 			</table>
 
 		</form>
+		<!-- 轮播点击放大图片 -->
+		<div id="outdiv">
+			<div id="innerdiv">
+				<div id="imgClose">
+					<span class="glyphicon glyphicon-remove-circle"></span>
+				</div>
+				<div id="backBigImg" style="background-size: contain;"></div>
+				<img class="lbigImg" src="" alt="" style="display: none;">
+			</div>
+		</div>
+
 	 	<div class="pagination">{$page}</div>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>

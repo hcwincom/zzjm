@@ -1,0 +1,117 @@
+<include file="public@header" />
+<style media="print">
+    @page {
+        size: auto;
+        /* auto is the initial value */
+        margin: 0mm;
+        /* this affects the margin in the printer settings */
+    }
+</style>
+<style>
+    body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td,button{padding:0;margin:0;font-size:100%;}
+    body{font:14px "宋体", Arial, Helvetica, sans-serif;color:#404040;background-color:#fff;}
+    .containerTack{margin: 20px 0 0 10px;}
+    .tacking{width: 922px;height: 508px;background: url("{:cmf_get_image_url('upload/bill/2016070402383847.jpg')}") no-repeat;background-size: contain;position: relative;
+            display: flex;display: -webkit-flex;}
+    .tackLeft,.tackRight{position: relative;width: 50%;}
+    .tacking_top,.jaddress{position: absolute;left: 22.5%;text-align: left;}
+    .tacking_top{top:24.5%;display: flex;display: -webkit-flex;justify-content: space-between;width: 75%;}
+    .tacking_top>p{width: 50%;line-height: 1.5;text-indent: 40px;}
+    .jaddress{top:40%;width:70%;line-height: 1.5;}
+    .jucode{position: absolute;top:50%;right: 6%;}
+    .jucode>span{letter-spacing: 8px;}
+    .tack_right,.saddress,.sdate,.remark,.scode{position: absolute;}
+    .tack_right{top:23.5%;left:12%;display: flex;display: -webkit-flex;justify-content: space-between;width: 70%;text-align: left;}
+    .tack_right>p{width: 50%;line-height: 1.5;}
+    .tack_right>p.sphone{padding-left: 16px;font-size: 16px;}
+    .tack_right>p.sname{padding-top: 5px;}
+    .saddress{top:40%;left:10px;width: 78%;text-align: left;}
+    .scode{right: 25%;top:50%;letter-spacing: 9px;}
+    .sdate{bottom:21%;left:10%;word-spacing:30px}
+    .footer{margin-top: 30px;margin-left: 20%;}
+    .remark{bottom: 15%;left: 10%;width: 70%;line-height: 1.5;}
+    .btn {
+        background-image: -webkit-gradient(linear,left top, left bottom, from(whiteSmoke), to(#F1F1F1));
+        background-image: -webkit-linear-gradient(top, whiteSmoke, #F1F1F1);
+        -webkit-border-radius: 2px;
+        -webkit-user-select: none;
+        background-color: whiteSmoke;
+        background-image: linear-gradient(top, whiteSmoke, #F1F1F1);
+        background-image: -o-linear-gradient(top, whiteSmoke, #F1F1F1);
+        border: 1px solid gainsboro;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        color: #666;
+    }
+
+    .btn:hover {
+        background-image: -webkit-gradient(linear,left top,left bottom,from(#F8F8F8),to(#F1F1F1));
+        background-image: -webkit-linear-gradient(top,#F8F8F8,#F1F1F1);
+        -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        background-color: #F8F8F8;
+        background-image: linear-gradient(top,#F8F8F8,#F1F1F1);
+        background-image: -o-linear-gradient(top,#F8F8F8,#F1F1F1);
+        border: 1px solid #C6C6C6;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        color: #333;
+    }
+
+</style>
+<script language="javascript">
+    function preview() {
+        bdhtml = window.document.body.innerHTML;
+        sprnstr = "<!--startprint-->";
+        eprnstr = "<!--endprint-->";
+        prnhtml = bdhtml.substr(bdhtml.indexOf(sprnstr) + 17);
+        prnhtml = prnhtml.substring(0, prnhtml.indexOf(eprnstr));
+        window.document.body.innerHTML = prnhtml;
+        window.print();
+    }
+</script>
+</head>
+<body>
+    <!--startprint-->
+    <div class="containerTack">
+        <div class="tacking">
+            <div class="tackLeft">
+                <div class="tacking_top">
+                    <p class="jname">{$info.sendName}</p>
+                    <p class="jphone">{$info.sendPhone}</p>
+                </div>
+                <div class="jaddress">
+                    <p>{$info.sendAddress}</p>
+                </div>
+                <div class="jucode">
+                    <span>{$info.sendCode}</span>
+                </div>
+            </div>
+            <div class="tackRight">
+                <div class="tack_right">
+                    <p class="sname">{$info.conName}</p>
+                    <p class="sphone"><span>{$info.conPhone}</span><br><span>{$info.conTele}</span></p>
+                </div>
+                <div class="saddress">
+                    <p>{$info.conAddress}</p>
+                </div>
+                <div class="scode">
+                    <span>{$info.conCode}</span>
+                </div>
+                <div class="sdate">
+                    <span>2018 10 25</span>
+                </div>
+                <div class="remark">
+                    <p>{$info.conPost}</p>
+                </div>
+            </div>
+                        
+        </div>
+        <!--endprint-->
+        <div class="footer">
+            <input class="btn" type="submit" class="btn_print" onclick="preview()" value="开始打印">
+            <input type="button" onclick="window.history.go(-1);" class="btn" value="返回上一级">               
+        </div>
+    </div>
+
+
+
+</body>
+</html>
