@@ -1,37 +1,5 @@
 <include file="public@header" />
-<style>
-.order10 {
-	background: red;
-}
-.order9 {
-	background: #999;
-}
-.order8 {
-	background: #2057f4;
-	color: #fff;
-}
-.order7{
-	background: #;
-}
-.order6{
-	background: #ff7733;
-}
-.order5 {
-	background: yellow;
-}
-.order4 {
-	background: green;
-}
-.order3{
-	background: #26e9ab;
-}
-.order2{
-	background: #f21534;
-}
-.order1{
-	background: #ecf824;
-}
-</style>
+  
 </head>
 <body>
 
@@ -62,15 +30,28 @@
 			</select> &nbsp;&nbsp; 
 		</notempty>
 			 创建人: 
-			<select class="form-control" name="aid" id="aid">
+			<select class="form-control" name="aid"  >
 				<option value='0'>全部</option> 
 				 <foreach name="aids" item="vo" k="key">
-				<option class="shop shop{$vo.shop}" value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo.name}
+				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
-		 
-		
+			审核人: 
+			<select class="form-control" name="rid" >
+				<option value='0'>全部</option> 
+				 <foreach name="rids" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<select class="form-control" name="cid" >
+				<option value='0'>客户类型</option> 
+				 <foreach name="cates" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.cid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
 			<select class="form-control" name="company" id="company">
 				<option value='0'>所属公司</option> 
 				 <foreach name="companys" item="vo" k="key">
@@ -94,13 +75,6 @@
 				  </select>	  
 			
 			<br/>
-			<select class="form-control" name="cid" >
-				<option value='0'>客户类型</option> 
-				 <foreach name="custom_cates" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.custom_cate">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp;
 			<select class="form-control" name="type1" id="">
 	        <foreach name="types" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
@@ -149,54 +123,47 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th> 
-						<th>订单类型</th>  
-						<th>订单号</th>
-						 <th>物流号</th>
-						<th>下单人</th>
-						<th>所属公司</th>
-						
-						<th>付款类型</th>
-						<th>客户</th>
-						<th>总金额</th>
-						<th>支付状态</th>  
-					    <th>下单时间</th>
-					  <th>订单状态</th>
+						<th>{$flag}名</th>  
+						<th>客户编码</th>
+						 <th>产品数</th>
+						<th>总订购金额</th>
+						<th>总笔数</th>
+						<th>客户电话</th>
+						<th>主要负责人</th>
+						<th>负责人手机</th>  
+						<th>负责人QQ</th>
+						<th>负责人微信</th>  
+						<th>最近更新时间</th>
+						<th>排序</th>
+						<th>状态</th> 
 					</tr>
 				</thead>
 				<tbody>
 					<foreach name="list" item="vo">
 				 
-					<tr class="order{$vo.sort}">
+					<tr class="status{$vo.status}">
 						<td>
 							<input type="checkbox" class="js-check"
 							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						{$vo.id}-{$vo.sort}
+						{$vo.id}
 						</td>
-						<td > 
-						{$order_types[$vo.order_type]}
-						</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.order_sn}</a></td>
-					 	<td>{$vo.express_no}</td>
-					  	<td>{$aids[$vo['aid']]['name']|default=$vo['aid']}</td>
-					  	<td>{$companys[$vo['company']]['name']|default=$vo['company']}</td>
-					  	<td>{$paytypes[$vo['paytype']]['name']|default=$vo['paytype']}</td>
-					   
-					  	<td>{$vo.custom_name}</td>
-						<td>{$vo.order_amount}</td>
-						<td>{$pay_status[$vo.pay_status]}</td>
-					 
-						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
-					 
-						<td>{$statuss[$vo.status]}
-						 <switch name="vo.sort">
-						 	<case value="10"><a class="btn btn-primary" href="{:url('send',['id'=>$vo.id])}">发货</a></case>
-						 	<case value="5"><a class="btn btn-primary" href="{:url('money',['id'=>$vo.id])}">确认货款</a></case>
-						 	 
-						 </switch>
-						</td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.name}</a></td>
+					  	<td>{$vo.code}</td>
+					  	<td>{$vo.goods_num}</td>
+					  	<td>{$vo.order_money}</td>
+					  	<td>{$vo.order_num}</td>
+					  	<td>{$vo.mobile}</td>
+						<td>{$vo.tel_name|default='--'}</td>
+						<td>{$vo.tel_mobile}</td>
+						<td>{$vo.tel_qq}</td>
+						<td>{$vo.tel_wechat}</td>
+						  
+						<td>{$vo.time|date='Y-m-d H:i',###}</td>
+						<td>{$vo.sort}</td>
+						<td>{$statuss[$vo.status]}</td>
 						 
 					</tr>
 				 
@@ -220,10 +187,8 @@ $('#shop').change(function(){
 		$('.shop').hide();
 		$('.shop'+shop).show();
 	}
-	$('#aid').val(0);
 	$('#company').val(0);
 	$('#paytype').val(0);
-	
    
 });
 $('.ban').click(function(){

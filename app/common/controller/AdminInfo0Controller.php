@@ -795,8 +795,7 @@ class AdminInfo0Controller extends AdminBaseController
             }
         }
           
-        //审核成功，记录操作记录,发送审核信息 
-       
+        //审核成功，记录操作记录,发送审核信息  
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,

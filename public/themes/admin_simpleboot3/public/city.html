@@ -1,0 +1,38 @@
+
+<select class=" city0 {$select_class|default=''}" name="province" id="province">
+	<option value='0'>选择省</option> 
+	 <foreach name="provinces" item="vo" >
+	<option value="{$key}" <if condition="$key eq $province">selected</if>> 
+	 {$vo.name} 
+	</option>
+	</foreach>
+</select>  
+<select class=" city {$select_class|default=''}" name="city" id="city">
+	<option class="city230" value='0'>选择市</option> 
+	 <foreach name="citys" item="vo" >
+	<option class="city20 city21{$vo.fid} city23{$key}" value="{$key}" <if condition="$key eq $city">selected</if>> 
+	 {$vo.name} 
+	</option>
+	</foreach>
+</select> &nbsp;&nbsp; 
+ 
+<script>
+ 
+$(function(){ 
+	 
+	var province="{$province|default=0}";
+	var city="{$city|default=0}";
+	city(province,$('#city'),city);
+	$('#province').change(function(){
+		province=$(this).val(); 
+		city(province,$(this).parent(),0);
+	});
+	function city(province,$dir,city){
+		$dir.find('.city .city20').hide();
+		$dir.find('.city .city21'+province).show();
+		$dir.find('.city .city23'+city).prop('selected','selected');
+	}
+});
+
+
+</script>

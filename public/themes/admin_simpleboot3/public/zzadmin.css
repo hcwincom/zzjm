@@ -27,6 +27,11 @@
 	display:inline-block;
 	width: 150px;  
 }
+
+.short-auto{
+	display:inline-block;
+	width: auto;  
+}
 .fleft input{
 	display:inline-block;
 }

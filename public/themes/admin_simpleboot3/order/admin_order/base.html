@@ -1,259 +1,173 @@
  		<notempty name="info.id">
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">id</label>
+				<label  class="col-sm-2 control-label">订单id</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
 				<present name="change">
-					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编号{$info.code}编辑</a>
+					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
 				<else/>
-					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">编号{$info.code}编辑记录</a>
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">编辑记录</a>
 				</present>
 				
 				</div>
 			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">订单编号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info.order_sn}" readonly/> 
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">订单类型</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$order_types[$info.order_type]}" readonly/> 
+				</div>
+			</div>
 		</notempty>
-	 
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">名称</label>
+		    
+	   		 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">订单来源</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name" value="{$info.name}" /> 
-				<present name="change.name">
-					<input type="text" class="form-control red"  value="{$change.name}" />
-				</present>
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label  class="col-sm-2 control-label">所属公司</label>
-				<div class="col-md-6 col-sm-10">
-					<select  class="form-control"  name="company" id=""  >
-					<option value="0">请选择</option>
+				<select  class="form-control "  name="company"  required>
+					<option value="0">订单来源</option>
 					<foreach name="companys" item="vo">
-					<option value="{$key}" <if condition="$key eq $info.company" >selected</if>>{$vo}</option>
+					<option value="{$key}" <if condition="$key eq $info.company" >selected</if>>{$vo.name}</option>
 					</foreach>
-					</select>
-					
-				<present name="change.company">
-					<select  class="form-control red"  id=""  >
-					<option value="0">请选择</option>
+					</select>  
+				</div>
+			</div>
+	 	<empty name="info.id">
+			 <div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">客户筛选</label>
+				<div class="col-md-6 col-sm-10">
+			 		<select  class="form-control  short-auto" id="company"   >
+						<option value="0">客户来源</option>
 					<foreach name="companys" item="vo">
-					<option value="{$key}" <if condition="$key eq $change.company" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo.name}</option>
+					</foreach>
+					</select>  
+					 
+					<select  class="form-control short-auto" id="custom_cate"  > 
+						<option value="0">客户分类</option>
+					<foreach name="custom_cates" item="vo">
+						<option value="{$key}" <if condition="$key eq $custom.cid"></if>>{$vo}</option>
 					</foreach>
 					</select>
-				</present>
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户类型</label>
-				<div class="col-md-6 col-sm-10">
-					<select  class="form-control" name="cid" id=""  >
-					<option value="0">请选择</option>
-					<foreach name="cates" item="vo">
-					<option value="{$key}" <if condition="$key eq $info.cid" >selected</if>>{$vo}</option>
-					</foreach>
+					<select  class="form-control short-auto" id="province"  > 
+						<option value="0">客户所在省</option> 
 					</select>
-					
-				<present name="change.cid">
-					<select  class="form-control red"  id=""  >
-					<option value="0">请选择</option>
-					<foreach name="cates" item="vo">
-					<option value="{$key}" <if condition="$key eq $change.cid" >selected</if>>{$vo}</option>
-					</foreach>
+					<select  class="form-control short-auto" id="city"  > 
+						<option value="0">客户所在市</option> 
+					</select> 
+					<p class="notice">客户所在省为必选项</p>
+				</div>
+			</div>
+		</empty>
+			 <div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">客户</label>
+				<div class="col-md-6 col-sm-10"> 
+					 
+					<select  class="form-control " name="uid" id="custom"   >
+						<option value="{$custom.id}" >{$custom.name|default="请选择客户"}</option>
 					</select>
-				</present>
+					<a href="{:url('custom/AdminCustom/edit',['id'=>$custom.id])}" target="{$zztarget['other']}" id="custom_link">客户详情</a>
 				</div>
 			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户评级</label>
+			 <div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">收货人</label>
 				<div class="col-md-6 col-sm-10">
-				  <input type="number" class="form-control" name="level" value="{$info.level|default=0}" required/>
-				<present name="change.number">
-					<input type="text" class="form-control red"  value="{$change.number}" />
-				</present>
+				<empty name="info.id">
+					<select  class="form-control " name="accept" id="accept" required >  
+					</select>
+					 
+				<else/>
+					<input type="text" class="form-control " value="{$info.accept_name},{$info.telphone},{$info.mobile},{$info.addressinfo}{$info.address},{$info.postcode}"/>
+				</empty>
 				</div>
 			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">公司主页</label>
+			 <div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">该客户发货注意事项</label>
 				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="url" value="{$info.url}" />
-				<present name="change.url">
-					<input type="text" class="form-control red"  value="{$change.url}" />
-				</present>
+				 
+					<input type="text" class="form-control " value="{$custom.announcement}" id="announcement"/>
+				 
 				</div>
 			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">公司email</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="email" value="{$info.email}" />
-				<present name="change.email">
-					<input type="text" class="form-control red"  value="{$change.email}" />
-				</present>
-				</div>
-			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">公司网店</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="shopurl" value="{$info.shopurl}" />
-				<present name="change.shopurl">
-					<input type="text" class="form-control red"  value="{$change.shopurl}" />
-				</present>
-				</div>
-			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">微信公众号</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="wechat" value="{$info.wechat}" />
-				<present name="change.wechat">
-					<input type="text" class="form-control red"  value="{$change.wechat}" />
-				</present>
-				</div>
-			</div> 
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">公司qq</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="qq" value="{$info.qq}" />
-				<present name="change.qq">
-					<input type="text" class="form-control red"  value="{$change.qq}" />
-				</present>
-				</div>
-			</div> 
-			<div class="fom-group fleft">
-				<label  class="col-sm-2 control-label">公司电话</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="mobile" value="{$info.mobile}"  />
-				<present name="change.mobile">
-					<input type="text" class="form-control red"  value="{$change.mobile}" />
-				</present>
-				</div>
-			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">公司传真</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="fax" value="{$info.fax}" />
-				<present name="change.fax">
-					<input type="text" class="form-control red"  value="{$change.fax}" />
+	  		<div class="form-group fleft-all"  >
+				<label  class="col-sm-2 control-label">用户留言</label>
+				<div class="col-md-6 col-sm-10" > 
+				  <input type="text" class="form-control" name="udsc" value="{$info.udsc}" />
+				<present name="change.udsc">
+					<input type="text" class="form-control red"  value="{$change.udsc}" />
 				</present>
 				</div>
 			</div>
 			<div style="clear:both"></div>
-			<div class="form-group fleft"  style="width:100%">
-				<label  class="col-sm-2 control-label">客户地址</label>
-				<div class="col-md-6 col-sm-10" >
-				  省：<select class="form-control" name="province" id="province" style="width:100px;display:inline-block;"  >
-				  	<option value="0">请选择</option>
-				  </select>
-				  
-				<present name="change.province">
-					<span class="red">{$change['citys'][$change['province']]|default='不存在'}</span>
-				</present>
-				  市：<select  class="form-control" name="city" id="city"  style="width:100px;display:inline-block;"  >
-				  	<option value="0">请选择</option>
-				  </select>
-				 <present name="change.city">
-					<span class="red">{$change['citys'][$change['city']]|default='不存在'}</span>
-				</present>
-				 县：  <select class="form-control" name="area" id="area" style="width:100px;display:inline-block;">
-				   	<option value="0">请选择</option>
-				   </select>
-				 <present name="change.area">
-					<span class="red">{$change['citys'][$change['area']]|default='不存在'}</span>
-				</present>
-				</div>
-			</div>
-			<div class="form-group fleft" style="width:100%">
-				<label  class="col-sm-2 control-label">街道地址</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="street" value="{$info.street}" />
-				<present name="change.street">
-					<input type="text" class="form-control red"  value="{$change.street}" />
-				</present>
-				</div>
-			</div>
-		 
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户编号</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" id="city_code" name="city_code" value="{$info.city_code}" style="width:70px;" readonly/>
-				  -
-				   <input type="number" class="form-control" id="code_num" name="code_num" value="{$info.code_num|default=1}" style="width:70px;" required/>
-				<present name="change.code">
-					<input type="text" class="form-control red"  value="{$change.code}" />
-				</present>
-				</div>
-			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户邮编</label>
-				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" id="postcode" name="postcode" value="{$info.postcode}" />
-				<present name="change.postcode">
-					<input type="text" class="form-control red"  value="{$change.postcode}" />
-				</present>
-				</div>
-			</div> 
+			 
+		  
 			
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">其他</label>
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">添加产品</label>
 				<div class="col-md-6 col-sm-10">
-				  <input type="text" class="form-control" name="other" value="{$info.other}" />
-				<present name="change.other">
-					<input type="text" class="form-control red"  value="{$change.other}" />
-				</present>
+				  
+				 
 				</div>
 			</div>
 			
 			<div style="clear:both"></div>
-			<div class="form-group fleft"  style="width:100%">
-				<label  class="col-sm-2 control-label">发货注意事项</label>
-				<div class="col-md-6 col-sm-10" >
-				  
-				  <input type="text" class="form-control" name="announcement" value="{$info.announcement}" />
-				<present name="change.announcement">
-					<input type="text" class="form-control red"  value="{$change.announcement}" />
-				</present>
-				</div>
-			</div>
+			
 			<div style="clear:both"></div>
+			
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户付款类型</label>
+				<label  class="col-sm-2 control-label">物流方式</label>
 				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="paytype" id="" required>
-				   		<option value="0">请选择</option>
-					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				<present name="change.paytype">
-					<select  class="form-control red"  >
-				   		<option value="0">请选择</option>
-					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.paytype" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</present>
-				</div>
-			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">常用物流</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="freight" id="" required>
+				   <select  class="form-control" name="freight" id="freight" required>
 				    	<option value="0">请选择</option>
 					<foreach name="freights" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.freight" >selected</if>>{$vo}</option>
+						<option class="store{$vo.store}" value="{$key}" <if condition="$key eq $info.freight" >selected</if>>{$vo.name}</option>
 					</foreach>
 					</select>
 				<present name="change.freight">
 					<select  class="form-control red"  >
 				   		<option value="0">请选择</option>
 					<foreach name="freights" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.freight" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $change.freight" >selected</if>>{$vo.name}</option>
 					</foreach>
 					</select>
 				</present>  
 				 </div>
 			</div>
 			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">客户付款方式</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control" name="paytype" id="paytype" required>
+				   		<option value="0">请选择</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo.name}</option>
+					</foreach>
+					</select>
+				<present name="change.paytype">
+					<select  class="form-control red"  > 
+						<option value="{$key}" >{$paytypes[$change['paytype']]|default=$change['paytype']}</option> 
+					</select>
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">用户付款账号</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control" id="">
+				    <option value="0">请选择</option>
+					<foreach name="accounts" item="vo">
+					<option value="{$key}" <if condition="$key eq $pay.account" >selected</if>>{$banks[$vo.bank1]|default=''}-{$vo.name1}-{$vo.num1}</option>
+					</foreach>
+					</select> 
+				</div>
+			</div>
+			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">开票类型</label>
 				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="invoice_type" id="">
+				   <select  class="form-control" name="invoice_type" id="invoice_type">
 					<foreach name="invoice_types" item="vo">
 					<option value="{$key}" <if condition="$key eq $info.invoice_type" >selected</if>>{$vo}</option>
 					</foreach>
@@ -268,368 +182,33 @@
 				</present>   
 				 </div>
 			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">税点</label>
+			 <div class="form-group fleft-all" id="invoice_info">
+				<label class="col-sm-2 control-label">发票信息</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="tax_point" value="{$info.tax_point}" />
-				 <present name="change.tax_point">
-					 <input type="text" class="form-control red" value="{$change.tax_point}" />
-				</present>  
+					<input type="hidden"  name="invoice_id" value="{$invoice.id}"/>
+					发票抬头:<input type="text" class="form-control" name="invoice-title" value="{$invoice.title}"/>
+					客户税号:<input type="text" class="form-control short-auto" name="invoice-ucode" value="{$invoice.ucode}"/>
+					税点:<input type="text" class="form-control short" name="invoice-point" value="{$invoice.point}"/>%
+					开票金额:<input type="text" class="form-control short" name="invoice-invoice_money" value="{$invoice.invoice_money}"/>
+					 <br/>
+					开票说明:<input type="text" class="form-control" name="invoice-dsc" value="{$invoice.dsc}"/>
+					  
 				</div>
 			</div>
 			<div style="clear:both"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户常用账号1</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank1[1]" id="">
-				    <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-					<option value="{$key}" <if condition="$key eq $account1.bank1" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				 <present name="change.account1.bank1">
-					<select  class="form-control red"  >
-				   	  <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.account1.bank1" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</present>  
-				</div>
-			</div>
-			 
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name1[1]" value="{$account1.name1}" />
-				 <present name="change.account1.name1">
-					<input type="text" class="form-control red"  value="{$change.account1.name1}" />
-				</present>  	 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num1[1]" value="{$account1.num1}" />
-				 <present name="change.account1.num1">
-					<input type="text" class="form-control red"  value="{$change.account1.num1}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location1[1]" value="{$account1.location1}" />
-				 <present name="change.account1.location1">
-					<input type="text" class="form-control red"  value="{$change.account1.location1}" />
-				</present> 
-					<label class="radio-inline">
-				 		<input type="radio" value="1" name="payer" checked/>
-				 		默认付款账号
-				 		<present name="change.payer">
-						 <eq name="change.payer" value="1"><span class="red">新选中</span></eq> 
-						</present> 
-				 	</label>
-				 
-				</div>
-			</div>
-			<div style="clear:both"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">对应收款账号1</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank2[1]" id="">
-				    	<option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $account1.bank2" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				 <present name="change.account1.bank2">
-					<select  class="form-control red"  >
-				   	  <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.account1.bank2" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</present>  
-				</div>
-			</div>
-			 
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name2[1]" value="{$account1.name2}" />
-				<present name="change.account1.name2">
-					<input type="text" class="form-control red"  value="{$change.account1.name2}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num2[1]" value="{$account1.num2}" />
-				 <present name="change.account1.num2">
-					<input type="text" class="form-control red"  value="{$change.account1.num2}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location2[1]" value="{$account1.location2}" />
-				 <present name="change.account1.location2">
-					<input type="text" class="form-control red"  value="{$change.account1.location2}" />
-				</present> 	
-				</div>
-			</div>
-			<div style="clear:both;"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户常用账号2</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank1[2]" id="">
-				    <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-					<option value="{$key}" <if condition="$key eq $account2.bank1" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				 <present name="change.account2.bank1">
-					<select  class="form-control red"  >
-				   	  <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.account2.bank1" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</present>  
-				</div>
-			</div>
-			 
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name1[2]" value="{$account2.name1}" />
-				 <present name="change.account2.name1">
-					<input type="text" class="form-control red"  value="{$change.account2.name1}" />
-				</present>  	 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num1[2]" value="{$account2.num1}" />
-				 <present name="change.account2.num1">
-					<input type="text" class="form-control red"  value="{$change.account2.num1}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location1[2]" value="{$account2.location1}" />
-				 <present name="change.account2.location1">
-					<input type="text" class="form-control red"  value="{$change.account2.location1}" />
-				</present> 
-					<label class="radio-inline">
-				 		<input type="radio" value="2" name="payer" <eq name="info.payer" value="2">checked</eq> />
-				 		默认付款账号
-				 		<present name="change.payer">
-						 <eq name="change.payer" value="2"><span class="red">新选中</span></eq> 
-						</present> 
-				 	</label>
-				 
-				</div>
-			</div>
-			<div style="clear:both"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">对应收款账号2</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank2[2]" id="">
-				    	<option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $account2.bank2" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				 <present name="change.account2.bank2">
-					<select  class="form-control red"  >
-				   	  <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.account2.bank2" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</present>  
-				</div>
-			</div>
-			 
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name2[2]" value="{$account2.name2}" />
-				<present name="change.account2.name2">
-					<input type="text" class="form-control red"  value="{$change.account2.name2}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num2[2]" value="{$account2.num2}" />
-				 <present name="change.account2.num2">
-					<input type="text" class="form-control red"  value="{$change.account2.num2}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location2[2]" value="{$account2.location2}" />
-				 <present name="change.account2.location2">
-					<input type="text" class="form-control red"  value="{$change.account2.location2}" />
-				</present> 	
-				</div>
-			</div>
-			<div style="clear:both;"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户常用账号3</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank1[3]" id="">
-				    <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-					<option value="{$key}" <if condition="$key eq $account3.bank1" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				 <present name="change.account3.bank1">
-					<select  class="form-control red"  >
-				   	  <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.account3.bank1" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</present>  
-				</div>
-			</div>
-			 
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name1[3]" value="{$account3.name1}" />
-				 <present name="change.account3.name1">
-					<input type="text" class="form-control red"  value="{$change.account3.name1}" />
-				</present>  	 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num1[3]" value="{$account3.num1}" />
-				 <present name="change.account3.num1">
-					<input type="text" class="form-control red"  value="{$change.account3.num1}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location1[3]" value="{$account3.location1}" />
-				 <present name="change.account3.location1">
-					<input type="text" class="form-control red"  value="{$change.account3.location1}" />
-				</present> 
-					<label class="radio-inline">
-				 		<input type="radio" value="3" name="payer" <eq name="info.payer" value="3">checked</eq>/>
-				 		默认付款账号
-				 		
-				 		<present name="change.payer">
-						 <eq name="change.payer" value="3"><span class="red">新选中</span></eq> 
-						</present> 
-				 	</label>
-				
-				</div>
-			</div>
-			<div style="clear:both"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">对应收款账号3</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank2[3]" id="">
-				    	<option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $account3.bank2" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				 <present name="change.account3.bank2">
-					<select  class="form-control red"  >
-				   	  <option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.account3.bank2" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				</present>  
-				</div>
-			</div>
-			 
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账户名</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name2[3]" value="{$account3.name2}" />
-				<present name="change.account3.name2">
-					<input type="text" class="form-control red"  value="{$change.account3.name2}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">账号</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num2[3]" value="{$account3.num2}" />
-				 <present name="change.account3.num2">
-					<input type="text" class="form-control red"  value="{$change.account3.num2}" />
-				</present> 
-				</div>
-			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">开户行</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location2[3]" value="{$account3.location2}" />
-				 <present name="change.account3.location2">
-					<input type="text" class="form-control red"  value="{$change.account3.location2}" />
-				</present> 	
-				</div>
-			</div>
+			
+		 
 			 
 			<div style="clear:both"></div>
 			 <div class="form-group fleft" style="width:100%">
-				<label class="col-sm-2 control-label">简介备注</label>
+				<label class="col-sm-2 control-label">管理员备注</label>
 				<div class="col-md-6 col-sm-10">
-					 <input type="text" class="form-control" name="dsc" value="{$info.dsc}" /> 
+					 <input type="text" class="form-control" name="dsc" value="{$info.adsc}" /> 
 				</div>
 			</div>
-			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">排序</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="number" class="form-control" name="sort" value="{$info.sort|default=1000}" required/>
-				</div>
-			</div>
-		<div class="form-group " >
-			<label class="col-sm-2 control-label">备注</label>
-			<div class="col-md-6 col-sm-10">
-				<input type="text" class="form-control" name="dsc" value="{$info.dsc}"  />
-				<present name='change.dsc'>
-					<input type="text" class="red form-control"  name="dsc" value="{$change.dsc}"  />
-				</present>
-			</div>
-		</div>
+			 
 		<div style="clear:both"></div>
-		<notempty name="info.id">
-			<div class="form-group ">
-				<label for="" class="col-sm-2 control-label">创建人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.aname|default=$info['aid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
-		<notempty name="info.rid">
-			<div class="form-group ">
-				<label for="" class="col-sm-2 control-label">创建审核人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.rname|default=$info['rid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
+		 
 		<div style="clear:both"></div>
 		<notempty name="info1.aid">
 			<div class="form-group ">
@@ -669,68 +248,5 @@
 		 <div style="clear:both"></div>
 		 
 <script>
-	 var id="{$info.id|default=0}";
-	 var code_add="{:url('custom/customajax/code_add')}";
-	 var code_check="{:url('custom/customajax/code_check')}";
-	city_js2($('#province'),"{$info.province|default=0}",$('#city'),"{$info.city|default=0}",$('#area'),"{$info.area|default=0}");
-	//城市选择js初始化
-	function city_js2($province,province,$city,city,$area=null,area=0){
-		get_citys($province,1,province);
-		if(province>0){
-			get_citys($city,province,city);
-		}
-		if(city>0){
-			get_citys($area,city,area); 
-		}
-		$province.change(function(){
-			province=$(this).val();
-			get_citys($city,province,0);
-			get_citys($area,0,0); 
-			$('#postcode').val('');
-		});
-		$city.change(function(){ 
-			city=$(this).val();
-			get_citys($area,city,0);
-		 
-			if(city==0){
-				$('#city_code').val('');
-				$('#postcode').val('');
-				return false;
-			}
-			$.post(code_add,{'id':id,'city':city,'type':1},function(data){
-				$('#city_code').val(data.data.city_code); 
-				$('#code_num').val(data.data.code_num);
-				$('#postcode').val(data.data.postcode); 
-			},'json');
-		});
-		$area.change(function(){ 
-			area=$(this).val(); 
-			//获取邮编 
-			if(area==0){
-				$('#postcode').val('');
-				return false;
-			}
-			$.post(city_one_url,{'id':area},function(data){  
-				$('#postcode').val(data.data.postcode); 
-			},'json');
-		});
-	}
-	 
-	
-	$('#code_num').change(function(){
-		var code_num=$(this).val();
-		var city=$('#city').val();
-		if(city==0){
-			$('#city_code').val('');
-			$('#code_num').val(1);
-			return false;
-		}
-		$.post(code_check,{'id':id,'city':city,'type':1,'code_num':code_num},function(data){
-			console.log(data);
-			if(data.code!=1){
-				alert(data.msg);
-				$('#code_num').focus();
-			}
-		},'json');
-	});
+ 
 </script>

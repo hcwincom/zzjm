@@ -178,7 +178,8 @@ class OrderBaseController extends AdminInfo0Controller
         //先查询得到id再关联得到数据，否则sql查询太慢
         $list=$m
         ->alias('p')
-        ->field('p.id')   
+        ->field('p.id')  
+        ->order('p.sort desc,p.id asc')
         ->paginate();
         // 获取分页显示
         $page = $list->appends($data)->render();
@@ -192,21 +193,19 @@ class OrderBaseController extends AdminInfo0Controller
         }else{
             //关联表
             $join=[
-                ['cmf_user a','a.id=p.aid','left'],
-                ['cmf_user r','r.id=p.rid','left'],
-                ['cmf_shop shop','p.shop=shop.id','left'], 
-                
+                ['cmf_user a','a.id=p.aid','left'], 
+                ['cmf_shop shop','p.shop=shop.id','left'],  
+                ['cmf_custom custom','p.uid=custom.id','left'],
+                ['cmf_company company','p.uid=company.id','left'],
             ];
-            $field='p.*,a.user_nickname as aname,r.user_nickname as rname,shop.name as sname'.
-                ',tel.name as tel_name,tel.mobile as tel_mobile,tel.qq as tel_qq,tel.wechat as tel_wechat'.
-                ',tel.taobaoid as tel_taobaoid,tel.aliid as tel_aliid';
-            $join=[];
-            
+            $field='p.*,shop.name as sname,a.user_nickname as aname,custom.name as custom_name,company.name as company_name';
+          
             $list=$m
             ->alias('p')
-            ->field('p.*') 
+            ->join($join) 
             ->where('p.id','in',$ids) 
-            ->select(); 
+            ->order('p.sort desc,p.id asc')
+            ->column($field); 
         }
        
         $this->assign('page',$page);
@@ -367,7 +366,7 @@ class OrderBaseController extends AdminInfo0Controller
      */
     public function edit()
     {
-        $id=$this->request->param('id',0,'intval');
+       
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
         $info=$m
@@ -852,9 +851,7 @@ class OrderBaseController extends AdminInfo0Controller
         parent::cates($type);
         $table=$this->table;
         $admin=$this->admin;
-        //分类
-        $cates=Db::name($table.'_cate')->where('status',2)->order('sort asc')->column('id,name');
-        //所属公司
+          //所属公司
         $where=[
             'status'=>2, 
         ];
@@ -890,8 +887,7 @@ class OrderBaseController extends AdminInfo0Controller
         
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes);
-        
-        $this->assign('cates',$cates);
+       
     }
     //联系人
     public function tel_edit(){

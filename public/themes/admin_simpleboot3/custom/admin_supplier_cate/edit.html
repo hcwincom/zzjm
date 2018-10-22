@@ -5,10 +5,16 @@
 		<ul class="nav nav-tabs"> 
 			<include file="public@nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
-		 
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
-			  <include file="order@admin_order:base" />
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">{$flag}id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
+				</div>
+			</div>
+		 	<include file="custom@admin_supplier_cate:base"/>
 			<div class="form-group">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
@@ -25,8 +31,14 @@
 					<button type="submit" class="review btn btn-primary js-ajax-submit"  >审核状态</button> 
 					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
 					 
+					<eq name="info.status" value="4">
+					 	<button type="submit" class="cancel_ban btn btn-primary js-ajax-submit">恢复</button> 
+					</eq>
+					<eq name="info.status" value="2">
+					 	  <button type="submit" class="ban btn btn-primary  js-ajax-submit" >禁用</button> 
+					</eq>
 					
-					 <p class="notice">不同仓库发货的必须拆分订单。 已付款和已发货的订单不能再修改，只能拆分订单发货</p>
+					 <p> </p>
 				</div>
 				
 			</div>

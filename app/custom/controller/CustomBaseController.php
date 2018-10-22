@@ -26,7 +26,7 @@ class CustomBaseController extends AdminInfo0Controller
             'p.email'=>'客户邮箱',
             'p.mobile'=>'客户电话', 
             'tels.name'=>'联系人姓名',
-            'tels.mobile|tels.mobile1|tels.mobile2|tels.phone|tels.phone1'=>'联系人手机',
+            'tels.mobile|tels.mobile1|tels.phone'=>'联系人手机',
             'tels.qq|p.qq'=>'联系人qq',
             'tels.wechat|p.wechat'=>'微信',
             'tels.taobaoid|tels.aliid'=>'淘宝阿里id'
@@ -733,17 +733,11 @@ class CustomBaseController extends AdminInfo0Controller
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
-        $update=[
-            'rid'=>$admin['id'],
-            'rtime'=>$time,
-            'rstatus'=>$status,
-        ];
         $review_status=$this->review_status;
         $update['rdsc']=$this->request->param('rdsc','');
         if(empty($update['rdsc'])){
             $update['rdsc']=$review_status[$status];
         }
-
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -836,8 +830,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
         }
         
-        //审核成功，记录操作记录,发送审核信息
-        $review_status=$this->review_status;
+        //审核成功，记录操作记录,发送审核信息 
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -996,7 +989,7 @@ class CustomBaseController extends AdminInfo0Controller
             'type'=>$tel_type,
         ];
         $tels=Db::name('tel')->where($where)->column('*','site');
-        $fields=['name','position','sex','mobile','mobile1','mobile2','phone','phone1',
+        $fields=['name','position','sex','mobile','mobile1','phone',
             'province','city','area','street','postcode','fax','other','qq','dsc',
             'wechat','wechatphone','wechatname','email','taobaoid','aliid','sort','status',
         ];
@@ -1182,10 +1175,8 @@ class CustomBaseController extends AdminInfo0Controller
             'rstatus'=>$status,
         ];
         $review_status=$this->review_status;
-        $update['rdsc']=$this->request->param('rdsc','');
-        if(empty($update['rdsc'])){
-            $update['rdsc']=$review_status[$status];
-        }
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -1256,7 +1247,7 @@ class CustomBaseController extends AdminInfo0Controller
         }
         
         //审核成功，记录操作记录,发送审核信息
-        $review_status=$this->review_status;
+      
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -1269,7 +1260,7 @@ class CustomBaseController extends AdminInfo0Controller
             'shop'=>$admin['shop'],
         ];
         
-        zz_action($data_action);
+        zz_action($data_action,['aid'=>$info['aid']]);
         
         $m->commit();
         $this->success('审核成功');

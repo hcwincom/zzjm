@@ -54,10 +54,11 @@ class OldController extends AdminBaseController
             '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
             '所属公司+付款银行+付款类型'=>url('sys'),
             '(客户/供货商)联系人+对应付款账号+物流公司对应联系人和账号'=>url('tel'),
-            '客户(同步客户分类和客户主体，关联联系人和付款账号)'=>url('custom'), 
-            '供货商'=>url('supplier'),
+            '客户(同步分类和主体，关联联系人和付款账号)'=>url('custom'), 
+            '供货商(同步分类和主体，关联联系人和付款账号)'=>url('supplier'),   
+            '订单'=>url('order'), 
+            '发货记录'=>url('freight_doc'),
            
-            
         ];
         $this->assign('list',$list);
         return $this->fetch();
@@ -279,6 +280,7 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_new->execute('truncate table cmf_company');
         $row_mew=$m_new->insertAll($data); 
+        
         $m_new->where($this->where_corrects)->update($this->corrects);
         
         //转账银行
@@ -314,12 +316,12 @@ class OldController extends AdminBaseController
         
         //开启事务
         $m_tel->startTrans();
-        
-        //联系人
+        //mobile2,phone1无用
+        //联系人,只取姓名不为空的数据
         $sql='select id,user_id as uid,name,position,other,'.
-            'sex,mobile,mobile1,mobile2,phone,phone1,province,city,area,street,postcode,fax,qq,'.
+            'sex,mobile,mobile1,phone,province,city,area,street,postcode,fax,qq,'.
             'wechat,wechatphone,wechatname,email,taobaoid,aliid,ctype '.
-            ' from sp_new_contacts '; 
+            ' from sp_new_contacts where name is not null and name!=""'; 
         $data=$m_old->query($sql); 
        
         //先截取旧数据
@@ -343,10 +345,7 @@ class OldController extends AdminBaseController
         $data_freight=[];  
         foreach($data as $v){
             $tmp=[
-                'name'=>$v['name'],
-                'province'=>intval($v['province_id']),
-                'city'=>intval($v['city_id']),
-                'area'=>intval($v['area_id']),
+                'name'=>$v['name'], 
                 'code'=>$v['code'],
                 'paytype'=>intval($v['suppaytype_id']),
                 'dg'=>0,
@@ -462,8 +461,10 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_new->execute('truncate table cmf_custom_cate');
         $row_mew=$m_new->insertAll($data);
-        $m_new->where($this->where_corrects)->update($this->corrects);
-        
+        $correct=$this->corrects;
+        unset($correct['atime']);
+        $m_new->where($this->where_corrects)->update($correct);
+         
         //获取主体数据
         $sql='select * from sp_user ';
         $data=$m_old->query($sql);
@@ -500,9 +501,8 @@ class OldController extends AdminBaseController
                 'announcement'=>$v['announcement'],
                 'invoice_type'=>intval($v['invoice_type']),
                 'tax_point'=>$v['tax_point'],
-                'freight'=>intval($v['freight']),
-                'status'=>intval($v['state']),
-                
+                'freight'=>intval($v['freight']), 
+                'atime'=>$v['addtime'],
             ];
            
             //客户编号
@@ -611,13 +611,378 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_new=Db::name('custom');
         $m_new->execute('truncate table cmf_custom');  
-        $row_mew=$m_new->insertAll($data_user); 
-        $m_new->where($this->where_corrects)->update($this->corrects);
+        $m_new->insertAll($data_user);
+        $m_new->where($this->where_corrects)->update($correct);
+        $m_new->commit();
+        $this->success('已同步数据数'.$row_mew);
+        exit;
+    }
+    //供货商
+    public function supplier(){
+        set_time_limit(300);
+        $m_old=Db::connect($this->db_old);
+        
+        //分类
+        $sql='select id,supcate_name as name,sort,addtime as atime,note as dsc'.
+            ' from sp_supcate ';
+        $data=$m_old->query($sql);
+        
+        $m_new=Db::name('supplier_cate');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_supplier_cate');
+        $row_mew=$m_new->insertAll($data);
+        $correct=$this->corrects;
+        unset($correct['atime']);
+        $m_new->where($this->where_corrects)->update($correct);
+       
+        //获取主体数据
+        $sql='select * from sp_supplier ';
+        $data=$m_old->query($sql);
+        $m_tel=Db::name('tel');
+        $m_account=Db::name('account');
+        $data_user=[];
+        
+        foreach($data as $k=>$v){
+            if(empty($v['name'])){
+                continue;
+            }
+            //组装数据
+            $tmp=[
+                'id'=>$v['id'],
+                'name'=>$v['name'],
+                'company'=>intval($v['gysly']),
+                'cid'=>intval($v['supcate_id']), 
+                'code_num'=>intval($v['nummm']),
+                'code'=>$v['supcode'],
+                'paytype'=>intval($v['suppaytype_id']),
+                'email'=>$v['email'],
+                'mobile'=>$v['phone'],
+                'level'=>intval($v['level']),
+                'url'=>$v['url'],
+                'shopurl'=>$v['shopurl'],
+                'wechat'=>$v['wechat'],
+                'qq'=>$v['qq'],
+                'fax'=>$v['fax'],
+                'province'=>intval($v['province_id']),
+                'city'=>intval($v['city_id']),
+                'area'=>intval($v['area_id']),
+                'street'=>$v['street'],
+                'other'=>$v['other'],
+                'announcement'=>$v['announcement'],
+                'invoice_type'=>intval($v['invoice_type']),
+                'tax_point'=>$v['tax_point'],  
+                'dsc'=>$v['remark'].'退货地址'.$v['backdz'], 
+                'atime'=>$v['addtime'],
+            ];
+            
+            //客户编号
+            
+            $i=1;
+            $receiver=1;
+            //联系人信息更新
+            if(!empty($v['contact_person'])){
+                $tel=[
+                    'id'=>$v['contact_person'],
+                    'site'=>$i++,
+                    'uid'=>$v['id'],
+                    'type'=>2,
+                ];
+                $m_tel->update($tel);
+            }
+            if(!empty($v['contact_person1'])){
+                $tel=[
+                    'id'=>$v['contact_person1'],
+                    'site'=>$i++,
+                    'uid'=>$v['id'],
+                    'type'=>2,
+                ];
+                $m_tel->update($tel);
+            }
+            if(!empty($v['contact_person2'])){
+                $tel=[
+                    'id'=>$v['contact_person2'],
+                    'site'=>$i++,
+                    'uid'=>$v['id'],
+                    'type'=>2,
+                ];
+                $m_tel->update($tel);
+            }
+            if(!empty($v['receiver'])){ 
+                $tel=[
+                    'id'=>$v['receiver'],
+                    'site'=>$i++,
+                    'uid'=>$v['id'],
+                    'type'=>2,
+                ];
+                $m_tel->update($tel);
+            }
+            
+            //付款账号更新
+            if(!empty($v['account1'])){
+                $account=[
+                    'id'=>$v['account1'],
+                    'site'=>1,
+                    'uid'=>$v['id'],
+                    'type'=>2,
+                ];
+                $m_account->update($account);
+            }
+            if(!empty($v['account2'])){
+                $account=[
+                    'id'=>$v['account2'],
+                    'site'=>2,
+                    'uid'=>$v['id'],
+                    'type'=>2,
+                ];
+                $m_account->update($account);
+            }
+            if(!empty($v['account3'])){
+                $account=[
+                    'id'=>$v['account3'],
+                    'site'=>3,
+                    'uid'=>$v['id'],
+                    'type'=>2,
+                ];
+                $m_account->update($account);
+            }
+            
+            $data_user[]=$tmp;
+                
+        }
+        //客户主体数据
+        //先截取旧数据
+        $m_new=Db::name('supplier');
+        $m_new->execute('truncate table cmf_supplier');
+        $row_mew=$m_new->insertAll($data_user);
+      
+        $m_new->where($this->where_corrects)->update($correct);
         
         $m_new->commit();
         $this->success('已同步数据数'.$row_mew);
         exit;
     }
     
+    //订单
+    public function order(){
+//         $val['ordertype']==1){echo "商城订单";}elseif ($val['ordertype']==2){echo "淘宝订单";}else{echo "线下订单";}
+        set_time_limit(300);
+        $m_old=Db::connect($this->db_old);
+        $count=1000; 
+        //订单主体
+        $m_new=Db::name('order');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_order');   
+        //获取最大的id来分页查询
+        $sql='select max(id) as count from sp_order';
+        $data=$m_old->query($sql);
+        $page=ceil($data[0]['count']/$count);
+        $field='p.id,p.order_sn,p.order_no as express_no,p.user_id as uid,'.
+                'p.pay_type as paytype,p.pay_status,p.paystate,p.distribution_status,p.status,'.
+                'p.create_time,p.pay_time,p.send_time,p.accept_time,p.completion_time,'.
+                'p.accept_name,p.telphone,p.province,p.city,p.area,p.address,p.mobile,'.
+                'p.payable_amount,p.order_amount,p.payable_freight,p.real_freight,'.
+                'p.postscript as udsc,p.note as adsc,p.if_del as is_del,'.
+                'p.ordertype as order_type,p.ordercompany as company,p.admin_id as aid,'.
+                'p.sfkp as invoice_type,'.
+                'concat(province.area_name,city.area_name,area.area_name) as addressinfo,area.area_postcode as postcode';
+        //订单状态变化
+        //336,上海拜豪机械设备有限公司 ,310114572666836,上海市嘉定区张掖路355号3B910 电话:021-60520497,农行上海江桥支行 账号: 03827500040041747,
+        /*  //原状态,6,7暂无
+         'order_status0'=>[
+         1=>'生成订单',
+         2=>'支付订单',
+         3=>'取消订单',
+         4=>'作废订单',
+         5=>'完成订单',
+         6=>'退款',
+         7=>'部分退款',
+         ],
+          pay_status--1付款0未付款
+         paystate--1确认付款0未付款
+         如果是先发货后付款的则是paystate=1，pay_status=0;
+         distribution_status--配送状态 0：未发送,1：已发送,2：部分发送,实际没有2
+                    新--
+         'pay_status'=>[
+         1=>'未付款',
+         2=>'付款未确认',
+         3=>'已确认付款', 
+         4=>'退款中',
+         5=>'退款完成', 
+         ],
+         'order_status'=>[
+         1=>'待付款',
+         2=>'待发货',
+         3=>'已发货', 
+         4=>'已收货', 
+         5=>'订单完成',
+         6=>'退货中',
+         7=>'退货完成',
+         8=>'取消订单',
+         9=>'废弃订单',
+         ],
+         'pay_type'=>[
+        1=>'先付款后发货',
+        2=>'货到付款',
+        3=>'定期结算',
+        4=>'其他',
+    ],
+     
+        sort专门排序，待发货10，待付款4，，待确认货款5，退货中3，其他0
+         */
+        //先检查pay_status
+        for($i=0;$i<$page;$i++){
+            $sql='select '.$field.
+                ' from sp_order as p '.
+                ' left join sp_areas province on province.id=p.province and province.area_type=1 and p.province>0 '.
+                ' left join sp_areas city on city.id=p.city and city.area_type=2 and p.city>0 '.
+                ' left join sp_areas area on area.id=p.area and area.area_type=3 and p.area>0 '.
+                'where p.id >'.($i*$count).' and p.id<='.(($i+1)*$count);
+            $data=$m_old->query($sql);
+            foreach($data as $k=>$v){ 
+                
+                //如果company为空就是上海极敏
+                if(empty($v['company'])){
+                    $v['company']=5;
+                }
+                //pay_type
+                switch ($v['paytype']){
+                    case 2:
+                        $v['pay_type']=3;
+                        break;
+                    case 10: 
+                        $v['pay_type']=2;
+                        break;
+                    case 11:
+                        $v['pay_type']=2;
+                        break;
+                    case 12:
+                        $v['pay_type']=4;
+                        break;
+                    default:  
+                        $v['pay_type']=1;
+                        break;
+                }
+               
+               
+                $v['sort']=0;
+                switch ($v['status']){
+                    case 3:
+                        $v['status']=8;
+                        break;
+                    case 4:
+                        $v['status']=9;
+                        break;
+                    case 5:
+                        $v['status']=5;
+                        break;
+                    default:  
+                        //status1,2
+                        
+                        if($v['pay_type']==1 && $v['paystate']==0 && $v['order_type']==3){
+                            //待确认货款5，
+                            $v['sort']=5;
+                            $v['status']=1;
+                        }elseif($v['distribution_status']==0){
+                            if($v['pay_status']==1 || ($v['pay_type']==2 || $v['pay_type']==10)){
+                                //待发货
+                                $v['sort']=10;
+                                $v['status']=2;
+                            }else{
+                                //待付款4
+                                $v['sort']=4;
+                                $v['status']=1;
+                            } 
+                        }  
+                        break;
+                }
+                //已发货
+                if($v['distribution_status']>0 &&  $v['status']<5){
+                    $v['status']=3;
+                }
+                if($v['pay_status']==0){
+                    $v['pay_status']=1;
+                }else{
+                    $v['pay_status']=($v['sort']==5)?2:3;
+                }
+                //order_type
+                switch ($v['order_type']){
+                    case 1:
+                        $v['order_type']=2;
+                        break;
+                    case 2:
+                        $v['order_type']=3;
+                        break;
+                    case 3:
+                        $v['order_type']=1;
+                        break;
+                }
+                unset($v['paystate']);
+                unset($v['distribution_status']);
+                
+                $data[$k]=$v;
+               
+            }
+           
+            $row_mew=$m_new->insertAll($data);
+        } 
+       
+      
+        
+        $m_new->commit();
+        zz_log('order订单主体同步完成');
+        //订单产品主体
+        $m_new=Db::name('order_goods');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_order_goods');
+        //获取最大的id来分页查询
+        $sql='select max(id) as count from sp_order_goods';
+        $data=$m_old->query($sql);
+        $page=ceil($data[0]['count']/$count);
+        $field='id,order_id as oid,codeid as goods,factory_price as price_in,sell_price as price_sell,prefer_price as price_real,goods_nums as num,goods_weight as weight';
+        for($i=0;$i<$page;$i++){
+            $sql='select '.$field.' from sp_order_goods '.
+                'where id >'.($i*$count).' and id<='.(($i+1)*$count);
+            $data=$m_old->query($sql);
+            $row_mew=$m_new->insertAll($data);
+        }
+        $m_new->commit();
+        zz_log('order_goods订单产品同步完成');
+        echo ('end');
+    }
+    //发货记录
+    public function freight_doc(){
+          set_time_limit(300);
+        $m_old=Db::connect($this->db_old);
+        $count=1000;
+        //订单主体
+        $m_new=Db::name('freight_doc');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_freight_doc');
+        //获取最大的id来分页查询
+        $sql='select max(id) as count from sp_delivery_doc';
+        $data=$m_old->query($sql);
+        $page=ceil($data[0]['count']/$count);
+        $field='id,order_id as oid,user_id as uid,admin_id as aid,k_id as store'.
+            ',addtime as atime,sjweight as weight,delivery_code as express_no,note as dsc,freight_id as freight';
+         
+        for($i=0;$i<$page;$i++){
+            $sql='select '.$field.' from sp_delivery_doc '.
+                'where id >'.($i*$count).' and id<='.(($i+1)*$count);
+            $data=$m_old->query($sql);
+            
+            $row_mew=$m_new->insertAll($data);
+        } 
+        $m_new->commit();
+        
+        echo ('end');
+    }
     
 }

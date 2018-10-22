@@ -433,6 +433,52 @@ class AdminGoodsController extends AdminBaseController
          
         return $this->fetch();
     }
+    public function print1(){
+        $info=[
+            'orderNum'=>'12365478965412',
+            'orderDate'=>'2018-10-20',
+            'customer'=>'测试',
+            'cusPhone'=>'15633333333',
+            'cusTele'=>'',
+            'goodsName'=>'测试商品名称',
+            'goodsStyle'=>'10-14-52',
+            'goodsPrice'=>'55.00',
+            'goodsNum'=>'66',
+            'subtotal'=>"3630",
+            'rece_address'=>'安徽省 合肥市',
+            'postscript'=>''
+        ];
+        $this->assign('info',$info);
+        return $this->fetch();
+    }
+    public function print2(){
+        $info=[
+            'conName'=>'测试姓名',
+            'conAddress'=>'测试地址',
+            'conTele'=>'0551-5555555',
+            'conPhone'=>'13866666666',
+            'conCode'=>'230000',
+            'conPost'=>''
+        ];
+        $this->assign('info',$info);
+        return $this->fetch();
+    }
+    public function print3(){
+        $info=[
+            'conName'=>'测试姓名',
+            'conAddress'=>'测试地址',
+            'conTele'=>'0551-5555555',
+            'conPhone'=>'13866666666',
+            'conCode'=>'230000',
+            'conPost'=>'',
+            'sendName'=>'极敏电子',
+            'sendPhone'=>'0551-63536880',
+            'sendAddress'=>'工业区兰州路88号青网电商园',
+            'sendCode'=>'230000'
+        ];
+        $this->assign('info',$info);
+        return $this->fetch();
+    }
     /**
      * 产品组合列表
      * @adminMenu(
@@ -1126,54 +1172,6 @@ class AdminGoodsController extends AdminBaseController
         
         return $this->fetch();
     }
-
- public function print1(){
-        $info=[
-            'orderNum'=>'12365478965412',
-            'orderDate'=>'2018-10-20',
-            'customer'=>'测试',
-            'cusPhone'=>'15633333333',
-            'cusTele'=>'',
-            'goodsName'=>'测试商品名称',
-            'goodsStyle'=>'10-14-52',
-            'goodsPrice'=>'55.00',
-            'goodsNum'=>'66',
-            'subtotal'=>"3630",
-            'rece_address'=>'安徽省 合肥市',
-            'postscript'=>''
-        ];
-        $this->assign('info',$info);
-        return $this->fetch();
-    }
-     public function print2(){
-        $info=[
-            'conName'=>'测试姓名',
-            'conAddress'=>'测试地址',
-            'conTele'=>'0551-5555555',
-            'conPhone'=>'13866666666',
-            'conCode'=>'230000',
-            'conPost'=>''
-        ];
-        $this->assign('info',$info);
-        return $this->fetch();
-    }
-     public function print3(){
-        $info=[
-            'conName'=>'测试姓名',
-            'conAddress'=>'测试地址',
-            'conTele'=>'0551-5555555',
-            'conPhone'=>'13866666666',
-            'conCode'=>'230000',
-            'conPost'=>'',
-            'sendName'=>'极敏电子',
-            'sendPhone'=>'0551-63536880',
-            'sendAddress'=>'工业区兰州路88号青网电商园',
-            'sendCode'=>'230000'
-        ];
-        $this->assign('info',$info);
-        return $this->fetch();
-    }
-
     /**
      * 设备列表
      * @adminMenu(

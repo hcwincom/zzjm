@@ -1,53 +1,5 @@
 <include file="public@header" />
-<style>
-	.order10 {
-		background: red;
-	}
-	.order9 {
-		background: #999;
-	}
-	.order8 {
-		background: #2057f4;
-		color: #fff;
-	}
-	.order7{
-		background: #;
-	}
-	.order6{
-		background: #ff7733;
-	}
-	.order5 {
-		background: yellow;
-	}
-	.order4 {
-		background: green;
-	}
-	.order3{
-		background: #26e9ab;
-	}
-	.order2{
-		background: #f21534;
-	}
-	.order1{
-		background: #ecf824;
-	}
-	/* 
-	'order_status'=>[
-        1=>'待付款',
-        2=>'待发货',
-        3=>'已发货',
-        4=>'已收货',
-        5=>'订单完成',
-        6=>'退货中',
-        7=>'退货完成',
-        8=>'取消订单',
-        9=>'废弃订单',
-        10=>'已拆分',
-    ],
-	
-	 */
-</style>
-
+  
 </head>
 <body>
 
@@ -280,95 +232,6 @@
 					</tr>
 				 
 					</foreach>
-					<php>$i=0;</php>
-					 
-					<foreach name="list" item="vo">
-						<php>$i++;</php>
-						<tr class="order{$i}">
-							<td>
-								<input type="checkbox" class="js-check" data-yid="js-check-y" data-xid="js-check-x" name="ids[]" value="{$vo.id}">
-							</td>
-							<td class='id'>
-								{$vo.id}--{$i}
-							</td>
-							<td>{$vo.sname|default=$vo.shop}</td>
-							<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}">{$vo.name}</a></td>
-							<td> {$vo.code}</td>
-							<td class="clickInfo">
-								<div style="position:relative;" class="goInfo" data-width="0">
-									{$goods_type[$vo.type]}
-								</div>
-								<!-- {$goods_type[$vo.type]} -->
-								<div class="goodsInfo">
-									<table class="table table-hover table-bordered">
-										<thead>
-											<tr>
-												<th class="nameWidth" width="30%">产品名称</th>
-												<th>编号</th>
-												<th>数量</th>
-												<th>单价</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												<td>吾问无为谓的点点滴滴无无无无所多付付付过晕晕拖拖拖付过过</td>
-												<td>5555555</td>
-												<td>444444444</td>
-												<td><span>¥</span>2222222</td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</td>
-							<td>
-					
-								<eq name="vo.pic" value="">
-									无图
-									<else />
-									<div class="tdImg">
-										<img src="{:cmf_get_image_url($vo['pic'])}" alt="">
-									</div>
-								</eq>
-								<present name="vo.pics">
-									<!-- 对应弹出图片列表框 -->
-									<div class="listposi">
-										<div class="imglunclose">
-											<span class="glyphicon glyphicon-remove-circle"></span>
-										</div>
-										<div class="imgGroup">
-											<ul class="imgList" class="imgList">
-												<foreach name="vo.pics" item="vv">
-													<li>
-														<img src="{:cmf_get_image_url($vv.file1)}" alt="">
-														<input type="hidden" value="{:cmf_get_image_url($vv.file3)}">
-													</li>
-												</foreach>
-											</ul>
-											<span class="prev"><i class="left"></i></span>
-											<span class="next"><i class="right"></i></span>
-										</div>
-									</div>
-								</present>
-					
-							</td>
-							<td>{$vo.aname|default=$vo.aid}--<a href="{:url('print1')}">print1</a>--<a href="{:url('print2')}">print2</a>--<a
-								 href="{:url('print3')}">print3</a></td>
-							<td>{$vo.atime|date='Y-m-d H:i',###}</td>
-							<eq name="vo.rid" value="0">
-								<td>-</td>
-								<td>-</td>
-								<else />
-								<td>{$vo.rname|default=$vo.rid}</td>
-								<td>{$vo.rtime|date='Y-m-d H:i',###}</td>
-							</eq>
-					
-							<td>{$vo.time|date='Y-m-d H:i',###}</td>
-							<td>{$vo.sort}</td>
-							<td>{$statuss[$vo.status]}</td>
-					
-						</tr>
-					
-					</foreach>
 				</tbody>
 
 			</table>
@@ -406,7 +269,6 @@ $('.review_all').click(function(){
 $('.del_all').click(function(){
 	$(this).parents('form').attr('action',"{:url('del_all')}");
 });
-
 </script>
 </body>
 </html>
