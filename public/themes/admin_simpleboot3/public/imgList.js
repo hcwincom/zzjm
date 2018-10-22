@@ -39,23 +39,29 @@ $(function () {
     });
 
     // 订单详细分类弹窗
-    $("table tr").find(".clickInfo").on("click", function (e) {
-        var widthG = $(this).find(".goInfo").attr("data-width");
-        console.log(widthG);
+    $("table tr td").find(".goInfo").click(function (e) {
+        e.stopPropagation();
+        var widthG = $(this).attr("data-width");
         if (widthG == 0) {
-            $(this).find(".goodsInfo").width(600);
-
+            $(this).next(".goodsInfo").width(600);
         } else {
-            $(this).find(".goodsInfo").width("auto");
+            $(this).next(".goodsInfo").width("auto");
         }
-        $(this).find(".goodsInfo").toggle().parent().parent().siblings().find(".goodsInfo").hide();
-        $(document).on('click', function () {
-            $('.goodsInfo').hide();
-        })
+        $(this).next(".goodsInfo").toggle().parent().parent().siblings().find("goodsInfo").hide();
         e.stopPropagation();
     });
 
-    
+    $(document).click(function (e) {
+        var drag = $(".goodsInfo"),
+            dragel = $(".goodsInfo")[0],
+            target = e.target;
+        if (dragel !== target && !$.contains(dragel, target)) {
+            drag.hide();
+        }
+        e.stopPropagation();
+    });
+
+
     // 轮播
     var imgListli = $('.imgList>li');
     var imgul = $('.imgList');
