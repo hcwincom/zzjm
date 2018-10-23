@@ -67,6 +67,7 @@
             box-shadow:-1px -1px 5px #999;
             z-index: 10;
             overflow: hidden;
+            display: none;
         }
         .pageHead{
             position: absolute;
@@ -466,23 +467,19 @@
 </script>
 <script>
      var msg_url = "{:url('admin/Public/msg_new')}";
-     setInterval(function(){
-         
+     setInterval(function(){     
          $.ajax({
             type: 'POST',
             url: msg_url,
             dataType: 'json',
             data: {},
-            success: function (data) {
-                
+            success: function (data) {               
                 if (data.code != 1) {
                     return false;
                 }
                 var list = data.data;
-               
                  var tchtml = "";
                $.each(list,function (index,item) {
-                
                  var timer = timestampToTime(item.time);
                  var lookHref;
                 var look = "";
@@ -490,21 +487,21 @@
                     lookHref = "";
                     look = "";
                 }else{
-                    lookHref = item.link;
+                    lookHref = item.link; 
                     look = "点击查看";
                 }
-
                  tchtml += '<div class="pageList"><div class="pageList_first"><p><span>发送人：</span>' + item.aname +'</p><p>'+timer+'</p></div><p>'+ item.dsc +'</p><div class="pageList_a"><a href="'+ lookHref+'">'+look+'</a></div></div>';
                });
-             
-             $(".pagecontainer").append(tchtml);
+                $(".pageCont").show();
+                $(".pagecontainer").append(tchtml);           
             },
             error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
-                	$('body').append(event.responseText);
+                $('body').append(event.responseText);
             }
         });
-        $("#pageWin").stop().slideToggle("fast");
-    }, 10000);
+         $("#pageWin").stop().slideToggle("fast");
+    }, 6000);
+
     $(".pageHead span").click(function () {
          $("#pageWin").stop().slideToggle("slow");
     });

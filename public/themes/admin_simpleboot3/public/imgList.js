@@ -38,30 +38,34 @@ $(function () {
         $(document.body).toggleClass("html_overflow");
     });
 
+  
     // 订单详细分类弹窗
-    $("table tr td").find(".goInfo").click(function (e) {
-        e.stopPropagation();
-        var widthG = $(this).attr("data-width");
+    $("table tr").find(".clickInfo").on("click", function (e) {
+        var widthG = $(this).find(".goInfo").attr("data-width");
         if (widthG == 0) {
-            $(this).next(".goodsInfo").width(600);
+            $(this).find(".goodsInfo").width(600);
         } else {
-            $(this).next(".goodsInfo").width("auto");
+            $(this).find(".goodsInfo").width("auto");
         }
-        $(this).next(".goodsInfo").toggle().parent().parent().siblings().find("goodsInfo").hide();
-        e.stopPropagation();
+        $(this).find(".goodsInfo").toggle().parent().parent().siblings('tr').find(".goodsInfo").hide();
+        stopPropagation(e);
     });
-
     $(document).click(function (e) {
-        var drag = $(".goodsInfo"),
-            dragel = $(".goodsInfo")[0],
-            target = e.target;
-        if (dragel !== target && !$.contains(dragel, target)) {
-            drag.hide();
-        }
-        e.stopPropagation();
+        $(".goodsInfo").hide();
+    });
+    $(".goodsInfo").click(function (e) {
+        stopPropagation(e);
     });
 
-
+    function stopPropagation(e) {
+        var ev = e || window.event;
+        if (ev.stopPropagation) {
+            ev.stopPropagation();
+        }
+        else if (window.event) {
+            window.event.cancelBubble = true;//兼容IE
+        }
+    }
     // 轮播
     var imgListli = $('.imgList>li');
     var imgul = $('.imgList');
