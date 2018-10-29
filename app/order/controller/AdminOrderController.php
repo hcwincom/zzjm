@@ -416,6 +416,17 @@ class AdminOrderController extends OrderBaseController
                     'uid'=>$data_order['uid'], 
                     'paytype'=>$data_order['paytype'],
                     'pay_type'=>$data_order['pay_type'], 
+                    'province'=>$data_order['province'], 
+                    'city'=>$data_order['city'], 
+                    'area'=>$data_order['area'], 
+                    'address'=>$data_order['address'], 
+                    'addressinfo'=>$data_order['addressinfo'], 
+                    'phone'=>$data_order['phone'], 
+                    'mobile'=>$data_order['mobile'], 
+                    'postcode'=>$data_order['postcode'], 
+                    'udsc'=>$data_order['udsc'],
+                    'dsc'=>$data_order['dsc'],
+                   
                     'goods_money'=>0, 
                 ];
                 foreach($v as $kk=>$vv){
@@ -520,10 +531,11 @@ class AdminOrderController extends OrderBaseController
         ];
         $invoice=Db::name('order_invoice')->where($where)->find();
         
+        
         //订单产品
         $goods=Db::name('order_goods') 
         ->where('oid',$info['id'])
-        ->column('goods,goods_name,goods_code,goods_sn,goods_pic,price_in,price_sell,price_real,num,weight,size');
+        ->column('goods,goods_name,goods_code,goods_sn,goods_pic,price_in,price_sale,price_real,num,weight,size');
         
        
         //当前库存
@@ -555,29 +567,7 @@ class AdminOrderController extends OrderBaseController
         $this->assign('invoice',$invoice);
         return $this->fetch();  
     }
-    //获取权限信息
-    public function auth_get($id,$str='goods/AdminGoodsauth/'){
-        $actions=[];
-        //检测是否超级管理员
-        if($id==1){
-            $actions['auth']=1;
-            return $actions;
-        }
-        $roles=Db::name('role_user')->where('user_id',$id)->column('role_id');
-        //检测是否超级管理员
-        if(in_array(1,$roles)){
-            $actions['auth']=1;
-        } else{
-            $where=[
-                'role_id'=>['in',$roles],
-                'rule_name'=>['like',$str.'%'],
-            ];
-            $len=strlen($str)+1;
-            $actions=Db::name('auth_access')->where($where)->column("substring(rule_name,$len)");
-            $actions=array_flip($actions);
-        }
-        return $actions;
-    }
+     
     //分类
     public function cates($type=3){
         $this->assign('invoice_types',config('invoice_type'));

@@ -2207,20 +2207,19 @@ class AdminGoodsController extends AdminBaseController
         }
         
         //记录操作记录
-        $flag=$this->flag;
-        $table=$this->table;
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'添加'.$flag.$id.'-'.$data['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'添加'.($this->flag).$id.'-'.$data['name'],
+            'table'=>($this->table),
             'type'=>'add',
             'pid'=>$id,
             'link'=>url('edit',['id'=>$id]),
             'shop'=>$admin['shop'],
+            
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
         $m->commit();
         //添加收藏关联
         $this->goods_collect($id,$admin['id'],1);
@@ -2550,17 +2549,20 @@ class AdminGoodsController extends AdminBaseController
                 $this->error('不能编辑其他店铺的信息');
             }
         }
+        $table0='image';
+        $flag='产品图片';
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
             'atime'=>$time,
-            'table'=>'goods_file',
+            'table'=>'goods',
+            'url'=>url($table0.'_edit_info','',false,false),
             'rstatus'=>1,
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-        
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag:$data['adsc'];
         $content=[];
         
         //检查文件修改
@@ -2695,19 +2697,19 @@ class AdminGoodsController extends AdminBaseController
             $this->error('保存数据错误，请重试');
         }
         //记录操作记录
-        $link=url('image_edit_info',['id'=>$eid]);
+        
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag.'图片/文件'.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
-            'pid'=>$info['id'],
-            'link'=>$link,
+            'pid'=>$info['id'], 
+            'link'=>url($table0.'_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
+        ]; 
+        zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
@@ -2903,6 +2905,9 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -2993,33 +2998,22 @@ class AdminGoodsController extends AdminBaseController
         
         //审核成功，记录操作记录,发送审核信息
         $flag=$this->flag;
-        $review_status=$this->review_status;
+       
         //记录操作记录
-        $link=url('image_edit_info',['id'=>$info['id']]);
+        $table0='image';
+        $flag='产品图片/文件';
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的文件编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($flag).$info['pid'].'-'.$info['pname'].'编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的文件编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
-        
+        zz_action($data_action,['aid'=>$info['aid']]); 
         $m->commit();
         //添加收藏关联
         $this->goods_collect($info['pid'],$admin['id'],3);
@@ -3087,16 +3081,21 @@ class AdminGoodsController extends AdminBaseController
                 $this->error('不能编辑其他店铺的信息');
             }
         }
+        
+        $table0='content';
+        $flag='产品技术资料';
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
             'atime'=>$time,
-            'table'=>'goods_content',
+            'table'=>'goods',
+            'url'=>url($table0.'_edit_info','',false,false),
             'rstatus'=>1,
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag:$data['adsc'];
         
         $content=[];
         //检查文件修改
@@ -3119,20 +3118,21 @@ class AdminGoodsController extends AdminBaseController
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+        
         //记录操作记录
-        $link=url('content_edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag.'技术资料'.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
+        
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
@@ -3233,6 +3233,9 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -3275,35 +3278,22 @@ class AdminGoodsController extends AdminBaseController
             }
         }
         
-        //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
-        $review_status=$this->review_status;
-        //记录操作记录
-        $link=url('content_edit_info',['id'=>$info['id']]);
+        //审核成功，记录操作记录,发送审核信息 
+        $table0='content';
+        $flag='产品技术资料';
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的技术资料为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($flag).$info['pid'].'-'.$info['pname'].'编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的技术资料已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
-        
+        zz_action($data_action,['aid'=>$info['aid']]); 
+       
         $m->commit();
         //添加收藏关联
         $this->goods_collect($info['pid'],$admin['id'],3);
@@ -3368,9 +3358,9 @@ class AdminGoodsController extends AdminBaseController
             $this->error('数据不存在');
         }
         $table=$this->table;
-        $flag=$this->flag;
-        $table0='goods_type2'; 
-        $flag0='产品组合';
+      
+        $table0='type2'; 
+        $flag='产品组合';
         $time=time();
         $admin=$this->admin;
         //其他店铺的审核判断
@@ -3383,12 +3373,14 @@ class AdminGoodsController extends AdminBaseController
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
             'atime'=>$time,
-            'table'=>$table0,
+            'table'=>$table,
+            'url'=>url($table0.'_edit_info','',false,false),
             'rstatus'=>1,
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag.'信息':$data['adsc'];
         $content=[];
         //关联产品
         $links0=Db::name('goods_link')->where('pid0',$data['id'])->column('pid1,num');
@@ -3421,20 +3413,21 @@ class AdminGoodsController extends AdminBaseController
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+        
         //记录操作记录
-        $link=url('type2_edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag0.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        
+        zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
@@ -3550,6 +3543,9 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -3610,36 +3606,21 @@ class AdminGoodsController extends AdminBaseController
         }
         
         //审核成功，记录操作记录,发送审核信息
-         
-         $flag0='产品组合';
-         
-        $review_status=$this->review_status;
-        //记录操作记录
-        $link=url('type2_edit_info',['id'=>$info['id']]);
+          
+        $table0='type2';
+        $flag='产品组合';
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($flag).$info['pid'].'-'.$info['pname'].'编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
-        
+        zz_action($data_action,['aid'=>$info['aid']]); 
         $m->commit();
         //添加收藏关联
         $this->goods_collect($info['pid'],$admin['id'],3);
@@ -3705,9 +3686,9 @@ class AdminGoodsController extends AdminBaseController
             $this->error('数据不存在');
         }
         $table=$this->table;
-        $flag=$this->flag;
+     
         $table0='type4'; 
-        $flag0='产品加工';
+        $flag='产品加工';
         $time=time();
         $admin=$this->admin;
         //其他店铺的审核判断
@@ -3720,12 +3701,15 @@ class AdminGoodsController extends AdminBaseController
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
             'atime'=>$time,
-            'table'=>'goods_'.$table0,
+            'table'=>$table,
+            'url'=>url($table0.'_edit_info','',false,false),
             'rstatus'=>1,
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
+         
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag.'信息':$data['adsc'];
         $content=[];
         //关联产品
         $links0=Db::name('goods_link')->where('pid0',$data['id'])->column('pid1,num');
@@ -3758,20 +3742,21 @@ class AdminGoodsController extends AdminBaseController
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+        
         //记录操作记录
-        $link=url(''.$table0.'_edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag0.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        
+        zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
@@ -3886,6 +3871,9 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -3947,34 +3935,20 @@ class AdminGoodsController extends AdminBaseController
         
         //审核成功，记录操作记录,发送审核信息
         
-        $flag0='产品加工';
+        $flag='产品加工';
         $table0='type4';
-        $review_status=$this->review_status;
-        //记录操作记录
-        $link=url(''.$table0.'_edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($flag).$info['pid'].'-'.$info['pname'].'编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
+        zz_action($data_action,['aid'=>$info['aid']]); 
         
         $m->commit();
         //添加收藏关联
@@ -4055,9 +4029,9 @@ class AdminGoodsController extends AdminBaseController
             $this->error('数据不存在');
         }
         $table=$this->table;
-        $flag=$this->flag;
+      
         $table0='type3';
-        $flag0='产品标签';
+        $flag='产品标签';
         $time=time();
         $admin=$this->admin;
         //其他店铺的审核判断
@@ -4066,16 +4040,19 @@ class AdminGoodsController extends AdminBaseController
                 $this->error('不能编辑其他店铺的信息');
             }
         }
+        
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
             'atime'=>$time,
-            'table'=>'goods_'.$table0,
+            'table'=>'goods',
+            'url'=>url($table0.'_edit_info','',false,false),
             'rstatus'=>1,
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag:$data['adsc'];
         $content=[];
         //原标签
         $label=Db::name('goods_label')->where('pid0',$info['id'])->find();
@@ -4154,20 +4131,21 @@ class AdminGoodsController extends AdminBaseController
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+      
         //记录操作记录
-        $link=url(''.$table0.'_edit_info',['id'=>$eid]);
+       
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag0.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
@@ -4298,6 +4276,9 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -4351,34 +4332,20 @@ class AdminGoodsController extends AdminBaseController
         
         //审核成功，记录操作记录,发送审核信息
         
-        $flag0='产品标签';
+        $flag='产品标签';
         $table0='type3';
-        $review_status=$this->review_status;
-        //记录操作记录
-        $link=url(''.$table0.'_edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($flag).$info['pid'].'-'.$info['pname'].'编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
+        zz_action($data_action,['aid'=>$info['aid']]); 
         
         $m->commit();
         //添加收藏关联
@@ -4444,9 +4411,9 @@ class AdminGoodsController extends AdminBaseController
             $this->error('数据不存在');
         }
         $table=$this->table;
-        $flag=$this->flag;
+      
         $table0='type5';
-        $flag0='设备';
+        $flag='设备';
         $time=time();
         $admin=$this->admin;
         //其他店铺的审核判断
@@ -4459,12 +4426,14 @@ class AdminGoodsController extends AdminBaseController
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
             'atime'=>$time,
-            'table'=>'goods_'.$table0,
+            'table'=>'goods',
+            'url'=>url($table0.'_edit_info','',false,false),
             'rstatus'=>1,
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag:$data['adsc'];
         $content=[];
         //关联产品
         $links0=Db::name('goods_link')->where('pid0',$data['id'])->column('pid1,num');
@@ -4497,20 +4466,20 @@ class AdminGoodsController extends AdminBaseController
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
+        
         //记录操作记录
-        $link=url(''.$table0.'_edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag0.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
@@ -4625,6 +4594,9 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -4686,34 +4658,20 @@ class AdminGoodsController extends AdminBaseController
         
         //审核成功，记录操作记录,发送审核信息
         
-        $flag0='设备';
+        $flag='产品设备';
         $table0='type5';
-        $review_status=$this->review_status;
-        //记录操作记录
-        $link=url(''.$table0.'_edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($flag).$info['pid'].'-'.$info['pname'].'编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url($table0.'_edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag0.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
+        zz_action($data_action,['aid'=>$info['aid']]); 
         
         $m->commit();
         //添加收藏关联
@@ -4920,16 +4878,19 @@ class AdminGoodsController extends AdminBaseController
                 $this->error('不能编辑其他店铺的信息');
             }
         }
+       
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
             'atime'=>$time,
-            'table'=>$table,
+            'table'=>'goods',
+            'url'=>url('edit_info','',false,false),
             'rstatus'=>1,
             'rid'=>0,
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag:$data['adsc'];
         //产品的字段 
         $fields=['cid','cid0','code_num','code_name','code','name','name2','name3',
             'type','sn_type','sn','brand','bchar','price','price_sale','price_in','price_cost',
@@ -4997,19 +4958,19 @@ class AdminGoodsController extends AdminBaseController
             $this->error('保存数据错误，请重试');
         }
         //记录操作记录
-        $link=url('edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url('edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
+         
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
@@ -5034,7 +4995,7 @@ class AdminGoodsController extends AdminBaseController
         $flag=$this->flag;
         $data=$this->request->param();
         //查找当前表的编辑
-        $where=['e.table'=>['in',$this->tables]];
+        $where=['e.table'=>['eq',$this->table]];
         //状态
         if(empty($data['status'])){
             $data['status']=0;
@@ -5146,16 +5107,7 @@ class AdminGoodsController extends AdminBaseController
         $rids=$m_user->where($where_rid)->column('id,user_nickname');
         //分类信息
         $this->cates();
-        $table_info=[
-            'goods'=>['edit_info','产品信息修改'],
-            'goods_file'=>['image_edit_info','产品图片文件修改'],
-            'goods_content'=>['content_edit_info','产品技术详情修改'],
-            'goods_type2'=>['type2_edit_info','产品组合修改'],
-            'goods_type3'=>['type3_edit_info','产品标签修改'], 
-            'goods_type4'=>['type4_edit_info','产品加工修改'], 
-            'goods_type5'=>['type5_edit_info','设备修改'], 
-        ];
-        $this->assign('table_info',$table_info);
+        
         $this->assign('page',$page);
         $this->assign('list',$list);
         $this->assign('aids',$aids);
@@ -5372,6 +5324,9 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -5502,34 +5457,22 @@ class AdminGoodsController extends AdminBaseController
         }
          
         //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
+       
         $review_status=$this->review_status;
         //记录操作记录
-        $link=url('edit_info',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url('edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
         
+        zz_action($data_action,['aid'=>$info['aid']]);
         $m->commit();
         //添加收藏关联
         $this->goods_collect($info['pid'],$admin['id'],3);
@@ -5550,94 +5493,8 @@ class AdminGoodsController extends AdminBaseController
      */
     public function edit_del_all()
     {
-        if(empty($_POST['ids'])){
-            $this->error('未选中信息');
-        }
-        $eids=$_POST['ids'];
         
-        $admin=$this->admin;
-        $table=$this->table;
-       
-        $m_edit=Db::name('edit');
-        $time=time();
-        $where=[
-            'e.id'=>['in',$eids],
-            'e.table'=>['in',$this->tables],
-        ];
-        
-        //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
-        if($admin['shop']!=1){
-            
-            $tmp=$m_edit
-            ->field('e.*')
-            ->alias('e')
-            ->where($where)
-            ->find();
-            if($tmp['shop']!=$admin['shop']){
-                $this->error('不能审核其他店铺的信息');
-            }else{
-                $where['e.shop']=['eq',$admin['shop']];
-            }
-        }
-        
-        //得到要删除的数据
-        $list=$m_edit
-        ->alias('e')
-        ->join('cmf_'.$table.' p','p.id=e.pid','left')
-        ->where($where)
-        ->column('e.*,p.name as pname');
-        
-        if(empty($list)){
-            $this->error('没有要删除的数据');
-        }
-        $eidss=implode(',',array_keys($list));
-        
-        //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
-        
-        //记录操作记录
-        $data_action=[
-            'aid'=>$admin['id'],
-            'time'=>$time,
-            'ip'=>get_client_ip(),
-            'action'=>'批量删除'.$flag.'编辑记录('.$eidss.')',
-            'table'=>$table,
-            'type'=>'edit_del',
-            'link'=>'',
-            'shop'=>$admin['shop'],
-        ];
-        
-        foreach($list as $k=>$v){
-            
-            //发送审核信息
-            $data_msg[]=[
-                'aid'=>1,
-                'time'=>$time,
-                'uid'=>$v['aid'],
-                'dsc'=>date('Y-m-d H:i',$v['atime']).'对'.$flag.$v['pid'].'-'.$v['pname'].'的编辑记录已批量删除',
-                'type'=>'edit_del',
-                'link'=>'',
-                'shop'=>$admin['shop'],
-            ];
-        }
-        $m_edit->startTrans();
-        //id 删除
-        $where_edit=[
-            'table'=>['in',$this->tables],
-            'id'=>['in',$eids],
-        ];
-        
-        $rows=$m_edit->where($where_edit)->delete();
-        if($rows<=0){
-            $m_edit->rollback();
-            $this->error('没有删除数据');
-        }
-        //删除编辑详情
-        Db::name('edit_info')->where(['eid'=>['in',$eids]])->delete();
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insertAll($data_msg);
-        $m_edit->commit();
-        $this->success('已批量删除'.$rows.'条数据');
+         parent::edit_del_all();
     }
     /**
      * 产品批量删除
@@ -5700,21 +5557,7 @@ class AdminGoodsController extends AdminBaseController
             $m->rollback();
             $this->error('删除数据失败，请刷新重试');
         }
-        
-        //记录操作记录
-        $idss=implode(',',$ids);
-        $data_action=[
-            'aid'=>$admin['id'],
-            'time'=>$time,
-            'ip'=>get_client_ip(),
-            'action'=>'批量删除'.$flag.'('.$idss.')',
-            'table'=>$table,
-            'type'=>'del',
-            'link'=>'',
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        
+         
         //删除关联编辑记录
         $where_edit=[
             'table'=>['eq',$table],
@@ -5741,6 +5584,23 @@ class AdminGoodsController extends AdminBaseController
         $m_label->where($where_link)->delete();
         //删除收藏
         Db::name('goods_collect')->where('pid','in',$ids)->delete();
+        
+       
+        //记录操作记录
+        $idss=implode(',',$ids);
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'批量删除'.$flag.'('.$idss.')',
+            'table'=>$table,
+            'type'=>'del',
+            'link'=>'',
+            'pid'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['pids'=>$idss]);
         $m->commit();
         $this->success('成功删除数据'.$tmp.'条');
         
