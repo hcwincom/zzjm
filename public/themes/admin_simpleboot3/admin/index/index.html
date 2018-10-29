@@ -467,7 +467,8 @@
 </script>
 <script>
      var msg_url = "{:url('admin/Public/msg_new')}";
-     setInterval(function(){     
+     setInterval(function(){
+
          $.ajax({
             type: 'POST',
             url: msg_url,
@@ -475,10 +476,12 @@
             data: {},
             success: function (data) {               
                 if (data.code != 1) {
+                    $(".pageList").remove(); 
+                    $(".pageCont").hide();
                     return false;
                 }
                 var list = data.data;
-                 var tchtml = "";
+                 var tchtml = "";  
                $.each(list,function (index,item) {
                  var timer = timestampToTime(item.time);
                  var lookHref;
@@ -492,7 +495,7 @@
                 }
                  tchtml += '<div class="pageList"><div class="pageList_first"><p><span>发送人：</span>' + item.aname +'</p><p>'+timer+'</p></div><p>'+ item.dsc +'</p><div class="pageList_a"><a href="'+ lookHref+'">'+look+'</a></div></div>';
                });
-                $(".pageCont").show();
+                $(".pageCont").show();                
                 $(".pagecontainer").append(tchtml);           
             },
             error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
