@@ -132,7 +132,7 @@ class PublicController extends AdminBaseController
     public function msg_new()
     {
         $uid=session('ADMIN_ID');
-        $m=db('msg');
+        $m=Db::name('msg');
         $where=[
             'm.uid'=>$uid,
             'm.status'=>1,

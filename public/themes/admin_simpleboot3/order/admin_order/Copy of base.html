@@ -43,7 +43,7 @@
 			 		<select  class="form-control  short-auto" id="company"   >
 						<option value="0">客户来源</option>
 					<foreach name="companys" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo.name}</option>
 					</foreach>
 					</select>  
 					 
@@ -79,7 +79,7 @@
 					 <select  class="form-control  short-auto" id="company"   >
 						<option value="0">客户来源</option>
 					<foreach name="companys" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo.name}</option>
 					</foreach>
 					</select>  
 					 
@@ -142,7 +142,10 @@
 					<p class="notice">字体红色的物流是推荐物流</p>
 				<present name="change.freight">
 					<select  class="form-control red"  >
-				   		<option value="{$change.freight}">{$freights[$change.freight]}</option> 
+				   		<option value="0">请选择</option>
+					<foreach name="freights" item="vo">
+						<option value="{$key}" <if condition="$key eq $change.freight" >selected</if>>{$vo.name}</option>
+					</foreach>
 					</select>
 				</present>  
 				 </div>
@@ -175,29 +178,30 @@
 				 
 				</div>
 			</div>
-		</empty>
-		<div  >
-			 
-			  <table class="table table-hover table-bordered table-list" id="goods-list">
+		</empty>	 
+			<table class="table table-hover table-bordered table-list" id="goods-list">
 				 
 			 	<tr id="goods0">
-				 	 <td>产品名称</td>
-				 	 <td width="100">产品编码</td>
-				 	 <td width="200">产品条码</td>
-				 	 <td width="100">产品图片</td> 
-				 	 <td width="150">库存</td> 
-				 	  <td width="100">成本价</td>
-					 <td width="100">零售价</td> 
+				 	<td>产品名称</td>
+				 	<td>产品编码</td>
+				 	<td width="100">产品图片</td>
+				 
+				 	<td width="150">库存</td>
+				  
 					 <td width="100">供应价</td>
 					 <td width="50">数量</td>
 					 <td width="100">金额</td>
 					 <td width="100">毛重</td> 
-					 <td width="100">体积</td> 
-			 	</tr>  
+					  <td width="100">体积</td> 
+					 <td >备注</td>
+			 	</tr> 
+	 
 	 		</table>
-			 
-			<p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
-		</div>	  
+	 		<p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
+	 		<div class="form-group fleft-all"  >
+				 
+			</div>
+			
 			 <div class="form-group fleft-all"  >
 				<label class="col-sm-2 control-label">物流费用</label>
 				<div class="col-md-6 col-sm-10">
@@ -283,7 +287,9 @@
 					税费：<input type="text" class="form-control short" id="invoice_tax_money" name="invoice_tax_money" value="{$invoice.invoice_money}"/>
 					 <button id="invoice_count" type="button">税费计算</button>
 					 </label>
-					  
+					 
+					
+						
 					 <br/> 
 					开票说明：<input type="text" class="form-control" name="invoice_dsc" value="{$invoice.dsc}"/>
 					   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息。
@@ -294,22 +300,22 @@
 				<label class="col-sm-2 control-label">订单总计</label>
 				<div class="col-md-6 col-sm-10">
 				 	<label class="input-inline">
-					 产品总数量：<input type="text" class="form-control short " id="num" name="num" value="{$info.num}" readonly/> 
+					 产品总数量：<input type="text" class="form-control short " id="num" name="num" value="" readonly/> 
 					</label>
 				 	 <label class="input-inline">
-					 产品总金额：<input type="text" class="form-control short " id="goods_money" name="goods_money" value="{$info.goods_money}" readonly/> 
+					 产品总金额：<input type="text" class="form-control short " id="goods_money" name="goods_money" value="" readonly/> 
 					</label>
 				 	 <label class="input-inline">
-					 优惠金额：<input type="text" class="form-control short" id="discount_money" name="discount_money" value="{$info.discount_money}" /> 
+					 优惠金额：<input type="text" class="form-control short" id="discount_money" name="discount_money" value="0" /> 
 					</label>
 					 <label class="input-inline">
-					 税费：<input type="text" class="form-control short" id="tax_money" name="tax_money" value="{$info.tax_money}" /> 
+					 税费：<input type="text" class="form-control short" id="tax_money" name="tax_money" value="0" /> 
 					</label>
 					 <label class="input-inline">
-					 其它费用：<input type="text" class="form-control short" id="other_money" name="other_money" value="{$info.other_money}" /> 
+					 其它费用：<input type="text" class="form-control short" id="other_money" name="other_money" value="0" /> 
 					</label>
 				 	 <label class="input-inline"> 
-					 用户付款：<input type="text" class="form-control short" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
+					 用户付款：<input type="text" class="form-control short" id="order_amount" name="order_amount" value="" required/> 
 					  
 				 	</label>
 				   <p class="notice">用户付款=产品总金额-优惠金额+税费+其它费用。
@@ -324,32 +330,28 @@
 				用户付款账号：
 					<select  class="form-control" id="account">
 				    	<option value="0">请选择</option> 
-				    <foreach name="accounts" item="vo">
-				    	<option value="{$vo.id}" bank1="{$vo.bank1}" bank2="{$vo.bank2}" name2="{$vo.name2}" 
-				    	num2="{$vo.num2}" location2="{$vo.location2}" name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
-				    </foreach>
 					</select> 
 				付款银行：
 					<select  class="form-control" name="account_bank1" id="account_bank1">
 				    	<option value="0">请选择</option>
 					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $pay.bank1">selected</if> >{$vo}</option>
+						<option value="{$key}"  >{$vo}</option>
 					</foreach>
 					</select>
-				   付款 账户名：<input type="text"  class="form-control" name="account_name1" id="account_name1" value="{$pay.name1}"/>
+				   付款 账户名：<input type="text"  class="form-control" name="account_name1" id="account_name1"/>
 				    <p class="notice">付款账户名为空则不保存付款信息</p>  
-				   付款账号：<input type="text"  class="form-control" name="account_num1" id="account_num1"  value="{$pay.num1}"/>
-				   付款开户行：<input type="text"  class="form-control" name="account_location1" id="account_location1"  value="{$pay.location1}"/>
+				   付款账号：<input type="text"  class="form-control" name="account_num1" id="account_num1"/>
+				   付款开户行：<input type="text"  class="form-control" name="account_location1" id="account_location1"/>
 				   收款银行：
 					<select  class="form-control" name="account_bank2" id="account_bank2">
 				    	<option value="0">请选择</option>
 					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $pay.bank2">selected</if> >{$vo}</option>
+						<option value="{$key}"  >{$vo}</option>
 					</foreach>
 					</select>
-				   收款 账户名：<input type="text"  class="form-control" name="account_name2" id="account_name2"  value="{$pay.name2}"/>
-				   收款账号：<input type="text"  class="form-control" name="account_num2" id="account_num2"  value="{$pay.num2}"/>
-				   收款开户行：<input type="text"  class="form-control" name="account_location2" id="account_location2"  value="{$pay.location2}"/>
+				   收款 账户名：<input type="text"  class="form-control" name="account_name2" id="account_name2"/>
+				   收款账号：<input type="text"  class="form-control" name="account_num2" id="account_num2"/>
+				   收款开户行：<input type="text"  class="form-control" name="account_location2" id="account_location2"/>
 				
 				</div>
 			</div>

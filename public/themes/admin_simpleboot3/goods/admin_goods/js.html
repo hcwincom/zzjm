@@ -12,7 +12,7 @@ $('#add').click(function(){
 		alert('先选择分类，输入三级名称,三级编码为大于0的整数');
 		return false;
 	}
-	$.post("{:url('goods/goodsajax/add_code')}",{'cid':cid,'name':name,'code_num':code_num,'id':id},function(data){
+	$.post("{:url('goods/Goodsajax/add_code')}",{'cid':cid,'name':name,'code_num':code_num,'id':id},function(data){
 		 
 		if(data.code!=1){
 			alert(data.msg);
@@ -27,7 +27,7 @@ function cid_change(cid){
 		$('#code_num').val(0);
 		return false;
 	}
-	$.post("{:url('goods/goodsajax/cid_change')}",{'cid':cid},function(data){
+	$.post("{:url('goods/Goodsajax/cid_change')}",{'cid':cid},function(data){
 		
 		if(data.code!=1){
 			alert(data.msg);

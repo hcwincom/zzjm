@@ -19,6 +19,7 @@ class AdminGoodsController extends AdminBaseController
     private $file_type;
     private $goods_type;
     private $units;
+    private $fields_link;
     public function _initialize()
     {
         parent::_initialize();
@@ -59,6 +60,12 @@ class AdminGoodsController extends AdminBaseController
         }
         $this->units=$units;
         $this->assign('units',$units);
+        //主产品修改审核，加标产品编辑审核都会同步这些字段。加标产品编辑会过滤这些字段
+        $this->fields_link=['unit','weight0','length0','width0',
+            'height0','size0','is_box','weight1','length1','width1',
+            'height1','size1','template',
+        ];
+        
     }
      
     /**
@@ -388,28 +395,11 @@ class AdminGoodsController extends AdminBaseController
             ];
             $pics=Db::name('goods_file')->where('pid','in',$ids)->column('id,file,pid');
             $path='upload/';
-            foreach($pics as $k=>$v){
-                
-                if(is_file($path.$v['file'])){
-                    //直接加判断，防止错误 
-                    if(is_file($path.$v['file'].'1.jpg')){
-                        $v['file1']=$v['file'].'1.jpg';
-                    }else{
-                        $v['file1']=$v['file'];
-                    }
-                    if(is_file($path.$v['file'].'3.jpg')){
-                        $v['file3']=$v['file'].'3.jpg';
-                    }else{
-                        $v['file3']=$v['file'];
-                    }
-                    
-                    $list[$v['pid']]['pics'][]=[
-                        'file1'=>$v['file1'],
-                        'file3'=>$v['file3'],
-                    ];
-                    
-                } 
-                
+            foreach($pics as $k=>$v){ 
+                $list[$v['pid']]['pics'][]=[
+                    'file1'=>$v['file'].'1.jpg',
+                    'file3'=>$v['file'].'3.jpg',
+                ]; 
             }
         }
         
@@ -4344,7 +4334,13 @@ class AdminGoodsController extends AdminBaseController
             }else{
                 $m_label->where('pid0',$info['pid'])->update($label1); 
             }
-             
+            //和主产品数据同步
+            $fields_link=$this->fields_link;
+            $pid_link=(isset($label1['pid1']))?$label1['pid1']:$label0['pid1'];
+            $info_link=$m->where('id',$pid_link)->find();
+            foreach($fields_link as $v){
+                $update_info[$v]=$info_link[$v];
+            }
             $row=$m->where('id',$info['pid'])->update($update_info);
             if($row!==1){
                 $m->rollback();
@@ -4934,14 +4930,18 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-        //产品的字段
+        //产品的字段 
         $fields=['cid','cid0','code_num','code_name','code','name','name2','name3',
-            'type','sn_type','sn','brand','bchar','unit','weight0','length0','width0',
-            'height0','size0','is_box','weight1','length1','width1',
-            'height1','size1','template','price','price_sale','price_in','price_cost',
+            'type','sn_type','sn','brand','bchar','price','price_sale','price_in','price_cost',
             'price_min','price_range1','price_range2','price_range3','price_dealer1',
             'price_dealer2','price_dealer3','price_trade','price_factory','sort','dsc',
         ];
+        //加标产品不能修改重量大小和技术参数，只能跟随主产品变动
+        if($info['type']!=3){
+            $fields_link=$this->fields_link;
+            $fields=array_merge($fields,$fields_link);
+        }
+       
         $content=[];
        
         //检测改变了哪些字段
@@ -4952,8 +4952,8 @@ class AdminGoodsController extends AdminBaseController
             } 
         }
        
-         //技术参数记录,新旧参数比较  
-         if(is_array($data['value'])){
+         //技术参数记录,新旧参数比较  .加标产品不修改参数
+         if($info['type']!=3 && is_array($data['value'])){
              $params=[];
              if(!empty($data['value'])){ 
                  foreach($data['value'] as $k=>$v){
@@ -5425,8 +5425,8 @@ class AdminGoodsController extends AdminBaseController
                 }
                 
             }
-            //处理关联产品
-            if(isset($update_info['id_links'])){
+            //处理关联产品?好像不需要了
+           /*  if(isset($update_info['id_links'])){
                 $links=json_decode($update_info['id_links'],true);
                 $type=isset($update_info['type'])?$update_info['type']:$info_tmp['type'];
                 unset($update_info['id_links']);
@@ -5444,24 +5444,54 @@ class AdminGoodsController extends AdminBaseController
                 if(!empty($links_add)){
                     Db::name('goods_link')->insertAll($links_add);
                 }
+            } */
+            //加标产品同步
+            if($info['type']==1){
+                $fields_link=$this->fields_link;
+                $m_lable=Db::name('goods_label');
+                $links=$m_lable->where('pid1',$info['id'])->column('pid0');
+                //组装加标产品更新数据
+                $link_info=[];
+                //得到要修改的字段 
+                foreach($fields_link as $v){
+                    if(isset($change[$v])){
+                        $link_info[$v]=$change[$v];
+                    }
+                }
+                if(!empty($link_info) && !empty($links)){
+                    $link_info['time']=$time;
+                    foreach($links as $v){
+                        $m->where('id',$v)->update($link_info);
+                    }
+                }
             }
+           
             //处理技术参数
             if(isset($update_info['param'])){
                 $params=json_decode($update_info['param'],true);
                 unset($update_info['param']);
                 $param_add=[];
-                
-                foreach($params as $k=>$v){
-                    $param_add[]=[
-                        'pid'=>$info['pid'],
-                        'param_id'=>$k,
-                        'value'=>$v,
-                    ]; 
+                //关联的标签产品也要修改 
+                if(empty($links)){
+                    $links=[$info['pid']]; 
+                }else{
+                    $links[]=$info['pid']; 
                 }
-                Db::name('goods_param')->where('pid',$info['pid'])->delete();
+                
+                Db::name('goods_param')->where('pid','in',$links)->delete();
+                foreach($links as $kk=>$vv){
+                    foreach($params as $k=>$v){
+                        $param_add[]=[
+                            'pid'=>$vv,
+                            'param_id'=>$k,
+                            'value'=>$v,
+                        ];
+                    }
+                } 
                 if(!empty($param_add)){
                     Db::name('goods_param')->insertAll($param_add);
                 } 
+               
             }
             $row=$m->where('id',$info['pid'])->update($update_info);
             if($row!==1){

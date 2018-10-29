@@ -381,7 +381,7 @@ class AdminFreightController extends AdminInfo0Controller
             'shop'=>$admin['shop'],
             'url'=>url('tel_edit_info','',false,false),
         ];
-        
+        $update['adsc']=(empty($data['asc']))?'修改了快递联系人和付款信息':$data['asc'];
         //获取联系人1,2
         $m_tel=Db::name('tel');
         $tels=$m_tel->where('id','in',[$info['tel1'],$info['tel2']])->column('');
@@ -648,6 +648,10 @@ class AdminFreightController extends AdminInfo0Controller
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=empty($rdsc)?$review_status[$status]:$rdsc;
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -732,9 +736,9 @@ class AdminFreightController extends AdminInfo0Controller
                 unset($change['fees']['del']);
             }
            
-            //关联区域
+            //获取最新的关联区域
             $ids0=Db::name('freight_fee')
-            ->where('freight',$info['id'])
+            ->where('freight',$info['pid'])
             ->column('expressarea');
             //获取添加数据 
             $adds=[];
@@ -742,6 +746,7 @@ class AdminFreightController extends AdminInfo0Controller
                 $adds=$change['fees']['add'];
                 unset($change['fees']['add']);
             } 
+           
             //循环判断是否更新和添加
             foreach($change['fees'] as $k=>$v){
                 unset($v['ea_name']);
@@ -752,9 +757,11 @@ class AdminFreightController extends AdminInfo0Controller
                         'expressarea'=>['eq',$k]
                     ];
                     $m_ff->where($where)->update($v);
+                   
                 } elseif(in_array($k, $adds)){
                     //不存在，但是属于新增的要添加
                     $m_ff->insert($v);
+                    
                 }
             }
             
@@ -762,7 +769,6 @@ class AdminFreightController extends AdminInfo0Controller
         
         //审核成功，记录操作记录,发送审核信息
         
-        $review_status=$this->review_status;
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
@@ -775,7 +781,7 @@ class AdminFreightController extends AdminInfo0Controller
             'shop'=>$admin['shop'],
         ];
         
-        zz_action($data_action);
+        zz_action($data_action,['aid'=>$info['aid']]);
         $m->commit();
         $this->success('审核成功');
     }

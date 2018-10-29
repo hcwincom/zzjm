@@ -4,7 +4,7 @@ namespace app\order\controller;
 
  
 use think\Db; 
-  
+use app\order\model\OrderModel;
 class AdminOrderController extends OrderBaseController
 {
     
@@ -14,12 +14,11 @@ class AdminOrderController extends OrderBaseController
        
         $this->flag='订单';
         $this->table='order';
-        $this->m=Db::name('order');
+        $this->m=new OrderModel();
        
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
-        
-       
+         
     }
     /**
      * 订单列表
@@ -185,12 +184,13 @@ class AdminOrderController extends OrderBaseController
         //关联表
         $join=[
             ['cmf_custom custom','p.uid=custom.id','left'],
-            ['cmf_order p','p.id=p0.fid','left'],
+            
         ];
         $field='p.*,custom.name as custom_name';
         $list=$m
         ->alias('p')
         ->field('p.id') 
+        ->where($where)
         ->order('p.sort desc,p.id asc')
         ->paginate();
         // 获取分页显示
@@ -214,7 +214,7 @@ class AdminOrderController extends OrderBaseController
             ->join($join)
             ->where('p.id','in',$ids)
             ->order('p.sort desc,p.id asc')
-            ->column($field);
+            ->column($field); 
         }
         
         $this->assign('page',$page);
@@ -245,8 +245,9 @@ class AdminOrderController extends OrderBaseController
      */
     public function add()
     {
-        
-        
+       
+        $admin=$this->admin;
+        $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
         $this->cates();
         
         $this->assign('info',null);
@@ -256,7 +257,7 @@ class AdminOrderController extends OrderBaseController
         $this->assign('custom',null);
         $this->assign('pay',null);
         $this->assign('invoice',null);
-        
+       
         return $this->fetch();  
         
     }
@@ -275,8 +276,197 @@ class AdminOrderController extends OrderBaseController
      */
     public function add_do()
     {
-       parent::add_do();
+        $data=$this->request->param();
+       
+        $fields_int=[
+            'company','uid','store','freight','accept','paytype','pay_type','num',
+        ];
+        foreach($fields_int as $v){
+            $data[$v]=intval($data[$v]);
+            if(empty($data[$v])){
+                $this->error('订单数据不完整'.$v);
+            }
+        }
+        $fields_round=[
+            'pay_freight','real_freight','tax_money','order_amount',
+            'goods_money','other_money','discount_money','weight','size'
+        ];
+        foreach($fields_round as $v){
+            $data[$v]=round($data[$v],2); 
+        }
+        if(empty($data['nums'])){
+            $this->error('未选择产品');
+        }
+        //店铺和下单人
+        $admin=$this->admin;
+        $time=time();
+        $data_order=[
+            'order_type'=>1,
+            'aid'=>$admin['id'],
+            'shop'=>($admin['shop']==1)?2:$admin['shop'],
+            'company'=>$data['company'],
+            'uid'=>$data['uid'],
+            'store'=>$data['store'],
+            'freight'=>$data['freight'],
+            'paytype'=>$data['paytype'],
+            'pay_type'=>$data['pay_type'],
+            'num'=>$data['num'],
+            
+            'pay_freight'=>$data['pay_freight'],
+            'real_freight'=>$data['real_freight'],
+            'tax_money'=>$data['tax_money'],
+            'order_amount'=>$data['order_amount'],
+            'other_money'=>$data['other_money'],
+            'goods_money'=>$data['goods_money'],
+            'discount_money'=>$data['discount_money'],
+            'weight'=>$data['weight'],
+            'size'=>$data['size'],
+            
+            'udsc'=>$data['udsc'],
+            'dsc'=>$data['dsc'],
+            'create_time'=>$time,
+        ];
+        //收货地址信息 
+        $field='p.name,p.mobile,p.phone,p.street,p.postcode'.
+            ',p.province,p.city,p.area'.
+            ',province.name as province_name,city.name as city_name,area.name as area_name';
+        $tel=Db::name('tel')
+        ->alias('p')
+        ->field($field)
+        ->join('cmf_area province','province.type=1 and p.province=province.id','left')
+        ->join('cmf_area city','city.type=2 and p.city=city.id','left')
+        ->join('cmf_area area','area.type=3 and p.area=area.id','left')
+        ->where('p.id',$data['accept'])
+        ->find(); 
+        $data_order['province']=$tel['province'];
+        $data_order['city']=$tel['city'];
+        $data_order['area']=$tel['area'];
+        $data_order['address']=$tel['street'];
+        $data_order['accept_name']=$tel['name'];
+        $data_order['phone']=$tel['phone'];
+        $data_order['mobile']=$tel['mobile'];
+        $data_order['addressinfo']=$tel['province_name'].'-'.$tel['city_name'].'-'.$tel['area_name'];
+        $data_order['postcode']=$tel['postcode'];
         
+        //单号
+        $company=Db::name('company')->field('id,code,name,shop')->find();
+        if($company['shop']!=$data_order['shop']){
+            $this->error('订单来源错误');
+        } 
+        $data_order['order_sn']=$company['code'].date('Ymd').substr($time,-8);
+        $m=$this->m;
+        $m_info=Db::name('order_goods');
+        $m->startTrans();
+        $oid= $m->insertGetId($data_order);
+        //添加订单产品order_goods
+        $nums=$data['nums'];
+        $store=$data_order['store'];
+        $goods=array_keys($nums);
+        
+        //获取所有产品信息
+        $where=[
+            'id'=>['in',$goods], 
+        ];
+        $goods_infos=Db::name('goods')->where($where)->column('id,name,code,pic,price_in,price_sale');
+        //order_break($goods,$store,$city,$shop)
+        $order_goods=[];
+        //标记是否需要拆分订单
+        $is_break=0;
+        foreach($nums as $k=>$v){
+            $v=intval($v);
+            if($v<=0){
+                $this->error('产品数量错误');
+            }
+            $order_goods[$k]=[
+                'oid'=>$oid,
+                'goods'=>$k,
+                'num'=>$v, 
+                'price_real'=>$data['prices'][$k],
+                'pay'=>bcmul($data['prices'][$k],$v,2),
+                'goods_sn'=>$data['sns'][$k],
+                'goods_name'=>$goods_infos[$k]['name'],
+                'goods_code'=>$goods_infos[$k]['code'],
+                'goods_pic'=>$goods_infos[$k]['pic'],
+                'price_in'=>$goods_infos[$k]['price_in'],
+                'price_sale'=>$goods_infos[$k]['price_sale'],
+                
+            ];
+            if($order_goods[$k]['pay'] != $data['price_counts'][$k]){
+                $this->error('产品费用错误');
+            } 
+        }
+        //检查是否拆分订单
+        $i=0;
+        $orders=$m->order_break($order_goods, $oid,$store,  $data_order['city'],  $data_order['shop']);
+        if(count($orders)==1){
+            $m_info->insertAll($order_goods);
+        }else{
+            //拆分订单要生成子单号
+            foreach($orders as $k=>$v){
+                $i++;
+                $tmp_order=[
+                    'fid'=>$oid,
+                    'order_sn'=>$data_order['order_sn'].'-'.$i,
+                    'store'=>$k, 
+                    'create_time'=>$time,
+                    'aid'=>$admin['id'],
+                    'order_type'=>$data_order['order_type'], 
+                    'shop'=>$data_order['shop'],
+                    'company'=>$data_order['company'],
+                    'uid'=>$data_order['uid'], 
+                    'paytype'=>$data_order['paytype'],
+                    'pay_type'=>$data_order['pay_type'], 
+                    'goods_money'=>0, 
+                ];
+                foreach($v as $kk=>$vv){
+                    $tmp_order['goods_money']+=$vv['pay'];
+                }
+                $tmp_oid=$m->insertGetId($tmp_order);
+                foreach($v as $kk=>$vv){
+                    $v[$kk]['oid']=$tmp_oid;
+                }
+                $m_info->insertAll($v);
+            }
+        }
+        //发票信息,要开发票，有抬头的保存
+        if(!empty($data['invoice_title']) && !empty($data['invoice_type'])){
+            $data_invoice=[
+                'invoice_type'=>$data['invoice_type'],
+                'oid'=>$oid,
+                'oid_type'=>1,
+                'aid'=>$data_order['aid'],
+                'title'=>$data['invoice_title'],
+                'ucode'=>$data['invoice_ucode'],
+                'point'=>$data['invoice_point'],
+                'tax_money'=>$data['invoice_tax_money'],
+                'invoice_money'=>$data['invoice_invoice_money'],
+                'dsc'=>$data['invoice_dsc'],
+                'company'=>$company['id'],
+                'company_name'=>$company['name'], 
+                'atime'=>$time,
+            ];
+            Db::name('order_invoice')->insert($data_invoice);
+        }
+        //支付信息，有账户名的保存
+        if(!empty($data['account_name1']) ){
+            $data_pay=[
+                'pay_type'=>1,
+                'oid'=>$oid,
+                'oid_type'=>1, 
+                'bank1'=>$data['account_bank1'],
+                'num1'=>$data['account_num1'],
+                'name1'=>$data['account_name1'],
+                'location1'=>$data['account_location1'],
+                'bank2'=>$data['account_bank2'],
+                'num2'=>$data['account_num2'],
+                'name2'=>$data['account_name2'],
+                'location2'=>$data['account_location2'],
+                'money'=>$data['order_amount'], 
+            ];
+            Db::name('order_pay')->insert($data_pay);
+        }
+        $m->commit();
+        $this->success('订单添加成功，等待审核');
     }
     /**
      * 订单详情
@@ -309,33 +499,27 @@ class AdminOrderController extends OrderBaseController
         $this->where_shop=$shop;
         //获取客户信息
         $custom=Db::name('custom')->where('id',$info['uid'])->find();
-        //选择收货人
-        $where=[
-            'tel.type'=>1,
-            'tel.uid'=>$info['uid'],
-            'tel.status'=>1, 
-        ];
-        $tels=Db::name('tel')
-        ->alias('tel')
-        ->join('cmf_area province','province.id=tel.province','left')
-        ->join('cmf_area city','city.id=tel.city','left')
-        ->join('cmf_area area','area.id=tel.area','left')
-        ->where($where)
-        ->order('tel.sort asc')
-        ->column('tel.site,concat(tel.name,",",tel.mobile,",",province.name,city.name,area.name,tel.street) as addressinfo,tel.province,tel.city,tel.area');
-        //addressinfo王天飞，13807522063，海南省 三亚市 吉阳镇 南边海路292号 ，572000
+        
+        
         //可选支付账号
         $where=[
             'uid'=>$id,
             'type'=>1,
         ];
         $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,bank2,name2,num2,location2');
-        //支付信息
-        if($info['pay']==0){
-            $pay=null;
-        }else{
-            $pay=Db::name('order_pay')->where('id',$info['pay'])->find();
-        }
+        //支付信息 
+        $where=[
+            'oid'=>$id,
+            'oid_type'=>1,
+        ];
+        $pay=Db::name('order_pay')->where($where)->find();
+        //发票
+        $where=[
+            'oid'=>$id,
+            'oid_type'=>1,
+        ];
+        $invoice=Db::name('order_invoice')->where($where)->find();
+        
         //订单产品
         $goods=Db::name('order_goods') 
         ->where('oid',$info['id'])
@@ -356,19 +540,43 @@ class AdminOrderController extends OrderBaseController
             $goods_num[$v['goods']][$v['store']]=[
                 'num'=>$v['num'],
                 'num1'=>$v['num1'], 
-            ];
-            
+            ]; 
         }
-       
+        
         $this->cates();
         
         $this->assign('info',$info);
         $this->assign('goods_num',$goods_num);
-        $this->assign('tels',$tels);
+       
         $this->assign('accounts',$accounts);
         $this->assign('custom',$custom);
         $this->assign('pay',$pay);
+        
+        $this->assign('invoice',$invoice);
         return $this->fetch();  
+    }
+    //获取权限信息
+    public function auth_get($id,$str='goods/AdminGoodsauth/'){
+        $actions=[];
+        //检测是否超级管理员
+        if($id==1){
+            $actions['auth']=1;
+            return $actions;
+        }
+        $roles=Db::name('role_user')->where('user_id',$id)->column('role_id');
+        //检测是否超级管理员
+        if(in_array(1,$roles)){
+            $actions['auth']=1;
+        } else{
+            $where=[
+                'role_id'=>['in',$roles],
+                'rule_name'=>['like',$str.'%'],
+            ];
+            $len=strlen($str)+1;
+            $actions=Db::name('auth_access')->where($where)->column("substring(rule_name,$len)");
+            $actions=array_flip($actions);
+        }
+        return $actions;
     }
     //分类
     public function cates($type=3){
@@ -408,8 +616,14 @@ class AdminOrderController extends OrderBaseController
             'user_type'=>1,
             'user_status'=>1,
         ];
-        $field='id,name,shop';
-        $order='shop asc,sort asc';
+        if($type==3){
+            $field='id,name';
+            $order='sort asc';
+        }else{
+            $field='id,name,shop';
+            $order='shop asc,sort asc';
+        }
+       
         if(empty($where_shop)){
             $shops=Db::name('shop')->where($where)->order('sort asc')->column('id,name');
             $this->assign('shops',$shops); 
@@ -417,16 +631,22 @@ class AdminOrderController extends OrderBaseController
             $where['shop']=$where_shop;
             $where_admin['shop']=$where_shop;
         }
+        
+       
         //公司
         $companys=Db::name('company')->where($where)->order($order)->column($field);
         //付款方式
-        $paytypes=Db::name('paytype')->where($where)->order($order)->column($field);
-        //获取所有仓库 
+        $paytypes=Db::name('paytype')->where($where)->order($order)->column($field.',type');
+        //获取所有仓库
         $stores=Db::name('store')->where($where)->order($order)->column($field); 
         //获取所有物流方式
         $freights=Db::name('freight')->where($where)->order('shop asc,sort asc,store asc')->column('id,name,shop,store'); 
         //管理员
         $aids=Db::name('user')->where($where_admin)->column('id,user_nickname as name,shop');
+        if($type==3){
+            $stores_json=json_encode($stores);
+            $this->assign('stores_json',$stores_json);
+        }
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes); 
         $this->assign('aids',$aids); 
@@ -434,5 +654,6 @@ class AdminOrderController extends OrderBaseController
         $this->assign('freights',$freights); 
         
     }
+    
     
 }

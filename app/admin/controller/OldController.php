@@ -175,6 +175,7 @@ class OldController extends AdminBaseController
         $data_file=[];
         $data_info=[];
         $data_tech=[];
+        $time=time();
         while($tmp=($res->fetch_assoc())){
             $data_goods[]=[
                 'id'=>$tmp['id'],
@@ -190,7 +191,12 @@ class OldController extends AdminBaseController
                 'weight1'=>$tmp['weight'],
                 'cid'=>$tmp['code_id2'],
                 'cid0'=>$tmp['code_id'],
-                
+                'aid'=>1,
+                'rid'=>1,
+                'atime'=>$time,
+                'rtime'=>$time,
+                'time'=>$time,
+                'status'=>2,
             ];
            
             if(!empty($tmp['content'])){
@@ -222,7 +228,7 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_goods->execute('truncate table cmf_goods');
         $row_mew=$m_goods->insertAll($data_goods);
-        $m_goods->where($this->where_corrects)->update($this->corrects);
+        
         //详情
         $m_info=Db::name('goods_info'); 
         //先截取旧数据
@@ -249,23 +255,66 @@ class OldController extends AdminBaseController
             $this->error('数据查询错误');
         }
         $data_file=[];
-        
+        $path='upload/';
+      
+        $pic_size=config('pic_size');
+        $pid=0;
+        //转化图片
+        set_time_limit(0);
         while($tmp=($res->fetch_assoc())){
+            $pathid='seller2/goods'.$tmp['pid'].'/';
+            if(!is_dir($path.$pathid)){
+                mkdir($path.$pathid);
+            }
             
-            $data_file[]=[ 
+            if (!is_file($path.$tmp['file']))
+            {
+               continue;
+            }
+            //获取后缀名,复制文件
+            $ext=substr($tmp['file'], strrpos($tmp['file'],'.'));
+            $new_file=$pathid.'jmold'.$tmp['id'].$ext;
+            $data_file[]=[
                 'pid'=>$tmp['pid'],
-                'file'=>$tmp['file'],
+                'file'=>$new_file,
                 'name'=>'极敏商城图片'.$tmp['id'],
                 'type'=>1,
             ];
+            if(!is_file($path. $new_file) ){
+                $result =copy($path.$tmp['file'], $path.$new_file);
+                if(!$result){
+                    echo '复制文件错误';
+                    exit;
+                }
+            }
+           
             
+            //判断是否需要编制图片 
+            $tmp_file=['file'=>$new_file];
+            $tmp_file['file1']= $tmp_file['file'].'1.jpg';
+            $tmp_file['file2']= $tmp_file['file'].'2.jpg';
+            $tmp_file['file3']= $tmp_file['file'].'3.jpg';
+            //设置封面图片
+            if($pid!=$tmp['pid']){
+                $pid=$tmp['pid'];
+                $m_goods->where('id',$pid)->setField('pic',$tmp_file['file1']);
+            }
+            if(!is_file($path. $tmp_file['file1']) ){
+                $dd=zz_set_image($tmp_file['file'], $tmp_file['file1'], $pic_size[1][0], $pic_size[1][1]); 
+            }
+            if(!is_file($path. $tmp_file['file2'])){
+                zz_set_image($tmp_file['file'], $tmp_file['file2'], $pic_size[2][0], $pic_size[2][1]);
+            }
+            if(!is_file($path. $tmp_file['file3'])){
+                zz_set_image($tmp_file['file'], $tmp_file['file3'], $pic_size[3][0], $pic_size[3][1]);
+            } 
         }
         $m_file->insertAll($data_file);
         
         $m_goods->commit();
         $this->success('已同步数据数'.$row_mew);
     }
-    
+     
     // '所属公司+付款银行+付款类型
     public function sys()
     {
@@ -783,12 +832,12 @@ class OldController extends AdminBaseController
         $field='p.id,p.order_sn,p.order_no as express_no,p.user_id as uid,'.
                 'p.pay_type as paytype,p.pay_status,p.paystate,p.distribution_status,p.status,'.
                 'p.create_time,p.pay_time,p.send_time,p.accept_time,p.completion_time,'.
-                'p.accept_name,p.telphone,p.province,p.city,p.area,p.address,p.mobile,'.
-                'p.payable_amount,p.order_amount,p.payable_freight,p.real_freight,'.
+                'p.accept_name,p.telphone as mobile,p.province,p.city,p.area,p.address,p.mobile as phone,'.
+                'p.payable_amount as goods_money,p.order_amount,p.payable_freight as pay_freight,p.real_freight,'.
                 'p.postscript as udsc,p.note as adsc,p.if_del as is_del,'.
                 'p.ordertype as order_type,p.ordercompany as company,p.admin_id as aid,'.
                 'p.sfkp as invoice_type,'.
-                'concat(province.area_name,city.area_name,area.area_name) as addressinfo,area.area_postcode as postcode';
+                'concat(province.area_name,"-",city.area_name,"-",area.area_name) as addressinfo,area.area_postcode as postcode';
         //订单状态变化
         //336,上海拜豪机械设备有限公司 ,310114572666836,上海市嘉定区张掖路355号3B910 电话:021-60520497,农行上海江桥支行 账号: 03827500040041747,
         /*  //原状态,6,7暂无
@@ -837,9 +886,9 @@ class OldController extends AdminBaseController
         for($i=0;$i<$page;$i++){
             $sql='select '.$field.
                 ' from sp_order as p '.
-                ' left join sp_areas province on province.id=p.province and province.area_type=1 and p.province>0 '.
-                ' left join sp_areas city on city.id=p.city and city.area_type=2 and p.city>0 '.
-                ' left join sp_areas area on area.id=p.area and area.area_type=3 and p.area>0 '.
+                ' left join sp_areas province on province.area_type=1 and p.province>0 and province.id=p.province '.
+                ' left join sp_areas city on city.area_type=2 and p.city>0 and city.id=p.city '.
+                ' left join sp_areas area on area.area_type=3 and p.area>0 and area.id=p.area '.
                 'where p.id >'.($i*$count).' and p.id<='.(($i+1)*$count);
             $data=$m_old->query($sql);
             foreach($data as $k=>$v){ 
@@ -944,7 +993,7 @@ class OldController extends AdminBaseController
         $sql='select max(id) as count from sp_order_goods';
         $data=$m_old->query($sql);
         $page=ceil($data[0]['count']/$count);
-        $field='id,order_id as oid,codeid as goods,factory_price as price_in,sell_price as price_sell,prefer_price as price_real,goods_nums as num,goods_weight as weight';
+        $field='id,order_id as oid,codeid as goods,factory_price as price_in,sell_price as price_sale,prefer_price as price_real,goods_nums as num,goods_weight as weight';
         for($i=0;$i<$page;$i++){
             $sql='select '.$field.' from sp_order_goods '.
                 'where id >'.($i*$count).' and id<='.(($i+1)*$count);
@@ -961,11 +1010,11 @@ class OldController extends AdminBaseController
         $m_old=Db::connect($this->db_old);
         $count=1000;
         //订单主体
-        $m_new=Db::name('freight_doc');
+        $m_new=Db::name('order_freight');
         //开启事务
         $m_new->startTrans();
         //先截取旧数据
-        $m_new->execute('truncate table cmf_freight_doc');
+        $m_new->execute('truncate table cmf_order_freight');
         //获取最大的id来分页查询
         $sql='select max(id) as count from sp_delivery_doc';
         $data=$m_old->query($sql);

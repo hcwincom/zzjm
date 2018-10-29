@@ -290,4 +290,6 @@ class GoodsajaxController extends AdminBaseController
         $goods=Db::name('goods')->where($where)->column('id,name');
         $this->success('ok','',$goods);
     }
+    
+   
 }
