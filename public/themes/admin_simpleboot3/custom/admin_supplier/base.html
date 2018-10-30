@@ -255,7 +255,7 @@
 				<div class="col-md-6 col-sm-10">
 				   <select  class="form-control" name="invoice_type" id="">
 					<foreach name="invoice_types" item="vo">
-					<option value="{$key}" <if condition="$key eq $info.invoice_type" >selected</if>>{$vo}</option>
+					<option value="{$key}" <if condition="$key eq $info.invoice_type" >selected</if>>{$vo[0]}</option>
 					</foreach>
 					</select>
 				 <present name="change.invoice_type">

@@ -54,12 +54,7 @@ class OrderajaxController extends AdminBase0Controller
         unset($where['id']); 
         $nums=Db::name('store_goods')->where($where)->column('store,num,num1');
         $goods['nums']=$nums;
-        //总库存
-        $goods['nums'][0]=['store'=>0,'num'=>0,'num1'=>0];
-        foreach($nums as $k=>$v){
-            $goods['nums'][0]['num']+=$v['num'];
-            $goods['nums'][0]['num1']+=$v['num1'];
-         }
+         
          //产品图片
          $where=[
              'pid'=>$id,

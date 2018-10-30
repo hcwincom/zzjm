@@ -225,7 +225,7 @@
 						</td>
 					  	<td>{$paytypes[$vo['paytype']]['name']|default=$vo['paytype']}</td>
 					   
-					  	<td>{$vo.custom_name}</td>
+					  	<td><a href="{:url('custom/AdminCustom/edit',['id'=>$vo.uid])}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
 						<td>{$vo.order_amount}</td>
 						<td>{$pay_status[$vo.pay_status]}</td>
 					 
@@ -233,8 +233,8 @@
 					 
 						<td>{$statuss[$vo.status]}
 						 <switch name="vo.sort">
-						 	<case value="10"><a class="btn btn-primary" href="{:url('send',['id'=>$vo.id])}">发货</a></case>
-						 	<case value="5"><a class="btn btn-primary" href="{:url('money',['id'=>$vo.id])}">确认货款</a></case>
+						 	<case value="10"><a class="btn btn-primary" href="{:url('send',['id'=>$vo.id])}" target="{$zztarget.list}" >发货</a></case>
+						 	<case value="5"><a class="btn btn-primary" href="{:url('money',['id'=>$vo.id])}" target="{$zztarget.list}" >确认货款</a></case>
 						 	 
 						 </switch>
 						</td>

@@ -13,6 +13,7 @@ function zz_instore($data){
     $where=[
         'store'=>['eq',$data['store']],
         'goods'=>['eq',$data['goods']], 
+        'shop'=>['eq',$data['shop']], 
     ];
     $tmp=$m_store_goods->where($where)->find();
     if(empty($tmp)){
@@ -20,15 +21,33 @@ function zz_instore($data){
             return '没有库存，请选择其他产品或仓库';
         }
        
-        //不存在，要添加
+        //不存在，要添加.总库存也要添加
        $data_store=[
-           'store'=>$data['store'],
-           'goods'=>$data['goods'], 
-           'shop'=>$data['shop'],
-           'time'=>$data['time'],
-           'num1'=>$data['num'], 
+           [
+               'store'=>$data['store'],
+               'goods'=>$data['goods'], 
+               'shop'=>$data['shop'],
+               'time'=>$data['time'],
+               'num1'=>$data['num'],  
+           ], 
        ];
-       $m_store_goods->insert($data_store);
+       //总库存是否添加
+       $where=[
+           'store'=>['eq',0],
+           'goods'=>['eq',$data['goods']],
+           'shop'=>['eq',$data['shop']], 
+       ];
+       $tmp=$m_store_goods->where($where)->find();
+       if(empty($tmp)){
+           $data_store[]=[
+                   'store'=>0,
+                   'goods'=>$data['goods'],
+                   'shop'=>$data['shop'],
+                   'time'=>$data['time'],
+                   'num1'=>$data['num'], 
+               ];
+       }
+       $m_store_goods->insertAll($data_store);
        
     }
     if($data['num']!=0){  

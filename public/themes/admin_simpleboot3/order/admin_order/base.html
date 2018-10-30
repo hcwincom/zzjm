@@ -175,17 +175,16 @@
 				 
 				</div>
 			</div>
-		</empty>
-		<div  >
+			<div class="order" >
 			 
 			  <table class="table table-hover table-bordered table-list" id="goods-list">
 				 
 			 	<tr id="goods0">
 				 	 <td>产品名称</td>
 				 	 <td width="100">产品编码</td>
-				 	 <td width="200">产品条码</td>
+				 	 
 				 	 <td width="100">产品图片</td> 
-				 	 <td width="150">库存</td> 
+				 	 <td width="100">总库存</td> 
 				 	  <td width="100">成本价</td>
 					 <td width="100">零售价</td> 
 					 <td width="100">供应价</td>
@@ -193,22 +192,50 @@
 					 <td width="100">金额</td>
 					 <td width="100">毛重</td> 
 					 <td width="100">体积</td> 
+					 <td >包装说明/备注</td> 
+					 <td width="100">操作</td> 
 			 	</tr> 
-			 <notempty name="goods">
-			  <foreach name="goods" item="vo" key="key">
+			 
+	 		</table>
+	 		</div>
+		</empty>
+		<foreach name="orders" item="vv" key="kk">
+		<div class="order order{$kk}" >
+			 
+			  <table class="table table-hover table-bordered table-list goods-list"  >
+				 
+			 	<tr >
+				 	 <td>订单{$kk}-产品名称</td>
+				 	 <td width="100">产品编码</td>
+				 	 
+				 	 <td width="100">产品图片</td> 
+				 	 <td width="100">总库存</td> 
+				 	  <td width="100">成本价</td>
+					 <td width="100">零售价</td> 
+					 <td width="100">供应价</td>
+					 <td width="50">数量</td>
+					 <td width="100">金额</td>
+					 <td width="100">毛重</td> 
+					 <td width="100">体积</td> 
+					 <td >包装说明/备注</td> 
+					 <td width="100">操作</td> 
+			 	</tr> 
+			 
+			  <foreach name="infos[$kk]" item="vo" key="key">
 			   
-     	     	<tr id="goods{$key}"> 
+     	     	<tr class="goods{$key}"> 
      	     		<td><a href="{$goods_url}/id/{$key}" target="{$zztarget.other}">{$vo.goods_name}</a></td> 
      	    		<td>{$vo.goods_code}</td> 
-    	    		<td ><input type="text" name="sns{$key}" class="form-control sn " value="{$vo.goods_sn}"/></td> 
+    	    		 
      	   			<td class="tableImg">
-     	   				<div class="tdImg"><image src="{$image_url}/{$vo.goods_pic}"  /></div>
+     	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vo.goods_pic});"></div>
+     	   				 <notempty name="vo.pics">
      	   				<div class="listposi"> 
      	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
 		    				<div class="imgGroup">
 		    				<ul class="imgList" class="imgList">
-		    				<foreach name="vo.pics" item="pic">
-								<li><img src="{$image_url}/{$pic.file1}" alt=""> 
+		    				<foreach name="goods[$key]['pics']" item="pic">
+								<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
 		    					<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
 		    				</foreach>
 		    				</ul>
@@ -216,73 +243,173 @@
 		    				<span class="next"><i class="right"></i></span>
 		    				</div>
 		    			</div>
+		    			</notempty>
 					</td> 
+					 
      	   			<td class="clickInfo">
      	   				<div style="position:relative;" class="goInfo" data-width="0">
-     	   				0-暂未计算和判断
-     	   		 		</div><div class="goodsInfo">
-     	   		 		<table class="table table-hover table-bordered">
-     	   		 		<thead>
-     	   		 		 
-     	   		 		<tr>
-						<td>0</td></tr></thead>
-						<tbody><tr>
-					   </tr></tbody>
-					   </table>
+     	   				<present name="goods[$key]['nums'][0]">
+     	   				{$goods[$key]['nums'][0]['num']}({$goods[$key]['nums'][0]['num1']})
+     	   				<else/>
+     	   				--
+     	   				</present> 
+     	   		 		</div>
+     	   		 		<div class="goodsInfo">
+	     	   		 		<table class="table table-hover table-bordered">
+		     	   		 		{$stores_tr}
+		     	   		 		<tbody>
+			     	   		 		<tr>
+			     	   		 		<foreach name="stores" item="svv" key="skk">
+			     	   		 			<td>
+			     	   		 			<present name="goods[$key]['nums'][$kk]">
+			     	   		 			{$goods[$key]['nums'][$skk]['num']}($goods[$key]['nums'][$skk]['num1'])
+			     	   		 			<else/>
+			     	   		 			--
+			     	   		 			</present>
+			     	   		 			
+			     	   		 			</td>
+			     	   		 		</foreach>
+			     	   		 		</tr>
+		     	   		 		</tbody>
+	     	   		 		 
+						   </table>
 					   </div>
 					</td>
-     	   			<td>{$vo.price_in}</td> 
-     	   			<td>{$vo.price_sale}</td>
-     	    		<td><input type="text" name="prices[{$key}]" class="form-control price_sale " value="{$vo.price_real}"/></td>
-     	    		<td><input type="number" name="nums[{$key}]" class="form-control input-order num" value="1"/></td>
-     	    		<td><input type="text" name="price_counts[{$key}]" class="form-control price_count" value="{$vo.pay}" /></td>
+     	   			<td><input type="text" class="form-control price_in" value="{$vo.price_in}" readonly/></td> 
+     	   			<td><input type="text" class="form-control price_sale" value="{$vo.price_sale}" readonly/></td>
+     	    		<td>
+     	    		<input type="text" name="prices[{$key}]" class="form-control price_sale " value="{$vo.price_real}"/>
+     	    		<present name="change['edit'][$kk][$key]['price_real']">
+     	    			<input type="text"  class="form-control price_sale red" value="{$change['edit'][$kk][$key]['price_real']}"/>
+     	    		</present> 
+     	    		</td>
+     	    		<td><input type="number" name="nums[{$key}]" class="form-control input-order num" value="1" readonly/></td>
+     	    		<td><input type="text" name="price_counts[{$key}]" class="form-control price_count" value="{$vo.pay}" readonly/></td>
      	    		<td><input type="text"  name="weight1s[{$key}]" class="form-control weight1" value="{$vo.weight}"/>
      	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/></td>
      	   			<td><input type="text"  name="size1s[{$key}]" class="form-control size1" value="{$vo.size}"/>
     	   				<input type="hidden" class="size0" value="{$vo.size1}"/></td>
+    	   			<td><input type="text"  name="dscs[{$key}]" class="form-control dsc" value="{$vo.dsc}"/></td>
+    	   			<td><input type="number" class="form-control input-order num" value="0"/></td>
     	   		</tr>
 			  
 			  </foreach>	
 			 
-			 </notempty>
+			 
 			 
 	 		</table>
 			 
-			<p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
-		</div>	  
+			 
+		 <eq name="info.is_real" value="2">
 			 <div class="form-group fleft-all"  >
-				<label class="col-sm-2 control-label">物流费用</label>
+				<label class="col-sm-2 control-label">订单{$kk}</label>
 				<div class="col-md-6 col-sm-10">
+					 <label class="input-inline"> 
+						 发货仓库：
+						 <select  class="form-control store" name="store0[]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="stores" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.store"></if>>{$vo}</option>
+						</foreach>
+						</select>
+						 
+						 <present name="change['oid'][$kk]['store']">
+						 <select  class="form-control store red"  >
+					    	<option value="0">请选择</option>
+						<foreach name="stores" item="vo">
+							<option value="{$key}" <if condition="$key eq $change['oid'][$kk]['store']">selected</if>>{$vo}</option>
+						</foreach>
+						</select>
+						 </present>
+					 </label>
+					 
+					 <label class="input-inline"> 
+						 发货物流：
+						 <select  class="form-control freight" name="freight0[]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="freights" item="vo">
+							<option value="{$key}" class="freight{$vo.store}" <if condition="$key eq $vv.store">selected</if>>{$vo.name}</option>
+						</foreach>
+						</select>
+						 
+						 <present name="change['oid'][$kk]['freight']">
+						 <select  class="form-control freight red"  >
+					    	<option value="0">请选择</option>
+						<foreach name="freights" item="vo">
+							<option value="{$key}" <if condition="$key eq $change['oid'][$kk]['store']">selected</if>>{$vo.name}</option>
+						</foreach>
+						</select>
+						 </present>
+					 </label>
+					 
 				    <label class="input-inline"> 
-					 包装总重：<input type="text" class="form-control short" id="weight" name="weight" value="" required/> 
+					 包装总重：<input type="text" class="form-control short weight" name="weight" value="{$vv.weight}" required/> 
 					 <present name="change.weight">
 					 	<input type="text" class="form-control short red"  value="{$change.weight}"  />  
 					 </present>
 					 </label>
 				 	 <label class="input-inline"> 
-					 包装总体积：<input type="text" class="form-control short" id="size" name="size" value="" required/> 
+					 包装总体积：<input type="text" class="form-control short size" name="size" value="{$vv.size}" required/> 
 					 <present name="change.size">
 					 	<input type="text" class="form-control short red"  value="{$change.size}"  />  
 					 </present>
 					</label>
 				 	 <label class="input-inline"> 
-					 用户支付运费：<input type="text" class="form-control short" id="pay_freight" name="pay_freight" value="" required/> 
+					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight" value="{$vv.pay_freight}" required/> 
 					 <present name="change.pay_freight">
 					 	<input type="text" class="form-control short red"  value="{$change.pay_freight}"  />  
 					 </present>
 					</label>
 				 	 <label class="input-inline"> 
-					 实际运费：<input type="text" class="form-control short" id="real_freight" name="real_freight" value="" required/> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" value="{$vv.real_freight}" required/> 
 					 <present name="change.real_freight">
 					 	<input type="text" class="form-control short red"  value="{$change.real_freight}"  />  
 					 </present>
-					 	<button id="freight_count" type="button">运费计算</button>
+					 	<button class="freight_count" type="button">运费计算</button>
 					 </label>
 					   <p class="notice">运费计算根据最终的包装总体积、总重和预先指定的快递规则计算。
 					   <br/>计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费 
 					  </p> 
 				</div>
-			</div> 
+			</div>
+		</eq> 
+		</div>	
+		</foreach> 
+	 
+			 <div class="form-group fleft-all order0"  >
+				<label class="col-sm-2 control-label">总物流费用</label>
+				<div class="col-md-6 col-sm-10">
+				    <label class="input-inline"> 
+					 包装总重：<input type="text" class="form-control short " name="weight" value="{$info.weight}" required/> 
+					 <present name="change.weight">
+					 	<input type="text" class="form-control short red"  value="{$change.weight}"  />  
+					 </present>
+					 </label>
+				 	 <label class="input-inline"> 
+					 包装总体积：<input type="text" class="form-control short size" name="size" value="{$info.size}" required/> 
+					 <present name="change.size">
+					 	<input type="text" class="form-control short red"  value="{$change.size}"  />  
+					 </present>
+					</label>
+				 	 <label class="input-inline"> 
+					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight" value="{$info.pay_freight}" required/> 
+					 <present name="change.pay_freight">
+					 	<input type="text" class="form-control short red"  value="{$change.pay_freight}"  />  
+					 </present>
+					</label>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" value="{$info.real_freight}" required/> 
+					 <present name="change.real_freight">
+					 	<input type="text" class="form-control short red"  value="{$change.real_freight}"  />  
+					 </present>
+					  
+					 </label>
+					   <p class="notice">运费计算根据最终的包装总体积、总重和预先指定的快递规则计算。
+					   <br/>计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费 
+					  </p> 
+				</div>
+			</div>
+	 
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">客户付款和发票</label>
 				<div class="col-md-6 col-sm-10">

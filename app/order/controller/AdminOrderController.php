@@ -388,13 +388,13 @@ class AdminOrderController extends OrderBaseController
                 'goods'=>$k,
                 'num'=>$v, 
                 'price_real'=>$data['prices'][$k],
-                'pay'=>bcmul($data['prices'][$k],$v,2),
-                'goods_sn'=>$data['sns'][$k],
+                'pay'=>bcmul($data['prices'][$k],$v,2), 
                 'goods_name'=>$goods_infos[$k]['name'],
                 'goods_code'=>$goods_infos[$k]['code'],
                 'goods_pic'=>$goods_infos[$k]['pic'],
                 'price_in'=>$goods_infos[$k]['price_in'],
                 'price_sale'=>$goods_infos[$k]['price_sale'],
+                'dsc'=>$goods_infos[$k]['dsc'],
                 
             ];
             if($order_goods[$k]['pay'] != $data['price_counts'][$k]){
@@ -551,30 +551,37 @@ class AdminOrderController extends OrderBaseController
         $where_goods=[];
         if($info['is_real']==1){
             $where_goods['oid']=['eq',$info['id']];
+            $orders=[$info['id']=>$info];
         }else{
             $orders=$m->where('fid',$info['id'])->column('id,order_sn,freight,store,num,weight,size,discount_money,goods_money,pay_freight,real_freight,other_money,order_amount');
-            dump($orders);
+           
             $order_ids=array_keys($orders);
             $where_goods['oid']=['in',$order_ids];
         }
-       
-        $goods=Db::name('order_goods') 
+        //全部订单产品
+        $order_goods=Db::name('order_goods') 
         ->where($where_goods)
-        ->column('goods,goods_name,goods_code,goods_sn,goods_pic,price_in,price_sale,price_real,num,pay,weight,size');
-       
-        $goods_id=array_keys($goods); 
+        ->column('');
+        
         //检查用户权限
         $authObj = new \cmf\lib\Auth();
         $name       = strtolower('goods/AdminGoodsauth/price_in_get');
         $is_auth=$authObj->check($admin['id'], $name);
-        //判断产品重量体积单位,统一转化为kg,cm3
-        foreach($goods as $k=>$v){
+        //数据转化，按订单分组
+        $infos=[];
+        $goods_id=[]; 
+        foreach($order_goods as $k=>$v){
+            $goods_id[$v['goods']]=$v['goods']; 
+            $goods[$v['goods']]=[];
             if($is_auth==false){
-                $goods[$k]['price_in']='--';
+                $v['price_in']='--';
             } 
-            $goods[$k]['weight1']=bcdiv($v['weight'],$v['num'],2);
-            $goods[$k]['size1']=bcdiv($v['size'],$v['num'],2); 
+            $v['weight1']=bcdiv($v['weight'],$v['num'],2);
+            $v['size1']=bcdiv($v['size'],$v['num'],2); 
+             
+            $infos[$v['oid']][$v['goods']]=$v;
         } 
+        
          //获取产品图片
          $where=[
              'pid'=>['in',$goods_id],
@@ -596,7 +603,7 @@ class AdminOrderController extends OrderBaseController
         ];
         $list=Db::name('store_goods')->where($where)->column('id,store,goods,num,num1');
         //循环得到数据 
-        foreach($list as $k=>$v){
+        foreach($list as $k=>$v){ 
             $goods[$v['goods']]['nums'][$v['store']]=[
                 'num'=>$v['num'],
                 'num1'=>$v['num1'], 
@@ -606,6 +613,8 @@ class AdminOrderController extends OrderBaseController
         $this->cates();
         
         $this->assign('info',$info); 
+        $this->assign('infos',$infos); 
+        $this->assign('orders',$orders); 
         $this->assign('goods',$goods); 
         $this->assign('accounts',$accounts);
         $this->assign('custom',$custom);
@@ -681,9 +690,14 @@ class AdminOrderController extends OrderBaseController
         $freights=Db::name('freight')->where($where)->order('shop asc,sort asc,store asc')->column('id,name,shop,store'); 
         //管理员
         $aids=Db::name('user')->where($where_admin)->column('id,user_nickname as name,shop');
-        if($type==3){
-            $stores_json=json_encode($stores);
-            $this->assign('stores_json',$stores_json);
+        if($type==3){ 
+            $stores_tr='<thead><tr>';
+            foreach($stores as $k=>$v){
+                $stores_tr.='<th>'.$v.'</th>';
+            } 
+            $stores_tr.='</tr></thead>'; 
+            $this->assign('stores_tr',$stores_tr);
+            $this->assign('stores_json',json_encode($stores)); 
         }
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes); 

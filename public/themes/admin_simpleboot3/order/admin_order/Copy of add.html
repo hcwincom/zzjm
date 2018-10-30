@@ -540,7 +540,7 @@ $('#goods_add').click(function(){
      	    var tr='';
      	    var div_pic='<div class="listposi">'+
      	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
-		    '<div class="imgGroup"><ul class="imgList"';
+		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
 		    var pics=info.pics;
 		    var nums=info.nums;
 		    for(var i in pics){
@@ -567,7 +567,7 @@ $('#goods_add').click(function(){
 		    div_num+='</tr></tbody></table>	</div></td>';	 
      	    tr+='<tr id="goods'+info['id']+'"><td>'+
      	    '<a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td><td>'+
-     	    info['code']+'</td><td class="tableImg"><div class="tdImg">'+
+     	    info['code']+'</td><td ><div class="tdImg">'+
      	   '<image src="'+image_url+'/'+info['pic']+'"  /></div>'+div_pic+'</td>'+
      	    div_num+'<td>'+
      	    '<input type="text" name="prices['+info['id']+']" class="form-control price_sale " value="'+info['price_sale']+'"/></td><td>'+

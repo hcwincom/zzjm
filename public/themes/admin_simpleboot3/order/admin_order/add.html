@@ -14,7 +14,8 @@
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-					 <p>添加订单后需管理员审核后才能生效</p>
+					 <p class="notice">添加订单后需管理员审核后才能生效</p>
+					 <p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
 				</div>
 			</div>
 		</form>
@@ -37,11 +38,8 @@ var arr;
 var store=0; 
 //仓库
 var stores={$stores_json};
-var num_table='</div><div class="goodsInfo"><table class="table table-hover table-bordered"><thead><tr>';
-for(var i in stores){
-	num_table+='<th>'+stores[i]+'</th>';
-}
-num_table+='</tr></thead><tbody><tr>';
+var stores_tr="{$stores_tr}";
+
 
   
 $('#invoice_type').val(2);
@@ -236,38 +234,36 @@ $('#goods_add').click(function(){
      	    var tr='';
      	    var div_pic='<div class="listposi">'+
      	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
-		    '<div class="imgGroup"><ul class="imgList"';
+		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
 		    var pics=info.pics;
 		    var nums=info.nums;
 		    for(var i in pics){
-		    	div_pic+='<li style="background-image:url(' + image_url + '/' + pics[i]['file1'] +');background-size:contain;">'+
-				'<input type="hidden" value="'+image_url+'/'+pics[i]['file1']+'"></li>'; 
-				// <img src="'+image_url+'/'+pics[i]['file1']+'" alt="">
+		    	div_pic+='<li style="background-size: contain;background-image:url('+image_url+'/'+pics[i]['file1']+');">'+
+		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file1']+'"></li>'; 
 		    }
 		    div_pic+='</ul><span class="prev"><i class="left"></i></span>'+
 		    '<span class="next"><i class="right"></i></span></div></div>';
-		    var div_num='<td class="clickInfo"><div style="position:relative;" class="goInfo" data-width="0">'+nums[0]['num']+'('+nums[0]['num1']+')--';
-		   
-		    if(nums.hasOwnProperty(store)){
-		    	div_num+=nums[store]['num']+'('+nums[store]['num1']+')';
+		    var div_num='<td class="clickInfo"><div style="position:relative;" class="goInfo" data-width="0">';
+		    
+		    if(nums.hasOwnProperty(0)){
+		    	div_num+=nums[0]['num']+'('+nums[0]['num1']+')';
 		    }else{
-		    	div_num+='0(0)';
+		    	div_num+='--';
 		    }
-		    div_num+=num_table;
+		    div_num+='</div><div class="goodsInfo"><table class="table table-hover table-bordered">'+stores_tr+'<tbody><tr>';
+		    
 		    for(var i in stores){
 		    	if(nums.hasOwnProperty(i)){
 			    	div_num+='<td>'+nums[i]['num']+'('+nums[i]['num1']+')</td>';
 			    }else{
-			    	div_num+='<td>0(0)</td>';
+			    	div_num+='<td>--</td>';
 			    }
-			}
-			// <image src="'+image_url+'/'+info['pic']+'" />
+		    }
 		    div_num+='</tr></tbody></table>	</div></td>';	 
      	    tr+='<tr id="goods'+info['id']+'">'+
      	    '<td><a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td>'+
-     	    '<td>'+info['code']+'</td>'+ 
-    	    '<td ><input type="text" name="sns['+info['id']+']" class="form-control sn " value="'+info['sn']+'"/></td>'+ 
-     	   '<td class="tableImg"><div class="tdImg" style="background-image:url(' + image_url + '/' + info['pic'] +');background-size:100% 100%;"></div>'+div_pic+'</td>'+
+     	    '<td>'+info['code']+'</td>'+  
+     	   '<td class="tableImg"><div class="tdImg" style="background-size: 100% 100%;background-image:url('+image_url+'/'+info['pic']+');"></div>'+div_pic+'</td>'+
      	    div_num+
      	   '<td>'+info['price_in']+'</td>'+ 
      	   '<td>'+info['price_sale']+'</td>'+ 
@@ -277,7 +273,9 @@ $('#goods_add').click(function(){
      	    '<td><input type="text"  name="weight1s['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
      	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td>'+
      	   '<td><input type="text"  name="size1s['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
-    	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td></tr>';
+    	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td>'+
+    	   '<td><input type="text"  name="dscs['+info['id']+']" class="form-control dsc" value=""/></td>'+ 
+    	   '<td><button type="button" class="goods_del">删除</td></tr>';
      	    $('#goods-list').append(tr);
      	   money_change($('#goods'+info['id']),'num');
         }, 
@@ -286,12 +284,48 @@ $('#goods_add').click(function(){
         }
     }); 
 });
+$(document).on('click','.goods_del',function(){
+	$(this).parents('tr').remove();
+	order_change();
+	
+}); 
 $(document).on('change','.price_sale',function(){
 	money_change($(this).parents('tr'),'price');
 }); 
 $(document).on('change','.num',function(){ 
 	money_change($(this).parents('tr'),'num'); 
 });
+function order_change(){  
+	var num=0; 
+	var price_count1=0;
+	 
+	var price_count=0;
+	var num_count=0;  
+	$('.price_count').each(function(){
+		$tr=$(this).parents('tr'); 
+		num=parseInt($tr.find('.num').val()); 
+		if(!(num>0)){
+			num=1; 
+			$(this).val($tr.find('.price_sale').val());
+		}
+		$tr.find('.num').val(num);
+		num_count+=num;
+		
+		price_count1=parseFloat($(this).val());
+		if(!(price_count1>=0)){
+			price_count1=0;
+			$(this).val(price_count1);
+		}
+		price_count+=price_count1; 
+	});
+	$('#goods_money').val(price_count.toFixed(2));
+	$('#num').val(num_count);
+	//重量体积改变
+	if(type=='num'){ 
+		weight_change();
+	}  
+	order_account();
+}
 function money_change($tr,type='price'){  
 	var num=parseInt($tr.find('.num').val()); 
 	var price_sale=parseFloat($tr.find('.price_sale').val());
