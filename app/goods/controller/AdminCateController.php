@@ -222,7 +222,7 @@ class AdminCateController extends GoodsBaseController
             $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
         }
         
-        
+        $this->assign('fid',$info['fid']);
         $this->assign('info',$info);
         $this->assign('cates',$cates);
         return $this->fetch();
@@ -451,6 +451,7 @@ class AdminCateController extends GoodsBaseController
         $change=json_decode($change,true);
         $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
         
+        $this->assign('fid',$info['fid']);
         $this->assign('info',$info);
         $this->assign('info1',$info1);
         $this->assign('cates',$cates);
