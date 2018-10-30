@@ -164,8 +164,8 @@
 						 <eq name="vo.pic" value="">
 						 	无图
 						 <else/>
-							 <div class="tdImg"> 
-							 	<img src="{:cmf_get_image_url($vo['pic'])}" alt="">
+							 <div class="tdImg" style="background-size: 100% 100%;background-image:url({:cmf_get_image_url($vo['pic'])});"> 
+							 	<!-- <img src="{:cmf_get_image_url($vo['pic'])}" alt=""> -->
 							 </div>
 						 </eq> 
 						<present name="vo.pics" >
@@ -175,10 +175,10 @@
 									<span class="glyphicon glyphicon-remove-circle"></span>
 								</div>
 								<div class="imgGroup">
-									<ul class="imgList" class="imgList">
+									<ul class="imgList">
 									<foreach name="vo.pics" item="vv">  
-										<li>
-											<img src="{:cmf_get_image_url($vv.file1)}" alt="">
+										<li style="background-size: contain;background-image:url({:cmf_get_image_url($vv.file1)});">
+											<!-- <img src="{:cmf_get_image_url($vv.file1)}" alt=""> -->
 											<input type="hidden" value="{:cmf_get_image_url($vv.file3)}">
 										</li>
 									</foreach>	 

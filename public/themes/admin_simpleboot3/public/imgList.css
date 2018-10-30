@@ -3,8 +3,8 @@
     .listposi{position:absolute;top:-160px;left:-100px;right:0;margin:auto;z-index: 10;display: none;width: 650px;background: #f5f5f5;}
 	.imgGroup{position: relative;width: 550px;height:150px;padding: 0 20px;margin: 0 auto;overflow: hidden;}
 	.imgList{height: 80px;position: absolute;z-index: 2;left: 20px;top: 23%;transition: all 0.4s linear;margin: 0;padding: 0;}
-	.imgList li{list-style: none;float: left;width: 80px;height: 100%;margin-left: 5px;overflow: hidden;}
-	.imgList li img{width: 100%;height: 100%;}
+	.imgList li{list-style: none;float: left;width: 80px;height: 100%;margin-left: 5px;overflow: hidden;background-size: contain;}
+	/* .imgList li img{width: 100%;height: 100%;} */
 	.imgGroup>span{position: absolute;top:17%;z-index: 30;background-color: black;display: inline-block;width: 20px;height: 100px;cursor: pointer;opacity: 0.8;}
 	.prev{left: 0;}
 	.next{right: 0;}
@@ -13,8 +13,8 @@
 	.imgGroup span .right {border-left: 10px solid #fff;}
 	.imglunclose{position: absolute;top:0;right: 5px;width: 40px;height: 40px;text-align: center;line-height: 40px;cursor: pointer;}
 	.imglunclose>span{font-size: 30px;}
-	.tdImg{cursor: pointer;width: 50px;height: 30px;position: relative;}
-	.tdImg img{width: 110%;height: 100%;}
+	.tdImg{padding: 0;margin: 0;cursor: pointer;height: 30px;background-repeat: no-repeat;}
+	/* .tdImg img{width: 110%;height: 100%;} */
 	/* 点击放大图片 */
 	#outdiv{position:fixed;top:0;right: 0;left: 0;bottom: 0;margin: auto;background: rgba(0, 0, 0, .9);display: none;z-index: 100;}
 	#imgClose{text-align: right;padding-right: 20px;padding-top: 10px;}
@@ -31,12 +31,11 @@
 }
 
 .status4{
-	background-color:#f2220c;
-	color: #fff;
+	background-color:#a9adad;
 }
 
 .table-hover>tbody>tr:hover {
-	background-color: #ecf0f1;
+	background-color: #f0f7f7;
 	color: #333;
 }
 

@@ -236,12 +236,13 @@ $('#goods_add').click(function(){
      	    var tr='';
      	    var div_pic='<div class="listposi">'+
      	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
-		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
+		    '<div class="imgGroup"><ul class="imgList"';
 		    var pics=info.pics;
 		    var nums=info.nums;
 		    for(var i in pics){
-		    	div_pic+='<li><img src="'+image_url+'/'+pics[i]['file1']+'" alt="">'+
-		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file1']+'"></li>'; 
+		    	div_pic+='<li style="background-image:url(' + image_url + '/' + pics[i]['file1'] +');background-size:contain;">'+
+				'<input type="hidden" value="'+image_url+'/'+pics[i]['file1']+'"></li>'; 
+				// <img src="'+image_url+'/'+pics[i]['file1']+'" alt="">
 		    }
 		    div_pic+='</ul><span class="prev"><i class="left"></i></span>'+
 		    '<span class="next"><i class="right"></i></span></div></div>';
@@ -259,13 +260,14 @@ $('#goods_add').click(function(){
 			    }else{
 			    	div_num+='<td>0(0)</td>';
 			    }
-		    }
+			}
+			// <image src="'+image_url+'/'+info['pic']+'" />
 		    div_num+='</tr></tbody></table>	</div></td>';	 
      	    tr+='<tr id="goods'+info['id']+'">'+
      	    '<td><a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td>'+
      	    '<td>'+info['code']+'</td>'+ 
     	    '<td ><input type="text" name="sns['+info['id']+']" class="form-control sn " value="'+info['sn']+'"/></td>'+ 
-     	   '<td class="tableImg"><div class="tdImg"><image src="'+image_url+'/'+info['pic']+'"  /></div>'+div_pic+'</td>'+
+     	   '<td class="tableImg"><div class="tdImg" style="background-image:url(' + image_url + '/' + info['pic'] +');background-size:100% 100%;"></div>'+div_pic+'</td>'+
      	    div_num+
      	   '<td>'+info['price_in']+'</td>'+ 
      	   '<td>'+info['price_sale']+'</td>'+ 
