@@ -2,7 +2,10 @@
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">名称</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="name" value="" required/>
+        <input type="text" class="form-control" name="name" value="{$info.name}" required/>
+        <present name='change.name'>
+            <input type="text" class="red form-control" value="{$change.name}" />
+        </present>
     </div>
 </div>
 <div class="form-group">
@@ -38,13 +41,20 @@
     <label for="" class="col-sm-2 control-label">简介</label>
     <div class="col-md-6 col-sm-10">
 
-        <textarea class="form-control" name="dsc" rows="5"  maxlength="250"></textarea>
+        <input type="text" class="form-control" name="dsc" value="{$info.dsc}" />
+        <!--<textarea class="form-control"  rows="5" >{$info.dsc}</textarea>-->
+        <present name='change.dsc'>
+            <input type="text" class="form-control" name="dsc" value="{$info.dsc}" />
+        </present>
     </div>
 </div>
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">排序</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="sort" value="10" />
+        <input type="text" class="form-control" name="sort" value="{$info.sort}" />
+        <present name='change.sort'>
+            <input type="text" class="red form-control" name="sort"  value="{$change.sort}" />
+        </present>
     </div>
 </div>
 
