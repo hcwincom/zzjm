@@ -34,7 +34,7 @@
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">排序</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="sort" value="{$info.sort}" />
+        <input type="text" class="form-control" name="sort" value="{$info.sort|default=1000}" />
         <present name='change.sort'>
             <input type="text" class="red form-control" name="sort"  value="{$change.sort}" />
         </present>
