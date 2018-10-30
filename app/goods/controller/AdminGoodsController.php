@@ -2394,41 +2394,29 @@ class AdminGoodsController extends AdminBaseController
             'status'=>$status,
             'time'=>$time,
         ];
+        
         $row=$m->where('id',$id)->update($update);
         
         if($row!==1){
             $m->rollback();
             $this->error('审核失败，请刷新后重试');
         }
+        
         //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
         $statuss=$this->statuss;
-        $table=$this->table;
-        //记录操作记录
-        $link=url('edit',['id'=>$info['id']]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$flag.$info['id'].'-'.$info['name'].'的状态为'.$statuss[$status],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'审核'.($this->flag).$info['id'].'-'.$info['name'].'的状态为'.$statuss[$status],
+            'table'=>($this->table),
             'type'=>'review',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url('edit',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['id'].'-'.$info['name'].'已审核，状态为'.$statuss[$status],
-            'type'=>'review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
+        zz_action($data_action,['aid'=>$info['aid']]);
+        
         $m->commit();
         $this->success('审核成功');
     }
@@ -4706,12 +4694,9 @@ class AdminGoodsController extends AdminBaseController
         ];
         //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
         if($admin['shop']!=1){
-            $tmp=$m->where($where)->find();
-            if(empty($tmp['shop']) || $tmp['shop']!=$admin['shop']){
-                $this->error('不能审核其他店铺的信息');
-            }else{
+          
                 $where['shop']=['eq',$admin['shop']];
-            }
+           
         }
         
         $update=[
@@ -4721,8 +4706,12 @@ class AdminGoodsController extends AdminBaseController
             'rtime'=>$time,
         ];
         //得到要更改的数据
-        $list=$m->where($where)->column('id,aid,name');
-        $ids=implode(',',array_keys($list));
+        $list=$m->where($where)->column('id');
+        if(empty($list)){
+            $this->error('没有可以批量审核的数据');
+        }
+        
+        $ids=implode(',',$list);
         
         //审核成功，记录操作记录,发送审核信息
         $flag=$this->flag;
@@ -4733,33 +4722,20 @@ class AdminGoodsController extends AdminBaseController
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'批量同意'.$flag.'('.$ids.')',
+            'action'=>$admin['user_nickname'].'批量同意'.$flag.'('.$ids.')',
             'table'=>$table,
             'type'=>'review_all',
             'link'=>'',
             'shop'=>$admin['shop'],
         ];
-        $link0=url('edit','',false,false);
-        foreach($list as $k=>$v){
-            //发送审核信息
-            $data_msg[]=[
-                'aid'=>1,
-                'time'=>$time,
-                'uid'=>$v['aid'],
-                'dsc'=>'对'.$flag.$v['id'].'-'.$v['name'].'已批量审核，结果为同意',
-                'type'=>'review',
-                'link'=>$link0.'/id/'.$v['id'],
-                'shop'=>$admin['shop'],
-            ];
-        }
         $m->startTrans();
-        $rows=$m->where($where)->update($update);
+        
+        zz_action($data_action,['pids'=>$ids]);
+        $rows=$m->where('id','in',$list)->update($update);
         if($rows<=0){
             $m->rollback();
             $this->error('没有数据审核成功，批量审核只能把未审核的数据审核为正常');
         }
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insertAll($data_msg);
         $m->commit();
         $this->success('审核成功'.$rows.'条数据');
     }
@@ -4790,7 +4766,12 @@ class AdminGoodsController extends AdminBaseController
             $ids=$_POST['ids'];
             $where['id']=['in',$ids];
         }
+        //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
+        $admin=$this->admin;
+        if($admin['shop']!=1){
         
+                $where['shop']=['eq',$admin['shop']];
+        }
         $m=$this->m;
         
         $update=['status'=>4];
@@ -4830,7 +4811,12 @@ class AdminGoodsController extends AdminBaseController
             $ids=$_POST['ids'];
             $where['id']=['in',$ids];
         }
-        
+        //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            
+                $where['shop']=['eq',$admin['shop']]; 
+        }
         $m=$this->m;
         $update=['status'=>2];
         $rows=$m->where($where)->update($update);
@@ -5401,10 +5387,10 @@ class AdminGoodsController extends AdminBaseController
                 }
             } */
             //加标产品同步
-            if($info['type']==1){
+            if($info_tmp['type']==1){
                 $fields_link=$this->fields_link;
                 $m_lable=Db::name('goods_label');
-                $links=$m_lable->where('pid1',$info['id'])->column('pid0');
+                $links=$m_lable->where('pid1',$info_tmp['id'])->column('pid0');
                 //组装加标产品更新数据
                 $link_info=[];
                 //得到要修改的字段 
@@ -5457,8 +5443,7 @@ class AdminGoodsController extends AdminBaseController
         }
          
         //审核成功，记录操作记录,发送审核信息
-       
-        $review_status=$this->review_status;
+        
         //记录操作记录
         $data_action=[
             'aid'=>$admin['id'],

@@ -45,6 +45,7 @@ class OrderModel extends Model
         return $sort;
         
     }
+     
     /* 
      * 自动分单
      * @param $goods产品信息

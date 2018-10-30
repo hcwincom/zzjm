@@ -139,8 +139,8 @@ class PublicController extends AdminBaseController
         ];
         $list=$m
         ->alias('m')
-        ->join('cmf_user a','a.id=m.aid','left')
-        ->join('cmf_msg_txt mt','mt.id=m.msg','left')
+        ->join('cmf_user a','a.id=m.aid')
+        ->join('cmf_msg_txt mt','mt.id=m.msg')
         ->where($where)
         ->column('m.id,a.user_nickname as aname,mt.link,mt.dsc,mt.time');
         if(empty($list)){

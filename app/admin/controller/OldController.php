@@ -834,7 +834,7 @@ class OldController extends AdminBaseController
                 'p.create_time,p.pay_time,p.send_time,p.accept_time,p.completion_time,'.
                 'p.accept_name,p.telphone as mobile,p.province,p.city,p.area,p.address,p.mobile as phone,'.
                 'p.payable_amount as goods_money,p.order_amount,p.payable_freight as pay_freight,p.real_freight,'.
-                'p.postscript as udsc,p.note as adsc,p.if_del as is_del,'.
+                'p.postscript as udsc,p.note as dsc,p.if_del as is_del,'.
                 'p.ordertype as order_type,p.ordercompany as company,p.admin_id as aid,'.
                 'p.sfkp as invoice_type,'.
                 'concat(province.area_name,"-",city.area_name,"-",area.area_name) as addressinfo,area.area_postcode as postcode';
@@ -892,7 +892,7 @@ class OldController extends AdminBaseController
                 'where p.id >'.($i*$count).' and p.id<='.(($i+1)*$count);
             $data=$m_old->query($sql);
             foreach($data as $k=>$v){ 
-                
+                $v['rstatus']=1;
                 //如果company为空就是上海极敏
                 if(empty($v['company'])){
                     $v['company']=5;
@@ -993,10 +993,13 @@ class OldController extends AdminBaseController
         $sql='select max(id) as count from sp_order_goods';
         $data=$m_old->query($sql);
         $page=ceil($data[0]['count']/$count);
-        $field='id,order_id as oid,codeid as goods,factory_price as price_in,sell_price as price_sale,prefer_price as price_real,goods_nums as num,goods_weight as weight';
+        $field='og.id,og.order_id as oid,og.codeid as goods,og.factory_price as price_in,'.
+        'og.sell_price as price_sale,og.prefer_price as price_real,og.goods_nums as num,'.
+        'og.goods_weight as weight,g.name as goods_name,g.goods_no as goods_code,g.img as goods_pic';
         for($i=0;$i<$page;$i++){
-            $sql='select '.$field.' from sp_order_goods '.
-                'where id >'.($i*$count).' and id<='.(($i+1)*$count);
+            $sql='select '.$field.' from sp_order_goods as og '.
+                'join sp_codegoods g on g.id=og.codeid '.
+                'where og.id >'.($i*$count).' and og.id<='.(($i+1)*$count);
             $data=$m_old->query($sql);
             $row_mew=$m_new->insertAll($data);
         }

@@ -203,7 +203,7 @@ function account_change(){
 var goods=0;
 var url_goods_add="{:url('order/Orderajax/goods_add')}";
 var href_goods="{:url('goods/AdminGoods/edit','',false,false)}";
-var image_url="{:cmf_get_image_url('')}";
+var image_url="{$image_url}";
 $('#goods_add').click(function(){
 	 
 	goods=parseInt($(this).siblings('.goods').val());

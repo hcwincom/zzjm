@@ -158,32 +158,7 @@
 						<td>{$vo.sname|default=$vo.shop}</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 						<td  > {$vo.code}</td>
-						<td  class="clickInfo"> 
-							<div style="position:relative;" class="goInfo" data-width="0">
-								{$goods_type[$vo.type]}
-							</div>
-							<!-- {$goods_type[$vo.type]} -->
-							<div class="goodsInfo">
-								<table class="table table-hover table-bordered">
-									<thead>
-										<tr>
-											<th class="nameWidth" width="30%">产品名称</th>
-											<th>编号</th>
-											<th>数量</th>
-											<th>单价</th>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td>吾问无为谓的点点滴滴无无无无所多付付付过晕晕拖拖拖付过过</td>
-											<td>5555555</td>
-											<td>444444444</td>
-											<td><span>¥</span>2222222</td>
-										</tr>
-									</tbody>
-								</table>							
-							</div>
-						</td>
+						<td >  {$goods_type[$vo.type]} </td>
 						<td class="tableImg">
 							
 						 <eq name="vo.pic" value="">

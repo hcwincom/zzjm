@@ -215,6 +215,11 @@ class AdminOrderController extends OrderBaseController
             ->where('p.id','in',$ids)
             ->order('p.sort desc,p.id asc')
             ->column($field); 
+            $goods=Db::name('order_goods')->where('oid','in',$ids)
+            ->column('id,oid,goods,goods_name,goods_code,goods_pic,goods_sn,price_real,num,pay');
+            foreach($goods as $k=>$v){ 
+                $list[$v['oid']]['infos'][]=$v;
+            }
         }
         
         $this->assign('page',$page);
@@ -325,6 +330,7 @@ class AdminOrderController extends OrderBaseController
             'udsc'=>$data['udsc'],
             'dsc'=>$data['dsc'],
             'create_time'=>$time,
+            'sort'=>11,
         ];
         //收货地址信息 
         $field='p.name,p.mobile,p.phone,p.street,p.postcode'.
@@ -401,9 +407,12 @@ class AdminOrderController extends OrderBaseController
         if(count($orders)==1){
             $m_info->insertAll($order_goods);
         }else{
+            //主单号标记
+            $m->where('id',$oid)->update(['is_real'=>2]);
             //拆分订单要生成子单号
             foreach($orders as $k=>$v){
                 $i++;
+                
                 $tmp_order=[
                     'fid'=>$oid,
                     'order_sn'=>$data_order['order_sn'].'-'.$i,
@@ -494,7 +503,7 @@ class AdminOrderController extends OrderBaseController
      */
     public function edit()
     {
-        
+        $admin=$this->admin;
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
         $info=$m
@@ -507,17 +516,23 @@ class AdminOrderController extends OrderBaseController
             $this->error('数据不存在');
         }
         $shop=$info['shop'];
+        if($admin['shop']>1 && $admin['shop']!=$shop){
+            $this->error('只能查看本店铺的数据');
+        }
         $this->where_shop=$shop;
         //获取客户信息
         $custom=Db::name('custom')->where('id',$info['uid'])->find();
-        
-        
-        //可选支付账号
-        $where=[
-            'uid'=>$id,
-            'type'=>1,
-        ];
-        $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,bank2,name2,num2,location2');
+        if(empty($custom)){
+            $accounts=null; 
+         }else{
+             //可选支付账号
+             $where=[
+                 'uid'=>$custom['id'],
+                 'type'=>1,
+             ];
+             $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,bank2,name2,num2,location2');
+             
+         }
         //支付信息 
         $where=[
             'oid'=>$id,
@@ -531,40 +546,73 @@ class AdminOrderController extends OrderBaseController
         ];
         $invoice=Db::name('order_invoice')->where($where)->find();
         
-        
-        //订单产品
-        $goods=Db::name('order_goods') 
-        ->where('oid',$info['id'])
-        ->column('goods,goods_name,goods_code,goods_sn,goods_pic,price_in,price_sale,price_real,num,weight,size');
-        
        
-        //当前库存
+        //订单产品
+        $where_goods=[];
+        if($info['is_real']==1){
+            $where_goods['oid']=['eq',$info['id']];
+        }else{
+            $orders=$m->where('fid',$info['id'])->column('id,order_sn,freight,store,num,weight,size,discount_money,goods_money,pay_freight,real_freight,other_money,order_amount');
+            dump($orders);
+            $order_ids=array_keys($orders);
+            $where_goods['oid']=['in',$order_ids];
+        }
+       
+        $goods=Db::name('order_goods') 
+        ->where($where_goods)
+        ->column('goods,goods_name,goods_code,goods_sn,goods_pic,price_in,price_sale,price_real,num,pay,weight,size');
+       
         $goods_id=array_keys($goods); 
+        //检查用户权限
+        $authObj = new \cmf\lib\Auth();
+        $name       = strtolower('goods/AdminGoodsauth/price_in_get');
+        $is_auth=$authObj->check($admin['id'], $name);
+        //判断产品重量体积单位,统一转化为kg,cm3
+        foreach($goods as $k=>$v){
+            if($is_auth==false){
+                $goods[$k]['price_in']='--';
+            } 
+            $goods[$k]['weight1']=bcdiv($v['weight'],$v['num'],2);
+            $goods[$k]['size1']=bcdiv($v['size'],$v['num'],2); 
+        } 
+         //获取产品图片
+         $where=[
+             'pid'=>['in',$goods_id],
+             'type'=>['eq',1],
+         ];
+         $pics=Db::name('goods_file')->where($where)->column('id,pid,file');
+         $path=cmf_get_image_url('');
+         foreach($pics as $k=>$v){
+             $goods[$v['pid']]['pics'][]=[
+                 'file1'=>$v['file'].'1.jpg',
+                 'file3'=>$v['file'].'3.jpg',
+             ];
+         }
+        
         //获取所有库存
         $where=[
             'id'=>['in',$goods_id],
             'shop'=>['eq',$shop],
         ];
         $list=Db::name('store_goods')->where($where)->column('id,store,goods,num,num1');
-        //循环得到数据
-        $goods_num=[];
+        //循环得到数据 
         foreach($list as $k=>$v){
-            $goods_num[$v['goods']][$v['store']]=[
+            $goods[$v['goods']]['nums'][$v['store']]=[
                 'num'=>$v['num'],
                 'num1'=>$v['num1'], 
             ]; 
-        }
-        
+        } 
+         
         $this->cates();
         
-        $this->assign('info',$info);
-        $this->assign('goods_num',$goods_num);
-       
+        $this->assign('info',$info); 
+        $this->assign('goods',$goods); 
         $this->assign('accounts',$accounts);
         $this->assign('custom',$custom);
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
+       
         return $this->fetch();  
     }
      
@@ -642,6 +690,9 @@ class AdminOrderController extends OrderBaseController
         $this->assign('aids',$aids); 
         $this->assign('stores',$stores); 
         $this->assign('freights',$freights); 
+        $this->assign('goods_url',url('goods/AdminGoods/edit',false,false)); 
+        $this->assign('image_url',cmf_get_image_url('')); 
+       
         
     }
     

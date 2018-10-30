@@ -193,7 +193,59 @@
 					 <td width="100">金额</td>
 					 <td width="100">毛重</td> 
 					 <td width="100">体积</td> 
-			 	</tr>  
+			 	</tr> 
+			 <notempty name="goods">
+			  <foreach name="goods" item="vo" key="key">
+			   
+     	     	<tr id="goods{$key}"> 
+     	     		<td><a href="{$goods_url}/id/{$key}" target="{$zztarget.other}">{$vo.goods_name}</a></td> 
+     	    		<td>{$vo.goods_code}</td> 
+    	    		<td ><input type="text" name="sns{$key}" class="form-control sn " value="{$vo.goods_sn}"/></td> 
+     	   			<td class="tableImg">
+     	   				<div class="tdImg"><image src="{$image_url}/{$vo.goods_pic}"  /></div>
+     	   				<div class="listposi"> 
+     	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+		    				<div class="imgGroup">
+		    				<ul class="imgList" class="imgList">
+		    				<foreach name="vo.pics" item="pic">
+								<li><img src="{$image_url}/{$pic.file1}" alt=""> 
+		    					<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+		    				</foreach>
+		    				</ul>
+		    				<span class="prev"><i class="left"></i></span>
+		    				<span class="next"><i class="right"></i></span>
+		    				</div>
+		    			</div>
+					</td> 
+     	   			<td class="clickInfo">
+     	   				<div style="position:relative;" class="goInfo" data-width="0">
+     	   				0-暂未计算和判断
+     	   		 		</div><div class="goodsInfo">
+     	   		 		<table class="table table-hover table-bordered">
+     	   		 		<thead>
+     	   		 		 
+     	   		 		<tr>
+						<td>0</td></tr></thead>
+						<tbody><tr>
+					   </tr></tbody>
+					   </table>
+					   </div>
+					</td>
+     	   			<td>{$vo.price_in}</td> 
+     	   			<td>{$vo.price_sale}</td>
+     	    		<td><input type="text" name="prices[{$key}]" class="form-control price_sale " value="{$vo.price_real}"/></td>
+     	    		<td><input type="number" name="nums[{$key}]" class="form-control input-order num" value="1"/></td>
+     	    		<td><input type="text" name="price_counts[{$key}]" class="form-control price_count" value="{$vo.pay}" /></td>
+     	    		<td><input type="text"  name="weight1s[{$key}]" class="form-control weight1" value="{$vo.weight}"/>
+     	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/></td>
+     	   			<td><input type="text"  name="size1s[{$key}]" class="form-control size1" value="{$vo.size}"/>
+    	   				<input type="hidden" class="size0" value="{$vo.size1}"/></td>
+    	   		</tr>
+			  
+			  </foreach>	
+			 
+			 </notempty>
+			 
 	 		</table>
 			 
 			<p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>

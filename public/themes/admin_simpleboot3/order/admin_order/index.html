@@ -146,12 +146,13 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th> 
-						<th>订单类型</th>  
-						<th>订单号</th>
+						<th>订单类型</th>
+						<th>订单号</th>  
+						<th>主订单</th>
 						 <th>物流号</th>
 						<th>下单人</th>
 						<th>所属公司</th>
-						
+						<th>产品数量</th>
 						<th>付款类型</th>
 						<th>客户</th>
 						<th>总金额</th>
@@ -176,9 +177,52 @@
 						{$order_types[$vo.order_type]}
 						</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.order_sn}</a></td>
+					 	<td>
+					 	<eq name="vo.fid" value="0">
+					 		无
+					 	<else/> 
+					 		<a href="{:url('edit',['id'=>$vo.fid])}" target="{$zztarget['other']}" >{$vo.fid}</a>
+					 	</eq>
+					 	</td>
+					 	
 					 	<td>{$vo.express_no}</td>
 					  	<td>{$aids[$vo['aid']]['name']|default=$vo['aid']}</td>
 					  	<td>{$companys[$vo['company']]['name']|default=$vo['company']}</td>
+					  	<td  class="clickInfo"> 
+							<div style="position:relative;" class="goInfo" data-width="0">
+								{$vo.num}
+							</div>
+						<notempty name="vo.infos">
+							<div class="goodsInfo">
+								<table class="table table-hover table-bordered">
+									<thead>
+										<tr>
+											<th class="nameWidth" width="30%">产品名称</th>
+											<th>编号</th>
+											<th>条码</th>
+											<th>单价</th>
+											<th>数量</th>
+											<th>总价</th>
+											 
+										</tr>
+									</thead>
+									<tbody>
+									<foreach name="vo.infos" item="vv" key="kk">
+										<tr>
+											<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vv.goods])}" target="{$zztarget.other}">{$vv.goods_name}</a></td>
+											<td>{$vv.goods_code}</td>
+											<td>{$vv.goods_sn}</td>
+											<td>{$vv.price_real}</td>
+											<td>{$vv.num}</td>
+											<td>{$vv.pay}</td>
+											 
+										</tr>
+									</foreach>
+									</tbody>
+								</table>							
+							</div>
+						</notempty>
+						</td>
 					  	<td>{$paytypes[$vo['paytype']]['name']|default=$vo['paytype']}</td>
 					   
 					  	<td>{$vo.custom_name}</td>

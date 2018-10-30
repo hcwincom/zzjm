@@ -22,7 +22,7 @@ class OrderajaxController extends AdminBase0Controller
         $admin=$this->admin;
         
         $where['shop']=($admin['shop']==1)?2:$admin['shop'];
-        //检查文件权限
+        //检查用户权限
         $authObj = new \cmf\lib\Auth(); 
         $name       = strtolower('goods/AdminGoodsauth/price_in_get'); 
         $is_auth=$authObj->check($admin['id'], $name);
