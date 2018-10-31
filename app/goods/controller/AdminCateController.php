@@ -90,6 +90,7 @@ class AdminCateController extends GoodsBaseController
         $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
         
         $this->assign('fid',$fid);
+        $this->assign('info',null);
         $this->assign('cates',$cates);
         return $this->fetch();
     }

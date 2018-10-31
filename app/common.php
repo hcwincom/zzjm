@@ -27,7 +27,7 @@ function zz_instore($data){
                'store'=>$data['store'],
                'goods'=>$data['goods'], 
                'shop'=>$data['shop'],
-               'time'=>$data['time'],
+               'time'=>$data['atime'],
                'num1'=>$data['num'],  
            ], 
        ];
@@ -43,7 +43,7 @@ function zz_instore($data){
                    'store'=>0,
                    'goods'=>$data['goods'],
                    'shop'=>$data['shop'],
-                   'time'=>$data['time'],
+                   'time'=>$data['atime'],
                    'num1'=>$data['num'], 
                ];
        }
@@ -56,7 +56,7 @@ function zz_instore($data){
         if($data['num']<0 && abs($data['num'])>$tmp['num']){
             return '库存不足';
         }
-        $num1=$m_store_goods->where('id',$tmp['id'])->inc('num1',$data['num'])->setField('time',$data['time']);
+        $num1=$m_store_goods->where('id',$tmp['id'])->inc('num1',$data['num'])->setField('time',$data['atime']);
         //入库
         Db::name('store_in')->insert($data); 
     } 

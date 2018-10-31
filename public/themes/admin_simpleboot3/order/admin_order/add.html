@@ -130,7 +130,7 @@ $('#custom').change(function(){
 			}
 			 $('#account').html(options); 
 			 account_change(); 
-			 $('#announcement').val(info.announcement);
+			 $('#dsc').val(info.announcement);
 			 $('#invoice_type').val(info.invoice_type); 
 			 invoice_type_change();
 			 $('#tax_point').val(info.tax_point); 
@@ -239,7 +239,7 @@ $('#goods_add').click(function(){
 		    var nums=info.nums;
 		    for(var i in pics){
 		    	div_pic+='<li style="background-size: contain;background-image:url('+image_url+'/'+pics[i]['file1']+');">'+
-		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file1']+'"></li>'; 
+		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file3']+'"></li>'; 
 		    }
 		    div_pic+='</ul><span class="prev"><i class="left"></i></span>'+
 		    '<span class="next"><i class="right"></i></span></div></div>';
@@ -270,9 +270,9 @@ $('#goods_add').click(function(){
      	    '<td><input type="text" name="prices['+info['id']+']" class="form-control price_sale " value="'+info['price_sale']+'"/></td>'+
      	    '<td><input type="number" name="nums['+info['id']+']" class="form-control input-order num" value="1"/></td>'+
      	    '<td><input type="text" name="price_counts['+info['id']+']" class="form-control price_count" value="'+info['price_sale']+'" /></td>'+ 
-     	    '<td><input type="text"  name="weight1s['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
+     	    '<td><input type="text"  name="weights['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
      	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td>'+
-     	   '<td><input type="text"  name="size1s['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
+     	   '<td><input type="text"  name="sizes['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
     	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td>'+
     	   '<td><input type="text"  name="dscs['+info['id']+']" class="form-control dsc" value=""/></td>'+ 
     	   '<td><button type="button" class="goods_del">删除</td></tr>';

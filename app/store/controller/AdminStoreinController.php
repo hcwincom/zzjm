@@ -5,6 +5,7 @@ namespace app\store\controller;
 
 use cmf\controller\AdminBaseController;
 use think\Db;
+use app\store\model\StoreGoodsModel;
 
 class AdminStoreinController extends AdminBaseController
 {
@@ -302,8 +303,7 @@ class AdminStoreinController extends AdminBaseController
         if($admin['shop']!=1 && $admin['shop']!=$info['shop']){
             $this->error('只能查看本店铺的数据',$back);
         }
-        //获取产品库存
-        
+        //获取产品库存 
         $where=[
             'goods'=>['eq',$info['goods']],
             'shop'=>['eq',$info['shop']],
@@ -316,8 +316,15 @@ class AdminStoreinController extends AdminBaseController
         ];
         $stores=Db::name('store')->where($where)->order('sort asc')->column('id,name');
         $stores[0]='总库存';
-      
+        //可选货架
+        $where=[
+          'store'=>$info['store'],
+          'goods'=>$info['goods'],
+            'status'=>2,
+        ];
+        $boxes=Db::name('store_box')->where($where)->column('id,name,code');
         $this->assign('stores',$stores);
+        $this->assign('boxes',$boxes);
         $this->assign('goods',$goods);
         $this->assign('info',$info);
         return $this->fetch();
@@ -336,54 +343,81 @@ class AdminStoreinController extends AdminBaseController
      *     'param'  => ''
      * )
      */
-    public function edit_do()
+    public function review()
     {
-        $back=url('index');
-        $m=$this->m;
-        $table=$this->table;
-        $flag=$this->flag;
-        $data=$this->request->param();
+        $status=$this->request->param('rstatus',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        $box=$this->request->param('box',0,'intval');
         
+        if($status<1 || $status>4 || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        //查找信息
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('信息不存在');
+        }
+        if($info['rstatus']!=1){
+            $this->error('审核结果不能更改');
+        }
         $admin=$this->admin;
-        $m->startTrans();
-        $time=time();
-        $ids='-';
-        foreach ($data['safe'] as $k=>$v){
-            if($v!==''){
-                $ids.=$k;
-                $update_info=[
-                    'time'=>$time,
-                    'safe'=>intval($v),
-                ];
-                $where=[
-                    'id'=>$k,
-                ];
-                if($admin['shop']!=1 ){
-                    $where['shop']=$admin['shop'];
-                }
-                $m->where($where)->update($update_info);
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
             }
-            
         }
-        if(empty($update_info)){
+       
+        $time=time();
+        $m->startTrans();
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+            'rtime'=>$time, 
+        ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
+        $row=$m->where('id',$id)->update($update);
+        
+        if($row!==1){
             $m->rollback();
-            $this->error('未修改',$back);
+            $this->error('审核失败，请刷新后重试');
         }
-        //记录操作记录
+        //是否更新,2同意，3不同意 
+        $m_store_goods=new StoreGoodsModel();
+        if($status==2){ 
+            //更新仓库和总库存 
+            $res=$m_store_goods->instore2($info['goods'],$info['store'],$info['shop'],$info['num'],$box); 
+        }else{
+            //更新仓库和总库存 
+            $res=$m_store_goods->instore3($info['goods'],$info['store'],$info['shop'],$info['num']);  
+        }
+        if($res!==1){
+            $m->rollback();
+            $this->error($res);
+        }
+        //审核成功，记录操作记录,发送审核信息 
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>$admin['user_nickname'].'调整了安全出入库'.$ids,
-            'table'=>($this->table),
-            'type'=>'edit',
-            'pid'=>0,
-            'link'=>'',
+            'action'=>$admin['user_nickname'].'审核产品入库'.$id.'为'.$review_status[$status],
+            'table'=> ($this->table),
+            'type'=>'review',
+            'pid'=>$info['id'],
+            'link'=>url('edit',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        
+        zz_action($data_action,['aid'=>$info['aid']]);
+        
         $m->commit();
-        $this->success('已修改',$back);
+        $this->success('审核成功');
     }
     
     

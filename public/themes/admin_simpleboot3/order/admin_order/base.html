@@ -89,7 +89,7 @@
 						<option value="{$key}" <if condition="$key eq $custom.cid"></if>>{$vo}</option>
 					</foreach>
 					</select>
-					<select  class="form-control " name="uid" id="custom"   >
+					<select  class="form-control " id="custom"   >
 						<option value="{$custom.id}" >{$custom.name}</option>
 					</select>
 					<a href="{:url('custom/AdminCustom/edit',['id'=>$custom.id])}" target="{$zztarget['other']}" id="custom_link">客户详情</a>
@@ -109,12 +109,22 @@
 				</empty>
 				</div>
 			</div>
-			 <div class="form-group fleft-all accept">
+			<div class="form-group fleft-all"  >
+				<label  class="col-sm-2 control-label">用户留言</label>
+				<div class="col-md-6 col-sm-10" > 
+				  <input type="text" class="form-control" name="udsc" value="{$info.udsc}" />
+				<present name="change.udsc">
+					<input type="text" class="form-control red"  value="{$change.udsc}" />
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft-all accept">
 				<label  class="col-sm-2 control-label">注意事项</label>
-				<div class="col-md-6 col-sm-10">
-				 
-					<input type="text" class="form-control " value="{$info.dsc}"  />
-				 
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control " name="dsc" value="{$info.dsc}" id="dsc"/> 
+				<present name="change.dsc">
+					<input type="text" class="form-control red"  value="{$change.dsc}" />
+				</present>
 				</div>
 			</div>
 	  		<div class="form-group fleft">
@@ -148,24 +158,8 @@
 				 </div>
 			</div>
 			<div style="clear:both"></div>
-			 <div class="form-group fleft-all accept">
-				<label  class="col-sm-2 control-label">注意事项</label>
-				<div class="col-md-6 col-sm-10"> 
-					<input type="text" class="form-control " name="dsc" value="{$info.dsc}" id="announcement"/> 
-				<present name="change.dsc">
-					<input type="text" class="form-control red"  value="{$change.dsc}" />
-				</present>
-				</div>
-			</div>
-	  		<div class="form-group fleft-all"  >
-				<label  class="col-sm-2 control-label">用户留言</label>
-				<div class="col-md-6 col-sm-10" > 
-				  <input type="text" class="form-control" name="udsc" value="{$info.udsc}" />
-				<present name="change.udsc">
-					<input type="text" class="form-control red"  value="{$change.udsc}" />
-				</present>
-				</div>
-			</div>
+			 
+	  		
 		<empty name="info.id">
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">添加产品</label>
@@ -181,11 +175,10 @@
 				 
 			 	<tr id="goods0">
 				 	 <td>产品名称</td>
-				 	 <td width="100">产品编码</td>
-				 	 
+				 	 <td width="100">产品编码</td> 
 				 	 <td width="100">产品图片</td> 
 				 	 <td width="100">总库存</td> 
-				 	  <td width="100">成本价</td>
+				 	 <td width="100">成本价</td>
 					 <td width="100">零售价</td> 
 					 <td width="100">供应价</td>
 					 <td width="50">数量</td>
@@ -198,16 +191,15 @@
 			 
 	 		</table>
 	 		</div>
-		</empty>
+	 	<else/>
+		
 		<foreach name="orders" item="vv" key="kk">
-		<div class="order order{$kk}" >
-			 
+			<div class="order order{$kk}" > 
 			  <table class="table table-hover table-bordered table-list goods-list"  >
 				 
 			 	<tr >
-				 	 <td>订单{$kk}-产品名称</td>
-				 	 <td width="100">产品编码</td>
-				 	 
+				 	 <td>订单{$vv.order_sn}</td>
+				 	 <td width="100">产品编码</td> 
 				 	 <td width="100">产品图片</td> 
 				 	 <td width="100">总库存</td> 
 				 	  <td width="100">成本价</td>
@@ -275,21 +267,21 @@
 						   </table>
 					   </div>
 					</td>
-     	   			<td><input type="text" class="form-control price_in" value="{$vo.price_in}" readonly/></td> 
-     	   			<td><input type="text" class="form-control price_sale" value="{$vo.price_sale}" readonly/></td>
-     	    		<td>
-     	    		<input type="text" name="prices[{$key}]" class="form-control price_sale " value="{$vo.price_real}"/>
+     	   			<td class="price_in">{$vo.price_in}</td> 
+     	   			<td class="price_sale">{$vo.price_sale}</td>
+     	    		<td class="price_sale">
+     	    		<input type="text" name="prices[{$key}-{$vv.id}]" class="form-control  " value="{$vo.price_real}"/>
      	    		<present name="change['edit'][$kk][$key]['price_real']">
-     	    			<input type="text"  class="form-control price_sale red" value="{$change['edit'][$kk][$key]['price_real']}"/>
+     	    			<input type="text"  class="form-control  red" value="{$change['edit'][$kk][$key]['price_real']}"/>
      	    		</present> 
      	    		</td>
-     	    		<td><input type="number" name="nums[{$key}]" class="form-control input-order num" value="1" readonly/></td>
-     	    		<td><input type="text" name="price_counts[{$key}]" class="form-control price_count" value="{$vo.pay}" readonly/></td>
-     	    		<td><input type="text"  name="weight1s[{$key}]" class="form-control weight1" value="{$vo.weight}"/>
+     	    		<td class="num"><input type="number" name="nums[{$key}-{$vv.id}]" class="form-control input-order " value="1" readonly/></td>
+     	    		<td class="price_count"><input type="text" name="price_counts[{$key}-{$vv.id}]" class="form-control " value="{$vo.pay}" readonly/></td>
+     	    		<td class="weight"><input type="text"  name="weights[{$key}-{$vv.id}]" class="form-control " value="{$vo.weight}"/>
      	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/></td>
-     	   			<td><input type="text"  name="size1s[{$key}]" class="form-control size1" value="{$vo.size}"/>
+     	   			<td class="size"><input type="text"  name="sizes[{$key}-{$vv.id}]" class="form-control" value="{$vo.size}"/>
     	   				<input type="hidden" class="size0" value="{$vo.size1}"/></td>
-    	   			<td><input type="text"  name="dscs[{$key}]" class="form-control dsc" value="{$vo.dsc}"/></td>
+    	   			<td><input type="text"  name="dscs[{$key}-{$vv.id}]" class="form-control dsc" value="{$vo.dsc}"/></td>
     	   			<td><input type="number" class="form-control input-order num" value="0"/></td>
     	   		</tr>
 			  
@@ -344,7 +336,7 @@
 					 
 				    <label class="input-inline"> 
 					 包装总重：<input type="text" class="form-control short weight" name="weight" value="{$vv.weight}" required/> 
-					 <present name="change.weight">
+					 <present name="change.weight" >
 					 	<input type="text" class="form-control short red"  value="{$change.weight}"  />  
 					 </present>
 					 </label>
@@ -372,10 +364,19 @@
 					  </p> 
 				</div>
 			</div>
+			<div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">注意事项</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control " name="dsc" value="{$info.dsc}" id="announcement"/> 
+				<present name="change.dsc">
+					<input type="text" class="form-control red"  value="{$change.dsc}" />
+				</present>
+				</div>
+			</div>
 		</eq> 
 		</div>	
 		</foreach> 
-	 
+	 </empty>
 			 <div class="form-group fleft-all order0"  >
 				<label class="col-sm-2 control-label">总物流费用</label>
 				<div class="col-md-6 col-sm-10">
@@ -402,7 +403,7 @@
 					 <present name="change.real_freight">
 					 	<input type="text" class="form-control short red"  value="{$change.real_freight}"  />  
 					 </present>
-					  
+					  <button class="freight_count" type="button">运费计算</button>
 					 </label>
 					   <p class="notice">运费计算根据最终的包装总体积、总重和预先指定的快递规则计算。
 					   <br/>计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费 

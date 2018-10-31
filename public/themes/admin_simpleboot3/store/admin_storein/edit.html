@@ -7,7 +7,7 @@
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">出入库审核</a></li>  
 		 
 		</ul>
-		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}">
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('review')}">
 			<div class="form-group fleft">
 				<label for=" " class="col-sm-2 control-label">出入库id</label>
 				<div class="col-md-6 col-sm-10">  
@@ -21,9 +21,9 @@
 				</div>
 			</div> 
 			<div class="form-group fleft">
-				<label for=" " class="col-sm-2 control-label">关联单号</label>
+				<label for=" " class="col-sm-2 control-label">关联id</label>
 				<div class="col-md-6 col-sm-10">  
-					<input type="text" class="form-control"  value="{$info.about_no}"  />
+					<input type="text" class="form-control"  value="{$info.about}"  />
 				</div>
 			</div> 
 			<div class="form-group fleft">
@@ -33,12 +33,23 @@
 				</div>
 			</div> 
 			<div class="form-group fleft-all">
-				<label for=" " class="col-sm-2 control-label">产品</label>
+				<label for=" " class="col-sm-2 control-label">入库货架</label>
+				<div class="col-md-6 col-sm-10">  
+					<select name="box" class="form-control">
+					<option value="0">未选择</option>
+					<foreach name="boxes" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.box">selected</if>>{$vo.name}--{$vo.code}</option>
+					</foreach>
+					</select>
+				</div>
+			</div> 
+			<div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">入库产品*数量</label>
 				<div class="col-md-6 col-sm-10">  
 					<input type="text" class="form-control" value="{$info.goods_name}-{$info.goods_code}*{$info.num}" />
 				</div>
 			</div> 
-		 
+		 	
 			<div class="form-group fleft-all">
 				<label for=" " class="col-sm-2 control-label">库存情况</label>
 				<div class="col-md-6 col-sm-10">  
@@ -63,12 +74,59 @@
 				</div>
 			</div> 
 		 <div style="clear:both;"></div>
+		 <div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" value="{$info.adsc}" />
+				</div>
+			</div> 
+			 <div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">申请人</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" value="{$info.aname}" />
+				</div>
+			</div> 
+			 <div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">申请时间</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" value="{$info.atime|date='Y-m-d H:i',###}" />
+				</div>
+			</div> 
+		<neq name="info.rid" value="0">
+			 <div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">审核人</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" value="{$info.rname}" />
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">审核时间</label>
+				<div class="col-md-6 col-sm-10">  
+						<input type="text" class="form-control" value="{$info.rtime|date='Y-m-d H:i',###}" />
+				</div>
+			</div> 
+		</neq>
+			<div class="form-group fleft-all rstatus">
+				<label for="" class="col-sm-2 control-label">审核状态</label>
+				<div class="col-md-6 col-sm-10">
+				 <foreach name="review_status" item="vo">
+				 <label class="radio-inline">
+				 		<input type="radio" value="{$key}" name="rstatus" <if condition="$key eq $info.rstatus">checked</if>/>{$vo}
+				 </label>
+				 </foreach>
+				</div>
+			</div>
+			 <div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">审核备注</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" name="rdsc" class="form-control" value="{$info.rdsc}" />
+				</div>
+			</div> 
 		 <div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10"> 
-				 
-					<button type="submit" class="save btn btn-primary js-ajax-submit" >确认保存</button>
-					 <p class="notice">	新指可以填入更新的安全库存，旧为原安全库存，理论安全库存数是根据库存进出数据，按公式算得，最大是指该产品在一定期间内单个订单最大订购数。</p>
-		 			 <p class="notice">	确认后安全库存更新，无需审核。</p>
+				 <eq name="info.rstatus" value="1">
+					<button type="submit" class="review btn btn-primary js-ajax-submit" >确认保存</button>
+				</eq> 
 				</div>
 				
 			</div>
@@ -78,4 +136,13 @@
 	<script src="__STATIC__/js/admin.js"></script> 
 </body>
 </html>
+ <script>
+ $('.review').click(function(){
+	 var status=$('.rstatus input:checked').val();
+	 if(status=='1'){ 
+		 return false;
+	 } 
+	 $(this).parents('form').attr('action',"{:url('review')}");
+ });
+ </script>
  

@@ -83,7 +83,7 @@
 								data-checklist="js-check-x">
 						</label>
 						</th>
-						<th width="100">{$flag}ID</th>
+						<th>{$flag}ID-备注</th>
 						<th>店铺</th> 
 						<th>仓库</th>  
 						<th>下单时间</th>  
@@ -110,14 +110,14 @@
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						<a href="{:url('edit',['id'=>$vo.id])}">{$vo.id}</a>
+						<a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget.list}">{$vo.id}-{$vo.adsc}</a>
 						</td>
 						<td > {$vo.sname}</td>
 						<td> {$stores[$vo['store']]['name']|default=$vo['store']}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td> 
 						<td>{$vo.aname|default=$vo['aid']}</td> 
 						<td>{$about_type[$vo['type']]|default='未知'}</td> 
-						<td > {$vo.about_no}</td>
+						<td > {$vo.about}</td>
 						<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vo.goods])}"  target="{$zztarget['other']}">{$vo.goods_name}</a></td>
 					    <td>{$vo.goods_code}</td> 
 					    <td>{$vo.box_code}</td>

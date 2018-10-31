@@ -5,7 +5,7 @@ namespace app\store\controller;
  
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
-  
+use app\store\model\StoreGoodsModel;
 class AdminBoxController extends AdminInfo0Controller
 {
     
@@ -252,18 +252,12 @@ class AdminBoxController extends AdminInfo0Controller
         $id=$m->insertGetId($data_add);
         //是否初次审核,添加入库
         if(!empty($data_add['goods'])){
-            $tmp=Db::name('goods')->where('id',$data_add['goods'])->value('code');
-            if(empty($tmp)){
-                $m->rollback();
-                $this->error('产品编号不存在');
-            }
+             
             $data_instore=[
                 'store'=>$data_add['store'],
                 'goods'=>$data_add['goods'],
-                'box_code'=>$data_add['code'],
-                'goods_code'=>$tmp,
-                'shop'=>$data_add['shop'],
-                'time'=>$data_add['time'],
+                'box'=>$id, 
+                'shop'=>$data_add['shop'], 
                 'num'=>$data['num'],
                 'box'=>$id,
                 'type'=>30,
@@ -272,8 +266,9 @@ class AdminBoxController extends AdminInfo0Controller
                 'atime'=>$data_add['time'],
                 'adsc'=>'管理员添加料位入库',
             ];
-            $tmp=zz_instore($data_instore);
-            if($tmp!==true){
+            $m_store_goods=new StoreGoodsModel();
+            $tmp=$m_store_goods->instore0($data_instore);
+            if($tmp!==1){
                 $m->rollback();
                 $this->error($tmp);
             }
@@ -579,8 +574,9 @@ class AdminBoxController extends AdminInfo0Controller
                     'atime'=>$data_add['time'],
                     'adsc'=>'管理员添加料位入库',
                 ];
-                $tmp=zz_instore($data_instore);
-                if($tmp!==true){
+                $m_store_goods=new StoreGoodsModel();
+                $tmp=$m_store_goods->instore0($data_instore);
+                if($tmp!==1){
                     $m->rollback();
                     $this->error($tmp);
                 }
@@ -980,6 +976,7 @@ class AdminBoxController extends AdminInfo0Controller
         $data['sort']=intval($data['sort']); 
         $where=[
             'code'=>$data['code'], 
+            'store'=>$data['store'],
         ];
         if(isset($data['id'])){
             $where['id']=['neq',$data['id']];

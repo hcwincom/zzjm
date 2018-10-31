@@ -83,7 +83,7 @@ class OrderModel extends Model
          //
          $num0=0;
          $num1=0;
-         //如果默认库存不足就按优先仓库发货
+         //如果默认库存不足就按优先仓库发货,重新计算费用和重量体积
          foreach($goods as $k=>$v){
             if(empty($store_num[$k][$store])){
                 $num0=0;
@@ -91,18 +91,12 @@ class OrderModel extends Model
             }elseif($v['num']>$store_num[$k][$store]){
                 $num0=$store_num[$k][$store];
                 $num1= $v['num']-$num0;
-                $order[$store][$k]=[
-                    'goods'=>$k,
-                    'num'=>$num0,
-                    'price_real'=>$v['price_real'],
-                    'pay'=>bcmul($v['price_real'],$num0,2), 
-                    'goods_sn'=>$v['goods_sn'],
-                    'goods_name'=>$v['goods_name'],
-                    'goods_code'=>$v['goods_code'],
-                    'goods_pic'=>$v['goods_pic'],
-                    'price_in'=>$v['price_in'],
-                    'price_sale'=>$v['price_sale'], 
-                ];
+                $order[$store][$k]=$v;
+                $order[$store][$k]['num']=$num0;
+                $order[$store][$k]['pay']=bcmul($v['price_real'],$num0,2);
+                $order[$store][$k]['weight']=bcmul($v['weight1'],$num0,2);
+                $order[$store][$k]['size']=bcmul($v['size1'],$num0,2);
+                
             }else{
                 $order[$store][$k]=$v;
                 continue;
@@ -114,50 +108,32 @@ class OrderModel extends Model
                 }elseif($num1 > $store_num[$k][$vv]){
                     $num0=$store_num[$k][$vv];
                     $num1= $num1-$num0;
-                    $order[$vv][$k]=[
-                        'goods'=>$k,
-                        'num'=>$num0,
-                        'price_real'=>$v['price_real'],
-                        'pay'=>bcmul($v['price_real'],$num0,2), 
-                        'goods_sn'=>$v['goods_sn'],
-                        'goods_name'=>$v['goods_name'],
-                        'goods_code'=>$v['goods_code'],
-                        'goods_pic'=>$v['goods_pic'],
-                        'price_in'=>$v['price_in'],
-                        'price_sale'=>$v['price_sale'], 
-                    ];
+                    $order[$vv][$k]=$v;
+                    $order[$vv][$k]['num']=$num0;
+                    $order[$vv][$k]['pay']=bcmul($v['price_real'],$num0,2);
+                    $order[$vv][$k]['weight']=bcmul($v['weight1'],$num0,2);
+                    $order[$vv][$k]['size']=bcmul($v['size1'],$num0,2);
+                    
                     continue;
                 }else{
-                    $order[$vv][$k]=[
-                        'goods'=>$k,
-                        'num'=>$num1,
-                        'price_real'=>$v['price_real'],
-                        'pay'=>bcmul($v['price_real'],$num1,2), 
-                        'goods_sn'=>$v['goods_sn'],
-                        'goods_name'=>$v['goods_name'],
-                        'goods_code'=>$v['goods_code'],
-                        'goods_pic'=>$v['goods_pic'],
-                        'price_in'=>$v['price_in'],
-                        'price_sale'=>$v['price_sale'], 
-                    ];
+                     
+                    $order[$vv][$k]=$v;
+                    $order[$vv][$k]['num']=$num1;
+                    $order[$vv][$k]['pay']=bcmul($v['price_real'],$num1,2);
+                    $order[$vv][$k]['weight']=bcmul($v['weight1'],$num1,2);
+                    $order[$vv][$k]['size']=bcmul($v['size1'],$num1,2);
                     $num1=0;
                     break;
                 }
             }
             //优先仓库货都不够，都标为暂时无货
             if($num1>0){
-                $order[0][$k]=[
-                    'goods'=>$k,
-                    'num'=>$num1,
-                    'price_real'=>$v['price_real'],
-                    'pay'=>bcmul($v['price_real'],$num1,2), 
-                    'goods_sn'=>$v['goods_sn'],
-                    'goods_name'=>$v['goods_name'],
-                    'goods_code'=>$v['goods_code'],
-                    'goods_pic'=>$v['goods_pic'],
-                    'price_in'=>$v['price_in'],
-                    'price_sale'=>$v['price_sale'], 
-                ];
+                $order[0][$k]=$v;
+                $order[0][$k]['num']=$num1;
+                $order[0][$k]['pay']=bcmul($v['price_real'],$num1,2);
+                $order[0][$k]['weight']=bcmul($v['weight1'],$num1,2);
+                $order[0][$k]['size']=bcmul($v['size1'],$num1,2);
+               
             } 
         }
         return $order;

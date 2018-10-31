@@ -387,16 +387,21 @@ class AdminOrderController extends OrderBaseController
                 'oid'=>$oid,
                 'goods'=>$k,
                 'num'=>$v, 
-                'price_real'=>$data['prices'][$k],
+                'price_real'=>round($data['prices'][$k],2),
                 'pay'=>bcmul($data['prices'][$k],$v,2), 
                 'goods_name'=>$goods_infos[$k]['name'],
                 'goods_code'=>$goods_infos[$k]['code'],
                 'goods_pic'=>$goods_infos[$k]['pic'],
                 'price_in'=>$goods_infos[$k]['price_in'],
                 'price_sale'=>$goods_infos[$k]['price_sale'],
-                'dsc'=>$goods_infos[$k]['dsc'],
-                
+                'dsc'=>$data['dscs'][$k],
+                'weight'=>round($data['weights'][$k],2),
+                'size'=>round($data['sizes'][$k],2),
+                'weight1'=>bcdiv($data['weights'][$k],$v,2),
+                'size1'=>bcdiv($data['sizes'][$k],$v,2), 
             ];
+            
+            
             if($order_goods[$k]['pay'] != $data['price_counts'][$k]){
                 $this->error('产品费用错误');
             } 
@@ -624,7 +629,25 @@ class AdminOrderController extends OrderBaseController
        
         return $this->fetch();  
     }
-     
+    /**
+     * 订单编辑
+     * @adminMenu(
+     *     'name'   => '订单编辑',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '订单编辑',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_do()
+    {
+        $data=$this->request->param();
+        dump($data);
+        exit;
+    }
     //分类
     public function cates($type=3){
         $this->assign('invoice_types',config('invoice_type'));
