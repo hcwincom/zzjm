@@ -27,7 +27,7 @@ class AdminCompareController extends GoodsBaseController
      * 产品对比表
      * @adminMenu(
      *     'name'   => '产品对比表',
-     *     'parent' => 'goods/work/default',
+     *     'parent' => 'goods/AdminWork/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,

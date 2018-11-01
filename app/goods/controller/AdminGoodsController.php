@@ -473,7 +473,7 @@ class AdminGoodsController extends AdminBaseController
      * 产品组合列表
      * @adminMenu(
      *     'name'   => '产品组合列表',
-     *     'parent' => 'default',
+     *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
@@ -820,7 +820,7 @@ class AdminGoodsController extends AdminBaseController
      * 加工产品列表
      * @adminMenu(
      *     'name'   => '加工产品列表',
-     *     'parent' => 'default',
+     *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 4,
@@ -1166,7 +1166,7 @@ class AdminGoodsController extends AdminBaseController
      * 设备列表
      * @adminMenu(
      *     'name'   => '设备列表',
-     *     'parent' => 'default',
+     *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 5,
@@ -1514,7 +1514,7 @@ class AdminGoodsController extends AdminBaseController
      * 标签产品列表
      * @adminMenu(
      *     'name'   => '标签产品列表',
-     *     'parent' => 'default',
+     *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 3,
@@ -1861,7 +1861,7 @@ class AdminGoodsController extends AdminBaseController
      * 产品技术资料列表
      * @adminMenu(
      *     'name'   => '产品技术资料列表',
-     *     'parent' => 'default',
+     *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 5,
