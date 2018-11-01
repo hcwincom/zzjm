@@ -558,7 +558,9 @@ class AdminOrderController extends OrderBaseController
             $where_goods['oid']=['eq',$info['id']];
             $orders=[$info['id']=>$info];
         }else{
-            $orders=$m->where('fid',$info['id'])->column('id,order_sn,freight,store,num,weight,size,discount_money,goods_money,pay_freight,real_freight,other_money,order_amount');
+            $fields='id,order_sn,freight,store,num,weight,size,discount_money,goods_money,pay_freight'.
+            ',real_freight,other_money,tax_money,order_amount,dsc';
+            $orders=$m->where('fid',$info['id'])->column($fields);
            
             $order_ids=array_keys($orders);
             $where_goods['oid']=['in',$order_ids];

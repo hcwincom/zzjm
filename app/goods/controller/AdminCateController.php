@@ -213,7 +213,14 @@ class AdminCateController extends GoodsBaseController
     {
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
-        $info=$m->where('id',$id)->find();
+       
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info)){
             $this->error('数据不存在');
         }
@@ -327,6 +334,7 @@ class AdminCateController extends GoodsBaseController
                 $this->error('不能编辑其他店铺的信息');
             }
         }
+        
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
@@ -338,7 +346,7 @@ class AdminCateController extends GoodsBaseController
             'rtime'=>0,
             'shop'=>$admin['shop'],
         ];
-        
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
         $fields=$this->edit;
         
         $content=[];
@@ -384,19 +392,20 @@ class AdminCateController extends GoodsBaseController
             $this->error('保存数据错误，请重试');
         }
         //记录操作记录
-        $link=url('edit_info',['id'=>$eid]);
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'编辑'.$flag.$info['id'].'-'.$info['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'],
+            'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>$link,
+            'link'=>url('edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
-        Db::name('action')->insert($data_action);
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
         $m_edit->commit();
         $this->success('已提交修改');
     }
@@ -436,13 +445,28 @@ class AdminCateController extends GoodsBaseController
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
         $table=$this->table;
+        
         //获取编辑信息
         $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find(); 
+        $info1=$m_edit
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
+      
         //获取原信息
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$info1['pid'])
+        ->find();
         $info=$m->where('id',$info1['pid'])->find();
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
@@ -512,6 +536,11 @@ class AdminCateController extends GoodsBaseController
             'rtime'=>$time,
             'rstatus'=>$status,
         ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
         //只有未审核的才能更新
         $where=[
             'id'=>$id,
@@ -612,33 +641,20 @@ class AdminCateController extends GoodsBaseController
             
         }
         //审核成功，记录操作记录,发送审核信息
-        $flag=$this->flag;
-        $review_status=$this->review_status;
-        //记录操作记录
-        $link=url('edit_info',['id'=>$info['id']]);
+        
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'审核'.$info['aid'].'-'.$info['aname'].'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$info['pname'].'的编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
-            'link'=>$link,
+            'link'=>url('edit_info',['id'=>$info['id']]),
             'shop'=>$admin['shop'],
         ];
-        //发送审核信息
-        $data_msg=[
-            'aid'=>1,
-            'time'=>$time,
-            'uid'=>$info['aid'],
-            'dsc'=>'对'.$flag.$info['pid'].'-'.$info['pname'].'的编辑已审核，结果为'.$review_status[$status],
-            'type'=>'edit_review',
-            'link'=>$link,
-            'shop'=>$admin['shop'],
-        ];
-        Db::name('action')->insert($data_action);
-        Db::name('msg')->insert($data_msg);
+        
+        zz_action($data_action,['aid'=>$info['aid']]);
         
         $m->commit();
         $this->success('审核成功');

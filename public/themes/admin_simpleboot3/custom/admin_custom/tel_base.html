@@ -243,10 +243,17 @@
 					 		</if> 
 						</present> 
 				 	</label>
-				 	<select name="status[{$key}]"  >
-				 	<option value="1">正常联系人</option>
-				 	<option value="0" <eq name="vo.status" value="0">selected</eq>>历史联系人</option>
-				 	</select>
+				 	<label class="select-inline receiver">
+					 	<select name="status[{$key}]"  >
+						 	<option value="1">正常联系人</option>
+						 	<option value="0" <eq name="vo.status" value="0">selected</eq>>历史联系人</option>
+					 	</select>
+				 	<present name="cc.status">
+					 	 <span class="red">
+						 	<eq name="cc.status" value="0">历史联系人<else/>正常</eq>  
+						 </span> 
+					</present> 
+					</label>
 				</div>
 			</div>
 			  	<div style="clear:both"></div>

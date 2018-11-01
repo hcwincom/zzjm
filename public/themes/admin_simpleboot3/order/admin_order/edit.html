@@ -9,7 +9,7 @@
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}">
 			  <include file="order@admin_order:base" />
-			<div class="form-group">
+			<div class="form-group fleft-all">
 				<label   class="col-sm-2 control-label">审核状态</label>
 				<div class="col-md-6 col-sm-10">
 				 
@@ -26,7 +26,10 @@
 					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
 					 
 					
-					 <p class="notice">不同仓库发货的必须拆分订单。 已付款和已发货的订单不能再修改，只能拆分订单发货</p>
+					 <p class="notice">不同仓库发货的必须拆分订单。 已付款和已发货的订单不能再修改，只能拆分订单发货
+					 <br/>用户在未发货前可以取消订单，管理员在用户未付款且未发货前可以废弃订单 
+					 <br/>订单总费用的更改只能在用户付款和公司发货前修改 
+					 <br/>子订单是不显示用户付款信息和发票信息的</p>
 				</div>
 				
 			</div>
@@ -41,5 +44,6 @@
 $('.save').click(function(){
 	$('form').attr('action',"{:url('edit_do')}");
 });
- 
+
+
 </script>

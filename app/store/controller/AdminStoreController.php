@@ -570,7 +570,7 @@ class AdminStoreController extends AdminInfo0Controller
     public function cates($type=3){
         parent::cates($type);
         if($type==3){
-            $this->assign('types',[1=>'存储仓库',2=>'不良品仓库',3=>'虚拟调货仓库']); 
+            $this->assign('types',[1=>'存储仓库',2=>'不良品仓库']); 
         }
        
     }
