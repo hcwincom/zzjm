@@ -5,7 +5,9 @@ namespace app\common\controller;
 
 use cmf\controller\AdminBaseController; 
 use think\Db; 
-  
+ /*
+  * 取消了权限判断，只有登录判断的基类，主要用于一般的ajax
+  *   */ 
 class AdminBase0Controller extends AdminBaseController
 {
     

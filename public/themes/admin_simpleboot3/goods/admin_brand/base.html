@@ -32,7 +32,7 @@
     <div class="col-md-6 col-sm-10">
 
         <input type="text" class="form-control" name="dsc" value="{$info.dsc}" />
-        <!--<textarea class="form-control"  rows="5" >{$info.dsc}</textarea>-->
+       
         <present name='change.dsc'>
             <input type="text" class="form-control" name="dsc" value="{$info.dsc}" />
         </present>
@@ -57,63 +57,5 @@
         </present>
     </div>
 </div>
-<div style="clear:both"></div>
-<notempty name="info.id">
-    <div class="form-group ">
-        <label for="" class="col-sm-2 control-label">创建人</label>
-        <div class="col-md-6 col-sm-10">
-            <input type="text" class="form-control" name="aname" value="{$info.aname|default=$info['aid']}" />
-        </div>
-    </div>
-</notempty>
-<div style="clear:both"></div>
-<notempty name="info.rid">
-    <div class="form-group ">
-        <label for="" class="col-sm-2 control-label">创建审核人</label>
-        <div class="col-md-6 col-sm-10">
-            <input type="text" class="form-control" name="rname" value="{$info.rname|default=$info['rid']}" />
-        </div>
-    </div>
-</notempty>
-<div style="clear:both"></div>
-<notempty name="info1.aid">
-    <div class="form-group ">
-        <label for="" class="col-sm-2 control-label">修改人</label>
-        <div class="col-md-6 col-sm-10">
-            <input type="text" class="form-control"  name="aname" value="{$info1.aname|default=$info1['aid']}" />
-        </div>
-    </div>
-</notempty>
-
-<div style="clear:both"></div>
-
-<notempty name="info1.rid">
-    <div class="form-group ">
-        <label for="" class="col-sm-2 control-label">修改审核人</label>
-        <div class="col-md-6 col-sm-10">
-            <input type="text" class="form-control" name="rname" value="{$info1.rname|default=$info1['rid']}" />
-        </div>
-    </div>
-</notempty>
-<div style="clear:both"></div>
-
-<present name="info.id">
-    <div class="form-group  "  >
-        <label class="col-sm-2 control-label">修改备注</label>
-        <div class="col-md-6 col-sm-10">
-            <input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
-            <p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
-        </div>
-    </div>
-</present>
-<present name="change">
-    <div class="form-group  "  >
-        <label class="col-sm-2 control-label">审核意见</label>
-        <div class="col-md-6 col-sm-10">
-            <input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  />
-            <p class="notice">审核人审核信息时可以填写</p>
-        </div>
-    </div>
-</present>
-
-<div style="clear:both"></div>
+  <include file="public@adsc" /> 
+ 

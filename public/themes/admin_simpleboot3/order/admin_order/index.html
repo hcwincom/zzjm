@@ -176,7 +176,7 @@
 						<td > 
 						{$order_types[$vo.order_type]}
 						</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.order_sn}</a></td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.name}</a></td>
 					 	<td>
 					 	<eq name="vo.fid" value="0">
 					 		无
@@ -190,7 +190,7 @@
 					  	<td>{$companys[$vo['company']]['name']|default=$vo['company']}</td>
 					  	<td  class="clickInfo"> 
 							<div style="position:relative;" class="goInfo" data-width="0">
-								{$vo.num}
+								{$vo.goods_num}
 							</div>
 						<notempty name="vo.infos">
 							<div class="goodsInfo">
@@ -199,8 +199,8 @@
 										<tr>
 											<th class="nameWidth" width="30%">产品名称</th>
 											<th>编号</th>
-											<th>条码</th>
-											<th>单价</th>
+											 <th>零售价</th>
+											<th>实际价</th>
 											<th>数量</th>
 											<th>总价</th>
 											 
@@ -211,7 +211,7 @@
 										<tr>
 											<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vv.goods])}" target="{$zztarget.other}">{$vv.goods_name}</a></td>
 											<td>{$vv.goods_code}</td>
-											<td>{$vv.goods_sn}</td>
+											 <td>{$vv.price_sale}</td>
 											<td>{$vv.price_real}</td>
 											<td>{$vv.num}</td>
 											<td>{$vv.pay}</td>

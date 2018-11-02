@@ -387,7 +387,9 @@ class AdminBrandController extends GoodsBaseController
      * )
      */
     public function edit_list(){
+       
         parent::edit_list();
+       
         return $this->fetch();  
     }
     

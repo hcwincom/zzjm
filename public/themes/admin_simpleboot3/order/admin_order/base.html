@@ -14,7 +14,7 @@
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">订单编号</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.order_sn}" readonly/> 
+					<input type="text" class="form-control"  value="{$info.name}" readonly/> 
 				</div>
 			</div>
 			<div class="form-group fleft">
@@ -153,7 +153,7 @@
 				 	 <td width="100">成本价</td>
 					 <td width="100">零售价</td> 
 					 <td width="100">供应价</td>
-					 <td width="50">数量</td>
+					 <td width="100">数量</td>
 					 <td width="100">金额</td>
 					 <td width="100">毛重</td> 
 					 <td width="100">体积</td> 
@@ -172,14 +172,14 @@
 			  <table class="table table-hover table-bordered table-list goods-list"  >
 				 
 			 	<tr >
-				 	 <td><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.order_sn}</a></td>
+				 	 <td><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.name}</a></td>
 				 	 <td width="100">产品编码</td> 
 				 	 <td width="100">产品图片</td> 
 				 	 <td width="100">总库存</td> 
 				 	  <td width="100">成本价</td>
 					 <td width="100">零售价</td> 
 					 <td width="100">供应价</td>
-					 <td width="50">数量</td>
+					 <td width="100">数量</td>
 					 <td width="100">金额</td>
 					 <td width="100">毛重</td> 
 					 <td width="100">体积</td> 
@@ -243,14 +243,15 @@
 					</td>
      	   			<td class="price_in">{$vo.price_in}</td> 
      	   			<td class="price_sale">{$vo.price_sale}</td>
-     	    		<td class="price_sale">
-     	    		<input type="text" name="prices-{$kk}[{$key}]" class="form-control  " value="{$vo.price_real}"/>
+     	    		<td class="price_real">
+     	    		<input type="text" name="price_reals-{$kk}[{$key}]" class="form-control  " value="{$vo.price_real}"/>
      	    		<present name="change['edit'][$kk][$key]['price_real']">
      	    			<input type="text"  class="form-control  red" value="{$change['edit'][$kk][$key]['price_real']}"/>
      	    		</present> 
      	    		</td>
-     	    		<td class="num"><input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="1" readonly/></td>
-     	    		<td class="price_count"><input type="text" name="price_counts-{$kk}[{$key}]" class="form-control " value="{$vo.pay}" readonly/></td>
+     	    			<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
+     	    		<td class="num"><input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" readonly/></td>
+     	    		<td class="price_count"><input type="text" name="pays-{$kk}[{$key}]" class="form-control " value="{$vo.pay}" readonly/></td>
      	    		<td class="weight"><input type="text"  name="weights-{$kk}[{$key}]" class="form-control " value="{$vo.weight}"/>
      	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/></td>
      	   			<td class="size"><input type="text"  name="sizes-{$kk}[{$key}]" class="form-control" value="{$vo.size}"/>
@@ -279,14 +280,14 @@
 						</foreach>
 						</select>
 						 
-						 <present name="change['edit'][$kk]['store']">
+						<present name="change['edit'][$kk]['store']">
 						 <select  class="form-control short-auto red"  >
 					    	<option value="0">请选择</option>
 						<foreach name="stores" item="vo">
 							<option value="{$key}" <if condition="$key eq $change['edit'][$kk]['store']">selected</if>>{$vo}</option>
 						</foreach>
 						</select>
-						 </present>
+						</present>
 					 </label>
 					 
 					 <label class="input-inline"> 
@@ -334,7 +335,7 @@
 					 	<button class="freight_count" type="button">运费计算</button>
 					 </label>
 					 <label class="input-inline">
-					 产品总数量：<input type="text" class="form-control short " class="goods_num" name="num0[{$kk}]" value="{$vv.num}" readonly/> 
+					 产品总数量：<input type="text" class="form-control short " class="goods_num" name="goods_num0[{$kk}]" value="{$vv.goods_num}" readonly/> 
 					</label>
 				 	 <label class="input-inline">
 					 产品总金额：<input type="text" class="form-control short " class="goods_money" name="goods_money0[{$kk}]" value="{$vv.goods_money}" readonly/> 
@@ -362,11 +363,9 @@
 					<input type="text" class="form-control fleft-all" name="dsc0[{$kk}]" value="{$vv.dsc}" class="dsc"/> 
 				<present name="change['edit'][$kk]['dsc']">
 					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['dsc']}" />
-				</present>
-					 
+				</present> 
 				</div>
-			</div>
-			 
+			</div> 
 		</eq> 
 		</div>	
 		</foreach> 
@@ -481,8 +480,7 @@
 					</select>
 				 <present name="change.invoice_type">
 				 	 <select  class="form-control short-auto red" >
-				   		<option value="{$change.invoice_type}">{$invoice_types[$change.invoice_type]}</option>
-					 
+				   		<option value="{$change.invoice_type}">{$invoice_types[$change.invoice_type]}</option> 
 					</select>   
 				 </present>	 
 				</div>
@@ -494,23 +492,41 @@
 					<input type="hidden"  name="invoice_id" value="{$invoice.id}"/>
 					 <label class="input-inline"> 
 					发票抬头：<input type="text" class="form-control short-auto" name="invoice_title" value="{$invoice.title}"/>
+					<present name="change.invoice.title">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.title}"/> 
+					</present> 
 					</label>
 				 	 <label class="input-inline"> 
 					客户税号：<input type="text" class="form-control short-auto" name="invoice_ucode" value="{$invoice.ucode}"/>
+					<present name="change.invoice.ucode">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.ucode}"/> 
+					</present>
 					</label>
 				 	 <label class="input-inline"> 
 					税点%：<input type="text" class="form-control short" id="invoice_point" name="invoice_point" value="{$invoice.point}"/>
+					<present name="change.invoice.point">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.point}"/> 
+					</present>
 					</label>
 				 	 <label class="input-inline"> 
 					开票金额：<input type="text" class="form-control short" id="invoice_invoice_money" name="invoice_invoice_money" value="{$invoice.invoice_money}"/>
+					<present name="change.invoice.invoice_money">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.invoice_money}"/> 
+					</present>
 					 </label>
 					  <label class="input-inline"> 
 					税费：<input type="text" class="form-control short" id="invoice_tax_money" name="invoice_tax_money" value="{$invoice.invoice_money}"/>
+					<present name="change.invoice.tax_money">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.tax_money}"/> 
+					</present>
 					 <button id="invoice_count" type="button">税费计算</button>
 					 </label>
 					  
 					 <br/> 
 					开票说明：<input type="text" class="form-control" name="invoice_dsc" value="{$invoice.dsc}"/>
+					<present name="change.invoice.dsc">
+						<input type="text" class="form-control red"  value="{$change.invoice.dsc}"/> 
+					</present>
 					   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息。
 					   <br/>开票金额为空则自动计算开票金额</p>  
 				</div>
@@ -520,23 +536,40 @@
 				<label class="col-sm-2 control-label">订单总计</label>
 				<div class="col-md-6 col-sm-10">
 				 	<label class="input-inline">
-					 产品总数量：<input type="text" class="form-control short " id="num" name="num" value="{$info.num}" readonly/> 
+					 产品总数量：<input type="text" class="form-control short " id="goods_num" name="goods_num" value="{$info.goods_num}" readonly/> 
+					<present name="change.goods_num">
+						<input type="text" class="form-control short red"  value="{$change.goods_num}"/> 
+					</present>
 					</label>
 				 	 <label class="input-inline">
 					 产品总金额：<input type="text" class="form-control short " id="goods_money" name="goods_money" value="{$info.goods_money}" readonly/> 
+					<present name="change.goods_money">
+						<input type="text" class="form-control short red"  value="{$change.goods_money}"/> 
+					</present>
 					</label>
 				 	 <label class="input-inline">
 					 优惠金额：<input type="text" class="form-control short" id="discount_money" name="discount_money" value="{$info.discount_money}" /> 
+					<present name="change.discount_money">
+						<input type="text" class="form-control short red"  value="{$change.discount_money}"/> 
+					</present>
 					</label>
 					 <label class="input-inline">
 					 税费：<input type="text" class="form-control short" id="tax_money" name="tax_money" value="{$info.tax_money}" /> 
+					<present name="change.tax_money">
+						<input type="text" class="form-control short red"  value="{$change.tax_money}"/> 
+					</present>
 					</label>
 					 <label class="input-inline">
 					 其它费用：<input type="text" class="form-control short" id="other_money" name="other_money" value="{$info.other_money}" /> 
+					<present name="change.other_money">
+						<input type="text" class="form-control short red"  value="{$change.other_money}"/> 
+					</present>
 					</label>
 				 	 <label class="input-inline"> 
 					 用户付款：<input type="text" class="form-control short" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
-					  
+					  <present name="change.order_amount">
+						<input type="text" class="form-control short red"  value="{$change.order_amount}"/> 
+					</present>
 				 	</label>
 				   <p class="notice">用户付款=产品总金额-优惠金额+税费+其它费用。
 				   <br/>计算税费后用户付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后用户付款金额也会改变
@@ -556,6 +589,7 @@
 				    	num2="{$vo.num2}" location2="{$vo.location2}" name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
 				    </foreach>
 					</select> 
+					<input type="hidden" name="account_id" value="{$pay.id}"/>
 				付款银行：
 					<select  class="form-control" name="account_bank1" id="account_bank1">
 				    	<option value="0">请选择</option>
@@ -581,44 +615,7 @@
 				</div>
 			</div>
 		 </eq>
-		<div style="clear:both"></div>
-		<notempty name="info1.aid">
-			<div class="form-group fleft-all">
-				<label for="" class="col-sm-2 control-label">修改人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
-		<notempty name="info1.rid">
-			<div class="form-group fleft-all">
-				<label for="" class="col-sm-2 control-label">修改审核人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info1.rname|default=$info1['rid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
-		<div style="clear:both"></div>
-		<present name="info.id">
-			<div class="form-group fleft-all"  >
-				<label class="col-sm-2 control-label">修改备注</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
-					<p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
-				</div>
-			</div>
-		</present>
-		<present name="change">
-			<div class="form-group fleft-all"  >
-				<label class="col-sm-2 control-label">审核意见</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  />
-					<p class="notice">审核人审核信息时可以填写</p>
-				</div>
-			</div>
-		</present>
-		 
-		 <div style="clear:both"></div>
+		 <include file="public@adsc_fleft" /> 
 		 
 <script>
  

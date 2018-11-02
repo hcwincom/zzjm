@@ -1,0 +1,53 @@
+ 
+<notempty name="info.id">
+    <div class="form-group ">
+        <label for="" class="col-sm-2 control-label">管理员</label>
+        <div class="col-md-6 col-sm-10">
+         <label class="input-inline"> 
+            	创建人：
+            <input type="text" class="form-control short"  value="{$info.aname|default=$info['aid']}" />
+          </label>
+        <notempty name="info.rid">
+           <label class="input-inline"> 
+         	 创建审核人： 
+            <input type="text" class="form-control short"  value="{$info.rname|default=$info['rid']}" />
+          </label>	
+		</notempty>
+		
+		<notempty name="info1.aid">
+           <label class="input-inline"> 
+         	 修改人： 
+            <input type="text" class="form-control short" value="{$info1.aname|default=$info1['aid']}" />
+          </label>	
+		</notempty>
+		
+		<notempty name="info1.rid">
+           <label class="input-inline"> 
+         	 修改审核人： 
+            <input type="text" class="form-control short" value="{$info1.rname|default=$info1['rid']}" />
+          </label>	
+		</notempty>
+		
+        </div>
+    </div>
+</notempty>
+ 
+
+<present name="info.id">
+    <div class="form-group  ">
+        <label class="col-sm-2 control-label">修改备注</label>
+        <div class="col-md-6 col-sm-10">
+            <input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
+            <p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
+        </div>
+    </div>
+</present>
+<present name="change">
+    <div class="form-group  "  >
+        <label class="col-sm-2 control-label">审核意见</label>
+        <div class="col-md-6 col-sm-10">
+            <input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  />
+            <p class="notice">审核人审核信息时可以填写</p>
+        </div>
+    </div>
+</present>

@@ -613,60 +613,8 @@
 				</present>
 			</div>
 		</div>
-		<div style="clear:both"></div>
-		<notempty name="info.id">
-			<div class="form-group fleft">
-				<label for="" class="col-sm-2 control-label">创建人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.aname|default=$info['aid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
-		<notempty name="info.rid">
-			<div class="form-group fleft">
-				<label for="" class="col-sm-2 control-label">创建审核人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info.rname|default=$info['rid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
-		<div style="clear:both"></div>
-		<notempty name="info1.aid">
-			<div class="form-group fleft">
-				<label for="" class="col-sm-2 control-label">修改人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
-		<notempty name="info1.rid">
-			<div class="form-group fleft">
-				<label for="" class="col-sm-2 control-label">修改审核人</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$info1.rname|default=$info1['rid']}" readonly/>
-				</div>
-			</div>
-		</notempty>
-		<div style="clear:both"></div>
-		<present name="info.id">
-			<div class="form-group fleft-all"  >
-				<label class="col-sm-2 control-label">修改备注</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
-					<p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
-				</div>
-			</div>
-		</present>
-		<present name="change">
-			<div class="form-group fleft-all"  >
-				<label class="col-sm-2 control-label">审核意见</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  />
-					<p class="notice">审核人审核信息时可以填写</p>
-				</div>
-			</div>
-		</present>
-		 <div style="clear:both"></div>
+		 <include file="public@adsc_fleft" /> 
+		 
 		 
 <script>
 	 var id="{$info.id|default=0}";

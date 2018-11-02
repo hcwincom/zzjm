@@ -115,14 +115,14 @@ class AdminOrderController extends OrderBaseController
         }
         //查询字段
         $types=[
-            'p.order_sn'=>'订单编号',
+            'p.name'=>'订单编号',
             'p.express_no'=>'物流编号',
             'custom.name'=>'客户名称',
             'custom.code'=>'客户编号',
-            'p.order_sn'=>'淘宝id',
-            'p.order_sn'=>'收货人',
-            'p.order_sn'=>'订单编号',
-            'p.order_sn'=>'订单编号',
+            'p.name'=>'淘宝id',
+            'p.name'=>'收货人',
+            'p.name'=>'订单编号',
+            'p.name'=>'订单编号',
         ];
         
         //选择查询字段
@@ -216,7 +216,7 @@ class AdminOrderController extends OrderBaseController
             ->order('p.sort desc,p.id asc')
             ->column($field); 
             $goods=Db::name('order_goods')->where('oid','in',$ids)
-            ->column('id,oid,goods,goods_name,goods_code,goods_pic,goods_sn,price_real,num,pay');
+            ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
             foreach($goods as $k=>$v){ 
                 $list[$v['oid']]['infos'][]=$v;
             }
@@ -284,7 +284,7 @@ class AdminOrderController extends OrderBaseController
         $data=$this->request->param();
        
         $fields_int=[
-            'company','uid','store','freight','accept','paytype','pay_type','num',
+            'company','uid','store','freight','accept','paytype','pay_type','goods_num',
         ];
         foreach($fields_int as $v){
             $data[$v]=intval($data[$v]);
@@ -315,7 +315,7 @@ class AdminOrderController extends OrderBaseController
             'freight'=>$data['freight'],
             'paytype'=>$data['paytype'],
             'pay_type'=>$data['pay_type'],
-            'num'=>$data['num'],
+            'goods_num'=>$data['goods_num'],
             
             'pay_freight'=>$data['pay_freight'],
             'real_freight'=>$data['real_freight'],
@@ -359,7 +359,7 @@ class AdminOrderController extends OrderBaseController
         if($company['shop']!=$data_order['shop']){
             $this->error('订单来源错误');
         } 
-        $data_order['order_sn']=$company['code'].date('Ymd').substr($time,-8);
+        $data_order['name']=$company['code'].date('Ymd').substr($time,-8);
         $m=$this->m;
         $m_info=Db::name('order_goods');
         $m->startTrans();
@@ -376,8 +376,7 @@ class AdminOrderController extends OrderBaseController
         $goods_infos=Db::name('goods')->where($where)->column('id,name,code,pic,price_in,price_sale');
         //order_break($goods,$store,$city,$shop)
         $order_goods=[];
-        //标记是否需要拆分订单
-        $is_break=0;
+        //标记是否需要拆分订单 
         foreach($nums as $k=>$v){
             $v=intval($v);
             if($v<=0){
@@ -399,9 +398,7 @@ class AdminOrderController extends OrderBaseController
                 'size'=>round($data['sizes'][$k],2),
                 'weight1'=>bcdiv($data['weights'][$k],$v,2),
                 'size1'=>bcdiv($data['sizes'][$k],$v,2), 
-            ];
-            
-            
+            ]; 
             if($order_goods[$k]['pay'] != $data['price_counts'][$k]){
                 $this->error('产品费用错误');
             } 
@@ -420,7 +417,7 @@ class AdminOrderController extends OrderBaseController
                 
                 $tmp_order=[
                     'fid'=>$oid,
-                    'order_sn'=>$data_order['order_sn'].'-'.$i,
+                    'name'=>$data_order['name'].'_'.$i,
                     'store'=>$k, 
                     'create_time'=>$time,
                     'aid'=>$admin['id'],
@@ -442,9 +439,11 @@ class AdminOrderController extends OrderBaseController
                     'dsc'=>$data_order['dsc'],
                    
                     'goods_money'=>0, 
+                    'goods_num'=>0, 
                 ];
                 foreach($v as $kk=>$vv){
                     $tmp_order['goods_money']+=$vv['pay'];
+                    $tmp_order['goods_num']+=$vv['num'];
                 }
                 $tmp_oid=$m->insertGetId($tmp_order);
                 foreach($v as $kk=>$vv){
@@ -550,15 +549,14 @@ class AdminOrderController extends OrderBaseController
             'oid_type'=>1,
         ];
         $invoice=Db::name('order_invoice')->where($where)->find();
-        
-       
+         
         //订单产品
         $where_goods=[];
         if($info['is_real']==1){
             $where_goods['oid']=['eq',$info['id']];
             $orders=[$info['id']=>$info];
         }else{
-            $fields='id,order_sn,freight,store,num,weight,size,discount_money,goods_money,pay_freight'.
+            $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
             ',real_freight,other_money,tax_money,order_amount,dsc';
             $orders=$m->where('fid',$info['id'])->column($fields);
            
@@ -646,9 +644,221 @@ class AdminOrderController extends OrderBaseController
      */
     public function edit_do()
     {
+        $m=$this->m;
+        $table=$this->table;
+        $flag=$this->flag;
         $data=$this->request->param();
-        dump($data);
-        exit;
+        $info=$m->where('id',$data['id'])->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+           $this->error('不能编辑其他店铺的信息'); 
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
+        $fields=$this->edit;
+        
+        $content=[];
+        //检测改变了哪些字段
+        
+        //所有订单都有
+        $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
+            'goods_num','goods_money','discount_money','tax_money','other_money','order_amount',
+        ];
+        //总订单信息系
+        $edit_fid0=['company','udsc','paytype','invoice_type'];
+        //组装需要判断的字段
+        if($info['fid']==0){
+            $fields=array_merge($edit_base,$edit_fid0);
+        }else{
+            $fields=$edit_base;
+        }
+        foreach($fields as $k=>$v){
+            //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+            if(isset($data[$v]) && $info[$v]!=$data[$v]){
+                $content[$v]=$data[$v];
+            } 
+        }
+        //主订单才有发票和付款信息
+        if($info['fid']==0){
+            //发票信息
+            $edit_invoice=['title','ucode','point','invoice_money','tax_money','dsc'];
+            //已有发票或写了发票抬头的要判断发票信息
+            if(!empty($data['invoice_id']) || (!empty($data['invoice_title']) && !empty($data['invoice_type']))){
+                $data['invoice_id']=intval($data['invoice_id']);
+                if(empty($data['invoice_id'])){
+                    $invoice=null;
+                }else{
+                    $invoice=Db::name('order_invoice')->where('id',$data['invoice_id'])->find();
+                }
+                $content['invoice']=[];
+                foreach($edit_invoice as $k=>$v){
+                    $field_tmp='invoice_'.$v;
+                    //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+                    if(isset($data[$field_tmp]) && $invoice[$v]!=$data[$field_tmp]){
+                        $content['invoice'][$v]=$data[$field_tmp];
+                    }
+                }
+                //没有改变清除
+                if(empty($content['invoice'])){
+                    unset($content['invoice']);
+                }else{
+                    $content['invoice']['id']= $data['invoice_id'];
+                }
+            }
+       
+            //支付信息
+            $edit_account=['bank1','name1','num1','location1','bank2','name2','num2','location2'];
+            //已有付款账号信息和付款账户名
+            if(!empty($data['account_id']) || !empty($data['account_name1']) ){
+                $data['account_id']=intval($data['account_id']);
+                if(empty($data['account_id'])){
+                    $pay=null;
+                }else{
+                    $pay=Db::name('order_pay')->where('id',$data['account_id'])->find();
+                }
+                $content['pay']=[];
+                foreach($edit_invoice as $k=>$v){
+                    $field_tmp='account_'.$v;
+                    //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+                    if(isset($data[$field_tmp]) && $invoice[$v]!=$data[$field_tmp]){
+                        $content['pay'][$v]=$data[$field_tmp];
+                    }
+                }
+                //没有改变清除
+                if(empty($content['pay'])){
+                    unset($content['pay']);
+                }else{
+                    $content['pay']['id']= $data['account_id'];
+                } 
+            }
+        }
+       
+        //获取原订单和订单产品
+        $where_goods=[];
+        if($info['is_real']==1){
+            $where_goods['oid']=['eq',$info['id']];
+            $orders=[$info['id']=>$info];
+            $order_ids=[$info['id']];
+        }else{
+            $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
+                ',real_freight,other_money,tax_money,order_amount,dsc';
+            $orders=$m->where('fid',$info['id'])->column($fields);
+            
+            $order_ids=array_keys($orders);
+            $where_goods['oid']=['in',$order_ids];
+        }
+        //全部订单产品
+        $order_goods=Db::name('order_goods')
+        ->where($where_goods)
+        ->column('');
+        //数据转化，按订单分组
+        $infos=[]; 
+        foreach($order_goods as $k=>$v){  
+            $infos[$v['oid']][$v['goods']]=$v;
+        } 
+        //子订单nums-{$kk}[{$key}],只有在主订单下才能拆分订单
+        //store0[{$kk}]
+        //name="oids[]"
+       /*  $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
+            'goods_num','goods_money','discount_money','tax_money','other_money','order_amount',
+        ]; */
+        $edit_goods=['num','pay','weight','size','dsc','price_real'];
+        if(count($data['oids'])==1){
+            //没有拆分订单,则只有change.edit
+            if($data['oids'][0]!=$info['id']){
+                $this->error('订单数据异常');
+            }
+            //没有拆分就没有小订单的金额结算等，只有产品变化记录
+            //订单只能拆分，不能增加合并删除
+            foreach ($infos[$info['id']] as $k=>$v){
+                //不存在就是没有该产品了change['edit'][$kk][$key]['price_real']
+                if(!isset($data['goods_ids-'.$info['id']][$v['goods']]) ){
+                    $content['edit'][$info['id']][$v['goods']]['id']='del';
+                    continue;
+                }
+                foreach($edit_goods as $vv){ 
+                    //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+                    if($data[$vv.'s-'.$info['id']][$v['goods']] != $v[$vv]){
+                        $content['edit'][$info['id']][$v['goods']][$vv]=$data[$vv.'s-'.$info['id']][$v['goods']];
+                    }
+                }
+            }
+           
+        }else{
+            //多个要比较add
+            $news=$data['oids'];
+            
+        }
+        
+        if(empty($content)){
+            $this->error('未修改');
+        }
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $this->success('已提交修改');
+    }
+    
+    /**
+     * 订单编辑列表
+     * @adminMenu(
+     *     'name'   => '订单编辑列表',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 1,
+     *     'icon'   => '',
+     *     'remark' => '订单编辑列表',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_list()
+    {
+        parent::edit_list();
+        return $this->fetch();
     }
     //分类
     public function cates($type=3){
@@ -698,7 +908,7 @@ class AdminOrderController extends OrderBaseController
        
         if(empty($where_shop)){
             $shops=Db::name('shop')->where($where)->order('sort asc')->column('id,name');
-            $this->assign('shops',$shops); 
+            $this->assign('shops',$shops);  
         }else{
             $where['shop']=$where_shop;
             $where_admin['shop']=$where_shop;
@@ -727,6 +937,7 @@ class AdminOrderController extends OrderBaseController
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes); 
         $this->assign('aids',$aids); 
+        $this->assign('rids',$aids); 
         $this->assign('stores',$stores); 
         $this->assign('freights',$freights); 
         $this->assign('goods_url',url('goods/AdminGoods/edit',false,false)); 

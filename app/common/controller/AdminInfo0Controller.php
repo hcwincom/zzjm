@@ -5,7 +5,7 @@ namespace app\common\controller;
 use cmf\controller\AdminBaseController; 
 use think\Db; 
 /*
- * 和admininfo功能相同，为了单个进程代码更简洁，复制了一份
+ * 数据的操作基类
  */
 class AdminInfo0Controller extends AdminBaseController
 {
@@ -657,7 +657,30 @@ class AdminInfo0Controller extends AdminBaseController
         $page = $list->appends($data)->render();
        
         //分类信息
-        $this->cates(2);
+        //显示编辑人和审核人
+        $m_user=Db::name('user');
+        //可以加权限判断，目前未加
+        $where_aid=[
+            'user_type'=>1, 
+        ];
+        //创建人
+        if($this->isshop){
+            //如果分店铺又是列表页查找,显示所有店铺
+            if($admin['shop']==1){
+                $shops=Db::name('shop')->where('status',2)->column('id,name'); 
+                $this->assign('shops',$shops);
+            }else{
+                $where_aid['shop']=$admin['shop'];
+            }
+        }else{
+            $where_aid['shop']=1;
+        }
+        
+        $aids=$m_user->where($where_aid)->column('id,user_nickname as name,shop');
+        //审核人 
+        $this->assign('aids',$aids);
+        $this->assign('rids',$aids);
+         
         $this->assign('page',$page);
         $this->assign('list',$list);
       
@@ -665,7 +688,7 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('types',$types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
-       
+        
     }
     /**
      * 编辑审核详情 
