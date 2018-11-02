@@ -860,6 +860,172 @@ class AdminOrderController extends OrderBaseController
         parent::edit_list();
         return $this->fetch();
     }
+    /**
+     * 订单编辑审核页面
+     * @adminMenu(
+     *     'name'   => ' 订单编辑审核页面',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 1,
+     *     'icon'   => '',
+     *     'remark' => '订单编辑审核页面',
+     *     'param'  => ''
+     * )
+     */
+    public function edit_info()
+    {
+        
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $table=$this->table;
+        //获取编辑信息
+        $m_edit=Db::name('edit');
+        $info1=$m_edit
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
+        
+        if(empty($info1)){
+            $this->error('编辑信息不存在');
+        }
+        //获取原信息
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$info1['pid'])
+        ->find();
+        if(empty($info)){
+            $this->error('编辑关联的信息不存在');
+        }
+        //获取改变的信息
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
+        $change=json_decode($change,true);
+         
+        $this->assign('info1',$info1);
+        $this->assign('change',$change);
+        
+        if($this->isshop){
+            $this->where_shop=$info['shop'];
+        }
+        $id=$info['id'];
+        $shop=$info['shop'];
+        $admin=$this->admin;
+        if($admin['shop']>1 && $admin['shop']!=$shop){
+            $this->error('只能查看本店铺的数据');
+        }
+        $this->where_shop=$shop;
+        //获取客户信息
+        $custom=Db::name('custom')->where('id',$info['uid'])->find();
+        if(empty($custom)){
+            $accounts=null;
+        }else{
+            //可选支付账号
+            $where=[
+                'uid'=>$custom['id'],
+                'type'=>1,
+            ];
+            $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,bank2,name2,num2,location2');
+            
+        }
+        //支付信息
+        $where=[
+            'oid'=>$id,
+            'oid_type'=>1,
+        ];
+        $pay=Db::name('order_pay')->where($where)->find();
+        //发票
+        $where=[
+            'oid'=>$id,
+            'oid_type'=>1,
+        ];
+        $invoice=Db::name('order_invoice')->where($where)->find();
+        
+        //订单产品
+        $where_goods=[];
+        if($info['is_real']==1){
+            $where_goods['oid']=['eq',$info['id']];
+            $orders=[$info['id']=>$info];
+        }else{
+            $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
+                ',real_freight,other_money,tax_money,order_amount,dsc';
+            $orders=$m->where('fid',$info['id'])->column($fields);
+            
+            $order_ids=array_keys($orders);
+            $where_goods['oid']=['in',$order_ids];
+        }
+        //全部订单产品
+        $order_goods=Db::name('order_goods')
+        ->where($where_goods)
+        ->column('');
+        
+        //检查用户权限
+        $authObj = new \cmf\lib\Auth();
+        $name       = strtolower('goods/AdminGoodsauth/price_in_get');
+        $is_auth=$authObj->check($admin['id'], $name);
+        //数据转化，按订单分组
+        $infos=[];
+        $goods_id=[];
+        foreach($order_goods as $k=>$v){
+            $goods_id[$v['goods']]=$v['goods'];
+            $goods[$v['goods']]=[];
+            if($is_auth==false){
+                $v['price_in']='--';
+            }
+            $v['weight1']=bcdiv($v['weight'],$v['num'],2);
+            $v['size1']=bcdiv($v['size'],$v['num'],2);
+            
+            $infos[$v['oid']][$v['goods']]=$v;
+        }
+        
+        //获取产品图片
+        $where=[
+            'pid'=>['in',$goods_id],
+            'type'=>['eq',1],
+        ];
+        $pics=Db::name('goods_file')->where($where)->column('id,pid,file');
+        $path=cmf_get_image_url('');
+        foreach($pics as $k=>$v){
+            $goods[$v['pid']]['pics'][]=[
+                'file1'=>$v['file'].'1.jpg',
+                'file3'=>$v['file'].'3.jpg',
+            ];
+        }
+        
+        //获取所有库存
+        $where=[
+            'id'=>['in',$goods_id],
+            'shop'=>['eq',$shop],
+        ];
+        $list=Db::name('store_goods')->where($where)->column('id,store,goods,num,num1');
+        //循环得到数据
+        foreach($list as $k=>$v){
+            $goods[$v['goods']]['nums'][$v['store']]=[
+                'num'=>$v['num'],
+                'num1'=>$v['num1'],
+            ];
+        } 
+        $this->cates(); 
+        $this->assign('info',$info);
+        $this->assign('infos',$infos);
+        $this->assign('orders',$orders);
+        $this->assign('goods',$goods);
+        $this->assign('accounts',$accounts);
+        $this->assign('custom',$custom);
+        $this->assign('pay',$pay);
+        
+        $this->assign('invoice',$invoice);
+        
+        return $this->fetch();  
+        
+    }
+    
+    
     //分类
     public function cates($type=3){
         $this->assign('invoice_types',config('invoice_type'));

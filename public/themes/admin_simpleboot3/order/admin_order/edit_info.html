@@ -7,7 +7,7 @@
 			<li class="active"><a href="{:url('edit_info',['id'=>$info1.id])}">审核{$flag}</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('review_edit')}">
-			 <include file="custom@admin_custom:base" />
+			 <include file="order@admin_order:base" />
 			<div class="form-group">
 				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
 				<div class="col-md-6 col-sm-10">
