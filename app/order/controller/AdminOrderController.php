@@ -1012,6 +1012,7 @@ class AdminOrderController extends OrderBaseController
         } 
         $this->cates(); 
         $this->assign('info',$info);
+     
         $this->assign('infos',$infos);
         $this->assign('orders',$orders);
         $this->assign('goods',$goods);

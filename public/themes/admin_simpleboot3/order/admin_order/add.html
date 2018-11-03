@@ -332,11 +332,13 @@ function money_change($tr,type='price'){
 	if(!(num>0)){
 		msg('产品数量错误');
 		$tr.find('.num').focus();
+		return false;
 	}
 	$tr.find('.num').val(num);
 	if(!(price_sale>=0)){
 		msg('产品价格错误');
 		$tr.find('.price_sale').focus();
+		return false;
 	}
 	price_sale=price_sale.toFixed(2);
 	$tr.find('.price_sale').val(price_sale);
@@ -431,8 +433,11 @@ $('#freight_count').click(function(){
      	    	return false;
      	    } 
      	    
-     	    $('#pay_freight').val(data.data);
      	    $('#real_freight').val(data.data);
+     	    if(($.trim($('#pay_freight').val()))==''){
+    	    	$('#pay_freight').val(data.data);
+    	    }
+     	    
         }, 
         error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
             msg(event.responseText,1);

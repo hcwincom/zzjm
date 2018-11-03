@@ -199,18 +199,18 @@ class OrderajaxController extends AdminBase0Controller
         ->field('ff.weight0,ff.price0,ff.price1,ff.weight1,ff.size')
         ->join('cmf_express_area ea','ff.freight='.$freight.' and ea.city='.$city.' and ea.area=ff.expressarea')
         ->find();
-       
+        
         if(empty($fees)){
-            $this->error('没有计算规则,请手动填写');
+            $this->error($freight.'没有计算规则,请手动填写'.$city);
         }
        
         $weight=bcmul($weight,1000);
         if(!empty($fees['size'])){
             //体积和重量换算比
             $weight1=bcdiv($size,$fees['size']);
-            $weight=($weight>$weight1)?$weight:$weight1;
-            $this->error('没有计算规则');
+            $weight=($weight>$weight1)?$weight:$weight1; 
         }
+        //首重计算和判断
         $weight1=bcsub($weight, $fees['weight0']);
         //不足首重
         if($weight1<=0){
