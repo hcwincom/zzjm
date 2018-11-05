@@ -408,6 +408,7 @@ class AdminOrderController extends OrderBaseController
         $orders=$m->order_break($order_goods, $oid,$store,  $data_order['city'],  $data_order['shop']);
         if(count($orders)==1){
             $dsc='订单添加成功';
+            
             $m_info->insertAll($order_goods);
         }else{
             $dsc='订单已拆分';
@@ -497,7 +498,7 @@ class AdminOrderController extends OrderBaseController
             Db::name('order_pay')->insert($data_pay);
         }
         $m->commit();
-        $this->success($dsc);
+        $this->success($dsc,url('edit',['id'=>$oid]));
     }
     /**
      * 订单详情
