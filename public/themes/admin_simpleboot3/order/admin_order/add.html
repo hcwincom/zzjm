@@ -454,61 +454,7 @@ function paytype_change(){
 	} 
 	$('#pay_type').val($('#paytype option:selected').attr('type0'));
 }
-$('#invoice_type').change(function(){
-	invoice_type_change();
-	 
-});
-function invoice_type_change(){
-	if(($('#invoice_type').val())==0){  
-		return false;
-	} 
-	$('#invoice_point').val($('#invoice_type option:selected').attr('point'));
-}
-$('#invoice_count').click(function(){
-	var invoice_type=$('#invoice_type').val();
-	if(invoice_type==0){ 
-		$('#invoice_type').focus();
-		return false;
-	}
-	 
-	var invoice_point=parseFloat($('#invoice_point').val());
-	if(!(invoice_point>0)){
-		invoice_point=0;
-		$('#invoice_point').val(0);
-		$('#invoice_point').focus();
-		return false;
-	}
-	var invoice_invoice_money=parseFloat($('#invoice_invoice_money').val());
-	if(!(invoice_invoice_money>0)){
-		var goods_money=parseFloat($('#goods_money').val());
-		var discount_money=parseFloat($('#discount_money').val());
-		var other_money=parseFloat($('#other_money').val());
-		var pay_freight=parseFloat($('#pay_freight').val());
-		if(!(goods_money>0)){
-			goods_money=0;
-			$('#goods_money').val(0);
-		}
-		if(!(discount_money>0)){
-			discount_money=0;
-			$('#discount_money').val(0);
-		}
-		if(!(other_money>0)){
-			other_money=0;
-			$('#other_money').val(0);
-		}
-		if(!(pay_freight>0)){
-			pay_freight=0;
-			$('#pay_freight').val(0);
-		}
-		invoice_invoice_money=(goods_money-discount_money+other_money+pay_freight)*(1+invoice_point/100);
-		 
-	}
-	$('#invoice_invoice_money').val(invoice_invoice_money.toFixed(2));
-	var invoice_tax_money=(invoice_invoice_money*invoice_point/100/(1+invoice_point)).toFixed(2);
-	$('#invoice_tax_money').val(invoice_tax_money); 
-	$('#tax_money').val(invoice_tax_money); 
-	order_account();
-});
+
 $('#discount_money,#other_money,#pay_freight,#tax_money').change(function(){
 	order_account();
 });

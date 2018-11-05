@@ -134,7 +134,7 @@
 			 
 	  		
 		<empty name="info.id">
-		<div class="form-group fleft-all order0"  >
+			<div class="form-group fleft-all order0"  >
 				<label class="col-sm-2 control-label">物流发货</label>
 				<div class="col-md-6 col-sm-10">
 			 
@@ -171,10 +171,8 @@
 				 
 				</div>
 			</div>
-			<div class="order" >
-			 
-			  <table class="table table-hover table-bordered table-list" id="goods-list">
-				 
+			<div class="order_add" > 
+			  <table class="table table-hover table-bordered table-list" id="goods-list"> 
 			 	<tr id="goods0">
 				 	 <td>产品名称</td>
 				 	 <td width="100">产品编码</td> 
@@ -195,13 +193,11 @@
 	 		</div>
 	 		<div class="form-group fleft-all"></div>
 	 	<else/>
-		
-		<foreach name="orders" item="vv" key="kk">
 		<div class="orders">
+		<foreach name="orders" item="vv" key="kk"> 
 			<div class="order order{$kk}" > 
 			<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
-			  <table class="table table-hover table-bordered table-list goods-list"  >
-				 
+			  <table class="table table-hover table-bordered table-list goods-list"  > 
 			 	<tr >
 				 	 <td><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.name}</a></td>
 				 	 <td width="100">产品编码</td> 
@@ -228,7 +224,7 @@
     	    		 
      	   			<td class="tableImg">
      	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vo.goods_pic});"></div>
-     	   				 <notempty name="vo.pics">
+     	   				 <notempty name="goods[$key]['pics']">
      	   				<div class="listposi"> 
      	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
 		    				<div class="imgGroup">
@@ -318,16 +314,10 @@
     	   			<td class="break"><input type="number" class="form-control" value="0"/></td>
     	   		</tr>
 			  
-			  </foreach>	
-			 
-			 
-			 
-	 		</table>
-			 
-			 
+			  </foreach> 
+	 		</table> 
 		 
-			 <div class="form-group fleft-all"  > 
-		 
+			 <div class="form-group fleft-all order_pay"  >  
 				<label class="col-sm-2 control-label">订单小计</label>
 				<div class="col-md-6 col-sm-10">
 					 <label class="input-inline"> 
@@ -408,9 +398,9 @@
 					 <label class="input-inline">
 					 其它费用：<input type="text" class="form-control short other_money"  name="other_money0[{$kk}]" value="{$vv.other_money}" /> 
 					</label>
-				 	 <label class="input-inline"> 
+				 	 <label class="input-inline">
 					 用户付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
-					   <button class="money_count" type="button">用户付款计算</button>
+					  
 				 	</label>
 					 
 					   订单备注： 
@@ -420,8 +410,9 @@
 				</present> 
 				</div>
 			</div>  
-		</div>	
-		</foreach> 
+			</div>
+		</foreach>
+		</div>	 
 	 </empty>
 	 <eq name="info.fid" value="0">
 		 <div class="form-group fleft-all "  >
@@ -436,7 +427,7 @@
 	  </eq>
 	  
 			 
-	 	 <eq name="info.fid" value="0">	
+	  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">客户付款和发票</label>
 				<div class="col-md-6 col-sm-10">
@@ -512,12 +503,14 @@
 					<present name="change.invoice.dsc">
 						<input type="text" class="form-control red"  value="{$change.invoice.dsc}"/> 
 					</present>
-					   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息。
-					   开票金额为空则自动计算开票金额</p>  
+					   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息；
+					   开票金额为空则自动计算开票金额，(产品总金额-优惠金额+其他费用+用户支付运费)*(1+税点/100)；
+					   开票税费为开票金额*	(税点/100)/(1+税点/100)													
+					   </p>  
 				</div>
 			</div>
-			</eq>
-			<div class="form-group fleft-all"  >
+		</if>
+			<div class="form-group fleft-all order_pay" id="order_pay" >
 				<label class="col-sm-2 control-label">订单总计</label>
 				<div class="col-md-6 col-sm-10">
 				 <empty name="info">
@@ -545,42 +538,42 @@
 					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" id="real_freight" value="{$info.real_freight}" required/> 
 					 <present name="change.real_freight">
 					 	<input type="text" class="form-control short red"  value="{$change.real_freight}"  />  
-					 </present>
-					 <button id="freight_count" type="button">运费计算</button>
+					 </present> 
 					 </label>
 				 	<label class="input-inline">
-					 产品总数量：<input type="text" class="form-control short " id="goods_num" name="goods_num" value="{$info.goods_num}" readonly/> 
+					 产品总数量：<input type="text" class="form-control short goods_num" id="goods_num" name="goods_num" value="{$info.goods_num}" readonly/> 
 					<present name="change.goods_num">
 						<input type="text" class="form-control short red"  value="{$change.goods_num}"/> 
 					</present>
 					</label>
 				 	 <label class="input-inline">
-					 产品总金额：<input type="text" class="form-control short " id="goods_money" name="goods_money" value="{$info.goods_money}" readonly/> 
+					 产品总金额：<input type="text" class="form-control short goods_money" id="goods_money" name="goods_money" value="{$info.goods_money}" readonly/> 
 					<present name="change.goods_money">
 						<input type="text" class="form-control short red"  value="{$change.goods_money}"/> 
 					</present>
 					</label>
 				 	 <label class="input-inline">
-					 优惠金额：<input type="text" class="form-control short" id="discount_money" name="discount_money" value="{$info.discount_money}" /> 
+					 优惠金额：<input type="text" class="form-control short discount_money" id="discount_money" name="discount_money" value="{$info.discount_money}" /> 
 					<present name="change.discount_money">
 						<input type="text" class="form-control short red"  value="{$change.discount_money}"/> 
 					</present>
 					</label>
 					 <label class="input-inline">
-					 税费：<input type="text" class="form-control short" id="tax_money" name="tax_money" value="{$info.tax_money}" /> 
+					 税费：<input type="text" class="form-control short tax_money" id="tax_money" name="tax_money" value="{$info.tax_money}" /> 
 					<present name="change.tax_money">
 						<input type="text" class="form-control short red"  value="{$change.tax_money}"/> 
 					</present>
 					</label>
 					 <label class="input-inline">
-					 其它费用：<input type="text" class="form-control short" id="other_money" name="other_money" value="{$info.other_money}" /> 
+					 其它费用：<input type="text" class="form-control short other_money" id="other_money" name="other_money" value="{$info.other_money}" /> 
 					<present name="change.other_money">
 						<input type="text" class="form-control short red"  value="{$change.other_money}"/> 
 					</present>
 					</label>
 					 
 				 	 <label class="input-inline"> 
-					 用户总付款：<input type="text" class="form-control short" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
+					 用户总付款：<input type="text" class="form-control short order_amount" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
+					 
 					  <present name="change.order_amount">
 						<input type="text" class="form-control short red"  value="{$change.order_amount}"/> 
 					</present>
@@ -595,7 +588,7 @@
 				 	  
 				</div>
 			</div> 
-		 <eq name="info.fid" value="0">	
+		  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">用户付款</label>
 				<div class="col-md-6 col-sm-10">
@@ -632,9 +625,93 @@
 				
 				</div>
 			</div>
-		 </eq>
+		</if>
 		 <include file="public@adsc_fleft" /> 
 		 
 <script>
- 
+$('#invoice_type').change(function(){
+	invoice_type_change();
+	 
+});
+function invoice_type_change(){
+	if(($('#invoice_type').val())==0){  
+		return false;
+	} 
+	$('#invoice_point').val($('#invoice_type option:selected').attr('point'));
+}
+$('#invoice_count').click(function(){
+	var invoice_type=$('#invoice_type').val();
+	if(invoice_type==0){ 
+		$('#invoice_type').focus();
+		return false;
+	}
+	 
+	var invoice_point=parseFloat($('#invoice_point').val());
+	if(!(invoice_point>0)){
+		invoice_point=0;
+		$('#invoice_point').val(0);
+		$('#invoice_point').focus();
+		return false;
+	}
+	var invoice_invoice_money=parseFloat($('#invoice_invoice_money').val());
+	if(!(invoice_invoice_money>0)){
+		var goods_money=parseFloat($('#goods_money').val());
+		var discount_money=parseFloat($('#discount_money').val());
+		var other_money=parseFloat($('#other_money').val());
+		var pay_freight=parseFloat($('#pay_freight').val());
+		if(!(goods_money>0)){
+			goods_money=0; 
+		}
+		$('#goods_money').val(goods_money.toFixed(2));
+		if(!(discount_money>0)){
+			discount_money=0; 
+		}
+		$('#discount_money').val(discount_money.toFixed(2));
+		if(!(other_money>0)){
+			other_money=0; 
+		}
+		$('#other_money').val(other_money.toFixed(2));
+		if(!(pay_freight>0)){
+			pay_freight=0; 
+		}
+		$('#pay_freight').val(pay_freight.toFixed(2));
+		invoice_invoice_money=(goods_money-discount_money+other_money+pay_freight)*(1+invoice_point/100);
+		 
+	}
+	$('#invoice_invoice_money').val(invoice_invoice_money.toFixed(2));
+	var invoice_tax_money=(invoice_invoice_money*invoice_point/100/(1+invoice_point/100)).toFixed(2);
+	$('#invoice_tax_money').val(invoice_tax_money); 
+	$('#tax_money').val(invoice_tax_money); 
+	money_count($('#order_pay'));
+});
+//订单费用计算
+function money_count($div){
+	var goods_money=parseFloat($div.find('.goods_money').val());
+	var discount_money=parseFloat($div.find('.discount_money').val());
+	var other_money=parseFloat($div.find('.other_money').val());
+	var pay_freight=parseFloat($div.find('.pay_freight').val());
+	var tax_money=parseFloat($div.find('.tax_money').val()); 
+	if(!(goods_money>0)){
+		goods_money=0; 
+	}
+	$div.find('.goods_money').val(goods_money.toFixed(2));
+	if(!(discount_money>0)){
+		discount_money=0; 
+	}
+	$div.find('.discount_money').val(discount_money.toFixed(2));
+	if(!(other_money>0)){
+		other_money=0; 
+	}
+	$div.find('.other_money').val(other_money.toFixed(2));
+	if(!(pay_freight>0)){
+		pay_freight=0; 
+	}
+	$div.find('.pay_freight').val(pay_freight.toFixed(2));
+	if(!(tax_money>0)){
+		tax_money=0; 
+	}
+	$div.find('.tax_money').val(tax_money.toFixed(2));
+	var order_amount=goods_money-discount_money+other_money+pay_freight+tax_money; 
+	$div.find('.order_amount').val(order_amount.toFixed(2));
+}
 </script>

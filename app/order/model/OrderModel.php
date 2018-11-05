@@ -86,9 +86,11 @@ class OrderModel extends Model
          //如果默认库存不足就按优先仓库发货,重新计算费用和重量体积
          foreach($goods as $k=>$v){
             if(empty($store_num[$k][$store])){
+                //没有库存，下面优先仓库发货
                 $num0=0;
                 $num1= $v['num'];
             }elseif($v['num']>$store_num[$k][$store]){
+                //库存不足，先分单
                 $num0=$store_num[$k][$store];
                 $num1= $v['num']-$num0;
                 $order[$store][$k]=$v;
@@ -98,14 +100,17 @@ class OrderModel extends Model
                 $order[$store][$k]['size']=bcmul($v['size1'],$num0,2);
                 
             }else{
+                //库存足够，不用分单
                 $order[$store][$k]=$v;
                 continue;
             }
             //按优先仓库发货
             foreach($sort as $vv){
                 if(empty($store_num[$k][$vv])){
+                    //没有库存
                     continue;
                 }elseif($num1 > $store_num[$k][$vv]){
+                    //产品数量大于库存，先分一单
                     $num0=$store_num[$k][$vv];
                     $num1= $num1-$num0;
                     $order[$vv][$k]=$v;
@@ -116,7 +121,7 @@ class OrderModel extends Model
                     
                     continue;
                 }else{
-                     
+                     //数量足够
                     $order[$vv][$k]=$v;
                     $order[$vv][$k]['num']=$num1;
                     $order[$vv][$k]['pay']=bcmul($v['price_real'],$num1,2);

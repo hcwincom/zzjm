@@ -103,36 +103,17 @@ $(document).on('click','.freight_count',function(){
         }
     }); 
 });
-$(document).on('click','.money_count',function(){
-	var $div=$(this).parents('.order');
-	var goods_money=parseFloat($div.find('.goods_money').val());
-	var discount_money=parseFloat($div.find('.discount_money').val());
-	var other_money=parseFloat($div.find('.other_money').val());
-	var pay_freight=parseFloat($div.find('.pay_freight').val());
-	var tax_money=parseFloat($div.find('.tax_money').val()); 
-	if(!(goods_money>0)){
-		goods_money=0;
-		$div.find('.goods_money').val(0);
-	}
-	if(!(discount_money>0)){
-		discount_money=0;
-		$div.find('.discount_money').val(0);
-	}
-	if(!(other_money>0)){
-		other_money=0;
-		$div.find('.other_money').val(0);
-	}
-	if(!(pay_freight>0)){
-		pay_freight=0;
-		$div.find('.pay_freight').val(0);
-	}
-	if(!(tax_money>0)){
-		tax_money=0;
-		$div.find('.tax_money').val(0);
-	}
-	order_amount=goods_money-discount_money+other_money+pay_freight+tax_money;
-	$div.find('.order_amount').val(order_amount.toFixed(2));
+$(document).on('change','.discount_money,.other_money,.pay_freight,.tax_money',function(){ 
+	var $div=$(this).parents('.order_pay');
+	money_count($div);
+	 if(!(($div.attr('id'))=='order_pay')){
+		 console.log('order_pay');
+		 orders_account();
+	 }
+	
 });
+ 
+ 
  
 //产品价格变化或重量变化,本行的变化
 function tr_change($tr,type='price'){  
@@ -176,10 +157,8 @@ function order_change($div,type='price'){
 			return false;
 		}
 		 
-		num_count+=num;
-		 
-		pay=parseFloat($tmp_tr.find('.pay input').val());
-		 
+		num_count+=num; 
+		pay=parseFloat($tmp_tr.find('.pay input').val()); 
 		if(!(pay>=0)){
 			msg('产品费用错误');
 			$(this).focus();
@@ -192,18 +171,17 @@ function order_change($div,type='price'){
 		if(type=='num'){
 			weight1=parseFloat($tmp_tr.find('.weight1').val());
 			if(!(weight1>0)){
-				weight1=0.01;
-				$tmp_tr.find('.weight1').val(weight1); 
+				weight1=0.01; 
 			}
+			$tmp_tr.find('.weight1').val(weight1.toFixed(2)); 
 			weight_count+=weight1;
 			size1=parseFloat($tmp_tr.find('.size1').val());
 			if(!(size1>0)){
-				size1=0.01;
-				$tmp_tr.find('.size1').val(size1); 
+				size1=0.01; 
 			}
+			$tmp_tr.find('.size1').val(size1.toFixed(2));
 			size_count+=size1;
-		}
-		  
+		} 
 	});
 	if(num==0){
 		return false;
@@ -214,7 +192,7 @@ function order_change($div,type='price'){
 		$div.find('.order_size').val(size_count.toFixed(2));
 		$div.find('.order_weight').val(weight_count.toFixed(2));
 	} 
-	 
+	money_count($div);
 	orders_account();
 }
 //子订单变化触发总订单
@@ -225,15 +203,16 @@ function orders_account(){
 	$('.order').each(function(){ 
 		pay=parseFloat($(this).find('.goods_money').val());
 		if(!(pay>=0)){
-			pay=0;
-			$(this).find('.goods_money').val(pay); 
+			pay=0; 
 		}
-		price_count+=pay;
+		$(this).find('.goods_money').val(pay.toFixed(2)); 
+		price_count+=pay; 
 		
 		num=parseFloat($(this).find('.goods_num').val());
-		if(!(pay>0)){
+		if(!(num>0)){
 			msg('商品数量错误');
 			$(this).find('.goods_money').focus();
+			num=0;
 			return 0; 
 		}
 		num_count+=num;
@@ -243,9 +222,9 @@ function orders_account(){
 		return 0; 
 	}
 	$('#goods_money').val(price_count.toFixed(2));
-	$('#goods_num').val(num_count.toFixed(2));
-	 
+	$('#goods_num').val(num_count.toFixed(2)); 
 	
+	money_count($('#goods_money').parents('.order_pay'));
 } 
  
 $('.save').click(function(){

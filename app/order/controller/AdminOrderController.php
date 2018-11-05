@@ -407,8 +407,10 @@ class AdminOrderController extends OrderBaseController
         $i=0;
         $orders=$m->order_break($order_goods, $oid,$store,  $data_order['city'],  $data_order['shop']);
         if(count($orders)==1){
+            $dsc='订单添加成功';
             $m_info->insertAll($order_goods);
         }else{
+            $dsc='订单已拆分';
             //主单号标记
             $m->where('id',$oid)->update(['is_real'=>2]);
             //拆分订单要生成子单号
@@ -440,11 +442,16 @@ class AdminOrderController extends OrderBaseController
                    
                     'goods_money'=>0, 
                     'goods_num'=>0, 
+                    'weight'=>0, 
+                    'size'=>0, 
                 ];
                 foreach($v as $kk=>$vv){
-                    $tmp_order['goods_money']+=$vv['pay'];
+                    $tmp_order['goods_money']+=$vv['pay']; 
                     $tmp_order['goods_num']+=$vv['num'];
+                    $tmp_order['weight']+=$vv['weight'];
+                    $tmp_order['size']+=$vv['size'];
                 }
+                $tmp_order['order_amount']= $tmp_order['goods_money'];
                 $tmp_oid=$m->insertGetId($tmp_order);
                 foreach($v as $kk=>$vv){
                     $v[$kk]['oid']=$tmp_oid;
@@ -490,7 +497,7 @@ class AdminOrderController extends OrderBaseController
             Db::name('order_pay')->insert($data_pay);
         }
         $m->commit();
-        $this->success('订单添加成功，等待审核');
+        $this->success($dsc);
     }
     /**
      * 订单详情
