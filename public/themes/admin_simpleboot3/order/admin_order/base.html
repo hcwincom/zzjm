@@ -229,7 +229,7 @@
      	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
 		    				<div class="imgGroup">
 		    				<ul class="imgList" class="imgList">
-		    				<foreach name="goods[$key]['pics']" item="pic">
+		    				<foreach name="goods[$key]['pics']" item="pic" key="kpic">
 								<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
 		    					<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
 		    				</foreach>
@@ -242,7 +242,7 @@
 					</td> 
 					 
      	   			<td class="clickInfo">
-     	   				<div style="position:relative;" class="goInfo" data-width="0">
+     	   				<div style="position:relative;" class="goInfo" data-width="0"> 
      	   				<present name="goods[$key]['nums'][0]">
      	   				{$goods[$key]['nums'][0]['num']}({$goods[$key]['nums'][0]['num1']})
      	   				<else/>
@@ -255,9 +255,9 @@
 		     	   		 		<tbody>
 			     	   		 		<tr>
 			     	   		 		<foreach name="stores" item="svv" key="skk">
-			     	   		 			<td>
-			     	   		 			<present name="goods[$key]['nums'][$kk]">
-			     	   		 			{$goods[$key]['nums'][$skk]['num']}($goods[$key]['nums'][$skk]['num1'])
+			     	   		 			<td> 
+			     	   		 			<present name="goods[$key]['nums'][$skk]">
+			     	   		 			{$goods[$key]['nums'][$skk]['num']}({$goods[$key]['nums'][$skk]['num1']})
 			     	   		 			<else/>
 			     	   		 			--
 			     	   		 			</present>

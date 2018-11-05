@@ -348,7 +348,7 @@ class AdminOrderController extends OrderBaseController
         $data_order['city']=$tel['city'];
         $data_order['area']=$tel['area'];
         $data_order['address']=$tel['street'];
-        $data_order['accept_name']=$tel['name'];
+        $data_order['accept_name']=empty($tel['name'])?:$tel['name'];
         $data_order['phone']=$tel['phone'];
         $data_order['mobile']=$tel['mobile'];
         $data_order['addressinfo']=$tel['province_name'].'-'.$tel['city_name'].'-'.$tel['area_name'];
@@ -611,10 +611,11 @@ class AdminOrderController extends OrderBaseController
         
         //获取所有库存
         $where=[
-            'id'=>['in',$goods_id],
+            'goods'=>['in',$goods_id],
             'shop'=>['eq',$shop],
         ];
         $list=Db::name('store_goods')->where($where)->column('id,store,goods,num,num1');
+       
         //循环得到数据 
         foreach($list as $k=>$v){ 
             $goods[$v['goods']]['nums'][$v['store']]=[
@@ -634,7 +635,7 @@ class AdminOrderController extends OrderBaseController
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
-       
+        
         return $this->fetch();  
     }
     /**
