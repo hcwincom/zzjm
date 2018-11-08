@@ -2558,6 +2558,7 @@ class AdminGoodsController extends AdminBaseController
         $list=[];
         $path='upload/';
         $pathid='seller'.$info['shop'].'/goods'.$id.'/';
+        //没有目录创建目录
         if(!is_dir($path.$pathid)){
             mkdir($path.$pathid);
         }
@@ -2620,7 +2621,7 @@ class AdminGoodsController extends AdminBaseController
                     {
                         $this->error($tmp_file[0].'文件损坏，请注意');
                     }
-                    //先比较是否需要额外保存,admin打头的要重新保存
+                    //先比较是否需要额外保存,非指定位置的要复制粘贴
                     if(strpos($tmp_file[1], $pathid)!==0){
                           //获取后缀名,复制文件
                         $ext=substr($tmp_file[1], strrpos($tmp_file[1],'.'));
@@ -2631,6 +2632,9 @@ class AdminGoodsController extends AdminBaseController
                             $this->error($tmp_file[0].'文件复制错误，请重试');
                         }else{
                             $files[$k][$kk]=$tmp_file[0].','.$new_file;
+                            //删除原图片
+                            unlink($path.$tmp_file[1]);
+                            
                         } 
                         $tmp_file[1]=$new_file;
                         
@@ -3029,7 +3033,14 @@ class AdminGoodsController extends AdminBaseController
         if(empty($info)){
             $this->error('数据不存在');
         }
-        session('file_path','/goods/'.$id.'/');
+      
+        $path='upload/';
+        $pathid='seller'.$info['shop'].'/goods'.$id.'/';
+        //没有目录创建目录
+        if(!is_dir($path.$pathid)){
+            mkdir($path.$pathid);
+        }
+        session('file_path',$pathid);
         $content=Db::name('goods_tech')->where('pid',$id)->value('content');
        
         $this->assign('info',$info);
@@ -4074,11 +4085,38 @@ class AdminGoodsController extends AdminBaseController
         if(empty($label)){
             $label=null;
         }
+        $path='upload/';
+        $pathid='seller'.$info['shop'].'/goods'.$id.'/';
+        //没有目录创建目录
+        if(!is_dir($path.$pathid)){
+            mkdir($path.$pathid);
+        }
         //循环比较图片，数量
         $num=0;
         foreach($pics as $k=>$v){
-            if($label['pic'.$k]!=$data['pic'.$k]){
-                $content['pic'.$k]=$data['pic'.$k];
+            $tmp_pic=$data['pic'.$k];
+            if($label['pic'.$k]!=$tmp_pic){
+                if (!is_file($path.$tmp_pic))
+                {
+                    $this->error($pics[$k].'图片损坏，请注意');
+                }
+                //先比较是否需要额外保存,非指定位置的要复制粘贴
+                if(strpos($tmp_pic, $pathid)!==0){
+                    //获取后缀名,复制文件
+                    $ext=substr($tmp_pic, strrpos($tmp_pic,'.'));
+                    $new_file=$pathid.'label'.$k.'_'.date('Ymd-His').$ext;
+                    $result =copy($path.$tmp_pic, $path.$new_file);
+                    if ($result == false)
+                    {
+                        $this->error($pics[$k].'文件复制错误，请重试');
+                    }else{ 
+                        //删除原图片
+                        unlink($path.$tmp_pic);
+                        $tmp_pic=$new_file;
+                    } 
+                    //标签暂时不制作缩略图
+                } 
+                $content['pic'.$k]=$tmp_pic;
             }
             if($label['num'.$k]!=$data['num'.$k]){
                 $content['num'.$k]=$data['num'.$k];
@@ -4095,7 +4133,28 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $files1=[];
             foreach($data['files'] as $k=>$v){
-                $files1[]=['name'=>$data['names'][$k],'file'=>$data['files'][$k]];
+                $tmp_file=$data['files'][$k];
+                $tmp_name=$data['names'][$k];
+                if (!is_file($path.$tmp_file))
+                {
+                    $this->error($tmp_name.'文件损坏，请注意');
+                }
+                //先比较是否需要额外保存,非指定位置的要复制粘贴
+                if(strpos($tmp_file, $pathid)!==0){
+                    //获取后缀名,复制文件
+                    $ext=substr($tmp_file, strrpos($tmp_file,'.'));
+                    $new_file=$pathid.'labelfiles'.$k.'_'.date('Ymd-His').$ext;
+                    $result =copy($path.$tmp_file, $path.$new_file);
+                    if ($result == false)
+                    {
+                        $this->error($tmp_name.'文件复制错误，请重试');
+                    }else{
+                        //删除原文件
+                        unlink($path.$tmp_file);
+                        $tmp_file=$new_file;
+                    } 
+                }
+                $files1[]=['name'=>$tmp_name,'file'=>$tmp_file];
             }
             $files1=json_encode($files1);
         }

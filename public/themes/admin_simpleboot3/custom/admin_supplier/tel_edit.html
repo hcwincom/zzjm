@@ -3,10 +3,10 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="public@nav" />
+			<include file="custom@nav" />
 			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 			<li class="active"><a href="{:url('tel_edit',['id'=>$info.id])}">{$flag}联系人</a></li>  
-			 
+			 <li class=""><a href="{:url('goods_edit',['id'=>$info.id])}">产品订购表</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('tel_edit_do')}">
 			 <div style="clear:both"></div>

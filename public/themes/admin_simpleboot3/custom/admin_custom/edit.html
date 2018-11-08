@@ -6,6 +6,7 @@
 			<include file="public@nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 			<li class=""><a href="{:url('tel_edit',['id'=>$info.id])}">{$flag}联系人</a></li>  
+			<li class=""><a href="{:url('goods_edit',['id'=>$info.id])}">产品订购表</a></li>  
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
 			  <include file="custom@admin_custom:base" />

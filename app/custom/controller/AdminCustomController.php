@@ -270,63 +270,165 @@ class AdminCustomController extends CustomBaseController
          
         parent::del_all();
     }
-   //客户编码
-   public function code_add(){
-       $id=$this->request->param('id',0,'intval');
-       $city=$this->request->param('city',0,'intval');
+    /**
+     * 客户联系人详情
+     * @adminMenu(
+     *     'name'   => '客户联系人详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户联系人详情',
+     *     'param'  => ''
+     * )
+     */
+    public function tel_edit()
+    {
+        parent::tel_edit();
         
-       $m=$this->m;
-       $where=[
-           'city'=>['eq',$city], 
-       ];
-       
-       $tmp=$m->where($where)->order('code_num desc')->column('id,code,city_code,code_num');
-       if(empty($tmp)){
-           //无此城市,则查询城市
-           $city_code=Db::name('area')->where('id',$city)->value('city_code');
-           $code_num=1; 
-       }else{
-           //判断id是否已存在
-           if(isset($tmp[$id])){
-               $city_code=$tmp[$id]['city_code'];
-               $code_num=$tmp[$id]['code_num'];
-           }else{
-               //不存在就是城市新增
-               $first=key($tmp);
-               $city_code=$tmp[$first]['city_code'];
-               $code_num=$tmp[$first]['code_num']+1;
-           }
-       } 
-       $this->success('ok','',['city_code'=>$city_code,'code_num'=>$code_num]);
-   }
-   //客户编码检查
-   public function code_check(){
-       $id=$this->request->param('id',0,'intval');
-       $city=$this->request->param('city',0,'intval');
-       
-       $m=$this->m;
-       $where=[
-           'city'=>['eq',$city],
-       ];
-       
-       $tmp=$m->where($where)->order('code_num desc')->column('id,code,city_code,code_num');
-       if(empty($tmp)){
-           //无此城市,则查询城市
-           $city_code=Db::name('area')->where('id',$city)->value('city_code');
-           $code_num=1;
-       }else{
-           //判断id是否已存在
-           if(isset($tmp[$id])){
-               $city_code=$tmp[$id]['city_code'];
-               $code_num=$tmp[$id]['code_num'];
-           }else{
-               //不存在就是城市新增
-               $first=key($tmp);
-               $city_code=$tmp[$first]['city_code'];
-               $code_num=$tmp[$first]['code_num']+1;
-           }
-       }
-       $this->success('ok','',['city_code'=>$city_code,'code_num'=>$code_num]);
-   }
-     
+        return $this->fetch();
+    }
+    /**
+     * 客户联系人编辑提交
+     * @adminMenu(
+     *     'name'   => '客户联系人编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户联系人编辑提交',
+     *     'param'  => ''
+     * )
+     */
+    public function tel_edit_do()
+    {
+        parent::tel_edit_do();
+    }
+    /**
+     * 客户联系人审核详情
+     * @adminMenu(
+     *     'name'   => '客户联系人审核详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户联系人审核详情',
+     *     'param'  => ''
+     * )
+     */
+    public function tel_edit_info()
+    {
+        parent::tel_edit_info();
+        return $this->fetch();
+    }
+    /**
+     * 客户联系人信息编辑审核
+     * @adminMenu(
+     *     'name'   => '客户联系人编辑审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户联系人编辑审核',
+     *     'param'  => ''
+     * )
+     */
+    public function tel_edit_review()
+    {
+        parent::tel_edit_review();
+    }
+    
+    /**
+     * 客户供应产品详情
+     * @adminMenu(
+     *     'name'   => '客户供应产品详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户供应产品详情',
+     *     'param'  => ''
+     * )
+     */
+    public function goods_edit()
+    {
+        parent::goods_edit();
+        
+        return $this->fetch();
+    }
+    /**
+     * 客户供应产品编辑提交
+     * @adminMenu(
+     *     'name'   => '客户供应产品编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户供应产品编辑提交',
+     *     'param'  => ''
+     * )
+     */
+    public function goods_edit_do()
+    {
+        parent::goods_edit_do();
+    }
+    /**
+     * 客户供应产品审核详情
+     * @adminMenu(
+     *     'name'   => '客户供应产品审核详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户供应产品审核详情',
+     *     'param'  => ''
+     * )
+     */
+    public function goods_edit_info()
+    {
+        parent::goods_edit_info();
+        return $this->fetch();
+    }
+    /**
+     * 客户供应产品信息编辑审核
+     * @adminMenu(
+     *     'name'   => '客户供应产品编辑审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户供应产品编辑审核',
+     *     'param'  => ''
+     * )
+     */
+    public function goods_edit_review()
+    {
+        parent::goods_edit_review();
+    }
+    /**
+     * 客户产品供应列表
+     * @adminMenu(
+     *     'name'   => '客户产品供应列表',
+     *     'parent' => 'custom/AdminIndex/default',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '客户产品供应列表',
+     *     'param'  => ''
+     * )
+     */
+    public function goods_list()
+    {
+        parent::goods_list();
+        return $this->fetch();
+    }
 }

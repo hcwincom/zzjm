@@ -4,10 +4,12 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs">
-			<li class="active"><a href="{:url('index')}">文件列表</a></li>
-		 	<li class=""><a href="{:url('files')}">纯文件列表</a></li>
+			<li class=""><a href="{:url('index')}">文件列表</a></li>
+		 	
 			<li><a href="{:url('clear')}">非法文件清除</a></li>
-		 
+		  	<li class="active"><a href="{:url('brand')}">品牌列表</a></li>
+		  	
+		 	<li class=" "><a href="{:url('brand')}">返回上一级</a></li>
 		</ul>
 		<form method="post" class="js-ajax-form margin-top-20" action=" ">
 
@@ -27,9 +29,13 @@
 					<tr>
 						 
 
-						<td>{$vo[0]}</td>
+						<td>{$vo.name}</td>
 
-						 <td><a href="{$vo[1]}">查看</a></td>
+						 <td> 
+						 <a href="{$vo.url}">查看</a>
+						 
+						  <a href="{$vo.url}">查看</a>
+						 </td>
 
 					</tr>
 					</foreach>

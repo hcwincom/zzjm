@@ -3,13 +3,12 @@
 namespace app\goods\controller;
 
  
-use cmf\controller\AdminBaseController; 
+use app\common\controller\AdminBase0Controller; 
 use think\Db; 
 /*
  * 产品页面的ajax  */ 
-class GoodsajaxController extends AdminBaseController
-{
-    
+class GoodsajaxController extends AdminBase0Controller
+{ 
     public function _initialize()
     { 
         parent::_initialize();

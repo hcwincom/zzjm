@@ -1,0 +1,134 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="custom@nav" />
+			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class=""><a href="{:url('tel_edit',['id'=>$info.id])}">{$flag}联系人</a></li>  
+			 <li class="active"><a href="{:url('goods_edit',['id'=>$info.id])}">产品订购表</a></li>  
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('goods_edit_do')}">
+			 <div style="clear:both"></div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">{$flag}id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+				  
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">编辑记录</a>
+			 
+				</div>
+			</div>
+		 <include file="custom@admin_supplier:goods_base" />
+			<div class="form-group fleft" id="status">
+				<label   class="col-sm-2 control-label">{$flag}状态</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$statuss[$info.status]}"  readonly/>
+				 	 
+				</div>
+			</div>
+		 
+			<div style="clear:both"></div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">  
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button> 
+				</div> 
+			</div>
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+<script>
+var url_goods_add="{:url('custom/Customajax/goods_add')}";
+var goods;
+var image_url="{$image_url}";
+var href_goods="{$href_goods}";
+var units_json={$units_json};
+ 
+ 
+$('#goods_add').click(function(){
+	 
+	goods=parseInt($(this).siblings('.goods').val());
+ 
+	if(!(goods>0)){
+		return false;
+	}
+	$('#goods-list tr').each(function(){
+		if($(this).attr('id')==('goods'+goods)){
+			goods=0;
+			$(this).find('.form-control').focus();
+			return false;
+		}
+	});
+	if(goods==0){ 
+		return false;
+	} 	
+	$.ajax({
+        type: 'POST',
+        url: url_goods_add,
+        dataType: 'json', 
+        data:{'id':goods},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	  
+     	    var info=data.data;
+     	   
+     	    var tr='';
+     	    var div_pic='<div class="listposi">'+
+     	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
+		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
+		    var pics=info.pics;
+		    var nums=info.nums;
+		    for(var i in pics){
+		    	div_pic+='<li style="background-size: contain;background-image:url('+image_url+'/'+pics[i]['file1']+');">'+
+		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file3']+'"></li>'; 
+		    }
+		    div_pic+='</ul><span class="prev"><i class="left"></i></span>'+
+		    '<span class="next"><i class="right"></i></span></div></div>';
+		    var div_num='<td>';
+		    
+		    if(nums.hasOwnProperty(0)){
+		    	div_num+=nums[0]['num']+'('+nums[0]['num1']+')';
+		    }else{
+		    	div_num+='--';
+		    }
+		    div_num+='</td>';	 
+     	    tr+='<tr id="goods'+info['id']+'">'+
+     	    '<td><a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td>'+
+     	    '<td>'+info['code']+'</td>'+  
+     	   '<td class="tableImg"><div class="tdImg" style="background-size: 100% 100%;background-image:url('+image_url+'/'+info['pic']+');"></div>'+div_pic+'</td>'+
+     	    div_num+
+     	   '<td ><input type="text" class="form-control" name="name['+info['id']+']" value=""/></td>'+
+  		 	'<td ><input type="text" class="form-control" name="cate['+info['id']+']" value=""/></td>'+ 
+     	   '<td>'+info['price_sale']+'</td>'+ 
+     	    '<td><input type="text" name="price['+info['id']+']" class="form-control" value="'+info['price_sale']+'"/></td>'+ 
+     	    '<td>'+info['weight1']+'</td>'+
+     	    '<td>'+info['length1']+'</td>'+
+     	    '<td>'+info['width1']+'</td>'+
+     	    '<td>'+info['height1']+'</td>'+
+     	    '<td>'+info['size1']+'</td>'+
+     	    '<td>'+units_json[info['unit']][0]+'-'+units_json[info['unit']][1]+'</td>'+ 
+    	   '<td><input type="text"  name="dsc['+info['id']+']" class="form-control dsc" value="'+info['dsc']+'"/></td>'+
+    	   '<td><input type="text" name="num['+info['id']+']" class=" input-order" value="1"/></td>'+
+    	   '<td><input type="text" name="sort['+info['id']+']" class=" input-order" value="1000"/></td>'+
+    	   '<td><button type="button" class="goods_del">删除</td></tr>';
+     	    $('#goods-list').append(tr);
+     	   
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
+
+$(document).on('click','.goods_del',function(){
+	$(this).parents('tr').remove();
+ 
+	
+}); 
+</script>

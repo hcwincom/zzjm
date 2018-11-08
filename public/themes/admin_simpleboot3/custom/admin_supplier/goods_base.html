@@ -1,0 +1,286 @@
+ <div class="form-group fleft">
+	<label  class="col-sm-2 control-label">{$flag}编号</label>
+	<div class="col-md-6 col-sm-10">
+		<input type="text" class="form-control" value="{$info.code}" readonly/> 
+	</div>
+</div>		
+<div class="form-group fleft-all">
+	<label  class="col-sm-2 control-label">{$flag}名</label>
+	<div class="col-md-6 col-sm-10">
+		<input type="text" class="form-control" value="{$info.name}" readonly/> 
+	</div>
+</div>
+ 
+
+<div style="clear:both"></div>
+<div class="form-group fleft-all">
+	<label  class="col-sm-2 control-label">添加产品</label>
+	<div class="col-md-6 col-sm-10">
+	   <include file="public@cate_goods0" />  
+		 <button type="button" id="goods_add">确定</button>
+	 
+	</div>
+</div>	 
+ <table class="table table-hover table-bordered table-list" id="goods-list"> 
+	<tr id="goods0">
+		 <td>产品名称</td>
+		 <td >产品编码</td> 
+		 <td >产品图片</td> 
+		 <td >总库存--安全库存</td> 
+		 <td >供应商用名</td>
+		 <td >供应商型号</td> 
+		 <td >零售价</td>  
+		 <td width="100">供应价</td>
+		  <td >毛重</td> 
+		  <td >长</td> 
+		  <td >宽</td> 
+		  <td >高</td> 
+		  <td >体积</td> 
+		  <td >单位</td>  
+		 <td >包装说明/备注</td>  
+		  <td >起订量</td>
+		 <td >排序</td> 
+		 <td width="100">操作</td> 
+	</tr> 
+<foreach name="ugoods" item="vo" key="key">
+	<assign name="vgoods" value="$goods[$key]"/>
+	 
+	<tr id="goods{$key}">
+	
+		<td><a href="{$href_goods}/id/{$info['id']}" target="_blank">{$vgoods['name']}</a></td>
+		<td >{$vgoods['code']}</td>  
+		<td class="tableImg">
+ 			<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vgoods.pic});"></div>
+ 			<notempty name="vgoods['pics']">
+ 				<div class="listposi"> 
+   				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+				<div class="imgGroup">
+					<ul class="imgList" class="imgList">
+					<foreach name="vgoods['pics']" item="pic" key="kpic">
+						<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
+						<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+					</foreach>
+					</ul>
+					<span class="prev"><i class="left"></i></span>
+					<span class="next"><i class="right"></i></span>
+				</div>
+			</div>
+			</notempty>
+		</td> 
+		<td >
+		<present name="vgoods['nums'][0]">
+		 {$vgoods['nums'][0]['num']}--{$vgoods['nums'][0]['safe']}
+		<else/> 
+		 --
+		</present>
+		 
+		 </td> 
+		 <td >
+		 	<input type="text" class="form-control" name="name[{$key}]" value="{$vo.name}"/>
+		 <present name="change['edit'][$key]['name']">
+		 	<input type="text" class="form-control red"  value="{$change['edit'][$key]['name']}"/>
+		 </present>
+		 </td>
+		 <td >
+		 	<input type="text" class="form-control" name="cate[{$key}]" value="{$vo.cate}"/>
+		 <present name="change['edit'][$key]['cate']">
+		 	<input type="text" class="form-control red" value="{$change['edit'][$key]['cate']}"/>
+		 </present>
+		 </td> 
+		 <td>{$vgoods.price_sale}</td>
+		 
+		 <td>
+		 	<input type="text" class="form-control" name="price[{$key}]" value="{$vo.price}"/>
+		 <present name="change['edit'][$key]['price']">
+		 	<input type="text" class="form-control red"  value="{$change['edit'][$key]['price']}"/>
+		 </present>
+		 </td>
+		 <td>{$vgoods.weight1}</td> 
+		 <td>{$vgoods.length1}</td> 
+		 <td >{$vgoods.width1}</td> 
+		 <td >{$vgoods.height1}</td> 
+		 <td >{$vgoods.size1}</td> 
+		 <td >{$units[$vgoods.unit][0]}-{$units[$vgoods.unit][1]}</td> 
+	 
+		 <td >
+		 	<input type="text" class="form-control" name="dsc[{$key}]" value="{$vo.dsc}"/>
+		 <present name="change['edit'][$key]['dsc']">
+		 	<input type="text" class="form-control red"  value="{$change['edit'][$key]['dsc']}"/>
+		 </present>
+		 </td> 
+		  <td>
+		 	<input type="text"  class="input-order" name="num[{$key}]" value="{$vo.num}"/>
+		 <present name="change['edit'][$key]['num']">
+		 	<input type="text" class="form-control input-order red"  value="{$change['edit'][$key]['num']}"/>
+		 </present>
+		 </td>  
+		 <td>
+		 	<input type="text"  class="input-order" name="sort[{$key}]" value="{$vo.sort}"/>
+		 <present name="change['edit'][$key]['sort']">
+		 	<input type="text" class="form-control input-order red"  value="{$change['edit'][$key]['sort']}"/>
+		 </present>
+		 </td> 
+		 <td >
+		 <present name="change">
+		 	 <present name="change['edit'][$key]">
+			 	<span class="red">编辑</span>
+			 </present>
+			 <present name="change['del'][$key]">
+			 	<span class="red">删除</span>
+			</present>
+		 <else/>
+		 	<button class="goods_del" type="button">删除</button>
+		 </present>
+		 </td>
+	</tr>	 
+</foreach>	
+<present name="change.add">
+<foreach name="change.add" item="vo" key="key">
+	<assign name="vgoods" value="$goods[$key]"/>
+	 
+	<tr class="red" id="goods{$key}">
+	
+		<td><a href="{$href_goods}/id/{$info['id']}" target="_blank">{$vgoods['name']}</a></td>
+		<td >{$vgoods['code']}</td> 
+		<td class="tableImg">
+ 			<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vgoods.pic});"></div>
+ 			<notempty name="vgoods['pics']">
+ 				<div class="listposi"> 
+   				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+				<div class="imgGroup">
+					<ul class="imgList" class="imgList">
+					<foreach name="vgoods['pics']" item="pic" key="kpic">
+						<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
+						<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+					</foreach>
+					</ul>
+					<span class="prev"><i class="left"></i></span>
+					<span class="next"><i class="right"></i></span>
+				</div>
+			</div>
+			</notempty>
+		</td> 
+		<td >
+		<present name="vgoods['nums'][0]">
+		 {$vgoods['nums'][0]['num']}--{$vgoods['nums'][0]['safe']}
+		<else/> 
+		 --
+		</present>
+		 
+		 </td> 
+		 <td >
+		 	<input type="text" class="form-control" name="name[{$key}]" value="{$vo.name}"/>
+		 
+		 </td>
+		 <td >
+		 	<input type="text" class="form-control" name="cate[{$key}]" value="{$vo.cate}"/>
+		 
+		 </td> 
+		 <td>{$vgoods.price_sale}</td>
+		 <td>
+		 	<input type="text" class="form-control" name="price[{$key}]" value="{$vo.price}"/>
+		 
+		 </td>
+		 <td>{$vgoods.weight1}</td> 
+		 <td>{$vgoods.length1}</td> 
+		 <td >{$vgoods.width1}</td> 
+		 <td >{$vgoods.height1}</td> 
+		 <td >{$vgoods.size1}</td> 
+		 <td >{$units[$vgoods.unit][0]}-{$units[$vgoods.unit][1]}</td> 
+	 
+		 <td >
+		 	<input type="text" class="form-control" name="dsc[{$key}]" value="{$vo.dsc}"/>
+		 
+		 </td> 
+		  <td>
+		 	<input type="text"  class="input-order" name="num[{$key}]" value="{$vo.num}"/>
+		 
+		 </td>  
+		 <td>
+		 	<input type="text"  class="input-order" name="sort[{$key}]" value="{$vo.sort}"/>
+		 
+		 </td> 
+		 <td > 
+		 	<span calss="red">新增</span> 
+		 </td>
+	</tr>	 
+</foreach>	
+</present>  
+
+<present name="change.del">
+<foreach name="change.del" item="vo" key="key">
+	<assign name="vgoods" value="$goods[$key]"/>
+	 
+	<tr class="red" id="goods{$key}">
+	
+		<td><a href="{$href_goods}/id/{$info['id']}" target="_blank">{$vgoods['name']}</a></td>
+		<td >{$vgoods['code']}</td> 
+		<td class="tableImg">
+ 			<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vgoods.pic});"></div>
+ 			<notempty name="vgoods['pics']">
+ 				<div class="listposi"> 
+   				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+				<div class="imgGroup">
+					<ul class="imgList" class="imgList">
+					<foreach name="vgoods['pics']" item="pic" key="kpic">
+						<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
+						<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+					</foreach>
+					</ul>
+					<span class="prev"><i class="left"></i></span>
+					<span class="next"><i class="right"></i></span>
+				</div>
+			</div>
+			</notempty>
+		</td> 
+		<td >
+		<present name="vgoods['nums'][0]">
+		 {$vgoods['nums'][0]['num']}--{$vgoods['nums'][0]['safe']}
+		<else/> 
+		 --
+		</present>
+		 
+		 </td> 
+		 <td >
+		 	<input type="text" class="form-control" name="name[{$key}]" value="{$vo.name}"/>
+		 
+		 </td>
+		 <td >
+		 	<input type="text" class="form-control" name="cate[{$key}]" value="{$vo.cate}"/>
+		 
+		 </td> 
+		 <td>{$vgoods.price_sale}</td>
+		 <td>
+		 	<input type="text" class="form-control" name="price[{$key}]" value="{$vo.price}"/>
+		 
+		 </td>
+		 <td>{$vgoods.weight1}</td> 
+		 <td>{$vgoods.length1}</td> 
+		 <td >{$vgoods.width1}</td> 
+		 <td >{$vgoods.height1}</td> 
+		 <td >{$vgoods.size1}</td> 
+		 <td >{$units[$vgoods.unit][0]}-{$units[$vgoods.unit][1]}</td> 
+	 
+		 <td >
+		 	<input type="text" class="form-control" name="dsc[{$key}]" value="{$vo.dsc}"/>
+		 
+		 </td>  
+		 <td>
+		 	<input type="text"  class="input-order" name="num[{$key}]" value="{$vo.num}"/>
+		 
+		 </td> 
+		  <td>
+		 	<input type="text"  class="input-order" name="sort[{$key}]" value="{$vo.sort}"/>
+		 
+		 </td> 
+		 <td > 
+		 	<span calss="red">删除</span> 
+		 </td>
+	</tr>	 
+</foreach>	
+</present> 
+</table>	
+<div class="form-group fleft-all"></div>
+ <include file="public@adsc_fleft" /> 	 
+	  		 
+ 

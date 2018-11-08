@@ -2,11 +2,11 @@
  
 namespace app\custom\controller;
 
-
-use cmf\controller\AdminBaseController; 
+use app\common\controller\AdminBase0Controller;
 use think\Db; 
+use app\goods\model\GoodsModel;
   
-class CustomajaxController extends AdminBaseController
+class CustomajaxController extends AdminBase0Controller
 {
     
     public function _initialize()
@@ -33,8 +33,10 @@ class CustomajaxController extends AdminBaseController
        }else{
            $m=Db::name('supplier');
        }
+       $admin=$this->admin;
        $where=[
            'city'=>['eq',$city], 
+           'shop'=>['eq',($admin['shop']==1)?2:$admin['shop']]
        ];
        
        $tmp=$m->where($where)->order('code_num desc')->column('id,code,city_code,code_num,postcode');
@@ -72,9 +74,12 @@ class CustomajaxController extends AdminBaseController
        }else{
            $m=Db::name('supplier');
        }
+       $admin=$this->admin;
+       
        $where=[
            'city'=>['eq',$city],
            'code_num'=>['eq',$code_num],
+           'shop'=>['eq',($admin['shop']==1)?2:$admin['shop']]
        ];
        
        $tmp=$m->where($where)->find();
@@ -91,6 +96,20 @@ class CustomajaxController extends AdminBaseController
            }
        }
        
+   }
+   /*
+    *添加产品
+    *  */
+   public function goods_add()
+   {
+       $id=$this->request->param('id'); 
+       $admin=$this->admin; 
+       $shop=($admin['shop']==1)?2:$admin['shop'];
+       $m_goods=new GoodsModel();
+       $field='id,name,pic,code,weight1,length1,width1,height1,size1,unit,price_sale,dsc';
+       $goods=$m_goods->goods_info($id,$shop,$field);
+        
+       $this->success('ok','',$goods);
    }
    
 }

@@ -88,7 +88,7 @@
 					        <input  class="file0" id="file-{$key}" type="hidden" name="files[]" value="{$vo.file}">
 					        <input class="form-control" id="file-{$key}-name" type="text" name="names[]" value="{$vo.name}"
 					               style="width: 200px;" title="文件名称"> 
-					     		<a href="{:url('admin/goodsauth/label_file_load',['pid0'=>$label.pid0,'key'=>$key])}">下载</a>
+					     		<a href="{:url('goods/goodsauth/label_file_load',['pid0'=>$label.pid0,'key'=>$key])}">下载</a>
 					     	&nbsp;&nbsp;&nbsp; 
 					        <a href="javascript:(function(){$('#saved-file{$key}').remove();})();">移除</a>
 					   

@@ -36,6 +36,8 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('statuss',$this->statuss);
         $this->assign('review_status',$this->review_status);
         $this->assign('html',$this->request->action());
+        //计算小数位
+        bcscale(2); 
     }
     /**
      *首页
@@ -253,6 +255,10 @@ class AdminInfo0Controller extends AdminBaseController
         } 
         $this->assign('info',$info); 
         if($this->isshop){
+            $admin=$this->admin;
+            if($admin['shop']!=1 && $admin['shop']!=$info['shop']){
+                $this->error('只能查看自己店铺的编辑信息');
+            }
             $this->where_shop=$info['shop'];
         }
         //对应分类数据
@@ -565,7 +571,7 @@ class AdminInfo0Controller extends AdminBaseController
                 $where['e.shop']=['eq',$data['shop']];
             }
         }else{
-            $where['e.shop']=['eq',$data['shop']];
+            $where['e.shop']=['eq',$admin['shop']];
         }
         //状态
         if(empty($data['status'])){
@@ -710,6 +716,10 @@ class AdminInfo0Controller extends AdminBaseController
         
         if(empty($info1)){
             $this->error('编辑信息不存在');
+        }
+        $admin=$this->admin;
+        if($admin['shop']!=1 && $admin['shop']!=$info1['shop']){
+            $this->error('只能查看自己店铺的编辑信息');
         }
         //获取原信息 
         $info=$m

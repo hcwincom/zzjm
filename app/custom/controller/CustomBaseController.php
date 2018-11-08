@@ -5,6 +5,7 @@ namespace app\custom\controller;
  
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
+use app\goods\model\GoodsModel;
   
 class CustomBaseController extends AdminInfo0Controller
 {
@@ -632,12 +633,28 @@ class CustomBaseController extends AdminInfo0Controller
         $table=$this->table;
         //获取编辑信息
         $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find();
+        $info1=$m_edit
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
+        $admin=$this->admin;
+        if($admin['shop']!=1 && $admin['shop']!=$info1['shop']){
+            $this->error('只能查看自己店铺的编辑信息');
+        }
         //获取原信息
-        $info=$m->where('id',$info1['pid'])->find();
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$info1['pid'])
+        ->find();
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
         }
@@ -902,15 +919,22 @@ class CustomBaseController extends AdminInfo0Controller
         
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes);
-        
+         
         $this->assign('cates',$cates);
+      
     }
     //联系人
     public function tel_edit(){
         
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
-        $info=$m->where('id',$id)->find();
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info)){
             $this->error('数据不存在');
         }
@@ -1041,7 +1065,7 @@ class CustomBaseController extends AdminInfo0Controller
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'],
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'].'的联系人信息',
             'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
@@ -1064,12 +1088,29 @@ class CustomBaseController extends AdminInfo0Controller
         $table=$this->table;
         //获取编辑信息
         $m_edit=Db::name('edit');
-        $info1=$m_edit->where('id',$id)->find();
+        $info1=$m_edit
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
+        
         if(empty($info1)){
             $this->error('编辑信息不存在');
         }
+        $admin=$this->admin;
+        if($admin['shop']!=1 && $admin['shop']!=$info1['shop']){
+            $this->error('只能查看自己店铺的编辑信息');
+        }
         //获取原信息
-        $info=$m->where('id',$info1['pid'])->find();
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$info1['pid'])
+        ->find();
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
         }
@@ -1265,4 +1306,593 @@ class CustomBaseController extends AdminInfo0Controller
         $m->commit();
         $this->success('审核成功');
     }
+    //产品供应表
+    public function goods_edit(){
+        
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $admin=$this->admin;
+        if($admin['shop']!=1 && $admin['shop']!=$info['shop']){
+            $this->error('店铺错误');
+        }
+        $table=$this->table;
+        if($table=='custom'){
+           $m_ugoods=Db::name('custom_goods');
+        }else{
+           $m_ugoods=Db::name('supplier_goods');
+        }
+       
+        
+        $ugoods=$m_ugoods->where('uid',$id)->order('sort asc')->column('*','goods');
+        $goods_ids=array_keys($ugoods);
+        $field='id,name,code,pic,weight1,length1,width1,height1,size1,unit,price_sale';
+        $m_goods=new GoodsModel(); 
+        $goods=$m_goods->goods_infos($goods_ids, $info['shop'],$field);
+       
+        //若没有新增赋值null 
+        $change=null;
+        
+        $this->assign('info',$info);
+        $this->assign('ugoods',$ugoods);
+        $this->assign('goods',$goods);
+        $this->assign('change',$change);
+        //获取产品分类
+        $where=[
+            'fid'=>0,
+            'status'=>2,
+        ];
+        $cates0=Db::name('cate')->where($where)->column('id,name');
+        $where=[
+            'fid'=>['gt',0],
+            'status'=>['eq',2],
+        ];
+        $cates=Db::name('cate')->where($where)->column('id,fid,name');
+        $this->assign('cates0',$cates0);
+        $this->assign('cates',$cates);
+        $this->assign('image_url',cmf_get_image_url(''));
+        $this->assign('href_goods',url('goods/AdminGoods/edit','',false,false));
+        $units=config('units');
+        $this->assign('units',$units);
+        $this->assign('units_json',json_encode($units));
+        
+        return $this->fetch();
+    }
+    //联系人编辑
+    public function goods_edit_do(){
+        $m=$this->m;
+        $table=$this->table;
+        $flag=$this->flag;
+        $data=$this->request->param();
+        $id=intval($data['id']);
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能编辑其他店铺的信息');
+            }
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('goods_edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($data['adsc']))?'订购产品信息编辑':$data['adsc'];
+        //获取关联的产品信息
+        if($table=='custom'){
+            $m_ugoods=Db::name('custom_goods');
+        }else{
+            $m_ugoods=Db::name('supplier_goods');
+        } 
+        $ugoods=$m_ugoods->where('uid',$id)->order('sort asc')->column('*','goods');
+        //比较记录的字段
+        $fields=['price','name','cate','dsc','sort','num'];
+        //记录数据id,最后用来比较是否有删除
+        $data_ids=[];
+        //循环所有变量
+        foreach($data['name'] as $k=>$v){
+            $data_ids[]=$k;
+            $data['price'][$k]=round( $data['price'][$k],2);
+            $data['sort'][$k]=intval( $data['sort'][$k]);
+            $data['num'][$k]=intval( $data['num'][$k]);
+            $tmp=[];
+            //存在的比较
+            if(isset($ugoods[$k])){
+                foreach($fields as $kk=>$vv){
+                    if($ugoods[$k][$vv] != $data[$vv][$k]){
+                        $tmp[$vv]=$data[$vv][$k];
+                    }
+                }
+                //有差异保存id
+                if(!empty($tmp)){
+                    $tmp['goods']=$k;
+                    $content['edit'][$k]=$tmp;
+                }
+            }else{
+                //不存在的直接添加,保存uid,goods
+                $tmp=['uid'=>$id,'goods'=>$k,'shop'=>$info['shop']];
+                foreach($fields as $vv){
+                    $tmp[$vv]=$data[$vv][$k];
+                }
+                $content['add'][$k]=$tmp;
+            }
+        }
+        //获取原关联产品，比较是否有删除
+        $old_ids=array_keys($ugoods); 
+        $dels=array_diff ( $old_ids, $data_ids);
+        if(!empty($dels)){
+            foreach($dels as $v){
+                $content['del'][$v]=$ugoods[$v];
+             }
+        }
+        if(empty($content)){
+            $this->error('未修改');
+        }
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-'.$info['name'].'的产品供应信息',
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('tel_edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $this->success('已提交修改');
+    }
+    /**
+     * 联系人审核详情
+     */
+    public function goods_edit_info()
+    {
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $table=$this->table;
+        //获取编辑信息
+        $m_edit=Db::name('edit');
+        $info1=$m_edit
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
+        if(empty($info1)){
+            $this->error('编辑信息不存在');
+        }
+        $admin=$this->admin;
+        if($admin['shop']!=1 && $admin['shop']!=$info1['shop']){
+            $this->error('只能查看自己店铺的编辑信息');
+        }
+        //获取原信息
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$info1['pid'])
+        ->find();
+        if(empty($info)){
+            $this->error('编辑关联的信息不存在');
+        }
+        //获取改变的信息
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
+        $change=json_decode($change,true);
+      
+        //获取关联信息 
+        if($table=='custom'){
+            $m_ugoods=Db::name('custom_goods');
+        }else{
+            $m_ugoods=Db::name('supplier_goods');
+        } 
+        
+        $ugoods=$m_ugoods->where('uid',$info['id'])->order('sort asc')->column('*','goods');
+        //获取产品表信息
+        $goods_ids=array_keys($ugoods); 
+        //是否有新增，有则和原id合并
+        if(isset($change['add'])){
+            $add=$change['add'];
+            $add_ids=array_keys($add);
+            $goods_ids=array_unique(array_merge($goods_ids,$add_ids));
+        } 
+        //是否有新增，有则和原id合并
+        if(isset($change['del'])){
+            $del=$change['del'];
+            $del_ids=array_keys($del);
+            $goods_ids=array_unique(array_merge($goods_ids,$del_ids));
+        } 
+        $field='id,name,code,pic,weight1,length1,width1,height1,size1,unit,price_sale';
+        $m_goods=new GoodsModel();
+        $goods=$m_goods->goods_infos($goods_ids, $info['shop'],$field);
+        
+         
+        //获取产品分类
+        $where=[
+            'fid'=>0,
+            'status'=>2,
+        ];
+        $cates0=Db::name('cate')->where($where)->column('id,name');
+        $where=[
+            'fid'=>['gt',0],
+            'status'=>['eq',2],
+        ];
+        $cates=Db::name('cate')->where($where)->column('id,fid,name');
+        $this->assign('cates0',$cates0);
+        $this->assign('cates',$cates);
+        $this->assign('image_url',cmf_get_image_url(''));
+        $this->assign('href_goods',url('goods/AdminGoods/edit','',false,false));
+        $units=config('units');
+        $this->assign('units',$units);
+        $this->assign('units_json',json_encode($units));
+          
+        $this->assign('info1',$info1);
+       
+        $this->assign('info',$info);
+        $this->assign('ugoods',$ugoods);
+        $this->assign('goods',$goods);
+        $this->assign('change',$change);
+       
+        return $this->fetch();
+    }
+    /**
+     *联系人编辑审核
+     */
+    public function goods_edit_review()
+    {
+        //审核编辑的信息
+        $status=$this->request->param('rstatus',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        if(($status!=2 && $status!=3) || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        $table=$this->table;
+        $m_edit=Db::name('edit');
+        $info=$m_edit
+        ->field('e.*,p.name as pname,a.user_nickname as aname')
+        ->alias('e')
+        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->join('cmf_user a','a.id=e.aid')
+        ->where('e.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('无效信息');
+        }
+        if($info['rstatus']!=1){
+            $this->error('编辑信息已被审核！不能重复审核');
+        }
+        
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能审核其他店铺的信息');
+        }
+        
+        $time=time();
+        
+        $m->startTrans();
+        
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+        ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
+        //只有未审核的才能更新
+        $where=[
+            'id'=>$id,
+            'rstatus'=>1,
+        ];
+        $row=$m_edit->where($where)->update($update);
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        //是否更新,2同意，3不同意
+        if($status==2){
+            //组装更新数据
+            $update_info=[
+                'time'=>$time,
+            ];
+            //得到修改的字段
+            $change=Db::name('edit_info')->where('eid',$id)->value('content');
+            $change=json_decode($change,true);
+            
+            //更新关联的产品信息
+            if($table=='custom'){
+                $m_ugoods=Db::name('custom_goods');
+            }else{
+                $m_ugoods=Db::name('supplier_goods');
+            } 
+            //先删除
+            if(isset($change['del'])){
+                $dels=$change['del'];
+                $dels_id=array_keys($dels);
+                $where=[
+                    'uid'=>$info['pid'],
+                    'goods'=>['in',$dels_id]
+                ];
+                $m_ugoods->where($where)->delete();
+            }
+            //更新
+            if(isset($change['edit'])){
+                foreach($change['edit'] as $k=>$v){
+                    $where=[
+                        'uid'=>$info['pid'],
+                        'goods'=>$k,
+                    ];
+                    $m_ugoods->where($where)->update($v);
+                } 
+            }
+            //添加，先删除再新增
+            if(isset($change['add'])){
+                $adds=$change['add'];
+                $adds_id=array_keys($adds);
+                $where=[
+                    'uid'=>$info['pid'],
+                    'goods'=>['in',$adds_id]
+                ];
+                $m_ugoods->where($where)->delete();
+                $m_ugoods->insertAll($adds);
+            }
+            $row=$m->where('id',$info['pid'])->update($update_info);
+            if($row!==1){
+                $m->rollback();
+                $this->error('信息更新失败，请刷新后重试');
+            }
+        }
+        
+        //审核成功，记录操作记录,发送审核信息
+        
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$info['pname'].'供应产品的编辑为'.$review_status[$status],
+            'table'=>$table,
+            'type'=>'edit_review',
+            'pid'=>$info['pid'],
+            'link'=>url('goods_edit_info',['id'=>$info['id']]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['aid'=>$info['aid']]);
+        
+        $m->commit();
+        $this->success('审核成功');
+    }
+    
+    /**
+     * 客户产品对应查询列表
+     */
+    public function goods_list()
+    {
+        $table=$this->table;
+        $m=$this->m;
+        $admin=$this->admin;
+        $data=$this->request->param();
+        $where=[];
+        //goods最后运行的条件
+        $where_goods=[];
+        //客户还是供货商
+        if($table=='custom'){
+            $tel_type=1; 
+            $m_ugoods=Db::name('custom_goods');
+            $this->assign('url_uid',url('custom/AdminCustom/edit','',false,false));
+        }else{
+            $tel_type=2; 
+            $m_ugoods=Db::name('supplier_goods');
+            $this->assign('url_uid',url('custom/AdminSupplier/edit','',false,false));
+        }
+        $this->assign('url_goods',url('goods/AdminGoods/edit','',false,false));
+        //店铺,分店只能看到自己的数据，总店可以选择店铺
+        if($admin['shop']==1){
+            if(empty($data['shop'])){
+                $data['shop']=0;
+            }else{ 
+                $where['p.shop']=['eq',$data['shop']];
+                $where_goods['p.shop']=['eq',$data['shop']];
+            }
+        }else{
+          
+            $where['p.shop']=['eq',$admin['shop']];
+            $where_goods['p.shop']=['eq',$admin['shop']];
+            $this->where_shop=$admin['shop']; 
+        }
+        
+        
+        //分类
+        if(empty($data['ucid'])){
+            $data['ucid']=0;
+        }else{
+            $where['p.cid']=['eq',$data['ucid']];
+        } 
+        
+        //所属公司
+        if(empty($data['company'])){
+            $data['company']=0;
+        }else{
+            $where['p.company']=['eq',$data['company']];
+        }
+        //付款类型
+        if(empty($data['paytype'])){
+            $data['paytype']=0;
+        }else{
+            $where['p.paytype']=['eq',$data['paytype']];
+        }
+       
+        //省
+        if(empty($data['province'])){
+            $data['province']=0;
+        }else{
+            $where['p.province']=['eq',$data['province']];
+        }
+        //市
+        if(empty($data['city'])){
+            $data['city']=0;
+        }else{
+            $where['p.city']=['eq',$data['city']];
+        }
+        
+        //类型
+        if(empty($data['type'])){
+            $data['type']=0;
+        }else{
+            $where['p.type']=['eq',$data['type']];
+        }
+        //查询字段
+        $types=$this->search;
+        
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        }
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        if(!isset($data['name']) || $data['name']==''){
+            $data['name']='';
+        }else{
+            $where[$data['type1']]=zz_search($data['type2'],$data['name']);
+        }
+        //产品信息
+        if(empty($data['cid1'])){
+            $data['cid1']=0;
+        }else{
+            $where_goods['goods.cid0']=['eq',$data['cid1']];
+        }
+        if(empty($data['cid2'])){
+            $data['cid2']=0;
+        }else{
+            $where_goods['goods.cid']=['eq',$data['cid2']];
+        }
+        //查询字段
+        $goods_fields=[
+            'name'=>'名称',
+            'code'=>'编码',
+            'id'=>'id',
+        ]; 
+        
+        //选择查询字段
+        if(empty($data['goods_field'])){
+            $data['goods_field']=key($goods_fields);
+        }
+        //搜索类型 
+        if(empty($data['goods_search'])){
+            $data['goods_search']=key($search_types);
+        }
+        if(!isset($data['goods_name']) || $data['goods_name']==''){
+            $data['goods_name']='';
+        }else{
+            $where_goods['goods.'.$data['goods_field']]=zz_search($data['goods_search'],$data['goods_name']);
+        }
+        
+        //先查询得到id再关联得到数据，否则sql查询太慢
+        $uids=$m
+        ->alias('p') 
+        ->join('cmf_tel tels','p.id=tels.uid and tels.type='.$tel_type,'left')
+        ->where($where) 
+        ->column('p.id');
+       
+        if(empty($uids)){
+            $list=[];
+        }else{
+            $where_goods['p.uid']=['in',$uids];
+            //关联表
+            $join=[ 
+                ['cmf_shop shop','p.shop=shop.id','left'],
+                ['cmf_goods goods','p.goods=goods.id','left'], 
+                ['cmf_'.$table.' uid','p.uid=uid.id','left'], 
+            ];
+            $field='p.*,shop.name as shop_name,goods.name as goods_name,goods.code as goods_code,'.
+            'uid.name as uid_name,uid.code as uid_code,uid.cid as uid_cid';
+            $list=Db::name($table.'_goods')
+            ->alias('p')
+            ->field($field)
+            ->join($join)
+            ->where($where_goods) 
+            ->paginate();
+            $page=$list->appends($data)->render();
+        }
+        
+        
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        $this->assign('types',$types);
+        
+        $this->assign("search_types", $search_types);
+        $this->assign("goods_fields", $goods_fields);
+        
+        //客户分类
+        $ucates=Db::name($table.'_cate')->where('status',2)->order('sort asc')->column('id,name');
+        $this->assign('ucates',$ucates);
+        //所属公司
+        $where=[
+            'status'=>2,
+        ];
+        if($admin['shop']!=1){
+            $where['shop']=$admin['shop'];
+        }
+        $field='id,name,shop'; 
+        $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field); 
+        //付款类型
+        $paytypes=Db::name('paytype')->where($where)->order('shop asc,sort asc')->column($field); 
+        $this->assign('companys',$companys);
+        $this->assign('paytypes',$paytypes);
+      
+        
+        
+        
+       
+        return $this->fetch();
+        
+    } 
 }
