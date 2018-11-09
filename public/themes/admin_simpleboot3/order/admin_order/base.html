@@ -105,12 +105,79 @@
 					<select  class="form-control " name="accept" id="accept" required >  
 					</select> 
 				<else/>
-					<input type="text" class="form-control " value="{$info.accept_name},{$info.mobile},{$info.phone},{$info.addressinfo}{$info.address},{$info.postcode}"/>
+					 <label class="input-inline"> 
+					 	收货人：
+					 	<input type="text" class="form-control short2" name="accept_name" value="{$info.accept_name}"/>
+				 	<present name="change.accept_name">
+				 		<input type="text" class="form-control short2 red"  value="{$change.accept_name}"/>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	收货手机：
+					 	<input type="text" class="form-control short2" name="mobile" value="{$info.mobile}"/>
+					<present name="change.mobile">
+				 		<input type="text" class="form-control short2 red"  value="{$change.mobile}"/>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	收货电话：
+					 	<input type="text" class="form-control short2" name="phone" value="{$info.phone}"/>
+					<present name="change.phone">
+				 		<input type="text" class="form-control short2 red"  value="{$change.phone}"/>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	省：
+					 	<select  class="form-control short2" name="province" id="province"  > 
+							<option value="0">所在省</option> 
+						</select>
+					<present name="change.province">
+				 		<select  class="form-control short2 red"  id="province1"  > 
+							<option value="0">所在省</option> 
+						</select>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	市：
+					 	<select  class="form-control short2" id="city" name="city" > 
+							<option value="0">所在市</option> 
+						</select>
+					<present name="change.city">
+				 		<select  class="form-control short2 red"  id="city1"  > 
+							<option value="0">所在市</option> 
+						</select>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	县：
+					 	<select  class="form-control short2" id="area" name="area" > 
+							<option value="0">所在县</option> 
+						</select>
+					<present name="change.area">
+				 		<select  class="form-control short2 red"  id="area1"  > 
+							<option value="0">所在县</option> 
+						</select>
+				 	</present>
+					</label> 
+					<label class="input-inline"> 
+					 	邮编：
+					 	<input type="text" class="form-control short" name="postcode" value="{$info.postcode}"/>
+					<present name="change.postcode">
+				 		<input type="text" class="form-control short2 red"  value="{$change.postcode}"/>
+				 	</present>
+					</label>
+					 
+				 	详细地址：
+				 	<input type="text" class="form-control " name="address" value="{$info.address}"/>
+					 <present name="change.address">
+				 		<input type="text" class="form-control short2 red"  value="{$change.address}"/>
+				 	</present>
 				</empty>
-				<input type="hidden" id="city" value="{$info.city}"/>
-				<p class="notice">客户和收货人选择后不可修改，只能废弃或删除订单</p>
-				</div>
+				<p class="notice">收货人信息添加后可以再次修改，主订单修改会同步到子订单，子订单可以能单独修改。
+				在主订单页面拆分订单和计算运费以主订单收货地址为准，子订单若有收货地址改变请在子订单页面计算运费。</p> 
+				</div> 
 			</div>
+		 
 			<div class="form-group fleft-all"  >
 				<label  class="col-sm-2 control-label">用户留言</label>
 				<div class="col-md-6 col-sm-10" > 
@@ -274,44 +341,55 @@
      	   			<td class="price_sale">{$vo.price_sale}</td>
      	    		<td class="price_real">
      	    			<input type="text" name="price_reals-{$kk}[{$key}]" class="form-control  " value="{$vo.price_real}"/>
-     	    		<present name="change['edit'][$kk][$key]['price_real']">
-     	    			<input type="text"  class="form-control  red" value="{$change['edit'][$kk][$key]['price_real']}"/>
+     	    		<present name="change['edit'][$kk]['goods'][$key]['price_real']">
+     	    			<input type="text"  class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['price_real']}"/>
      	    		</present> 
      	    		</td>
-     	    			<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
+     	    			
      	    		<td class="num">
      	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" readonly/>
-     	    		<present name="change['edit'][$kk][$key]['num']">
-     	    		 	<input type="number" class="form-control  red" value="{$change['edit'][$kk][$key]['num']}" readonly/> 
+     	    		<present name="change['edit'][$kk]['goods'][$key]['num']">
+     	    		 	<input type="number" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['num']}" readonly/> 
      	    		</present> 
      	    		</td>
      	    		<td class="pay">
      	    			<input type="text" name="pays-{$kk}[{$key}]" class="form-control " value="{$vo.pay}" readonly/>
-     	    		<present name="change['edit'][$kk][$key]['pay']">
-     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk][$key]['pay']}" readonly/> 
+     	    		<present name="change['edit'][$kk]['goods'][$key]['pay']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['pay']}" readonly/> 
      	    		</present> 
      	    		</td>
      	    		<td class="">
      	    			<input type="text"  name="weights-{$kk}[{$key}]" class="form-control weight1" value="{$vo.weight}"/>
      	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/>
-     	   			<present name="change['edit'][$kk][$key]['weight']">
-     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk][$key]['weight']}" readonly/> 
+     	   			<present name="change['edit'][$kk]['goods'][$key]['weight']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['weight']}" readonly/> 
      	    		</present> 	
      	   			</td>
      	   			<td class="">
      	   				<input type="text"  name="sizes-{$kk}[{$key}]" class="form-control size1" value="{$vo.size}"/>
     	   				<input type="hidden" class="size0" value="{$vo.size1}"/>
-    	   			<present name="change['edit'][$kk][$key]['size']">
-     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk][$key]['size']}" readonly/> 
+    	   			<present name="change['edit'][$kk]['goods'][$key]['size']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['size']}" readonly/> 
      	    		</present> 
     	   			</td>
     	   			<td class="dsc">
     	   				<input type="text"  name="dscs-{$kk}[{$key}]" class="form-control dsc" value="{$vo.dsc}"/>
-    	   			<present name="change['edit'][$kk][$key]['dsc']">
-     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk][$key]['dsc']}" readonly/> 
+    	   			<present name="change['edit'][$kk]['goods'][$key]['dsc']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['dsc']}" readonly/> 
      	    		</present> 	
     	   			</td>
-    	   			<td class="break"><input type="number" class="form-control" value="0"/></td>
+    	   			<td class="">
+    	   			<present name="change['edit'][$kk][$key]['del']">
+    	   				<span class="red">删除</span>
+    	   			<else/>
+    	   				<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
+    	   				<input type="number" class="form-control break" value="0"/>
+    	   			<eq name="info.fid" value="0"> 
+    	   				<button class="order_break" type="button">拆分</button> 
+    	   			</eq>
+    	   			
+    	   			</present> 
+    	   			</td>
     	   		</tr>
 			  
 			  </foreach> 
@@ -381,7 +459,215 @@
 					 <present name="change['edit'][$kk]['real_freight']">
 					 	<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['real_freight']}"  />  
 					 </present>
+					 <empty name="info1">
 					 	<button class="freight_count" type="button">运费计算</button>
+					 </empty>
+					 </label>
+					 <label class="input-inline">
+					 产品总数量：<input type="text" class="form-control short goods_num"  name="goods_num0[{$kk}]" value="{$vv.goods_num}" readonly/> 
+					<present name="change['edit'][$kk]['goods_num']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['goods_num']}" />
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 产品总金额：<input type="text" class="form-control short goods_money"  name="goods_money0[{$kk}]" value="{$vv.goods_money}" readonly/> 
+					<present name="change['edit'][$kk]['goods_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['goods_money']}" />
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 优惠金额：<input type="text" class="form-control short discount_money"  name="discount_money0[{$kk}]" value="{$vv.discount_money}" /> 
+					<present name="change['edit'][$kk]['discount_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['discount_money']}" />
+					</present>
+					</label>
+					 <label class="input-inline">
+					 税费：<input type="text" class="form-control short tax_money"  name="tax_money0[{$kk}]" value="{$vv.tax_money}" /> 
+					<present name="change['edit'][$kk]['tax_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['tax_money']}" />
+					</present>
+					</label>
+					 <label class="input-inline">
+					 其它费用：<input type="text" class="form-control short other_money"  name="other_money0[{$kk}]" value="{$vv.other_money}" /> 
+					<present name="change['edit'][$kk]['other_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['other_money']}" />
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 用户付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
+					 <present name="change['edit'][$kk]['order_amount']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['order_amount']}" />
+					</present> 
+				 	</label>
+					 
+					   订单备注： 
+					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
+				<present name="change['edit'][$kk]['dsc']">
+					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['dsc']}" />
+				</present> 
+				</div>
+			</div>  
+			</div>
+		</foreach>
+		<present name="change.add">
+		<foreach name="change.add" item="vv" key="kk"> 
+			<div class="order order{$kk} red" > 
+			<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
+			  <table class="table table-hover table-bordered table-list goods-list"  > 
+			 	<tr >
+				 	 <td><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.name}</a></td>
+				 	 <td width="100">产品编码</td> 
+				 	 <td width="100">产品图片</td> 
+				 	 <td width="100">总库存</td> 
+				 	  <td width="100">成本价</td>
+					 <td width="100">零售价</td> 
+					 <td width="100">供应价</td>
+					 <td width="100">数量</td>
+					 <td width="100">金额</td>
+					 <td width="100">毛重</td> 
+					 <td width="100">体积</td> 
+					 <td >包装说明/备注</td> 
+					 <td width="100">拆分</td> 
+			 	</tr> 
+			 
+			  <foreach name="infos[$kk]" item="vo" key="key">
+			   
+     	     	<tr class="goods{$key}"> 
+     	     		<td>
+     	     			<a href="{$goods_url}/id/{$key}" target="{$zztarget.other}">{$vo.goods_name}</a> 
+     	     		</td> 
+     	    		<td>{$vo.goods_code}</td> 
+    	    		 
+     	   			<td class="tableImg">
+     	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vo.goods_pic});"></div>
+     	   				 <notempty name="goods[$key]['pics']">
+     	   				<div class="listposi"> 
+     	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+		    				<div class="imgGroup">
+		    				<ul class="imgList" class="imgList">
+		    				<foreach name="goods[$key]['pics']" item="pic" key="kpic">
+								<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
+		    					<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+		    				</foreach>
+		    				</ul>
+		    				<span class="prev"><i class="left"></i></span>
+		    				<span class="next"><i class="right"></i></span>
+		    				</div>
+		    			</div>
+		    			</notempty>
+					</td> 
+					 
+     	   			<td class="clickInfo">
+     	   				<div style="position:relative;" class="goInfo" data-width="0"> 
+     	   				<present name="goods[$key]['nums'][0]">
+     	   				{$goods[$key]['nums'][0]['num']}({$goods[$key]['nums'][0]['num1']})
+     	   				<else/>
+     	   				--
+     	   				</present> 
+     	   		 		</div>
+     	   		 		<div class="goodsInfo">
+	     	   		 		<table class="table table-hover table-bordered">
+		     	   		 		{$stores_tr}
+		     	   		 		<tbody>
+			     	   		 		<tr>
+			     	   		 		<foreach name="stores" item="svv" key="skk">
+			     	   		 			<td> 
+			     	   		 			<present name="goods[$key]['nums'][$skk]">
+			     	   		 			{$goods[$key]['nums'][$skk]['num']}({$goods[$key]['nums'][$skk]['num1']})
+			     	   		 			<else/>
+			     	   		 			--
+			     	   		 			</present>
+			     	   		 			
+			     	   		 			</td>
+			     	   		 		</foreach>
+			     	   		 		</tr>
+		     	   		 		</tbody>
+	     	   		 		 
+						   </table>
+					   </div>
+					</td>
+     	   			<td class="price_in">{$vo.price_in}</td> 
+     	   			<td class="price_sale">{$vo.price_sale}</td>
+     	    		<td class="price_real">
+     	    			<input type="text" name="price_reals-{$kk}[{$key}]" class="form-control  " value="{$vo.price_real}"/>
+     	    		 
+     	    		</td>
+     	    			<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
+     	    		<td class="num">
+     	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" readonly/>
+     	    		 
+     	    		</td>
+     	    		<td class="pay">
+     	    			<input type="text" name="pays-{$kk}[{$key}]" class="form-control " value="{$vo.pay}" readonly/>
+     	    	 
+     	    		</td>
+     	    		<td class="">
+     	    			<input type="text"  name="weights-{$kk}[{$key}]" class="form-control weight1" value="{$vo.weight}"/>
+     	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/>
+     	   		 
+     	   			</td>
+     	   			<td class="">
+     	   				<input type="text"  name="sizes-{$kk}[{$key}]" class="form-control size1" value="{$vo.size}"/>
+    	   				<input type="hidden" class="size0" value="{$vo.size1}"/>
+    	   			 
+    	   			</td>
+    	   			<td class="dsc">
+    	   				<input type="text"  name="dscs-{$kk}[{$key}]" class="form-control dsc" value="{$vo.dsc}"/>
+    	   		 
+    	   			</td>
+    	   			<td class="break">
+    	   		 
+    	   				<span class="red">新增</span>
+    	   			 
+    	   			</td>
+    	   		</tr>
+			  
+			  </foreach> 
+	 		</table> 
+		 
+			 <div class="form-group fleft-all order_pay"  >  
+				<label class="col-sm-2 control-label">订单小计</label>
+				<div class="col-md-6 col-sm-10">
+					 <label class="input-inline"> 
+						 发货仓库：
+						 <select  class="form-control store short-auto" name="store0[{$kk}]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="stores" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.store">selected</if>>{$vo}</option>
+						</foreach>
+						</select>
+						 
+					 
+					 </label>
+					 
+					 <label class="input-inline"> 
+						 发货物流：
+						 <select  class="form-control freight short-auto" name="freight0[{$kk}]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="freights" item="vo">
+							<option value="{$key}" class="freight{$vo.store}" <if condition="$key eq $vv.store">selected</if>>{$vo.name}</option>
+						</foreach>
+						</select>
+						 
+					 
+					 </label>
+					 
+				    <label class="input-inline"> 
+					 包装总重：<input type="text" class="form-control short order_weight" name="weight0[{$kk}]" value="{$vv.weight}" required/> 
+					 
+					 </label>
+				 	 <label class="input-inline"> 
+					 包装总体积：<input type="text" class="form-control short order_size" name="size0[{$kk}]" value="{$vv.size}" required/> 
+					 
+					</label>
+				 	 <label class="input-inline"> 
+					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" required/> 
+					 
+					</label>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight0[{$kk}]" value="{$vv.real_freight}" required/> 
+					 
+					 
 					 </label>
 					 <label class="input-inline">
 					 产品总数量：<input type="text" class="form-control short goods_num"  name="goods_num0[{$kk}]" value="{$vv.goods_num}" readonly/> 
@@ -405,27 +691,34 @@
 					 
 					   订单备注： 
 					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
-				<present name="change['edit'][$kk]['dsc']">
-					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['dsc']}" />
-				</present> 
+				 
 				</div>
 			</div>  
 			</div>
 		</foreach>
+		</present>
 		</div>	 
 	 </empty>
-	 <eq name="info.fid" value="0">
-		 <div class="form-group fleft-all "  >
-			<label class="col-sm-2 control-label">订单拆分</label>
+	 	<div class="form-group fleft-all "  >
+			<label class="col-sm-2 control-label">费用计算说明</label>
 			<div class="col-md-6 col-sm-10">
-			    <button id="order_break" type="button">订单拆分</button>
-				   <p class="notice">在操作栏中填入的数字代表选中的产品数，点击订单拆分后所有操作栏中有数字的产品都被选中生成新订单。
-				   <br/>订单生成后就不能删除产品，但是可以将不要的产品加入子订单中，将子订单废弃
-				  </p> 
+			    <p class="notice">运费计算根据最终的包装总体积、总重和预先指定的快递规则计算。
+					   若快递规则未设置请到配送管理->店铺合作快递中添加快递或给已有快递设置关联仓库，然后再联系人和付款中添加快递区域和对应的费用。
+					   运费计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费 。
+			   </p> 
+			   <p class="notice">用户付款=产品总金额+用户支付运费-优惠金额+税费+其它费用。
+			   	计算税费后用户付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后用户付款金额也会改变
+				  订单付款或发货后则不能修改用户付款</p> 
 			</div>
 		</div>
-	  </eq>
-	  
+	  <div class="form-group fleft-all "  >
+			<label class="col-sm-2 control-label">订单确认</label>
+			<div class="col-md-6 col-sm-10">
+				<button id="break_ok" type="button">订单确认</button>
+			    <p class="notice">拆分订单后点击确认，继续拆分则会产生新订单 </p> 
+			   <p class="notice">订单生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
+			</div>
+		</div>
 			 
 	  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
 			<div class="form-group fleft-all">
@@ -510,6 +803,7 @@
 				</div>
 			</div>
 		</if>
+		 <if condition="empty($info) || (($info['is_real'] eq 2) || ($info['fid'] neq 0))">
 			<div class="form-group fleft-all order_pay" id="order_pay" >
 				<label class="col-sm-2 control-label">订单总计</label>
 				<div class="col-md-6 col-sm-10">
@@ -578,16 +872,11 @@
 						<input type="text" class="form-control short red"  value="{$change.order_amount}"/> 
 					</present>
 				 	</label>
-				 	 <p class="notice">运费计算根据最终的包装总体积、总重和预先指定的快递规则计算。
-					   若快递规则未设置请到配送管理->店铺合作快递中添加快递或给已有快递设置关联仓库，然后再联系人和付款中添加快递区域和对应的费用。
-					   运费计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费 。
-					  </p> 
-				   <p class="notice">用户付款=产品总金额+用户支付运费-优惠金额+税费+其它费用。
-				   	计算税费后用户付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后用户付款金额也会改变
-					  订单付款或发货后则不能修改用户付款</p> 
+				 	
 				 	  
 				</div>
 			</div> 
+		</if>
 		  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">用户付款</label>
@@ -629,6 +918,8 @@
 		 <include file="public@adsc_fleft" /> 
 		 
 <script>
+//订单是否拆分
+var is_real="{$info.is_real|default=1}";
 $('#invoice_type').change(function(){
 	invoice_type_change();
 	 
@@ -645,7 +936,7 @@ $('#invoice_count').click(function(){
 		$('#invoice_type').focus();
 		return false;
 	}
-	 
+	 var $order_div;
 	var invoice_point=parseFloat($('#invoice_point').val());
 	if(!(invoice_point>0)){
 		invoice_point=0;
@@ -655,34 +946,39 @@ $('#invoice_count').click(function(){
 	}
 	var invoice_invoice_money=parseFloat($('#invoice_invoice_money').val());
 	if(!(invoice_invoice_money>0)){
-		var goods_money=parseFloat($('#goods_money').val());
-		var discount_money=parseFloat($('#discount_money').val());
-		var other_money=parseFloat($('#other_money').val());
-		var pay_freight=parseFloat($('#pay_freight').val());
+		if(is_real==1){
+			$order_div= $('.order_pay');
+		}else{
+			$order_div= $('#order_pay');
+		}
+		var goods_money=parseFloat($order_div.find('.goods_money').val());
+		var discount_money=parseFloat($order_div.find('.discount_money').val());
+		var other_money=parseFloat($order_div.find('.other_money').val());
+		var pay_freight=parseFloat($order_div.find('.pay_freight').val());
 		if(!(goods_money>0)){
 			goods_money=0; 
 		}
-		$('#goods_money').val(goods_money.toFixed(2));
+		$order_div.find('.goods_money').val(goods_money.toFixed(2));
 		if(!(discount_money>0)){
 			discount_money=0; 
 		}
-		$('#discount_money').val(discount_money.toFixed(2));
+		$order_div.find('.discount_money').val(discount_money.toFixed(2));
 		if(!(other_money>0)){
 			other_money=0; 
 		}
-		$('#other_money').val(other_money.toFixed(2));
+		$order_div.find('.other_money').val(other_money.toFixed(2));
 		if(!(pay_freight>0)){
 			pay_freight=0; 
 		}
-		$('#pay_freight').val(pay_freight.toFixed(2));
+		$order_div.find('.pay_freight').val(pay_freight.toFixed(2));
 		invoice_invoice_money=(goods_money-discount_money+other_money+pay_freight)*(1+invoice_point/100);
 		 
 	}
 	$('#invoice_invoice_money').val(invoice_invoice_money.toFixed(2));
 	var invoice_tax_money=(invoice_invoice_money*invoice_point/100/(1+invoice_point/100)).toFixed(2);
 	$('#invoice_tax_money').val(invoice_tax_money); 
-	$('#tax_money').val(invoice_tax_money); 
-	money_count($('#order_pay'));
+	$order_div.find('.tax_money').val(invoice_tax_money); 
+	money_count($order_div);
 });
 //订单费用计算
 function money_count($div){
