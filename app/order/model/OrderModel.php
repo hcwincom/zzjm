@@ -159,10 +159,10 @@ class OrderModel extends Model
           
          //总订单信息系
          $edit_fid0=['company','udsc','paytype','invoice_type'];
-         //组装需要判断的字段
+         //组装需要判断的字段,普通订单未拆分的不比较总订单信息
          if($info['fid']==0){
              $fields=array_merge($edit_accept,$edit_fid0);
-             if($info['is_real']==2){
+             if($info['is_real']==2 || count($data['oids'])>1){
                  $fields=array_merge($fields,$edit_base);
              } 
          }else{
@@ -238,7 +238,7 @@ class OrderModel extends Model
          
          //获取原订单和订单产品
          $where_goods=[];
-         if($info['is_real']==1){
+         if($info['is_real']==1 ){
              $where_goods['oid']=['eq',$info['id']];
              $orders=[$info['id']=>$info];
              $order_ids=[$info['id']];
@@ -248,6 +248,7 @@ class OrderModel extends Model
              $orders=$this->where('fid',$info['id'])->column($fields);
              
              $order_ids=array_keys($orders);
+             
              $where_goods['oid']=['in',$order_ids];
          }
          //全部订单产品
@@ -256,8 +257,10 @@ class OrderModel extends Model
          ->column('');
          //数据转化，按订单分组
          $infos=[];
+         $goods_info=[];
          foreach($order_goods as $k=>$v){
              $infos[$v['oid']][$v['goods']]=$v;
+             $goods_info[$v['goods']]=$v;
          }
          //子订单nums-{$kk}[{$key}],只有在主订单下才能拆分订单
          
@@ -285,25 +288,35 @@ class OrderModel extends Model
                      foreach($edit_goods as $vv){
                          if($data[$vv.'s-'.$void][$kgoodsid] !=  $infos[$void][$kgoodsid][$vv]){
                              $content['edit'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
-                         }
-                         
-                     }
+                         } 
+                     } 
                  }
                  
              }else{
                  //不存在新增
                  $content['add'][$void]=[];
                  //添加订单信息
+               
                  foreach($edit_base as $kk=>$vv){
                      $content['add'][$void][$vv]=$data[$vv.'0'][$void];
                  }
-                 foreach ($data['nums-'.$v] as $kgoodsid=>$kv){
+                 foreach ($data['nums-'.$void] as $kgoodsid=>$kv){
                      //添加商品id
                      $content['add'][$void]['goods'][$kgoodsid]['goods']=$kgoodsid;
                      //循环商品信息
                      foreach($edit_goods as $vv){
                          $content['add'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid]; 
                      }
+                     $content['add'][$void]['goods'][$kgoodsid]['goods_name']=$goods_info[$kgoodsid]['goods_name']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['goods_code']=$goods_info[$kgoodsid]['goods_code']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['goods_uname']=$goods_info[$kgoodsid]['goods_uname']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['goods_ucate']=$goods_info[$kgoodsid]['goods_ucate']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['goods_pic']=$goods_info[$kgoodsid]['goods_pic']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['price_in']=$goods_info[$kgoodsid]['price_in']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['price_sale']=$goods_info[$kgoodsid]['price_sale']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['weight1']=$goods_info[$kgoodsid]['weight1']; 
+                     $content['add'][$void]['goods'][$kgoodsid]['size1']=$goods_info[$kgoodsid]['size1']; 
+                     
                  } 
              }
          }
@@ -349,9 +362,13 @@ class OrderModel extends Model
          }
          //新增订单信息只能先保存产品信息，新增订单，才有单号给产品保存
          if(isset($change['add'])){
-             //有新增一定是虚拟主单号了,拆分单号
-             $change['is_real']=2;
-             $change['status']=10;
+             //有新增一定是虚拟主单号了,拆分单号,删除原产品
+             if($order['is_real']==1){
+                 $change['is_real']=2;
+                 $change['status']=10;
+                 $m_ogoods->where('oid',$order['id'])->delete();
+             }
+            
              //得到子订单的序号
              $tmp=$this->where('fid',$order['id'])->count();
              
@@ -389,7 +406,7 @@ class OrderModel extends Model
                  foreach ($edit_base as $v){
                      $data_order[$v]=$vo[$v];
                  }
-                 $tmp_oid=$this->insert($data_order);
+                 $tmp_oid=$this->insertGetId($data_order);
                  //产品新增
                  if(isset($vo['goods'])){ 
                      foreach($vo['goods'] as $kgoods_id=>$vgoods){
@@ -398,21 +415,12 @@ class OrderModel extends Model
                          $vgoods['size1']=bcdiv($vgoods['size'],$vgoods['num'],2);
                          $vgoods['weight1']=($vgoods['weight1']<=0.01)?0.01:$vgoods['weight1'];
                          $vgoods['size1']=($vgoods['size1']<=0.01)?0.01:$vgoods['size1'];
-                         $goods_adds[]=$vgoods; 
-                         $goods_ids[]=$kgoods_id;
+                         $goods_adds[]=$vgoods;  
                      } 
                  } 
              }
-             if(!empty($goods_ids)){
-                 //最后统一新增产品，要先查询产品，得到的数据
-                 $goods_info=Db::name('goods')->where('id','in',$goods_ids)->column('id,name,pic,code,price_in,price_sale');
-                 foreach($goods_adds as $k=>$v){
-                     $goods_adds[$k]['goods_name']=$goods_info[$v['goods']]['name'];
-                     $goods_adds[$k]['goods_pic']=$goods_info[$v['goods']]['pic'];
-                     $goods_adds[$k]['goods_code']=$goods_info[$v['goods']]['code'];
-                     $goods_adds[$k]['price_in']=$goods_info[$v['goods']]['price_in'];
-                     $goods_adds[$k]['price_sale']=$goods_info[$v['goods']]['price_sale']; 
-                 }
+             if(!empty($goods_adds)){
+                 //最后统一新增产品  
                  $m_ogoods->insertAll($goods_adds);
              }
             

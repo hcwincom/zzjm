@@ -583,6 +583,7 @@ class AdminOrderController extends OrderBaseController
         //数据转化，按订单分组
         $infos=[];
         $goods_id=[]; 
+        $goods=[];
         foreach($order_goods as $k=>$v){
             $goods_id[$v['goods']]=$v['goods']; 
             $goods[$v['goods']]=[];
@@ -635,7 +636,7 @@ class AdminOrderController extends OrderBaseController
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
-        
+     
         return $this->fetch();  
     }
     /**
@@ -656,7 +657,7 @@ class AdminOrderController extends OrderBaseController
         $m=$this->m;
         $table=$this->table;
         $flag=$this->flag;
-        $data=$this->request->param();dump($data);exit();
+        $data=$this->request->param();
         $info=$m->where('id',$data['id'])->find();
         if(empty($info)){
             $this->error('数据不存在');
@@ -680,7 +681,7 @@ class AdminOrderController extends OrderBaseController
             'shop'=>$admin['shop'],
         ];
         $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
-        $fields=$this->edit;
+      
         
         $content=$m->order_edit($info, $data);
         
@@ -787,8 +788,7 @@ class AdminOrderController extends OrderBaseController
         $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
          
-        $this->assign('info1',$info1);
-        $this->assign('change',$change);
+      
         
         if($this->isshop){
             $this->where_shop=$info['shop'];
@@ -857,6 +857,7 @@ class AdminOrderController extends OrderBaseController
         //数据转化，按订单分组
         $infos=[];
         $goods_id=[];
+        $goods=[];
         foreach($order_goods as $k=>$v){
             $goods_id[$v['goods']]=$v['goods'];
             $goods[$v['goods']]=[];
@@ -898,7 +899,8 @@ class AdminOrderController extends OrderBaseController
         } 
         $this->cates(); 
         $this->assign('info',$info);
-     
+        $this->assign('info1',$info1);
+        $this->assign('change',$change);
         $this->assign('infos',$infos);
         $this->assign('orders',$orders);
         $this->assign('goods',$goods);

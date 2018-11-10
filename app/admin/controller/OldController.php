@@ -819,6 +819,31 @@ class OldController extends AdminBaseController
         set_time_limit(300);
         $m_old=Db::connect($this->db_old);
         $count=1000; 
+        
+        //订单产品主体
+        $m_new=Db::name('order_goods');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_order_goods');
+        //获取最大的id来分页查询
+        $sql='select max(id) as count from sp_order_goods';
+        $data=$m_old->query($sql);
+        $page=ceil($data[0]['count']/$count);
+        $field='og.id,og.order_id as oid,og.codeid as goods,og.factory_price as price_in,'.
+            'og.sell_price as price_sale,og.prefer_price as price_real,og.goods_nums as num,'.
+            'og.goods_weight as weight,g.name as goods_name,g.goods_no as goods_code,g.img as goods_pic';
+        for($i=0;$i<$page;$i++){
+            $sql='select '.$field.' from sp_order_goods as og '.
+                'join sp_codegoods g on g.id=og.codeid '.
+                'where og.id >'.($i*$count).' and og.id<='.(($i+1)*$count);
+            $data=$m_old->query($sql);
+            $row_mew=$m_new->insertAll($data);
+        }
+        zz_log('order_goods订单产品同步完成');
+        //统计产品数量
+        $nums=$m_new->group('oid')->column('oid,count(num)');
+        
         //订单主体
         $m_new=Db::name('order');
         //开启事务
@@ -829,7 +854,7 @@ class OldController extends AdminBaseController
         $sql='select max(id) as count from sp_order';
         $data=$m_old->query($sql);
         $page=ceil($data[0]['count']/$count);
-        $field='p.id,p.order_sn,p.order_no as express_no,p.user_id as uid,'.
+        $field='p.id,p.order_sn as name,p.order_no as express_no,p.user_id as uid,'.
                 'p.pay_type as paytype,p.pay_status,p.paystate,p.distribution_status,p.status,'.
                 'p.create_time,p.pay_time,p.send_time,p.accept_time,p.completion_time,'.
                 'p.accept_name,p.telphone as mobile,p.province,p.city,p.area,p.address,p.mobile as phone,'.
@@ -893,9 +918,13 @@ class OldController extends AdminBaseController
             $data=$m_old->query($sql);
             foreach($data as $k=>$v){ 
                 $v['rstatus']=1;
+                $v['goods_num']=isset($nums[$v['id']])?$nums[$v['id']]:0;
                 //如果company为空就是上海极敏
                 if(empty($v['company'])){
                     $v['company']=5;
+                }
+                if(empty($v['invoice_type'])){
+                    $v['invoice_type']=0;
                 }
                 //pay_type
                 switch ($v['paytype']){
@@ -972,39 +1001,17 @@ class OldController extends AdminBaseController
                 unset($v['paystate']);
                 unset($v['distribution_status']);
                 
-                $data[$k]=$v;
-               
+                $data[$k]=$v; 
             }
            
             $row_mew=$m_new->insertAll($data);
         } 
-       
-      
         
         $m_new->commit();
         zz_log('order订单主体同步完成');
-        //订单产品主体
-        $m_new=Db::name('order_goods');
-        //开启事务
-        $m_new->startTrans();
-        //先截取旧数据
-        $m_new->execute('truncate table cmf_order_goods');
-        //获取最大的id来分页查询
-        $sql='select max(id) as count from sp_order_goods';
-        $data=$m_old->query($sql);
-        $page=ceil($data[0]['count']/$count);
-        $field='og.id,og.order_id as oid,og.codeid as goods,og.factory_price as price_in,'.
-        'og.sell_price as price_sale,og.prefer_price as price_real,og.goods_nums as num,'.
-        'og.goods_weight as weight,g.name as goods_name,g.goods_no as goods_code,g.img as goods_pic';
-        for($i=0;$i<$page;$i++){
-            $sql='select '.$field.' from sp_order_goods as og '.
-                'join sp_codegoods g on g.id=og.codeid '.
-                'where og.id >'.($i*$count).' and og.id<='.(($i+1)*$count);
-            $data=$m_old->query($sql);
-            $row_mew=$m_new->insertAll($data);
-        }
+        
         $m_new->commit();
-        zz_log('order_goods订单产品同步完成');
+       
         echo ('end');
     }
     //发货记录
