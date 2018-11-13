@@ -244,16 +244,18 @@
 			  <table class="table table-hover table-bordered table-list" id="goods-list"> 
 			 	<tr id="goods0">
 				 	 <td>产品名称</td>
-				 	 <td width="100">产品编码</td> 
-				 	 <td width="100">产品图片</td> 
-				 	 <td width="100">总库存</td> 
-				 	 <td width="100">成本价</td>
-					 <td width="100">零售价</td> 
-					 <td width="100">供应价</td>
-					 <td width="100">数量</td>
-					 <td width="100">金额</td>
-					 <td width="100">毛重</td> 
-					 <td width="100">体积</td> 
+				 	 <td >产品编码</td> 
+				 	 <td  >产品图片</td> 
+				 	 <td  >总库存</td> 
+				 	  <td >客户用名</td>
+					 <td >客户型号</td> 
+				 	 <td  >成本价</td>
+					 <td >零售价</td> 
+					 <td >供应价</td>
+					 <td >数量</td>
+					 <td >金额</td>
+					 <td >毛重</td> 
+					 <td >体积</td> 
 					 <td >包装说明/备注</td> 
 					 <td width="100">操作</td> 
 			 	</tr> 
@@ -269,18 +271,20 @@
 			  <table class="table table-hover table-bordered table-list goods-list"  > 
 			 	<tr >
 				 	 <td class="order_name"><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.name}</a></td>
-				 	 <td width="100">产品编码</td> 
-				 	 <td width="100">产品图片</td> 
-				 	 <td width="100">总库存</td> 
-				 	  <td width="100">成本价</td>
-					 <td width="100">零售价</td> 
-					 <td width="100">供应价</td>
-					 <td width="100">数量</td>
-					 <td width="100">金额</td>
-					 <td width="100">毛重</td> 
-					 <td width="100">体积</td> 
+				 	 <td >产品编码</td> 
+				 	 <td  >产品图片</td> 
+				 	 <td  >总库存</td> 
+				 	 <td >客户用名</td>
+					 <td >客户型号</td> 
+				 	 <td  >成本价</td>
+					 <td >零售价</td> 
+					 <td >供应价</td>
+					 <td >数量</td>
+					 <td >金额</td>
+					 <td >毛重</td> 
+					 <td >体积</td> 
 					 <td >包装说明/备注</td> 
-					 <td width="100">拆分</td> 
+					 <td width="100">操作</td> 
 			 	</tr> 
 			 
 			  <foreach name="infos[$kk]" item="vo" key="key">
@@ -339,6 +343,8 @@
 						   </table>
 					   </div>
 					</td>
+					<td class="">{$vo.goods_uname}</td> 
+     	   			<td class="">{$vo.goods_ucate}</td>
      	   			<td class="price_in">{$vo.price_in}</td> 
      	   			<td class="price_sale">{$vo.price_sale}</td>
      	    		<td class="price_real">
@@ -383,13 +389,13 @@
     	   			<td class="">
     	   			<present name="change['edit'][$kk][$key]['del']">
     	   				<span class="red">删除</span>
-    	   			<else/>
+    	   			<else/> 
+    	   			<if condition="empty($info1) && $info.fid eq 0">
     	   				<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
-    	   				<input type="number" class="form-control break" value="0"/>
-    	   			<eq name="info.fid" value="0"> 
+    	   			 	<input type="number" class="form-control break" value="0"/>
     	   				<button class="order_break" type="button">拆分</button> 
-    	   			</eq>
-    	   			
+    	   			 
+    	   			</if>
     	   			</present> 
     	   			</td>
     	   		</tr>
@@ -520,18 +526,18 @@
 			  <table class="table table-hover table-bordered table-list goods-list"  > 
 			 	<tr >
 				 	 <td>新拆分订单</td>
-				 	 <td width="100">产品编码</td> 
-				 	 <td width="100">产品图片</td> 
-				 	 <td width="100">总库存</td> 
-				 	 <td width="100">成本价</td>
-					 <td width="100">零售价</td> 
-					 <td width="100">供应价</td>
-					 <td width="100">数量</td>
-					 <td width="100">金额</td>
-					 <td width="100">毛重</td> 
-					 <td width="100">体积</td> 
+				 	 <td >产品编码</td> 
+				 	 <td  >产品图片</td> 
+				 	 <td  >总库存</td> 
+				 	  <td  >成本价</td>
+					 <td >零售价</td> 
+					 <td >供应价</td>
+					 <td >数量</td>
+					 <td >金额</td>
+					 <td >毛重</td> 
+					 <td >体积</td> 
 					 <td >包装说明/备注</td> 
-					 <td width="100">拆分</td> 
+					 <td width="100">操作</td> 
 			 	</tr> 
 			 
 			  <foreach name="vv['goods']" item="vo" key="key">
@@ -590,6 +596,8 @@
 						   </table>
 					   </div>
 					</td>
+					<td class="">{$vo.goods_uname}</td> 
+     	   			<td class="">{$vo.goods_ucate}</td>
      	   			<td class="price_in">{$vo.price_in}</td> 
      	   			<td class="price_sale">{$vo.price_sale}</td>
      	    		<td class="price_real">
@@ -718,6 +726,8 @@
 				  订单付款或发货后则不能修改用户付款</p> 
 			</div>
 		</div>
+ 
+    <if condition="empty($info1) && !empty($info) && ($info.fid eq 0)">  
 	  <div class="form-group fleft-all "  >
 			<label class="col-sm-2 control-label">订单确认</label>
 			<div class="col-md-6 col-sm-10">
@@ -726,7 +736,7 @@
 			   <p class="notice">订单生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
 			</div>
 		</div>
-			 
+	</if>	 
 	  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">客户付款和发票</label>
@@ -923,7 +933,31 @@
 			</div>
 		</if>
 		 <include file="public@adsc_fleft" /> 
+	<notempty name="info">
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">支付状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="pay_status" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}" name="pay_status" <if condition="$key eq $info.pay_status">checked</if>/>{$vo}
+			 	</label>
+			 </foreach>
+			</div>
+		</div>
 		 
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">订单状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="statuss" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+			 	</label>
+			 </foreach>
+			</div>
+		</div>
+	</notempty> 
 <script>
 //订单是否拆分,不拆分就隐藏总计
 var is_real="{$info.is_real|default=1}";

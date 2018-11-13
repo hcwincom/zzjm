@@ -40,7 +40,7 @@ var store=0;
 var stores={$stores_json};
 var stores_tr="{$stores_tr}";
 
-
+$('#order_pay').show();
   
 $('#invoice_type').val(2);
 $('#province').change(function(){
@@ -203,7 +203,11 @@ var url_goods_add="{:url('order/Orderajax/goods_add')}";
 var href_goods="{:url('goods/AdminGoods/edit','',false,false)}";
 var image_url="{$image_url}";
 $('#goods_add').click(function(){
-	 
+	 var custom=$('#custom').val();
+	 if(!(custom>0)){
+		 $('#custom').focus();
+		 return false;
+	 }
 	goods=parseInt($(this).siblings('.goods').val());
 	store=$('#store').val();
 	if(!(goods>0)){
@@ -223,7 +227,7 @@ $('#goods_add').click(function(){
         type: 'POST',
         url: url_goods_add,
         dataType: 'json', 
-        data:{'id':goods},
+        data:{'id':goods,'uid':custom},
         success: function (data) {
      	    if(data.code!=1){
      	    	msg(data.msg);
@@ -265,9 +269,11 @@ $('#goods_add').click(function(){
      	    '<td>'+info['code']+'</td>'+  
      	   '<td class="tableImg"><div class="tdImg" style="background-size: 100% 100%;background-image:url('+image_url+'/'+info['pic']+');"></div>'+div_pic+'</td>'+
      	    div_num+
+     	   '<td>'+info['goods_uname']+'</td>'+ 
+     	   '<td>'+info['goods_ucate']+'</td>'+ 
      	   '<td>'+info['price_in']+'</td>'+ 
      	   '<td>'+info['price_sale']+'</td>'+ 
-     	    '<td><input type="text" name="prices['+info['id']+']" class="form-control price_sale " value="'+info['price_sale']+'"/></td>'+
+     	    '<td><input type="text" name="prices['+info['id']+']" class="form-control price_sale " value="'+info['price_pay']+'"/></td>'+
      	    '<td><input type="number" name="nums['+info['id']+']" class="form-control input-order num" value="1"/></td>'+
      	    '<td><input type="text" name="price_counts['+info['id']+']" class="form-control price_count" value="'+info['price_sale']+'" /></td>'+ 
      	    '<td><input type="text"  name="weights['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+

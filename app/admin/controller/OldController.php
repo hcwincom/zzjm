@@ -905,7 +905,7 @@ class OldController extends AdminBaseController
         4=>'其他',
     ],
      
-        sort专门排序，待发货10，待付款4，，待确认货款5，退货中3，其他0
+        sort专门排序，待发货10，待付款4，，待确认货款5，退货中3，未提交2，其他0
          */
         //先检查pay_status
         for($i=0;$i<$page;$i++){
@@ -918,6 +918,7 @@ class OldController extends AdminBaseController
             $data=$m_old->query($sql);
             foreach($data as $k=>$v){ 
                 $v['rstatus']=1;
+             
                 $v['goods_num']=isset($nums[$v['id']])?$nums[$v['id']]:0;
                 //如果company为空就是上海极敏
                 if(empty($v['company'])){
@@ -944,42 +945,43 @@ class OldController extends AdminBaseController
                         $v['pay_type']=1;
                         break;
                 }
-               
-               
+                 
+              
                 $v['sort']=0;
                 switch ($v['status']){
                     case 3:
-                        $v['status']=8;
+                        $v['status']=80;
                         break;
                     case 4:
-                        $v['status']=9;
+                        $v['status']=81;
                         break;
                     case 5:
-                        $v['status']=5;
+                        $v['status']=30;
                         break;
                     default:  
                         //status1,2
-                        
+                       
                         if($v['pay_type']==1 && $v['paystate']==0 && $v['order_type']==3){
                             //待确认货款5，
                             $v['sort']=5;
-                            $v['status']=1;
+                            $v['status']=10;
                         }elseif($v['distribution_status']==0){
                             if($v['pay_status']==1 || ($v['pay_type']==2 || $v['pay_type']==10)){
                                 //待发货
                                 $v['sort']=10;
-                                $v['status']=2;
+                                $v['status']=20;
+                              
                             }else{
                                 //待付款4
                                 $v['sort']=4;
-                                $v['status']=1;
+                                $v['status']=10;
                             } 
                         }  
                         break;
                 }
                 //已发货
-                if($v['distribution_status']>0 &&  $v['status']<5){
-                    $v['status']=3;
+                if($v['distribution_status']>0 &&  $v['status']<30){
+                    $v['status']=24; 
                 }
                 if($v['pay_status']==0){
                     $v['pay_status']=1;

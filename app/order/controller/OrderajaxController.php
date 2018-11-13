@@ -15,6 +15,7 @@ class OrderajaxController extends AdminBase0Controller
     public function goods_add()
     {
         $id=$this->request->param('id');
+        $uid=$this->request->param('uid');
         $where=[
             'id'=>$id,
         ];
@@ -69,6 +70,19 @@ class OrderajaxController extends AdminBase0Controller
                  'file3'=>$v['file'].'3.jpg',
              ]; 
          }
+         //添加客户用名
+        $where=['uid'=>$uid,'goods'=>$id];
+        $tmp=Db::name('custom_goods')->where($where)->find();
+        if(empty($tmp)){
+            $goods['goods_uname']='';
+            $goods['goods_ucate']=''; 
+            $goods['price_pay']=$goods['price_sale'];
+        }else{
+            $goods['goods_uname']=$tmp['name'];
+            $goods['goods_ucate']=$tmp['cate'];
+            $goods['price_pay']=$tmp['price'];
+            $goods['dsc']=$tmp['dsc'];
+        }
         $this->success('ok','',$goods);
     }
     //根据所属公司和客户分类,客户所在地得到客户

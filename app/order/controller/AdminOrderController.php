@@ -40,7 +40,7 @@ class AdminOrderController extends OrderBaseController
         $admin=$this->admin;
         $data=$this->request->param();
         $where=[];
-        
+       
         
         //店铺,分店只能看到自己的数据，总店可以选择店铺
         if($admin['shop']==1){
@@ -330,8 +330,13 @@ class AdminOrderController extends OrderBaseController
             'udsc'=>$data['udsc'],
             'dsc'=>$data['dsc'],
             'create_time'=>$time,
-            'sort'=>11,
+            'sort'=>2,
         ];
+//         sort专门排序，待发货10，待付款4，，待确认货款5，退货中3，其他0
+//	3	订单总表中，“已付款等待发货的订单”显示红色排最上，
+// 订单数据有改动的显示“蓝色”或者“灰色”排第二，
+// “已下单，等待买家付款”黄色，排第三，
+//剩下的订单按时间顺序排列
         //收货地址信息 
         $field='p.name,p.mobile,p.phone,p.street,p.postcode'.
             ',p.province,p.city,p.area'.
@@ -440,6 +445,7 @@ class AdminOrderController extends OrderBaseController
                     'postcode'=>$data_order['postcode'], 
                     'udsc'=>$data_order['udsc'],
                     'dsc'=>$data_order['dsc'],
+                    'sort'=>$data_order['sort'],
                    
                     'goods_money'=>0, 
                     'goods_num'=>0, 
@@ -474,7 +480,7 @@ class AdminOrderController extends OrderBaseController
                 'invoice_money'=>$data['invoice_invoice_money'],
                 'dsc'=>$data['invoice_dsc'],
                 'company'=>$company['id'],
-                'company_name'=>$company['name'], 
+                'company_name'=>$company['name'],
                 'atime'=>$time,
             ];
             Db::name('order_invoice')->insert($data_invoice);
@@ -527,6 +533,7 @@ class AdminOrderController extends OrderBaseController
         if(empty($info)){
             $this->error('数据不存在');
         }
+       // $m->order_sort($info);
         $shop=$info['shop'];
         if($admin['shop']>1 && $admin['shop']!=$shop){
             $this->error('只能查看本店铺的数据');
@@ -668,7 +675,11 @@ class AdminOrderController extends OrderBaseController
         if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
            $this->error('不能编辑其他店铺的信息'); 
         }
-         
+         //是否有权查看
+        $res=$m->order_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res); 
+        }
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
@@ -682,7 +693,10 @@ class AdminOrderController extends OrderBaseController
         ];
         $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
       
-        
+        if($info['status']==1){
+            $m->order_edit($info, $data,1);
+            $this->success('已修改',url('edit',['id'=>$info['id']]));
+        }
         $content=$m->order_edit($info, $data);
         
         
@@ -1021,6 +1035,7 @@ class AdminOrderController extends OrderBaseController
         $this->assign('order_types',config('order_type'));
         $this->assign('statuss',config('order_status'));
         $this->assign('pay_status',config('pay_status'));
+        $this->assign('freight_status',config('freight_status'));
         //获取产品分类
         $where=[
             'fid'=>0,
