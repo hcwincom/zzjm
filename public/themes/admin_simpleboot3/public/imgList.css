@@ -17,9 +17,13 @@
 	/* .tdImg img{width: 110%;height: 100%;} */
 	/* 点击放大图片 */
 	#outdiv{position:fixed;top:0;right: 0;left: 0;bottom: 0;margin: auto;background: rgba(0, 0, 0, .9);display: none;z-index: 100;}
+	#innerdiv{position: relative;}
 	#imgClose{text-align: right;padding-right: 20px;padding-top: 10px;}
 	#imgClose span.glyphicon{font-size: 40px;color: #fff;cursor: pointer;}
 	#backBigImg{margin: 0 auto;background-repeat: no-repeat;background-position: center center;max-width: 90%;max-height: 60%;}
+	#imgPrev,#imgNext{position: absolute;right: 5%;top:30%;z-index: 200;}
+	#imgNext{top:50%;}
+	#imgPrev span.glyphicon,#imgNext span.glyphicon{font-size: 80px;color: #fff;cursor: pointer;}
 	.html_overflow{overflow-x: hidden;overflow-y: hidden;}
 
 .status1{

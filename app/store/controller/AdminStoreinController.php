@@ -24,7 +24,7 @@ class AdminStoreinController extends AdminBaseController
     {
         parent::_initialize();
         $this->statuss=config('info_status');
-        $this->review_status=config('review_status'); 
+        $this->review_status= config('store_in_status'); 
         $this->assign('statuss',$this->statuss);
         $this->assign('review_status',$this->review_status);
        
@@ -78,6 +78,12 @@ class AdminStoreinController extends AdminBaseController
             $where_shop=$admin['shop'];
             $where['p.shop']=['eq',$admin['shop']];
         }
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
         //产品分类
         if(empty($data['cid0'])){
             $data['cid0']=0;
@@ -89,17 +95,20 @@ class AdminStoreinController extends AdminBaseController
         }else{
             $where['goods.cid']=['eq',$data['cid']];
         }
-        //查询字段
+        //查询字段，子弹名直接列出比较危险
         $types=[
-            'goods.name' => '产品名称',
-            'goods.code'=>'产品编码',
-            'goods.id' => '产品id',
-            'goods.sn'=>'产品条码',
-            'box.code'=>'料位编号',
+            1=>['goods.name' ,'产品名称'],
+            2=>['goods.code','产品编码'],
+            3=>['goods.id' , '产品id'],
+            4=>['goods.sn','产品条码'],
+            5=>['box.code','料位编号'],
+            5=>['box.id','料位id'],
+            6=>['p.about','下单id'],
+            7=>['p.about_name','下单名称']
         ];
         //选择查询字段
         if(empty($data['type1'])){
-            $data['type1']=key($types);
+            $data['type1']=1;
         }
         //搜索类型
         $search_types=config('search_types');
@@ -109,7 +118,7 @@ class AdminStoreinController extends AdminBaseController
         if(!isset($data['name']) || $data['name']==''){
             $data['name']='';
         }else{
-            $where[$data['type1']]=zz_search($data['type2'],$data['name']);
+            $where[$types[$data['type1']][0]]=zz_search($data['type2'],$data['name']);
         }
         
         //入库数量和金额
@@ -185,7 +194,11 @@ class AdminStoreinController extends AdminBaseController
                 }
             }
         }
-        
+        if(empty($data['type'])){
+            $data['type']=0;
+        }else{
+            $where['p.type']=['eq',$data['type']];
+        }
         $join=[
             ['cmf_shop shop','p.shop=shop.id','left'],
             ['cmf_goods goods','p.goods=goods.id','left'],
@@ -212,7 +225,7 @@ class AdminStoreinController extends AdminBaseController
         ->join($join)
         ->where($where)
         ->whereRaw($where_num) 
-        ->order('p.atime desc')
+        ->order('p.id desc')
         ->paginate();
         // 获取分页显示
         $page = $list->appends($data)->render();
@@ -327,6 +340,7 @@ class AdminStoreinController extends AdminBaseController
         $this->assign('boxes',$boxes);
         $this->assign('goods',$goods);
         $this->assign('info',$info);
+       
         return $this->fetch();
     }
     
@@ -349,7 +363,7 @@ class AdminStoreinController extends AdminBaseController
         $id=$this->request->param('id',0,'intval');
         $box=$this->request->param('box',0,'intval');
         
-        if($status<1 || $status>4 || $id<=0){
+        if($id<=0){
             $this->error('信息错误');
         }
         $m=$this->m;
@@ -358,8 +372,8 @@ class AdminStoreinController extends AdminBaseController
         if(empty($info)){
             $this->error('信息不存在');
         }
-        if($info['rstatus']!=1){
-            $this->error('审核结果不能更改');
+        if($info['rstatus']!=1 ){
+            $this->error('只能审核待审核数据');
         }
         $admin=$this->admin;
         //其他店铺的审核判断
@@ -368,7 +382,7 @@ class AdminStoreinController extends AdminBaseController
                 $this->error('不能审核其他店铺的信息');
             }
         }
-       
+         
         $time=time();
         $m->startTrans();
         $update=[
@@ -388,14 +402,19 @@ class AdminStoreinController extends AdminBaseController
             $m->rollback();
             $this->error('审核失败，请刷新后重试');
         }
+       
         //是否更新,2同意，3不同意 
         $m_store_goods=new StoreGoodsModel();
-        if($status==2){ 
-            //更新仓库和总库存 
-            $res=$m_store_goods->instore2($info['goods'],$info['store'],$info['shop'],$info['num'],$box); 
-        }else{
-            //更新仓库和总库存 
-            $res=$m_store_goods->instore3($info['goods'],$info['store'],$info['shop'],$info['num']);  
+        
+        if($status==2){
+            //更新仓库和总库存
+            $res=$m_store_goods->instore2($info,$box);
+        }elseif($status==3){
+            //更新仓库和总库存
+            $res=$m_store_goods->instore3($info);
+        } else{
+            $m->rollback();
+            $this->error('只能审核为通过和不通过');
         }
         if($res!==1){
             $m->rollback();
@@ -407,6 +426,91 @@ class AdminStoreinController extends AdminBaseController
             'time'=>$time,
             'ip'=>get_client_ip(),
             'action'=>$admin['user_nickname'].'审核产品入库'.$id.'为'.$review_status[$status],
+            'table'=> ($this->table),
+            'type'=>'review',
+            'pid'=>$info['id'],
+            'link'=>url('edit',['id'=>$info['id']]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['aid'=>$info['aid']]);
+        
+        $m->commit();
+        $this->success('审核成功');
+    }
+    
+    /**
+     *修改已审核为待审核
+     * @adminMenu(
+     *     'name'   => '修改已审核为待审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '修改已审核为待审核',
+     *     'param'  => ''
+     * )
+     */
+    public function review_back()
+    {
+        $status=1;
+        $id=$this->request->param('id',0,'intval');
+        
+        if($id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        //查找信息
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('信息不存在');
+        }
+        if($info['rstatus']!=2 && $info['rstatus']!=3){
+            $this->error('只能还原审核过的数据');
+        }
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
+        
+        $time=time();
+        $m->startTrans();
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+            'rtime'=>$time,
+        ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']='还原状态为待审核';
+        }
+        $row=$m->where('id',$id)->update($update);
+        
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        //是否更新,2同意，3不同意
+        $m_store_goods=new StoreGoodsModel();
+        //原先是审核过的要回归
+        $res=$m_store_goods->instore_back($info);
+       
+        if($res!==1){
+            $m->rollback();
+            $this->error($res);
+        }
+        //审核成功，记录操作记录,发送审核信息
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'还原已审核产品入库'.$id,
             'table'=> ($this->table),
             'type'=>'review',
             'pid'=>$info['id'],

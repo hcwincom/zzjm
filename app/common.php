@@ -7,8 +7,8 @@ use think\Db;
 use think\Url;
  
 // 应用公共文件
-/* 申请入库 */
-function zz_instore($data){
+/* 申请入库,已废弃，使用StoreGoodsModel */
+function zz_instore_xxx($data){
     $m_store_goods=Db::name('store_goods');
     $where=[
         'store'=>['eq',$data['store']],

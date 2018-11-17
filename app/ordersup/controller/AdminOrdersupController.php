@@ -1,12 +1,12 @@
 <?php
  
-namespace app\order\controller;
+namespace app\ordersup\controller;
 
  
 use think\Db; 
-use app\order\model\OrderModel;
+use app\ordersup\model\OrdersupModel;
 use app\common\controller\AdminInfo0Controller; 
-class AdminOrderController extends AdminInfo0Controller
+class AdminOrdersupController extends AdminInfo0Controller
 {
     
     public function _initialize()
@@ -14,29 +14,30 @@ class AdminOrderController extends AdminInfo0Controller
         parent::_initialize();
         //没有店铺区分
         $this->isshop=1;
-        $this->flag='订单';
-        $this->table='order';
-        $this->m=new OrderModel();
+        $this->flag='采购单';
+        $this->table='ordersup';
+        $this->m=new OrdersupModel();
        
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
          
     }
     /**
-     * 订单列表
+     * 采购单列表
      * @adminMenu(
-     *     'name'   => '订单列表',
-     *     'parent' => 'order/AdminIndex/default',
+     *     'name'   => '采购单列表',
+     *     'parent' => 'ordersup/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 1,
      *     'icon'   => '',
-     *     'remark' => '订单列表',
+     *     'remark' => '采购单列表',
      *     'param'  => ''
      * )
      */
     public function index()
     {
+        
         $table=$this->table;
         $m=$this->m;
         $admin=$this->admin;
@@ -62,12 +63,6 @@ class AdminOrderController extends AdminInfo0Controller
             $data['status']=0;
         }else{
             $where['p.status']=['eq',$data['status']];
-        }
-        //分类
-        if(empty($data['order_type'])){
-            $data['order_type']=0;
-        }else{
-            $where['p.order_type']=['eq',$data['order_type']];
         }
         
         //添加人
@@ -117,13 +112,11 @@ class AdminOrderController extends AdminInfo0Controller
         }
         //查询字段
         $types=[
-            'p.name'=>'订单编号',
+            'p.name'=>'采购单编号',
             'p.express_no'=>'物流编号',
-            'custom.name'=>'客户名称',
-            'custom.code'=>'客户编号',
-           
-            'p.accept_name'=>'收货人',
-            'p.mobile|p.phone'=>'收货人电话',
+            'supplier.name'=>'客户名称',
+            'supplier.code'=>'客户编号',
+            
             
         ];
         
@@ -178,17 +171,17 @@ class AdminOrderController extends AdminInfo0Controller
             }
         }
         //客户类型
-        if(empty($data['custom_cate'])){
-            $data['custom_cate']=0;
+        if(empty($data['supplier_cate'])){
+            $data['supplier_cate']=0;
         }else{
-            $where['custom.cid']=['eq',$data['custom_cate']];
+            $where['supplier.cid']=['eq',$data['supplier_cate']];
         }
         //关联表
         $join=[
-            ['cmf_custom custom','p.uid=custom.id','left'],
+            ['cmf_supplier supplier','p.uid=supplier.id','left'],
             
         ];
-        $field='p.*,custom.name as custom_name';
+        $field='p.*,supplier.name as supplier_name';
         $list=$m
         ->alias('p')
         ->field('p.id') 
@@ -207,9 +200,9 @@ class AdminOrderController extends AdminInfo0Controller
         }else{
             //关联表
             $join=[ 
-                ['cmf_custom custom','p.uid=custom.id','left'], 
+                ['cmf_supplier supplier','p.uid=supplier.id','left'], 
             ];
-            $field='p.*,custom.name as custom_name';
+            $field='p.*,supplier.name as supplier_name';
             
             $list=$m
             ->alias('p')
@@ -217,7 +210,7 @@ class AdminOrderController extends AdminInfo0Controller
             ->where('p.id','in',$ids)
             ->order('p.sort desc,p.id asc')
             ->column($field); 
-            $goods=Db::name('order_goods')->where('oid','in',$ids)
+            $goods=Db::name('ordersup_goods')->where('oid','in',$ids)
             ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
             foreach($goods as $k=>$v){ 
                 $list[$v['oid']]['infos'][]=$v;
@@ -238,15 +231,15 @@ class AdminOrderController extends AdminInfo0Controller
      
    
     /**
-     * 订单添加
+     * 采购单添加
      * @adminMenu(
-     *     'name'   => '订单添加',
+     *     'name'   => '采购单添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单添加',
+     *     'remark' => '采购单添加',
      *     'param'  => ''
      * )
      */
@@ -261,7 +254,7 @@ class AdminOrderController extends AdminInfo0Controller
       
         $this->assign('tels',null);
         $this->assign('accounts',null);
-        $this->assign('custom',null);
+        $this->assign('supplier',null);
         $this->assign('pay',null);
         $this->assign('invoice',null);
        
@@ -269,15 +262,15 @@ class AdminOrderController extends AdminInfo0Controller
         
     }
     /**
-     * 订单添加do
+     * 采购单添加do
      * @adminMenu(
-     *     'name'   => '订单添加do',
+     *     'name'   => '采购单添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单添加do',
+     *     'remark' => '采购单添加do',
      *     'param'  => ''
      * )
      */
@@ -286,12 +279,12 @@ class AdminOrderController extends AdminInfo0Controller
         $data=$this->request->param();
        
         $fields_int=[
-            'company','uid','store','freight','accept','paytype','pay_type','goods_num',
+           'uid','store','freight','paytype','pay_type','goods_num',
         ];
         foreach($fields_int as $v){
             $data[$v]=intval($data[$v]);
             if(empty($data[$v])){
-                $this->error('订单数据不完整'.$v);
+                $this->error('采购单数据不完整'.$v);
             }
         }
         $fields_round=[
@@ -307,8 +300,8 @@ class AdminOrderController extends AdminInfo0Controller
         //店铺和下单人
         $admin=$this->admin;
         $time=time();
-        $data_order=[
-            'order_type'=>1,
+        $data_ordersup=[
+            'ordersup_type'=>1,
             'aid'=>$admin['id'],
             'shop'=>($admin['shop']==1)?2:$admin['shop'],
             'company'=>$data['company'],
@@ -336,40 +329,26 @@ class AdminOrderController extends AdminInfo0Controller
         ];
  
         //收货地址信息 
-        $field='p.name,p.mobile,p.phone,p.street,p.postcode'.
-            ',p.province,p.city,p.area'.
-            ',province.name as province_name,city.name as city_name,area.name as area_name';
-        $tel=Db::name('tel')
-        ->alias('p')
-        ->field($field)
-        ->join('cmf_area province','province.type=1 and p.province=province.id','left')
-        ->join('cmf_area city','city.type=2 and p.city=city.id','left')
-        ->join('cmf_area area','area.type=3 and p.area=area.id','left')
-        ->where('p.id',$data['accept'])
-        ->find(); 
-        $data_order['province']=$tel['province'];
-        $data_order['city']=$tel['city'];
-        $data_order['area']=$tel['area'];
-        $data_order['address']=$tel['street'];
-        $data_order['accept_name']=empty($tel['name'])?:$tel['name'];
-        $data_order['phone']=$tel['phone'];
-        $data_order['mobile']=$tel['mobile'];
-        $data_order['addressinfo']=$tel['province_name'].'-'.$tel['city_name'].'-'.$tel['area_name'];
-        $data_order['postcode']=$tel['postcode'];
         
-        //单号
-        $company=Db::name('company')->field('id,code,name,shop')->find();
-        if($company['shop']!=$data_order['shop']){
-            $this->error('订单来源错误');
-        } 
-        $data_order['name']=$company['code'].date('Ymd').substr($time,-8);
+        $data_ordersup['province']=$data['province'];
+        $data_ordersup['city']=$data['city'];
+        $data_ordersup['area']=$data['area'];
+        $data_ordersup['address']=$data['address'];
+        $data_ordersup['accept_name']=$data['accept_name'];
+        $data_ordersup['phone']=$data['phone'];
+        $data_ordersup['mobile']=$data['mobile'];
+        
+        $data_ordersup['postcode']=$data['postcode'];
+        
+        //单号 
+        $data_ordersup['name']=date('Ymd').substr($time,-8);
         $m=$this->m;
-        $m_info=Db::name('order_goods');
+        $m_info=Db::name('ordersup_goods');
         $m->startTrans();
-        $oid= $m->insertGetId($data_order);
-        //添加订单产品order_goods
+        $oid= $m->insertGetId($data_ordersup);
+        //添加采购单产品ordersup_goods
         $nums=$data['nums'];
-        $store=$data_order['store'];
+        $store=$data_ordersup['store'];
         $goods=array_keys($nums);
         
         //获取所有产品信息
@@ -378,17 +357,17 @@ class AdminOrderController extends AdminInfo0Controller
         ];
         $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale');
         //添加客户用名
-        $where=['uid'=>$data_order['uid'],'goods'=>['in',$goods]];
-        $ugoods=Db::name('custom_goods')->where($where)->column('goods,name,cate');
+        $where=['uid'=>$data_ordersup['uid'],'goods'=>['in',$goods]];
+        $ugoods=Db::name('supplier_goods')->where($where)->column('goods,name,cate');
         
-        $order_goods=[];
-        //标记是否需要拆分订单 
+        $ordersup_goods=[];
+        //标记是否需要拆分采购单 
         foreach($nums as $k=>$v){
             $v=intval($v);
             if($v<=0){
                 $this->error('产品数量错误');
             }
-            $order_goods[$k]=[
+            $ordersup_goods[$k]=[
                 'oid'=>$oid,
                 'goods'=>$k,
                 'num'=>$v, 
@@ -409,75 +388,22 @@ class AdminOrderController extends AdminInfo0Controller
                 'size1'=>bcdiv($data['sizes'][$k],$v,2), 
             ]; 
            
-            if($order_goods[$k]['pay'] != $data['price_counts'][$k]){
+            if($ordersup_goods[$k]['pay'] != $data['price_counts'][$k]){
                 $this->error('产品费用错误');
             } 
         }
-        //检查是否拆分订单
-        $i=0;
-        $orders=$m->order_break($order_goods, $oid,$store,  $data_order['city'],  $data_order['shop']);
-        if(count($orders)==1){
-            $dsc='订单添加成功';
-            
-            $m_info->insertAll($order_goods);
-        }else{
-            $dsc='订单已拆分';
-            //主单号标记
-            $m->where('id',$oid)->update(['is_real'=>2]);
-            //拆分订单要生成子单号
-            foreach($orders as $k=>$v){
-                $i++;
-                
-                $tmp_order=[
-                    'fid'=>$oid,
-                    'name'=>$data_order['name'].'_'.$i,
-                    'store'=>$k, 
-                    'create_time'=>$time,
-                    'aid'=>$admin['id'],
-                    'order_type'=>$data_order['order_type'], 
-                    'shop'=>$data_order['shop'],
-                    'company'=>$data_order['company'],
-                    'uid'=>$data_order['uid'], 
-                    'paytype'=>$data_order['paytype'],
-                    'pay_type'=>$data_order['pay_type'], 
-                    'province'=>$data_order['province'], 
-                    'city'=>$data_order['city'], 
-                    'area'=>$data_order['area'], 
-                    'address'=>$data_order['address'], 
-                    'addressinfo'=>$data_order['addressinfo'], 
-                    'phone'=>$data_order['phone'], 
-                    'mobile'=>$data_order['mobile'], 
-                    'postcode'=>$data_order['postcode'], 
-                    'udsc'=>$data_order['udsc'],
-                    'dsc'=>$data_order['dsc'],
-                    'sort'=>$data_order['sort'],
-                   
-                    'goods_money'=>0, 
-                    'goods_num'=>0, 
-                    'weight'=>0, 
-                    'size'=>0, 
-                ];
-                foreach($v as $kk=>$vv){
-                    $tmp_order['goods_money']+=$vv['pay']; 
-                    $tmp_order['goods_num']+=$vv['num'];
-                    $tmp_order['weight']+=$vv['weight'];
-                    $tmp_order['size']+=$vv['size'];
-                }
-                $tmp_order['order_amount']= $tmp_order['goods_money'];
-                $tmp_oid=$m->insertGetId($tmp_order);
-                foreach($v as $kk=>$vv){
-                    $v[$kk]['oid']=$tmp_oid;
-                }
-                $m_info->insertAll($v);
-            }
-        }
+         
+        $dsc='采购单添加成功';
+        
+        $m_info->insertAll($ordersup_goods);
+        
         //发票信息,要开发票，有抬头的保存
         if(!empty($data['invoice_title']) && !empty($data['invoice_type'])){
             $data_invoice=[
                 'invoice_type'=>$data['invoice_type'],
                 'oid'=>$oid,
-                'oid_type'=>1,
-                'aid'=>$data_order['aid'],
+                
+                'aid'=>$data_ordersup['aid'],
                 'title'=>$data['invoice_title'],
                 'ucode'=>$data['invoice_ucode'],
                 'point'=>$data['invoice_point'],
@@ -488,14 +414,14 @@ class AdminOrderController extends AdminInfo0Controller
                 'company_name'=>$company['name'],
                 'atime'=>$time,
             ];
-            Db::name('order_invoice')->insert($data_invoice);
+            Db::name('ordersup_invoice')->insert($data_invoice);
         }
         //支付信息，有账户名的保存
         if(!empty($data['account_name1']) ){
             $data_pay=[
                 'pay_type'=>1,
                 'oid'=>$oid,
-                'oid_type'=>1, 
+               
                 'bank1'=>$data['account_bank1'],
                 'num1'=>$data['account_num1'],
                 'name1'=>$data['account_name1'],
@@ -506,21 +432,21 @@ class AdminOrderController extends AdminInfo0Controller
                 'location2'=>$data['account_location2'],
                 'money'=>$data['order_amount'], 
             ];
-            Db::name('order_pay')->insert($data_pay);
+            Db::name('ordersup_pay')->insert($data_pay);
         }
         $m->commit();
         $this->success($dsc,url('edit',['id'=>$oid]));
     }
     /**
-     * 订单详情
+     * 采购单详情
      * @adminMenu(
-     *     'name'   => '订单详情',
+     *     'name'   => '采购单详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单详情',
+     *     'remark' => '采购单详情',
      *     'param'  => ''
      * )
      */
@@ -547,13 +473,13 @@ class AdminOrderController extends AdminInfo0Controller
         }
         $this->where_shop=$shop;
         //获取客户信息
-        $custom=Db::name('custom')->where('id',$info['uid'])->find();
-        if(empty($custom)){
+        $supplier=Db::name('supplier')->where('id',$info['uid'])->find();
+        if(empty($supplier)){
             $accounts=null; 
          }else{
              //可选支付账号
              $where=[
-                 'uid'=>$custom['id'],
+                 'uid'=>$supplier['id'],
                  'type'=>1,
              ];
              $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,bank2,name2,num2,location2');
@@ -564,26 +490,26 @@ class AdminOrderController extends AdminInfo0Controller
             'oid'=>$id,
             'oid_type'=>1,
         ];
-        $pay=Db::name('order_pay')->where($where)->find();
+        $pay=Db::name('ordersup_pay')->where($where)->find();
         //发票
         $where=[
             'oid'=>$id,
             'oid_type'=>1,
         ];
-        $invoice=Db::name('order_invoice')->where($where)->find();
+        $invoice=Db::name('ordersup_invoice')->where($where)->find();
          
-        //订单产品
-        $res=$m->order_goods($info,$admin['id']);
+        //采购单产品
+        $res=$m->ordersup_goods($info,$admin['id']);
          
         $this->cates();
         $this->assign('infos',$res['infos']);
-        $this->assign('orders',$res['orders']);
+        $this->assign('ordersups',$res['ordersups']);
         $this->assign('goods',$res['goods']);
         
         $this->assign('info',$info); 
         
         $this->assign('accounts',$accounts);
-        $this->assign('custom',$custom);
+        $this->assign('supplier',$supplier);
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
@@ -591,15 +517,15 @@ class AdminOrderController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 订单编辑
+     * 采购单编辑
      * @adminMenu(
-     *     'name'   => '订单编辑',
+     *     'name'   => '采购单编辑',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单编辑',
+     *     'remark' => '采购单编辑',
      *     'param'  => ''
      * )
      */
@@ -620,7 +546,7 @@ class AdminOrderController extends AdminInfo0Controller
            $this->error('不能编辑其他店铺的信息'); 
         }
          //是否有权查看
-        $res=$m->order_edit_auth($info,$admin);
+        $res=$m->ordersup_edit_auth($info,$admin);
         if($res!==1){
             $this->error($res); 
         }
@@ -638,11 +564,11 @@ class AdminOrderController extends AdminInfo0Controller
         $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
       
         if($info['status']==1){
-            $m->order_edit($info, $data,1);
+            $m->ordersup_edit($info, $data,1);
             
             $this->success('已修改',url('edit',['id'=>$info['id']]));
         }
-        $content=$m->order_edit($info, $data);
+        $content=$m->ordersup_edit($info, $data);
         if(!is_array($content)){
             $this->error($content);
         } 
@@ -663,8 +589,8 @@ class AdminOrderController extends AdminInfo0Controller
             $m_edit->rollback();
             $this->error('保存数据错误，请重试');
         }
-        //订单排序
-        $m->order_sort($info['id']);
+        //采购单排序
+        $m->ordersup_sort($info['id']);
         //记录操作记录
         $data_action=[
             'aid'=>$admin['id'],
@@ -685,15 +611,15 @@ class AdminOrderController extends AdminInfo0Controller
     }
     
     /**
-     * 订单编辑列表
+     * 采购单编辑列表
      * @adminMenu(
-     *     'name'   => '订单编辑列表',
+     *     'name'   => '采购单编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 1,
      *     'icon'   => '',
-     *     'remark' => '订单编辑列表',
+     *     'remark' => '采购单编辑列表',
      *     'param'  => ''
      * )
      */
@@ -703,15 +629,15 @@ class AdminOrderController extends AdminInfo0Controller
         return $this->fetch();
     }
     /**
-     * 订单编辑审核页面
+     * 采购单编辑审核页面
      * @adminMenu(
-     *     'name'   => ' 订单编辑审核页面',
+     *     'name'   => ' 采购单编辑审核页面',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 1,
      *     'icon'   => '',
-     *     'remark' => '订单编辑审核页面',
+     *     'remark' => '采购单编辑审核页面',
      *     'param'  => ''
      * )
      */
@@ -760,14 +686,14 @@ class AdminOrderController extends AdminInfo0Controller
         }
         $this->where_shop=$shop;
         //获取客户信息
-        $custom=Db::name('custom')->where('id',$info['uid'])->find();
+        $supplier=Db::name('supplier')->where('id',$info['uid'])->find();
         if($info['fid']==0){  
-            if(empty($custom)){
+            if(empty($supplier)){
                 $accounts=null;
             }else{
                 //可选支付账号
                 $where=[
-                    'uid'=>$custom['id'],
+                    'uid'=>$supplier['id'],
                     'type'=>1,
                 ];
                 $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,bank2,name2,num2,location2');
@@ -778,24 +704,24 @@ class AdminOrderController extends AdminInfo0Controller
                 'oid'=>$id,
                 'oid_type'=>1,
             ];
-            $pay=Db::name('order_pay')->where($where)->find();
+            $pay=Db::name('ordersup_pay')->where($where)->find();
             //发票
             $where=[
                 'oid'=>$id,
                 'oid_type'=>1,
             ];
-            $invoice=Db::name('order_invoice')->where($where)->find();
+            $invoice=Db::name('ordersup_invoice')->where($where)->find();
          }else{
              $accounts=null;
              $pay=null;
              $invoice=null;
              
          }
-        //订单产品
-         $res=$m->order_goods($info,$admin['id']);
+        //采购单产品
+         $res=$m->ordersup_goods($info,$admin['id']);
         $this->cates(); 
         $this->assign('infos',$res['infos']);
-        $this->assign('orders',$res['orders']);
+        $this->assign('ordersups',$res['ordersups']);
         $this->assign('goods',$res['goods']);
  
         $this->assign('info',$info);
@@ -803,7 +729,7 @@ class AdminOrderController extends AdminInfo0Controller
         $this->assign('change',$change);
        
         $this->assign('accounts',$accounts);
-        $this->assign('custom',$custom);
+        $this->assign('supplier',$supplier);
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
@@ -812,15 +738,15 @@ class AdminOrderController extends AdminInfo0Controller
         
     }
     /**
-     * 订单编辑审核确认
+     * 采购单编辑审核确认
      * @adminMenu(
-     *     'name'   => ' 订单编辑审核确认',
+     *     'name'   => ' 采购单编辑审核确认',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 1,
      *     'icon'   => '',
-     *     'remark' => '订单编辑审核确认',
+     *     'remark' => '采购单编辑审核确认',
      *     'param'  => ''
      * )
      */
@@ -844,7 +770,7 @@ class AdminOrderController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('无效信息');
         }
-        $order=$m->where('id',$info['pid'])->find();
+        $ordersup=$m->where('id',$info['pid'])->find();
         
         if($info['rstatus']!=1){
             $this->error('编辑信息已被审核！不能重复审核');
@@ -887,37 +813,37 @@ class AdminOrderController extends AdminInfo0Controller
             //得到修改的字段
             $change=Db::name('edit_info')->where('eid',$id)->value('content');
             $change=json_decode($change,true);
-            $row=$m->order_edit_review($order, $change);
+            $row=$m->ordersup_edit_review($ordersup, $change);
            
             if($row!==1){
                 $m->rollback();
                 $this->error($row);
             }
             //排序
-            $m->order_sort($order['id']);
+            $m->ordersup_sort($ordersup['id']);
             //判断是否需要出库
             if(isset($change['status'])){
                 switch ($change['status']){
                     case 10:
                     case 20:
-                        //确认订单后添加出库记录
-                        if($order['status']<10){
-                            $row=$m->order_storein0($order['id']);
+                        //确认采购单后添加出库记录
+                        if($ordersup['status']<10){
+                            $row=$m->ordersup_storein0($ordersup['id']);
                         }
                         break;
                     case 22:
-                        //准备发货后更新出库未待审核
-                        if($order['status']==20){
-                            $row=$m->order_storein1($order['id']);
+                        //准备收货后更新出库未待审核
+                        if($ordersup['status']==20){
+                            $row=$m->ordersup_storein1($ordersup['id']);
                         }
                         
                         break;
                     case 24:
-                        //仓库发货要检查出库记录是否都已审核
-                        if($order['status']==22){
-                            $row=$m->order_storein_check($order['id']);
+                        //仓库收货要检查出库记录是否都已审核
+                        if($ordersup['status']==22){
+                            $row=$m->ordersup_storein_check($ordersup['id']);
                         }
-                        if($row!==1 && empty($order['express_no']) && empty($change['express_no'])){
+                        if($row!==1 && empty($ordersup['express_no']) && empty($change['express_no'])){
                             $row='快递单号未填写';
                         }
                         break;
@@ -936,7 +862,7 @@ class AdminOrderController extends AdminInfo0Controller
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$order['name'].'的编辑为'.$review_status[$status],
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$ordersup['name'].'的编辑为'.$review_status[$status],
             'table'=>$table,
             'type'=>'edit_review',
             'pid'=>$info['pid'],
@@ -953,9 +879,10 @@ class AdminOrderController extends AdminInfo0Controller
     //分类
     public function cates($type=3){
         $this->assign('invoice_types',config('invoice_type'));
-        $this->assign('order_types',config('order_type'));
-        $this->assign('statuss',config('order_status'));
+       
+        $this->assign('statuss',config('ordersup_status'));
         $this->assign('pay_status',config('pay_status'));
+        $this->assign('pay_type',config('pay_type'));
        
         //获取产品分类
         $where=[
@@ -974,8 +901,8 @@ class AdminOrderController extends AdminInfo0Controller
         $where=[ 
             'status'=>2,
         ];
-        $custom_cates=Db::name('custom_cate')->where($where)->order('sort asc')->column('id,name');
-        $this->assign('custom_cates',$custom_cates);
+        $supplier_cates=Db::name('supplier_cate')->where($where)->order('sort asc')->column('id,name');
+        $this->assign('supplier_cates',$supplier_cates);
         //付款银行
         $where=[
             'status'=>2,
@@ -991,10 +918,10 @@ class AdminOrderController extends AdminInfo0Controller
         ];
         if($type==3){
             $field='id,name';
-            $order='sort asc';
+            $ordersup='sort asc';
         }else{
             $field='id,name,shop';
-            $order='shop asc,sort asc';
+            $ordersup='shop asc,sort asc';
         }
        
         if(empty($where_shop)){
@@ -1007,11 +934,11 @@ class AdminOrderController extends AdminInfo0Controller
         
        
         //公司
-        $companys=Db::name('company')->where($where)->order($order)->column($field);
+        $companys=Db::name('company')->where($where)->order($ordersup)->column($field);
         //付款方式
-        $paytypes=Db::name('paytype')->where($where)->order($order)->column($field.',type');
+        $paytypes=Db::name('paytype')->where($where)->order($ordersup)->column($field.',type');
         //获取所有仓库
-        $stores=Db::name('store')->where($where)->order($order)->column($field); 
+        $stores=Db::name('store')->where($where)->order($ordersup)->column($field); 
         //获取所有物流方式
         $freights=Db::name('freight')->where($where)->order('shop asc,sort asc,store asc')->column('id,name,shop,store'); 
         //管理员
@@ -1037,185 +964,185 @@ class AdminOrderController extends AdminInfo0Controller
         
     }
     /**
-     * 订单确认
+     * 采购单确认
      * @adminMenu(
-     *     'name'   => '订单确认',
+     *     'name'   => '采购单确认',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单确认',
+     *     'remark' => '采购单确认',
      *     'param'  => ''
      * )
      */ 
     public function status_do2(){
-        $flag='确认订单';
+        $flag='确认采购单';
         $data=$this->request->param();
         $this->status_do($data,2,$flag);
         
     }
     /**
-     * 订单手动转为待发货
+     * 采购单手动转为待收货
      * @adminMenu(
-     *     'name'   => '订单手动转为待发货',
+     *     'name'   => '采购单手动转为待收货',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单手动转为待发货',
+     *     'remark' => '采购单手动转为待收货',
      *     'param'  => ''
      * )
      */ 
     public function status_do10(){
         
-        $flag='将订单手动转为待发货';
+        $flag='将采购单手动转为待收货';
         $data=$this->request->param();
         $this->status_do($data,10,$flag);
         
     }
     /**
-     * 订单准备发货
+     * 采购单准备收货
      * @adminMenu(
-     *     'name'   => '订单准备发货',
+     *     'name'   => '采购单准备收货',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单准备发货',
+     *     'remark' => '采购单准备收货',
      *     'param'  => ''
      * )
      */
     public function status_do20(){
         
-        $flag='准备发货';
+        $flag='准备收货';
         $data=$this->request->param();
         $this->status_do($data,20,$flag);
         
     }
     /**
-     * 订单仓库发货
+     * 采购单仓库收货
      * @adminMenu(
-     *     'name'   => '订单仓库发货',
+     *     'name'   => '采购单仓库收货',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单仓库发货',
+     *     'remark' => '采购单仓库收货',
      *     'param'  => ''
      * )
      */
     public function status_do22(){
         
-        $flag='仓库发货';
+        $flag='仓库收货';
         $data=$this->request->param();
         $this->status_do($data,22,$flag);
         
     }
     /**
-     * 订单确认收货
+     * 采购单确认收货
      * @adminMenu(
-     *     'name'   => '订单确认收货',
+     *     'name'   => '采购单确认收货',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单确认收货',
+     *     'remark' => '采购单确认收货',
      *     'param'  => ''
      * )
      */
     public function status_do24(){
         
-        $flag='订单确认收货';
+        $flag='采购单确认收货';
         $data=$this->request->param();
         $this->status_do($data,24,$flag);
         
     }
     /**
-     * 订单退货
+     * 采购单退货
      * @adminMenu(
-     *     'name'   => '订单退货',
+     *     'name'   => '采购单退货',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单退货',
+     *     'remark' => '采购单退货',
      *     'param'  => ''
      * )
      */
     public function status_do26(){
         
-        $flag='订单退货';
+        $flag='采购单退货';
         $data=$this->request->param();
         $this->status_do($data,26,$flag);
         
     }
     /**
-     * 订单退货
+     * 采购单退货
      * @adminMenu(
-     *     'name'   => '订单退货',
+     *     'name'   => '采购单退货',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单退货',
+     *     'remark' => '采购单退货',
      *     'param'  => ''
      * )
      */
     public function status_do30(){
         
-        $flag='订单退货';
+        $flag='采购单退货';
         $data=$this->request->param();
         $this->status_do($data,30,$flag);
         
     }
     /**
-     * 订单退货完成
+     * 采购单退货完成
      * @adminMenu(
-     *     'name'   => '订单退货完成',
+     *     'name'   => '采购单退货完成',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '订单退货完成',
+     *     'remark' => '采购单退货完成',
      *     'param'  => ''
      * )
      */
     public function status_do40(){
         
-        $flag='订单退货完成';
+        $flag='采购单退货完成';
         $data=$this->request->param();
         $this->status_do($data,40,$flag);
         
     }
     /**
-     * 超管直接修改订单状态
+     * 超管直接修改采购单状态
      * @adminMenu(
-     *     'name'   => '超管直接修改订单状态',
+     *     'name'   => '超管直接修改采购单状态',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '超管直接修改订单状态',
+     *     'remark' => '超管直接修改采购单状态',
      *     'param'  => ''
      * )
      */
     public function status_do0(){
         
-        $flag='超管直接修改订单状态';
+        $flag='超管直接修改采购单状态';
         $data=$this->request->param();
         $this->status_do($data,0,$flag);
         
     }
-    /* 改变订单状态 */
+    /* 改变采购单状态 */
     public function status_do($data,$status,$flag){
         
         
@@ -1235,7 +1162,7 @@ class AdminOrderController extends AdminInfo0Controller
             $this->error('不能编辑其他店铺的信息');
         }
         //是否有权查看
-        $res=$m->order_edit_auth($info,$admin);
+        $res=$m->ordersup_edit_auth($info,$admin);
         if($res!==1){
             $this->error($res);
         }
@@ -1255,13 +1182,13 @@ class AdminOrderController extends AdminInfo0Controller
         if($status>0 && $info['status']!=$status){
             $this->error('状态信息错误');
         }
-        $content=$m->order_edit($info, $data);
+        $content=$m->ordersup_edit($info, $data);
         if(!is_array($content)){
             $this->error($content);
         }
         switch ($status){
             case 2:
-                //判断是先付款后发货还是先发货
+                //判断是先付款后收货还是先收货
                 $pay_type=isset($content['pay_type'])?$content['pay_type']:$info['pay_type'];
                 if($pay_type==1){
                     $content['status']=10;
@@ -1270,29 +1197,29 @@ class AdminOrderController extends AdminInfo0Controller
                 }
                 break;
             case 10:
-                //手动待发货
+                //手动待收货
                 $content['status']=20;
                 break;
             case 20:
-                //准备发货
+                //准备收货
                 $content['status']=22;
                 //检查库存
-                $res=$m->order_store($id);
+                $res=$m->ordersup_store($id);
                 if($res!==1){
                     $this->error($res);
                 }
                 break;
             case 22:
-                //仓库发货
+                //仓库收货
                 $content['status']=24;
                 //检查库存
-                $res=$m->order_store($id);
+                $res=$m->ordersup_store($id);
                 if($res!==1){
                     $this->error($res);
                 }
                 break;
             case 24:
-                // 点击“确认收货”，订单状态为已收货，若已支付，则订单状态为已完成。
+                // 点击“确认收货”，采购单状态为已收货，若已支付，则采购单状态为已完成。
                 $content['status']=($info['pay_status']==3)?30:26;
                 break;
             case 26:
@@ -1350,104 +1277,104 @@ class AdminOrderController extends AdminInfo0Controller
         $this->success('已提交修改');
     }
     /**
-     * 超管直接修改订单支付状态
+     * 超管直接修改采购单支付状态
      * @adminMenu(
-     *     'name'   => '超管直接修改订单支付状态',
+     *     'name'   => '超管直接修改采购单支付状态',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '超管直接修改订单支付状态',
+     *     'remark' => '超管直接修改采购单支付状态',
      *     'param'  => ''
      * )
      */
     public function pay_do0(){
         
-        $flag='超管直接修改订单支付状态';
+        $flag='超管直接修改采购单支付状态';
         $data=$this->request->param();
         $this->pay_do($data,0,$flag);
         
     }
     /**
-     * 用户付款订单
+     * 用户付款采购单
      * @adminMenu(
-     *     'name'   => '用户付款订单',
+     *     'name'   => '用户付款采购单',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '用户付款订单',
+     *     'remark' => '用户付款采购单',
      *     'param'  => ''
      * )
      */
     public function pay_do1(){
         
-        $flag='用户付款订单';
+        $flag='用户付款采购单';
         $data=$this->request->param();
         $this->pay_do($data,1,$flag);
         
     }
     /**
-     * 财务确认订单付款
+     * 财务确认采购单付款
      * @adminMenu(
-     *     'name'   => '财务确认订单付款',
+     *     'name'   => '财务确认采购单付款',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '财务确认订单付款',
+     *     'remark' => '财务确认采购单付款',
      *     'param'  => ''
      * )
      */
     public function pay_do2(){
         
-        $flag='财务确认订单付款';
+        $flag='财务确认采购单付款';
         $data=$this->request->param();
         $this->pay_do($data,2,$flag);
         
     }
     /**
-     * 订单退款
+     * 采购单退款
      * @adminMenu(
-     *     'name'   => '订单退款',
+     *     'name'   => '采购单退款',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
-     *     'icon'   => '订单退款',
+     *     'icon'   => '采购单退款',
      *     'param'  => ''
      * )
      */
     public function pay_do3(){
         
-        $flag='订单退款';
+        $flag='采购单退款';
         $data=$this->request->param();
         $this->pay_do($data,3,$flag);
         
     }
     /**
-     * 订单退款完成
+     * 采购单退款完成
      * @adminMenu(
-     *     'name'   => ' 订单退款完成',
+     *     'name'   => ' 采购单退款完成',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
-     *     'icon'   => ' 订单退款完成',
+     *     'icon'   => ' 采购单退款完成',
      *     'param'  => ''
      * )
      */
     public function pay_do4(){
         
-        $flag=' 订单退款完成';
+        $flag=' 采购单退款完成';
         $data=$this->request->param();
         $this->pay_do($data,4,$flag);
         
     }
-    /* 改变订单支付状态 */
+    /* 改变采购单支付状态 */
     public function pay_do($data,$pay_status,$flag){
         
         
@@ -1468,7 +1395,7 @@ class AdminOrderController extends AdminInfo0Controller
             $this->error('不能编辑其他店铺的信息');
         }
         //是否有权查看
-        $res=$m->order_edit_auth($info,$admin);
+        $res=$m->ordersup_edit_auth($info,$admin);
         if($res!==1){
             $this->error($res);
         }
@@ -1488,7 +1415,7 @@ class AdminOrderController extends AdminInfo0Controller
         if($info['pay_status']!=$pay_status){
             $this->error('状态信息错误');
         }
-        $content=$m->order_edit($info, $data);
+        $content=$m->ordersup_edit($info, $data);
         if(!is_array($content)){
             $this->error($content);
         }
@@ -1498,7 +1425,7 @@ class AdminOrderController extends AdminInfo0Controller
                 $content['pay_status']=2; 
                 break;
             case 2:
-                //财务确认付款,未发货的可以发货了
+                //财务确认付款,未收货的可以收货了
                 $content['pay_status']=3;
                 if($info['status']<20){
                     $content['status']=20;

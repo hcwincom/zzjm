@@ -10,36 +10,31 @@
  		
  		<notempty name="info.id">
 			  <div class="form-group fleft">
-				<label  class="col-sm-2 control-label">订单id</label>
+				<label  class="col-sm-2 control-label">采购单id</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" value="{$info.id}" readonly/>
 				 
 					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">编辑记录</a>
 			 
 				<neq name="info.fid" value="0">
-					&nbsp;&nbsp;<a href="{:url('edit',['id'=>$info.fid])}" target="{$zztarget['edit']}">主订单</a>
+					&nbsp;&nbsp;<a href="{:url('edit',['id'=>$info.fid])}" target="{$zztarget['edit']}">主采购单</a>
 				</neq>
 				</div>
 			</div>
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">订单编号</label>
+				<label  class="col-sm-2 control-label">采购单编号</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control"  value="{$info.name}" readonly/> 
 				</div>
 			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">订单类型</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  value="{$order_types[$info.order_type]}" readonly/> 
-				</div>
-			</div>
+			 
 		</notempty>
 		    
 	   		 <div class="form-group fleft">
-				<label  class="col-sm-2 control-label">订单来源</label>
+				<label  class="col-sm-2 control-label">采购公司</label>
 				<div class="col-md-6 col-sm-10">
 					<select  class="form-control"  name="company" id="order_company" required >
-						<option value="0">订单来源</option>
+						<option value="0">采购公司</option>
 					<foreach name="companys" item="vo">
 						<option value="{$key}" <if condition="$key eq $info.company" >selected</if>>{$vo}</option>
 					</foreach>
@@ -48,61 +43,61 @@
 			</div>
 	 	<empty name="info.id">
 			 <div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">客户筛选</label>
+				<label  class="col-sm-2 control-label">供货商筛选</label>
 				<div class="col-md-6 col-sm-10">
 			 		<select  class="form-control  short-auto" id="company"   >
-						<option value="0">客户来源</option>
+						<option value="0">供货商来源</option>
 					<foreach name="companys" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $supplier.company" >selected</if>>{$vo}</option>
 					</foreach>
 					</select>  
 					 
-					<select  class="form-control short-auto" id="custom_cate"  > 
-						<option value="0">客户分类</option>
-					<foreach name="custom_cates" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.cid"></if>>{$vo}</option>
+					<select  class="form-control short-auto" id="supplier_cate"  > 
+						<option value="0">供货商分类</option>
+					<foreach name="supplier_cates" item="vo">
+						<option value="{$key}" <if condition="$key eq $supplier.cid"></if>>{$vo}</option>
 					</foreach>
 					</select>
 					<select  class="form-control short-auto" id="province"  > 
-						<option value="0">客户所在省</option> 
+						<option value="0">供货商所在省</option> 
 					</select>
 					<select  class="form-control short-auto" id="city"  > 
-						<option value="0">客户所在市</option> 
+						<option value="0">供货商所在市</option> 
 					</select> 
-					<p class="notice">客户所在省为必选项</p>
+					<p class="notice">供货商所在省为必选项</p>
 				</div>
 			</div>
 			 <div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">客户</label>
+				<label  class="col-sm-2 control-label">供货商</label>
 				<div class="col-md-6 col-sm-10"> 
 					 
-					<select  class="form-control " name="uid" id="custom"   >
-						<option value="{$custom.id}" >{$custom.name|default="请选择客户"}</option>
+					<select  class="form-control " name="uid" id="supplier"   >
+						<option value="{$supplier.id}" >{$supplier.name|default="请选择供货商"}</option>
 					</select>
-					<a href="{:url('custom/AdminCustom/edit',['id'=>$custom.id])}" target="{$zztarget['other']}" id="custom_link">客户详情</a>
+					<a href="{:url('custom/AdminSupplier/edit',['id'=>$supplier.id])}" target="{$zztarget['other']}" id="supplier_link">供货商详情</a>
 				</div>
 			</div>
 		<else/>
 		 	<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">客户</label>
+				<label  class="col-sm-2 control-label">供货商</label>
 				<div class="col-md-6 col-sm-10"> 
 					 <select  class="form-control  short-auto" id="company"   >
-						<option value="0">客户来源</option>
+						<option value="0">供货商来源</option>
 					<foreach name="companys" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $supplier.company" >selected</if>>{$vo}</option>
 					</foreach>
 					</select>  
 					 
-					<select  class="form-control short-auto" id="custom_cate"  > 
-						<option value="0">客户分类</option>
-					<foreach name="custom_cates" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.cid"></if>>{$vo}</option>
+					<select  class="form-control short-auto" id="supplier_cate"  > 
+						<option value="0">供货商分类</option>
+					<foreach name="supplier_cates" item="vo">
+						<option value="{$key}" <if condition="$key eq $supplier.cid"></if>>{$vo}</option>
 					</foreach>
 					</select>
-					<select  class="form-control " id="custom"   >
-						<option value="{$custom.id}" >{$custom.name}</option>
+					<select  class="form-control " id="supplier"   >
+						<option value="{$supplier.id}" >{$supplier.name}</option>
 					</select>
-					<a href="{:url('custom/AdminCustom/edit',['id'=>$custom.id])}" target="{$zztarget['other']}" id="custom_link">客户详情</a>
+					<a href="{:url('custom/AdminSupplier/edit',['id'=>$supplier.id])}" target="{$zztarget['other']}" id="supplier_link">供货商详情</a>
 				</div>
 			</div>
 		
@@ -111,10 +106,7 @@
 			 <div class="form-group fleft-all accept">
 				<label  class="col-sm-2 control-label">收货人</label>
 				<div class="col-md-6 col-sm-10">
-				<empty name="info.id">
-					<select  class="form-control " name="accept" id="accept" required >  
-					</select> 
-				<else/>
+				  	<input type="hidden" c name="accept" value="1"/>
 					 <label class="input-inline"> 
 					 	收货人：
 					 	<input type="text" class="form-control short2" name="accept_name" value="{$info.accept_name}"/>
@@ -182,14 +174,14 @@
 					 <present name="change.address">
 				 		<input type="text" class="form-control short2 red"  value="{$change.address}"/>
 				 	</present>
-				</empty>
-				<p class="notice">收货人信息添加后可以再次修改，主订单修改会同步到子订单，子订单可以能单独修改。
-				在主订单页面拆分订单和计算运费以主订单收货地址为准，子订单若有收货地址改变请在子订单页面计算运费。</p> 
+				 
+				<p class="notice">收货人信息添加后可以再次修改，主采购单修改会同步到子采购单，子采购单可以能单独修改。
+				在主采购单页面拆分采购单和计算运费以主采购单收货地址为准，子采购单若有收货地址改变请在子采购单页面计算运费。</p> 
 				</div> 
 			</div>
 		 
 			<div class="form-group fleft-all"  >
-				<label  class="col-sm-2 control-label">用户留言</label>
+				<label  class="col-sm-2 control-label">供货商留言</label>
 				<div class="col-md-6 col-sm-10" > 
 				  <input type="text" class="form-control" name="udsc" value="{$info.udsc}" />
 				<present name="change.udsc">
@@ -198,7 +190,7 @@
 				</div>
 			</div>
 			<div class="form-group fleft-all accept">
-				<label  class="col-sm-2 control-label">订单备注</label>
+				<label  class="col-sm-2 control-label">采购单备注</label>
 				<div class="col-md-6 col-sm-10"> 
 					<input type="text" class="form-control " name="dsc" value="{$info.dsc}" id="dsc"/> 
 				<present name="change.dsc">
@@ -216,9 +208,9 @@
 				<div class="col-md-6 col-sm-10">
 			 
 				 	<label class="input-inline"> 
-						发货仓库： 
+						收货仓库： 
 					 	<select  class="form-control short-auto" name="store" id="store" required > 
-					    	<option value="0">选择发货仓库</option>
+					    	<option value="0">选择仓库</option>
 						<foreach name="stores" item="vo">
 							<option value="{$key}"  >{$vo}</option>
 						</foreach>
@@ -226,9 +218,9 @@
 					 </label>
 					 
 					 <label class="input-inline"> 
-						 发货物流：
+						 物流：
 						 <select  class="form-control freight short-auto" name="freight" id="freight" required > 
-					    	<option value="0">选择发货物流</option>
+					    	<option value="0">选择物流</option>
 						<foreach name="freights" item="vo">
 							<option value="{$key}" class="freight{$vo.store}"  >{$vo.name}</option>
 						</foreach>
@@ -251,8 +243,8 @@
 				 	 <td >产品编码</td> 
 				 	 <td  >产品图片</td> 
 				 	 <td  >总库存</td> 
-				 	  <td >客户用名</td>
-					 <td >客户型号</td> 
+				 	  <td >供货商用名</td>
+					 <td >供货商型号</td> 
 				 	 <td  >成本价</td>
 					 <td >零售价</td> 
 					 <td >供应价</td>
@@ -274,12 +266,12 @@
 			<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
 			  <table class="table table-hover table-bordered table-list goods-list"  > 
 			 	<tr >
-				 	 <td class="order_name"><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.name}</a></td>
+				 	 <td class="order_name"><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">采购单{$vv.name}</a></td>
 				 	 <td >产品编码</td> 
 				 	 <td  >产品图片</td> 
 				 	 <td  >总库存</td> 
-				 	 <td >客户用名</td>
-					 <td >客户型号</td> 
+				 	 <td >供货商用名</td>
+					 <td >供货商型号</td> 
 				 	 <td  >成本价</td>
 					 <td >零售价</td> 
 					 <td >供应价</td>
@@ -408,10 +400,10 @@
 	 		</table> 
 		 
 			 <div class="form-group fleft-all order_pay"  >  
-				<label class="col-sm-2 control-label">订单小计</label>
+				<label class="col-sm-2 control-label">采购单小计</label>
 				<div class="col-md-6 col-sm-10">
 					 <label class="input-inline"> 
-						 发货仓库：
+						 收货仓库：
 						 <select  class="form-control store short-auto" name="store0[{$kk}]"  >
 					    	<option value="0">请选择</option>
 						<foreach name="stores" item="vo">
@@ -461,19 +453,17 @@
 					 </present>
 					</label>
 				 	 <label class="input-inline"> 
-					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" required/> 
+					 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" /> 
 					 <present name="change['edit'][$kk]['pay_freight']">
 					 	<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['pay_freight']}"  />  
 					 </present>
 					</label>
 				 	 <label class="input-inline"> 
-					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight0[{$kk}]" value="{$vv.real_freight}" required/> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight0[{$kk}]" value="{$vv.real_freight}" /> 
 					 <present name="change['edit'][$kk]['real_freight']">
 					 	<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['real_freight']}"  />  
 					 </present>
-					 <empty name="info1">
-					 	<button class="freight_count" type="button">运费计算</button>
-					 </empty>
+					 
 					 </label>
 					 <label class="input-inline">
 					 产品总数量：<input type="text" class="form-control short goods_num"  name="goods_num0[{$kk}]" value="{$vv.goods_num}" readonly/> 
@@ -506,7 +496,7 @@
 					</present>
 					</label>
 				 	 <label class="input-inline">
-					 用户付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
+					 付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
 					 <present name="change['edit'][$kk]['order_amount']">
 						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['order_amount']}" />
 					</present> 
@@ -517,7 +507,8 @@
 					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['express_no']}" />
 				</present> 
 				  <a href="{:url('store/AdminStorein/index',['type'=>10,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
-					   订单备注： 
+				<a href="{:url('ordersup/AdminOrdersup/express_query',['type'=>'ordersup','id'=>$kk])}" target="{$zztarget.other}">查快递</a> 
+					   采购单备注： 
 					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
 				<present name="change['edit'][$kk]['dsc']">
 					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['dsc']}" />
@@ -535,13 +526,13 @@
 			<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
 			  <table class="table table-hover table-bordered table-list goods-list"  > 
 			 	<tr >
-				 	 <td>新拆分订单</td>
+				 	 <td>新拆分采购单</td>
 				 	 <td >产品编码</td> 
 				 	 <td  >产品图片</td> 
 				 	 <td  >总库存</td> 
 				 	  <td  >成本价</td>
-				 	   <td >客户用名</td>
-					 <td >客户型号</td> 
+				 	   <td >供货商用名</td>
+					 <td >供货商型号</td> 
 					 <td >零售价</td> 
 					 <td >供应价</td>
 					 <td >数量</td>
@@ -650,7 +641,7 @@
 	 		</table> 
 		 
 			 <div class="form-group fleft-all order_pay"  >  
-				<label class="col-sm-2 control-label">订单小计</label>
+				<label class="col-sm-2 control-label">采购单小计</label>
 				<div class="col-md-6 col-sm-10">
 					 <label class="input-inline"> 
 						 发货仓库：
@@ -685,11 +676,11 @@
 					 
 					</label>
 				 	 <label class="input-inline"> 
-					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" required/> 
+					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" /> 
 					 
 					</label>
 				 	 <label class="input-inline"> 
-					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight0[{$kk}]" value="{$vv.real_freight}" required/> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight0[{$kk}]" value="{$vv.real_freight}" /> 
 					 
 					 
 					 </label>
@@ -713,7 +704,7 @@
 					  
 				 	</label>
 					 
-					   订单备注： 
+					   采购单备注： 
 					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
 				 
 				</div>
@@ -735,36 +726,49 @@
 			   </p> 
 			   <p class="notice">用户付款=产品总金额+用户支付运费-优惠金额+税费+其它费用。
 			   	计算税费后用户付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后用户付款金额也会改变
-				  订单付款或发货后则不能修改用户付款</p> 
+				  采购单付款或发货后则不能修改用户付款</p> 
 			</div>
 		</div>
  
     <if condition="empty($info1) && !empty($info) && ($info.fid eq 0)">  
 	  <div class="form-group fleft-all "  >
-			<label class="col-sm-2 control-label">订单确认</label>
+			<label class="col-sm-2 control-label">采购单确认</label>
 			<div class="col-md-6 col-sm-10">
-				<button id="break_ok" type="button">订单确认</button>
-			    <p class="notice">拆分订单后点击确认，继续拆分则会产生新订单 </p> 
-			   <p class="notice">订单生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
+				<button id="break_ok" type="button">采购单确认</button>
+			    <p class="notice">拆分采购单后点击确认，继续拆分则会产生新采购单 </p> 
+			   <p class="notice">采购单生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
 			</div>
 		</div>
 	</if>	 
 	  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
 			<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">客户付款和发票</label>
+				<label  class="col-sm-2 control-label">供货商付款和发票</label>
 				<div class="col-md-6 col-sm-10">
 				        付款方式：
 				   <select  class="form-control short-auto" name="paytype" id="paytype"  required >
 				   		<option value="0">请选择</option>
 					<foreach name="paytypes" item="vo">
-						<option value="{$key}" type0="{$vo.type}" <if condition="$key eq $info.paytype">selected</if>>{$vo.name}</option>
+						<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo.name}</option>
 					</foreach>
 					</select> 
-					<input type="hidden" name="pay_type" id="pay_type"/>
-					
+					  
 				 <present name="change.paytype">
 				 	 <select  class="form-control short-auto red" >
-				   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option>
+				   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option> 
+					</select>   
+				 </present>
+				  付款类型：
+				   <select  class="form-control short-auto" name="pay_type" id="pay_type"  required >
+				   		<option value="0">请选择</option>
+					<foreach name="pay_type" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.pay_type">selected</if>>{$vo}</option>
+					</foreach>
+					</select> 
+					 
+					
+				 <present name="change.pay_type">
+				 	 <select  class="form-control short-auto red" >
+				   		<option value="{$change.pay_type}">{$pay_types[$change.pay_type]|default='未知'}</option>
 					 
 					</select>   
 				 </present>
@@ -793,7 +797,7 @@
 					</present> 
 					</label>
 				 	 <label class="input-inline"> 
-					客户税号：<input type="text" class="form-control short-auto" name="invoice_ucode" value="{$invoice.ucode}"/>
+					供货商税号：<input type="text" class="form-control short-auto" name="invoice_ucode" value="{$invoice.ucode}"/>
 					<present name="change.invoice.ucode">
 						<input type="text" class="form-control short-auto red"  value="{$change.invoice.ucode}"/> 
 					</present>
@@ -835,7 +839,7 @@
 		 
 			<div class="form-group fleft-all order_pay" id="order_pay" >
 		 
-				<label class="col-sm-2 control-label">订单总计</label>
+				<label class="col-sm-2 control-label">采购单总计</label>
 				<div class="col-md-6 col-sm-10">
 				 <empty name="info">
 					<label class="input-inline"> 
@@ -849,17 +853,17 @@
 					 <present name="change.size">
 					 	<input type="text" class="form-control short red"  value="{$change.size}"  />  
 					 </present> 
-					 <button id="freight_count" type="button">运费计算</button> 
+					 
 					 </label>
 				 </empty>
 					<label class="input-inline"> 
-					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight" id="pay_freight" value="{$info.pay_freight}" required/> 
+					 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight" id="pay_freight" value="{$info.pay_freight}" /> 
 					 <present name="change.pay_freight">
 					 	<input type="text" class="form-control short red"  value="{$change.pay_freight}"  />  
 					 </present>
 					</label>
 				 	 <label class="input-inline"> 
-					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" id="real_freight" value="{$info.real_freight}" required/> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" id="real_freight" value="{$info.real_freight}" /> 
 					 <present name="change.real_freight">
 					 	<input type="text" class="form-control short red"  value="{$change.real_freight}"  />  
 					 </present> 
@@ -896,7 +900,7 @@
 					</label>
 					 
 				 	 <label class="input-inline"> 
-					 用户总付款：<input type="text" class="form-control short order_amount" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
+					 总付款：<input type="text" class="form-control short order_amount" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
 					 
 					  <present name="change.order_amount">
 						<input type="text" class="form-control short red"  value="{$change.order_amount}"/> 
@@ -908,9 +912,9 @@
 	 
 		  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
 			<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">用户付款</label>
+				<label  class="col-sm-2 control-label">付款</label>
 				<div class="col-md-6 col-sm-10">
-				用户付款账号：
+				付款账号：
 					<select  class="form-control" id="account">
 				    	<option value="0">请选择</option> 
 				    <foreach name="accounts" item="vo">
@@ -997,7 +1001,7 @@
 		</div>
 		 
 		<div class="form-group fleft-all">
-			<label   class="col-sm-2 control-label">订单状态</label>
+			<label   class="col-sm-2 control-label">采购单状态</label>
 			<div class="col-md-6 col-sm-10">
 			 
 			 <foreach name="statuss" item="vo">
@@ -1013,7 +1017,7 @@
 		 <include file="public@adsc_fleft" /> 
 	</notempty> 
 <script>
-//订单是否拆分,不拆分就隐藏总计
+//采购单是否拆分,不拆分就隐藏总计
 var is_real="{$info.is_real|default=1}";
 <present name="change.add">
 is_real=2;
@@ -1080,7 +1084,7 @@ $('#invoice_count').click(function(){
 	$order_div.find('.tax_money').val(invoice_tax_money); 
 	money_count($order_div);
 });
-//订单费用计算
+//采购单费用计算
 function money_count($div){
 	var goods_money=parseFloat($div.find('.goods_money').val());
 	var discount_money=parseFloat($div.find('.discount_money').val());

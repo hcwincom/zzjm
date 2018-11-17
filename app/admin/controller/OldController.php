@@ -905,7 +905,7 @@ class OldController extends AdminBaseController
         4=>'其他',
     ],
      
-        sort专门排序，待发货10，待付款4，，待确认货款5，退货中3，未提交2，其他0
+       //   sort专门排序，待发货10，仓库发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
          */
         //先检查pay_status
         for($i=0;$i<$page;$i++){

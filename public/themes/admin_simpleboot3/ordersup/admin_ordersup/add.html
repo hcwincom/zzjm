@@ -7,14 +7,14 @@
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
 			 
-			 <include file="order@admin_order:base" />
+			 <include file="ordersup@admin_ordersup:base" />
 		 <div style="clear:both"></div>
  
 			 
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-					 <p class="notice">添加订单后需管理员审核后才能生效</p>
+					 <p class="notice">添加采购单后需管理员审核后才能生效</p>
 					 <p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
 				</div>
 			</div>
@@ -43,9 +43,9 @@ var cid=0;
 var province=0;
 var city=0;
  
-var url_custom_get="{:url('order/Orderajax/get_customs')}";
-var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
-var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
+var url_supplier_get="{:url('ordersup/Ordersupajax/get_suppliers')}";
+var url_supplier_info="{:url('ordersup/Ordersupajax/get_supplier_info')}";
+var url_supplier="{:url('custom/AdminSupplier/edit','',false,false)}"+'/id/';
 var arr;
 var store=0; 
 //仓库
@@ -60,44 +60,44 @@ $('#province').change(function(){
 	get_citys($('#city'),province,0);
 	
 	company=$('#company').val();
-	cid=$('#custom_cate').val(); 
+	cid=$('#supplier_cate').val(); 
 	city=0;
-	custom_get(company,cid,province,city);
+	supplier_get(company,cid,province,city);
 });
-$('#company,#custom_cate,#city').change(function(){
+$('#company,#supplier_cate,#city').change(function(){
 	company=$('#company').val();
-	cid=$('#custom_cate').val();
+	cid=$('#supplier_cate').val();
 	province=$('#province').val();
 	city=$('#city').val();
-	custom_get(company,cid,province,city); 
+	supplier_get(company,cid,province,city); 
 });
-function custom_get(company,cid,province,city){
+function supplier_get(company,cid,province,city){
 	if(province==0){
 		return false;
 	}
-	$.post(url_custom_get,{'company':company,'cid':cid,'type':1,'province':province,'city':city},function(data){
+	$.post(url_supplier_get,{'company':company,'cid':cid,'type':1,'province':province,'city':city},function(data){
 		if(data.code!=1){
 			return false;
 		} 
 		var list=data.data;
-		var options='<option value="0">请选择客户</option>';
+		var options='<option value="0">请选择供货商</option>';
 		for(var i in list){
 			options+='<option value="'+i+'" >'+list[i]+'</option>';
 		}
-		$('#custom').html(options); 
+		$('#supplier').html(options); 
 		$('.accept input').val('');
 	},'json');
 }
-$('#custom').change(function(){
-	 var custom=$(this).val();
+$('#supplier').change(function(){
+	 var supplier=$(this).val();
 	 
-	 if(custom==0){ 
-		 $('.accept select').val(0);
-		 $('#custom_link').attr('href',url_custom+custom);
+	 if(supplier==0){ 
+		 
+		 $('#supplier_link').attr('href',url_supplier+supplier);
 		 return false;
 	 } 
-	  $('#custom_link').attr('href',url_custom+custom);
-	 $.post(url_custom_info,{'uid':custom,'type':1},function(data){
+	  $('#supplier_link').attr('href',url_supplier+supplier);
+	 $.post(url_supplier_info,{'uid':supplier,'type':1},function(data){
 			if(data.code!=1){
 				return false;
 			}  
@@ -105,19 +105,6 @@ $('#custom').change(function(){
 			var list=info.tels;
 			var selected=''; 
 			 
-			var options='<option value="0">选择收货人</option>'; 
-			//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
-			for(var i in list){
-				if(info.receiver==i){
-					selected='selected';  
-				}else{
-					selected=''; 
-				} 
-				options+='<option value="'+list[i]['id']+'" city="'+list[i]['city']+'" '+selected+' >'+
-				list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
-				list[i]['province_name']+list[i]['city_name']+list[i]['area_name']+list[i]['street']+','+list[i]['postcode']+'</option>'; 
-			}
-			 $('#accept').html(options); 
 			 $('#freight').val(info.freight);
 			 accept_change(); 
 			 list=info.accounts;
@@ -156,6 +143,7 @@ $('#custom').change(function(){
  
 var url_accept_change="{:url('order/Orderajax/accept_change')}";
 $('#accept').change(function(){
+	return 0;
 	accept_change(); 
 });
 function accept_change(){
@@ -215,9 +203,9 @@ var url_goods_add="{:url('order/Orderajax/goods_add')}";
 var href_goods="{:url('goods/AdminGoods/edit','',false,false)}";
 var image_url="{$image_url}";
 $('#goods_add').click(function(){
-	 var custom=$('#custom').val();
-	 if(!(custom>0)){
-		 $('#custom').focus();
+	 var supplier=$('#supplier').val();
+	 if(!(supplier>0)){
+		 $('#supplier').focus();
 		 return false;
 	 }
 	goods=parseInt($(this).siblings('.goods').val());
@@ -239,7 +227,7 @@ $('#goods_add').click(function(){
         type: 'POST',
         url: url_goods_add,
         dataType: 'json', 
-        data:{'id':goods,'uid':custom},
+        data:{'id':goods,'uid':supplier},
         success: function (data) {
      	    if(data.code!=1){
      	    	msg(data.msg);

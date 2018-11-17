@@ -5,6 +5,7 @@ namespace app\goods\controller;
  
 use cmf\controller\AdminBaseController; 
 use think\Db; 
+use app\goods\model\GoodsModel;
  
 
 class AdminGoodsController extends AdminBaseController
@@ -23,7 +24,8 @@ class AdminGoodsController extends AdminBaseController
     public function _initialize()
     {
         parent::_initialize();
-        $this->m=Db::name('goods');
+//         $this->m=Db::name('goods');
+        $this->m=new GoodsModel();
         $this->flag='产品'; 
         $this->table='goods'; 
         $this->assign('flag',$this->flag);
@@ -388,19 +390,9 @@ class AdminGoodsController extends AdminBaseController
             ->where('p.id','in',$ids)
             ->order('p.status asc,p.time desc')
             ->column('p.*,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname');
-            //只取商城图片
-            $where=[
-                'pid'=>['in',$ids],
-                'type'=>['eq',1],
-            ];
-            $pics=Db::name('goods_file')->where('pid','in',$ids)->column('id,file,pid');
-            $path='upload/';
-            foreach($pics as $k=>$v){ 
-                $list[$v['pid']]['pics'][]=[
-                    'file1'=>$v['file'].'1.jpg',
-                    'file3'=>$v['file'].'3.jpg',
-                ]; 
-            }
+            //取商城图片
+            $list=$m->goods_pics($list);
+            
         }
         
         

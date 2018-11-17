@@ -2,11 +2,18 @@
 <li class="<eq name='html' value='edit_list'>active</eq>"><a href="{:url('edit_list')}">{$flag}编辑列表</a></li>  
 <li class="<eq name='html' value='add'>active</eq>"><a href="{:url('add')}">添加{$flag}</a></li>
 
+ 
 <!-- 轮播点击放大图片 -->
 		<div id="outdiv">
 			<div id="innerdiv">
 				<div id="imgClose">
 					<span class="glyphicon glyphicon-remove-circle"></span>
+				</div>
+				<div id="imgPrev">
+					<span class="glyphicon glyphicon-upload"></span>
+				</div>
+				<div id="imgNext">
+					<span class="glyphicon glyphicon-download"></span>
 				</div>
 				<div id="backBigImg" style="background-size: contain;"></div>
 				<img class="lbigImg" src="" alt="" style="display: none;">

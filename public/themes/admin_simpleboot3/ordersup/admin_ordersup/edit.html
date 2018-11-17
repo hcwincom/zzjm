@@ -9,7 +9,7 @@
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}" id="form-edit">
 			 
-			  <include file="order@admin_order:base" />
+			 <include file="ordersup@admin_ordersup:base" />
 			
 		 
 			<div class="form-group fleft-all">
@@ -19,7 +19,7 @@
 					<button type="submit" action="{:url('edit_do')}" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
 					  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					 <if condition="$info.pay_status eq 1 && $info.status elt 10">
-					 	 <button type="submit" action="{:url('order_abandon')}" class="save btn btn-primary js-ajax-submit" >废弃订单</button>
+					 	 <button type="submit" action="{:url('order_abandon')}" class="save btn btn-primary js-ajax-submit" >废弃采购单</button>
 					 </if>
 				</p>
 				
@@ -61,7 +61,7 @@
 					 </switch> 
 					  
 					  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-					 <button type="submit" action="{:url('status_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改订单状态</button>
+					 <button type="submit" action="{:url('status_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改采购单状态</button>
 					<else/>
 					 	<eq name="info.status" value="2"> 
 						 	<button type="submit" action="{:url('status_do2')}" class="save btn btn-primary js-ajax-submit" >确认下单</button>
@@ -88,23 +88,23 @@
 					 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改支付状态</button>
 					</p>
 			 
-					 <p class="notice">不同仓库发货的必须拆分订单。 已付款和已发货的订单不能再修改，只能拆分订单发货。
-					 <br/>用户在未发货前可以取消订单，管理员在用户未付款且未发货前可以废弃订单 。
-					 <br/>新添加的订单未提交前视为草稿，只有创建人本人可以编辑，编辑即时生效。若要提交订单，先选择订单状态为提交待审核再编辑保存。其他点击按钮均需审核
-					 <br/>订单总费用的更改只能在用户付款和公司发货前修改 。
-					 <br/>子订单是不显示用户付款信息和发票信息的，拆分订单只能到主订单下操作。</p>
-					 <p class="notice">如果要确认订单或发货等操作，请点击对应的按钮，可以在编辑备注里填写信息以便管理员审核。<br/>
-					 点击“确认订单”后订单状态根据付款方式显示为待付款或待发货。 <br/>
-					 点击“用户付款提交”，订单支付状态为付款待确认。<br/>
-					 点击“财务确认付款”，订单支付状态为已确认付款,若订单还未发货，则订单状态为待发货。<br/>
-					 点击“发起退款”，订单支付状态为退款中。<br/>
-					 点击“退款完成”，订单支付状态为退款完成。<br/>
-					  点击“手动转为待发货”，可以强制将未付款的订单改为待发货状态。<br/>
-					 点击“仓库发货”，订单状态为已发货。<br/>
-					 点击“确认收货”，订单状态为已收货，若已支付，则订单状态为已完成。<br/>
-					 点击“退货中”，订单状态为退货中。<br/>
-					 点击“退货完成”，订单状态为退货完成。<br/>
-					 点击“废弃订单”，订单状态为已废弃，不可修改。<br/>
+					 <p class="notice">不同仓库发货的必须拆分采购单。 已付款和已发货的采购单不能再修改，只能拆分采购单发货。
+					 <br/>用户在未发货前可以取消采购单，管理员在用户未付款且未发货前可以废弃采购单 。
+					 <br/>新添加的采购单未提交前视为草稿，只有创建人本人可以编辑，编辑即时生效。若要提交采购单，先选择采购单状态为提交待审核再编辑保存。其他点击按钮均需审核
+					 <br/>采购单总费用的更改只能在用户付款和公司发货前修改 。
+					 <br/>子采购单是不显示用户付款信息和发票信息的，拆分采购单只能到主采购单下操作。</p>
+					 <p class="notice">如果要确认采购单或发货等操作，请点击对应的按钮，可以在编辑备注里填写信息以便管理员审核。<br/>
+					 点击“确认采购单”后采购单状态根据付款方式显示为待付款或待发货。 <br/>
+					 点击“用户付款提交”，采购单支付状态为付款待确认。<br/>
+					 点击“财务确认付款”，采购单支付状态为已确认付款,若采购单还未发货，则采购单状态为待发货。<br/>
+					 点击“发起退款”，采购单支付状态为退款中。<br/>
+					 点击“退款完成”，采购单支付状态为退款完成。<br/>
+					  点击“手动转为待发货”，可以强制将未付款的采购单改为待发货状态。<br/>
+					 点击“仓库发货”，采购单状态为已发货。<br/>
+					 点击“确认收货”，采购单状态为已收货，若已支付，则采购单状态为已完成。<br/>
+					 点击“退货中”，采购单状态为退货中。<br/>
+					 点击“退货完成”，采购单状态为退货完成。<br/>
+					 点击“废弃采购单”，采购单状态为已废弃，不可修改。<br/>
 					 
 					 </p>
 					  
@@ -220,11 +220,11 @@ function tr_change($tr,type='price'){
 	order_change($tr.parents('.order'),type);
 	 
 }
-//一个订单内的计算统计
+//一个采购单内的计算统计
 function order_change($div,type='price'){  
 	price_count=0;
 	num_count=0; 
-	//订单div 
+	//采购单div 
 	$div.find('.pay').each(function(){
 		$tmp_tr=$(this).parents('tr');  
 		num=parseInt($tmp_tr.find('.num input').val()); 
@@ -267,7 +267,7 @@ function order_change($div,type='price'){
 	money_count($div);
 	orders_account();
 }
-//子订单变化触发总订单
+//子采购单变化触发总采购单
 function orders_account(){
 	if(is_real==1){
 		 
@@ -322,7 +322,7 @@ $('.order_break').click(function(){
   		$tmp_tr.find('.num input').focus();
 		return 0;
   	} 
-  	//如果是新拆分要把原订单的name值都改变
+  	//如果是新拆分要把原采购单的name值都改变
 	if(is_real==1){
 		is_real=2;
 		$('#order_pay').show();
@@ -330,7 +330,7 @@ $('.order_break').click(function(){
 		oid=oid-1;
 		$('.order'+oid0).removeClass('order'+oid0).addClass('order'+oid);
 		$('.oid').val(oid);
-		$('.order_name').html('拆分订单'+oid);
+		$('.order_name').html('拆分采购单'+oid);
 		$order_new=$('.order'+oid);
 		$order_new.find('.order_pay .store').attr('name','store0['+oid+']');
 		$order_new.find('.order_pay .freight').attr('name','freight0['+oid+']');
@@ -366,7 +366,7 @@ $('.order_break').click(function(){
 		div='<div class="order order'+oid+'" >'+
 			'<input type="hidden" class="oid" value="'+oid+'" name="oids[]"/>'+
 			'<table class="table table-hover table-bordered table-list goods-list"  ><tr >'+ 
-		 	 '<td>新子订单'+oid+'</td>'+
+		 	 '<td>新子采购单'+oid+'</td>'+
 		 	 '<td width="100">产品编码</td>'+
 		 	 '<td width="100">产品图片</td>'+
 		 	 '<td width="100">总库存</td>'+

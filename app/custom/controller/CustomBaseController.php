@@ -1841,6 +1841,7 @@ class CustomBaseController extends AdminInfo0Controller
        
         if(empty($uids)){
             $list=[];
+            $page=null;
         }else{
             $where_goods['p.uid']=['in',$uids];
             //关联表

@@ -31,7 +31,10 @@ class StoreGoodsModel extends Model
     
     /* 申请入库 */
     function instore0($data){
-         
+        //默认为待审核
+        if(!isset($data['rstatus'])){
+            $data['rstatus']=1;
+        }
         $where=[
             'store'=>['eq',$data['store']],
             'goods'=>['eq',$data['goods']], 
@@ -41,7 +44,7 @@ class StoreGoodsModel extends Model
        
         if($data['num']!=0){
             if($data['num']<0 && (empty($tmp['num']) || abs($data['num'])>$tmp['num']) ){
-                return '没有库存，请选择其他产品或仓库';
+                return '库存不足，请选择其他产品或仓库';
             }
             //入库记录
             Db::name('store_in')->insert($data);
@@ -88,15 +91,21 @@ class StoreGoodsModel extends Model
        
         return 1;
     }
-    /* 确认入库 */
-    public function instore2($goods,$store,$shop,$num,$box=0){
+    /**
+     * 审核同意入库
+     * 
+     * @param array $info 
+     * @param number $box
+     * @return string|number
+     *  */
+    public function instore2($info,$box=0){
         //未选择料位则自动选择
-       $m_box=Db::name('store_box');
+        $m_box=Db::name('store_box');
         if($box==0){
             $where=[
-                'store'=>$store,
-                'goods'=>$goods,
-                'shop'=>$shop,
+                'store'=>$info['store'],
+                'goods'=>$info['goods'],
+                'shop'=>$info['shop'],
                 'status'=>2,
             ];
             $box=$m_box->where($where)->order('sort asc')->value('id');
@@ -109,51 +118,161 @@ class StoreGoodsModel extends Model
             'time'=>time(),
         ];
         $where=[
-            'id'=>$box,
-            'shop'=>$shop,
+            'id'=>$box, 
         ];
         
-        $row=$m_box->where($where)->inc('num',$num)->update($update_info);
+        $row=$m_box->where($where)->inc('num',$info['num'])->update($update_info);
         if($row!==1){ 
             return '料位信息更新失败，请刷新后重试';
         }
+      
         $where=[ 
-            'goods'=>['eq',$goods],
-            'shop'=>['eq',$shop], 
-            'store'=>['in',[0,$store]],
+            'goods'=>$info['goods'],
+            'shop'=>$info['shop'],
+            'store'=>['in',[0,$info['store']]],
         ];
-        //库存判断
-        if($num<0){
-            $where['num']=['egt',abs($num)];
+        //库存判断 //更新仓库和总库存
+        if($info['num']<0){
+            //如num--3，数据库减去负数会出错，转化绝对值
+            $num=abs($info['num']);
+            $where['num']=['egt',$num];
+            $row=$this->where($where)->dec('num',$num)->inc('num1',$num)->update($update_info); 
+        }else{
+            $row=$this->where($where)->inc('num',$info['num'])->dec('num1',$info['num'])->update($update_info); 
         }
-        //更新仓库和总库存
-        $row=$this->where($where)->inc('num',$num)->dec('num1',$num)->update($update_info); 
+         
         if($row===2){
             return 1;
         }else{
-            return '库存信息更新失败，请刷新后重试';
+            return '库存信息更新失败，可能是库存不足';
         }
     }
-    /* 确认不入库 */
-    public function instore3($goods,$store,$shop,$num){
+    
+    
+   /**
+    * 确认不入库
+    * @param array $info 
+    * @return number|string
+    */
+    public function instore3($info){
          
+        //更新料位库存
+        $update_info=[
+            'time'=>time(), 
+        ];
+        if(empty($info['num'])){
+            return 1;
+        }
+        
+        if($info['rstatus']!=1 ){
+            return '入库状态错误';
+        }
+        $where=[
+            'goods'=>['eq',$info['goods']],
+            'shop'=>['eq',$info['shop']],
+            'store'=>['in',[0,$info['store']]],
+        ];
+        
+        //更新仓库和总库存
+        if($info['num']<0){
+            //如num--3，数据库减去负数会出错，转化绝对值
+            $num=abs($info['num']);
+            $row=$this->where($where)->inc('num1',$num)->update($update_info);
+        }else{
+            $row=$this->where($where)->dec('num1',$info['num'])->update($update_info);
+        } 
+        if($row!==2){ 
+            return '库存信息更新失败，请刷新后重试';
+        } 
+        return 1;
+        
+    }
+    /**
+     * 确认废弃
+     * @param array $info
+     * @return number|string
+     */
+    public function instore5($info){
+        
         //更新料位库存
         $update_info=[
             'time'=>time(),
         ];
-        
-        $where=[
-            'goods'=>['eq',$goods],
-            'shop'=>['eq',$shop],
-            'store'=>['in',[0,$store]],
-        ];
-        
-        //更新仓库和总库存
-        $row=$this->where($where)->dec('num1',$num)->update($update_info);
-        if($row===1){
+        if(empty($info['num'])){
             return 1;
+        }
+        
+        if($info['rstatus']==2){
+            return '不能废弃已审核出库记录';
+        }
+        //已废弃和审核不通过的不用更新库存了
+        if($info['rstatus']==3 || $info['rstatus']==5){
+            return 1;
+        }
+        $where=[
+            'goods'=>['eq',$info['goods']],
+            'shop'=>['eq',$info['shop']],
+            'store'=>['in',[0,$info['store']]],
+        ]; 
+        //更新仓库和总库存
+        if($info['num']<0){
+            //如num--3，数据库减去负数会出错，转化绝对值
+            $num=abs($info['num']);
+            $row=$this->where($where)->inc('num1',$num)->update($update_info);
         }else{
+            $row=$this->where($where)->dec('num1',$info['num'])->update($update_info);
+        } 
+       
+        if($row!==2){
             return '库存信息更新失败，请刷新后重试';
         }
+        
+        return 1;
+        
     }
+    /**
+     * 还原已审核出入库
+     * @param array $info
+     * @return number|string
+     */
+    public function instore_back($info){
+        
+        //更新料位库存
+        $update_info=[
+            'time'=>time(),
+        ];
+        if(empty($info['num'])){
+            return 1;
+        }
+         
+        $where=[
+            'goods'=>['eq',$info['goods']],
+            'shop'=>['eq',$info['shop']],
+            'store'=>['in',[0,$info['store']]],
+        ];
+        
+        //更新仓库和总库存,已通过的要把库存还原
+        if($info['rstatus']==2){
+            if($info['num']<0){
+                $num=abs($info['num']);
+                $row=$this->where($where)->inc('num',$num)->dec('num1',$num)->update($update_info);
+                //料位还要还原
+                Db::name('store_box')->where('id',$num)->inc('num',$num)->update($update_info);
+            }else{
+                $row=$this->where($where)->dec('num',$info['num'])->inc('num1',$info['num'])->update($update_info);
+                //料位还要还原
+                Db::name('store_box')->where('id',$info['box'])->dec('num',$info['num'])->update($update_info);
+            } 
+        }elseif($info['rstatus']==3){
+            $row=$this->where($where)->inc('num1',$info['num'])->update($update_info);
+        }else{
+            return '只能还原审核通过和审核不通过的记录';
+        }
+       
+        if($row!==2){
+            return '库存信息更新失败，请刷新后重试';
+        } 
+        return 1; 
+    }
+    
 }

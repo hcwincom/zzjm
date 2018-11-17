@@ -17,15 +17,17 @@
 			<div class="form-group fleft">
 				<label for=" " class="col-sm-2 control-label">入库类型</label>
 				<div class="col-md-6 col-sm-10">  
-					<input type="text" class="form-control"  value="{$about_type[$info['type']]|default='未知'}"  />
+					<input type="text" class="form-control"  value="{$about_type[$info['type']][0]}"  />
 				</div>
 			</div> 
 			<div class="form-group fleft">
 				<label for=" " class="col-sm-2 control-label">关联id</label>
 				<div class="col-md-6 col-sm-10">  
 					<input type="text" class="form-control"  value="{$info.about}"  />
+					<a href="{$about_type[$info['type']][1]}/id/{$info.about}" target="{$zztarget.other}">{$info.about_name}</a>
 				</div>
 			</div> 
+			 
 			<div class="form-group fleft">
 				<label for=" " class="col-sm-2 control-label">仓库</label>
 				<div class="col-md-6 col-sm-10">  
@@ -124,8 +126,12 @@
 			</div> 
 		 <div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10"> 
-				 <eq name="info.rstatus" value="1">
+				<eq name="info.rstatus" value="1">
 					<button type="submit" class="review btn btn-primary js-ajax-submit" >确认保存</button>
+				<else/>
+					<lt name="info.rstatus" value="4">
+					<button type="submit" class="review_back btn btn-primary js-ajax-submit" >还原已审核数据</button>
+					</lt>
 				</eq> 
 				</div>
 				
@@ -140,9 +146,14 @@
  $('.review').click(function(){
 	 var status=$('.rstatus input:checked').val();
 	 if(status=='1'){ 
+		 $('.rstatus input').eq(0).focus();
 		 return false;
 	 } 
 	 $(this).parents('form').attr('action',"{:url('review')}");
+ });
+ $('.review_back').click(function(){
+	 
+	 $(this).parents('form').attr('action',"{:url('review_back')}");
  });
  </script>
  

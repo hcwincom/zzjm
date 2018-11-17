@@ -11,6 +11,34 @@ class GoodsModel extends Model
      * @param $goods_ids产品id
      * @param $shop店铺
      * @param $field产品信息字段
+     */
+    public function goods_pics($goods){
+        $goods_ids=array_keys($goods);
+         
+        //获取产品图片
+        $where=[
+            'pid'=>['in',$goods_ids],
+            'type'=>['eq',1],
+        ];
+        $pics=Db::name('goods_file')->where($where)->column('id,pid,file');
+        if(!empty($pics)){
+            foreach($pics as $k=>$v){
+                if(!isset($goods[$v['pid']]['pics'])){
+                    $goods[$v['pid']]['pics']=[];
+                }
+                $goods[$v['pid']]['pics'][]=[
+                    'file1'=>$v['file'].'1.jpg',
+                    'file3'=>$v['file'].'3.jpg',
+                ];
+            }
+        }
+        return $goods;
+    }
+    /**
+     * 获取产品的图片，库存
+     * @param $goods_ids产品id
+     * @param $shop店铺
+     * @param $field产品信息字段
      */ 
     public function goods_infos($goods_ids,$shop,$field='id,name,pic,code'){
        
