@@ -33,6 +33,10 @@ $('form').submit(function(){
 		$('#paytype').focus();
 		return false;
 	}
+	if($('#store').val()=='0'){
+		$('#store').focus();
+		return false;
+	}
 	
 	return true;
 });
@@ -97,7 +101,7 @@ $('#supplier').change(function(){
 		 return false;
 	 } 
 	  $('#supplier_link').attr('href',url_supplier+supplier);
-	 $.post(url_supplier_info,{'uid':supplier,'type':1},function(data){
+	 $.post(url_supplier_info,{'uid':supplier},function(data){
 			if(data.code!=1){
 				return false;
 			}  
@@ -106,7 +110,14 @@ $('#supplier').change(function(){
 			var selected=''; 
 			 
 			 $('#freight').val(info.freight);
-			 accept_change(); 
+			 list=info.ugoods;
+			 options=''; 
+			for(var k in list){ 
+				options+='<option value="'+list[k]['goods']+'" >'+
+				list[k]['goods']+'--'+list[k]['cate']+'--'+list[k]['name']+'</option>'; 
+			}
+			 $('#goods').html(options); 
+			 
 			 list=info.accounts;
 			  options='<option value="0">选择付款账号</option>'; 
 			 for(var j in list){
@@ -128,6 +139,7 @@ $('#supplier').change(function(){
 				list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
 			}
 			 $('#account').html(options); 
+			 
 			 account_change(); 
 			 $('#dsc').val(info.announcement);
 			 $('#invoice_type').val(info.invoice_type); 
@@ -208,11 +220,8 @@ $('#goods_add').click(function(){
 		 $('#supplier').focus();
 		 return false;
 	 }
-	goods=parseInt($(this).siblings('.goods').val());
-	store=$('#store').val();
-	if(!(goods>0)){
-		return false;
-	}
+	goods=parseInt($('#goods').val());
+	 
 	$('#goods-list tr').each(function(){
 		if($(this).attr('id')==('goods'+goods)){
 			goods=0;
@@ -450,16 +459,6 @@ $('#freight_count').click(function(){
         }
     }); 
 });
-$('#paytype').change(function(){
-	paytype_change();
-	 
-});
-function paytype_change(){
-	if(($('#paytype').val())==0){  
-		return false;
-	} 
-	$('#pay_type').val($('#paytype option:selected').attr('type0'));
-}
 
 $('#discount_money,#other_money,#pay_freight,#tax_money').change(function(){
 	order_account();

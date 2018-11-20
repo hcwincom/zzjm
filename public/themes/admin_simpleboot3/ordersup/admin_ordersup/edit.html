@@ -14,32 +14,35 @@
 		 
 			<div class="form-group fleft-all">
 				<div class="col-sm-offset-2 col-sm-10"> 
-				 <p>
+				 <p>  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 				 <input type="hidden"  name="id" value="{$info.id}" />
 					<button type="submit" action="{:url('edit_do')}" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
-					  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+					
 					 <if condition="$info.pay_status eq 1 && $info.status elt 10">
+					   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					 	 <button type="submit" action="{:url('order_abandon')}" class="save btn btn-primary js-ajax-submit" >废弃采购单</button>
 					 </if>
 				</p>
 				
-					<p>
+					<p> 
 					<eq name="info.is_real" value="1">
+					<eq name="info.order_type" value="1">
+					 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					   <switch name="info.status">
 					   
 						 <case value="2">
 						 	<button type="submit" action="{:url('status_do2')}" class="save btn btn-primary js-ajax-submit" >确认下单</button>
 						 </case>
 						 <case value="10"> 
-						 	<button type="submit" action="{:url('status_do10')}" class="save btn btn-primary js-ajax-submit" >手动转为待发货</button>
+						 	<button type="submit" action="{:url('status_do10')}" class="save btn btn-primary js-ajax-submit" >手动转为待收货</button>
 						 	 
 						 </case>
 						  <case value="20"> 
-						 	<button type="submit" action="{:url('status_do20')}" class="save btn btn-primary js-ajax-submit" >准备发货</button>
+						 	<button type="submit" action="{:url('status_do20')}" class="save btn btn-primary js-ajax-submit" >准备收货</button>
 						 	 
 						 </case>
 						  <case value="22"> 
-						 	<button type="submit" action="{:url('status_do22')}" class="save btn btn-primary js-ajax-submit" >仓库发货</button>
+						 	<button type="submit" action="{:url('status_do22')}" class="save btn btn-primary js-ajax-submit" >仓库收货</button>
 						 	 
 						 </case>
 						  <case value="24"> 
@@ -60,19 +63,21 @@
 						 </case>
 					 </switch> 
 					  
-					  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					 <button type="submit" action="{:url('status_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改采购单状态</button>
 					<else/>
 					 	<eq name="info.status" value="2"> 
+					 	 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 						 	<button type="submit" action="{:url('status_do2')}" class="save btn btn-primary js-ajax-submit" >确认下单</button>
 						 </eq>
 					</eq>
+					</eq>
 					</p>
 			 			
-					<p>
+					<p>  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					  <switch name="info.pay_status">
 						 <case value="1">
-						 	<button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >用户付款提交</button> 
+						 	<button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >付款提交</button> 
 						 </case>
 						 <case value="2">
 						 	<button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >财务确认付款</button>
@@ -88,19 +93,19 @@
 					 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改支付状态</button>
 					</p>
 			 
-					 <p class="notice">不同仓库发货的必须拆分采购单。 已付款和已发货的采购单不能再修改，只能拆分采购单发货。
-					 <br/>用户在未发货前可以取消采购单，管理员在用户未付款且未发货前可以废弃采购单 。
+					 <p class="notice">不同仓库收货的必须拆分采购单。 已付款和已收货的采购单不能再修改，只能拆分采购单收货。
+					 <br/>用户在未收货前可以取消采购单，管理员在用户未付款且未收货前可以废弃采购单 。
 					 <br/>新添加的采购单未提交前视为草稿，只有创建人本人可以编辑，编辑即时生效。若要提交采购单，先选择采购单状态为提交待审核再编辑保存。其他点击按钮均需审核
-					 <br/>采购单总费用的更改只能在用户付款和公司发货前修改 。
-					 <br/>子采购单是不显示用户付款信息和发票信息的，拆分采购单只能到主采购单下操作。</p>
-					 <p class="notice">如果要确认采购单或发货等操作，请点击对应的按钮，可以在编辑备注里填写信息以便管理员审核。<br/>
-					 点击“确认采购单”后采购单状态根据付款方式显示为待付款或待发货。 <br/>
-					 点击“用户付款提交”，采购单支付状态为付款待确认。<br/>
-					 点击“财务确认付款”，采购单支付状态为已确认付款,若采购单还未发货，则采购单状态为待发货。<br/>
+					 <br/>采购单总费用的更改只能在付款和公司收货前修改 。
+					 <br/>子采购单是不显示付款信息和发票信息的，拆分采购单只能到主采购单下操作。</p>
+					 <p class="notice">如果要确认采购单或收货等操作，请点击对应的按钮，可以在编辑备注里填写信息以便管理员审核。<br/>
+					 点击“确认采购单”后采购单状态根据付款方式显示为待付款或待收货。 <br/>
+					 点击“付款提交”，采购单支付状态为付款待确认。<br/>
+					 点击“财务确认付款”，采购单支付状态为已确认付款,若采购单还未收货，则采购单状态为待收货。<br/>
 					 点击“发起退款”，采购单支付状态为退款中。<br/>
 					 点击“退款完成”，采购单支付状态为退款完成。<br/>
-					  点击“手动转为待发货”，可以强制将未付款的采购单改为待发货状态。<br/>
-					 点击“仓库发货”，采购单状态为已发货。<br/>
+					  点击“手动转为待收货”，可以强制将未付款的采购单改为待收货状态。<br/>
+					 点击“仓库收货”，采购单状态为已收货。<br/>
 					 点击“确认收货”，采购单状态为已收货，若已支付，则采购单状态为已完成。<br/>
 					 点击“退货中”，采购单状态为退货中。<br/>
 					 点击“退货完成”，采购单状态为退货完成。<br/>
@@ -150,11 +155,11 @@ $(document).on('click','.freight_count',function(){
 	var weight=$div.find('.order_weight').val();
 	var size=$div.find('.order_size').val();
 	if(!(store>0)){
-		msg('先选择发货仓库');
+		msg('先选择收货仓库');
 		return false;
 	}
 	if(!(freight>0)){
-		msg('先选择合作快递公司');
+		msg('先选择快递公司');
 		return false;
 	} 
 	if(!(weight>0) || !(size>0)){

@@ -921,6 +921,18 @@ class AdminOrderController extends AdminInfo0Controller
                             $row='快递单号未填写';
                         }
                         break;
+                    case 81:
+                        //废弃
+                        if($order['pay_status']>2 || $order['status']>22){
+                            $row='订单状态错误';
+                        }else{
+                            $row=$m->order_storein5($order['id']);
+                        }
+                       
+                       
+                       
+                        
+                        break;
                         
                 }
                 if($row!==1){
@@ -956,6 +968,7 @@ class AdminOrderController extends AdminInfo0Controller
         $this->assign('order_types',config('order_type'));
         $this->assign('statuss',config('order_status'));
         $this->assign('pay_status',config('pay_status'));
+        $this->assign('pay_types',config('pay_type'));
        
         //获取产品分类
         $where=[
@@ -1009,7 +1022,7 @@ class AdminOrderController extends AdminInfo0Controller
         //公司
         $companys=Db::name('company')->where($where)->order($order)->column($field);
         //付款方式
-        $paytypes=Db::name('paytype')->where($where)->order($order)->column($field.',type');
+        $paytypes=Db::name('paytype')->where($where)->order($order)->column($field);
         //获取所有仓库
         $stores=Db::name('store')->where($where)->order($order)->column($field); 
         //获取所有物流方式
@@ -1485,7 +1498,7 @@ class AdminOrderController extends AdminInfo0Controller
         ];
         $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
         
-        if($info['pay_status']!=$pay_status){
+        if($pay_status!=0 && $info['pay_status']!=$pay_status){
             $this->error('状态信息错误');
         }
         $content=$m->order_edit($info, $data);
@@ -1521,6 +1534,97 @@ class AdminOrderController extends AdminInfo0Controller
         }
         
         
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $this->success('已提交修改');
+    }
+    
+    /**
+     * 废弃
+     * @adminMenu(
+     *     'name'   => '废弃订单',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '废弃订单',
+     *     'param'  => ''
+     * )
+     */
+    public function order_abandon(){
+         
+        $flag='废弃订单';
+        $data=$this->request->param();
+        
+        $m=$this->m;
+        $table=$this->table;
+        
+        $id=intval($data['id']);
+        
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能编辑其他店铺的信息');
+        }
+        //是否有权查看
+        $res=$m->order_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res);
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
+        //只有未发货且未付款的才能废弃
+        if($info['status']>22 || $info['pay_status']>2){
+            $this->error('只有未发货且未付款的才能废弃');
+        }
+        $content=[
+            'status'=>81, 
+        ];
         //保存更改
         $m_edit=Db::name('edit');
         $m_edit->startTrans();

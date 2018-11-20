@@ -511,13 +511,26 @@
 						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['order_amount']}" />
 					</present> 
 				 	</label>
-					   快递单号： 
-					<input type="text" class="form-control short2 express_no" name="express_no0[{$kk}]" value="{$vv.express_no}" /> 
-				<present name="change['edit'][$kk]['express_no']">
-					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['express_no']}" />
-				</present> 
-				  <a href="{:url('store/AdminStorein/index',['type'=>10,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
-					   订单备注： 
+					  <label class="input-inline">
+					 付款状态：
+					 <input type="text" class="form-control short" value=" {$pay_status[$vv.pay_status]|default='未知'}" readonly/> 
+					 
+				 	</label>
+				 	 <label class="input-inline">
+				 	   订单状态：<input type="text" class="form-control short" value="{$statuss[$vv.status]|default='未知'}" readonly/> 
+					  
+				 	</label>
+				 	<label class="input-inline">
+						快递单号： 
+						<input type="text" class="form-control short2 express_no" name="express_no0[{$kk}]" value="{$vv.express_no}" /> 
+					<present name="change['edit'][$kk]['express_no']">
+						<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['express_no']}" />
+					</present> 
+					</label>
+					<a href="{:url('express/AdminFreight/express_query',['freight'=>$vv.freight,'no'=>$vv.express_no])}" target="{$zztarget.other}">查快递</a> 
+				 	&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="{:url('store/AdminStorein/index',['type'=>1,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
+				   	订单备注：  
 					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
 				<present name="change['edit'][$kk]['dsc']">
 					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['dsc']}" />
@@ -757,14 +770,27 @@
 				   <select  class="form-control short-auto" name="paytype" id="paytype"  required >
 				   		<option value="0">请选择</option>
 					<foreach name="paytypes" item="vo">
-						<option value="{$key}" type0="{$vo.type}" <if condition="$key eq $info.paytype">selected</if>>{$vo.name}</option>
+						<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
 					</foreach>
 					</select> 
-					<input type="hidden" name="pay_type" id="pay_type"/>
+					 
 					
 				 <present name="change.paytype">
 				 	 <select  class="form-control short-auto red" >
 				   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option>
+					 
+					</select>   
+				 </present>
+				  货款结算方式：
+				   <select  class="form-control short-auto" name="pay_type" id="pay_type"   > 
+					<foreach name="pay_types" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.pay_type">selected</if>>{$vo}</option>
+					</foreach>
+					</select>  
+					
+				 <present name="change.pay_type">
+				 	 <select  class="form-control short-auto red" >
+				   		<option value="{$change.pay_type}">{$pay_types[$change.pay_type]|default='未知'}</option>
 					 
 					</select>   
 				 </present>

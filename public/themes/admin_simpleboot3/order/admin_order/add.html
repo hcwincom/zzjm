@@ -462,16 +462,7 @@ $('#freight_count').click(function(){
         }
     }); 
 });
-$('#paytype').change(function(){
-	paytype_change();
-	 
-});
-function paytype_change(){
-	if(($('#paytype').val())==0){  
-		return false;
-	} 
-	$('#pay_type').val($('#paytype option:selected').attr('type0'));
-}
+ 
 
 $('#discount_money,#other_money,#pay_freight,#tax_money').change(function(){
 	order_account();

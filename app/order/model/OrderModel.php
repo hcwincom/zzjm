@@ -161,7 +161,7 @@ class OrderModel extends Model
          $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode',];
           
          //总订单信息系
-         $edit_fid0=['company','udsc','paytype','invoice_type'];
+         $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type'];
          //组装需要判断的字段,普通订单未拆分的不比较总订单信息
          if($info['fid']==0){
              $fields=array_merge($edit_accept,$edit_fid0);
@@ -326,13 +326,7 @@ class OrderModel extends Model
                  } 
              }
          }
-         //改变了付款方式要检查
-         if(isset($content['paytype'])){
-             $content['pay_type']=Db::name('paytype')->where('id',$content['paytype'])->value('type');
-             if(empty($content['pay_type'])){
-                 return '付款方式错误';
-             }
-         }
+         
          if($is_do==1){
              if($info['status']==1 && $data['status']==2){
                  $content['status']=2;
@@ -364,7 +358,7 @@ class OrderModel extends Model
          $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','status','pay_status'];
          
          //总订单信息系，子订单不能单独修改，总订单修改后同步到子订单
-         $edit_fid0=['company','udsc','paytype','pay_type','invoice_type'];
+         $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type'];
          //记录有订单拆分，需要废弃原出入库的订单id,重新添加
          $instore_oids=[];
          //新添加订单号
@@ -563,6 +557,7 @@ class OrderModel extends Model
          $where=[
              'oid'=>$order['id'],
              'aid'=>$admin['id'],
+             'type'=>1,5
          ];
          $tmp=Db::name('order_aid')->where($where)->find();
          if(!empty($tmp)){
@@ -710,7 +705,7 @@ class OrderModel extends Model
      /**
       *  订单准备发货后，出库记录可审核 */
      public function order_storein1($id){
-         //在store_goods表中num1数值减少
+         
          $order=$this->where('id',$id)->find();
          $order=$order->data;
          if($order['status']!=22){
@@ -720,28 +715,25 @@ class OrderModel extends Model
              return '已拆分订单请在子订单页面发货';
          }
           
-         $m_store_goods=new StoreGoodsModel();
+         //出入库记录要变为待审核
          $where=[
              'type'=>10,
              'about'=>$id,
              'rstatus'=>4,
          ];
-         $update=[
-             'adsc'=>'订单准备发货',
+         $update=[ 
              'rstatus'=>1,
          ];
-         $m_store_goods->where($where)->update($update);
+         Db::name('store_in')->where($where)->update($update);
          return 1;
      }
      /**
       *  订单确认发货要检查出库记录是否都已审核 */
      public function order_storein_check($id){
-         //在store_goods表中num1数值减少
+        
          $order=$this->where('id',$id)->find();
          $order=$order->data;
-         if($order['status']!=24){
-             return '订单状态错误';
-         }
+         
          if($order['is_real']!=1){
              return '已拆分订单请在子订单页面发货';
          }
@@ -765,13 +757,11 @@ class OrderModel extends Model
          
      }
      /* 订单改变后废弃原出库记录 */
-     public function order_storein5($id){
-         //在store_goods表中num1数值减少
+     public function order_storein5($id,$dsc='订单变化，废弃原出入库'){
+        
          $order=$this->where('id',$id)->find();
          $order=$order->data;
-         if($order['status']<10 || $order['status']>20){
-             return '订单状态错误';
-         }
+         
          //订单产品
          $where_about=['type'=>10];
          
@@ -788,6 +778,7 @@ class OrderModel extends Model
          }
          $in_ids=array_keys($instores);
          $m_store_goods=new StoreGoodsModel();
+         //一个个地废弃
          foreach($instores as $k=>$v){
              $res=$m_store_goods->instore5($v);
              if($res!==1){
@@ -797,7 +788,7 @@ class OrderModel extends Model
          $update_info=[
              'rstatus'=>5,
              'time'=>time(),
-             'rdsc'=>'订单变化，废弃原出入库',
+             'rdsc'=>$dsc,
              'rid'=>session('ADMIN_ID'),
          ];
          Db::name('store_in')->where('id','in',$in_ids)->update($update_info);
@@ -821,7 +812,7 @@ class OrderModel extends Model
              $orders=[$info['id']=>$info];
          }else{
              $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
-                 ',real_freight,other_money,tax_money,order_amount,dsc,express_no';
+                 ',real_freight,other_money,tax_money,order_amount,dsc,express_no,status,pay_status';
              $orders=$this->where('fid',$info['id'])->column($fields);
              
              $order_ids=array_keys($orders);

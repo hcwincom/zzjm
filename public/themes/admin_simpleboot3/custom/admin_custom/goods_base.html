@@ -39,6 +39,7 @@
 		  <td >单位</td> 
 		 
 		 <td >包装说明/备注</td>  
+		 
 		 <td >排序</td> 
 		 <td width="100">操作</td> 
 	</tr> 
@@ -89,6 +90,7 @@
 		 </td> 
 		 <td>{$vgoods.price_sale}</td>
 		 <input type="hidden" name="num[{$key}]" value="{$vo.num}"/>
+		 <input type="hidden" name="url[{$key}]" value="{$vo.url}"/>
 		 <td>
 		 	<input type="text" class="form-control" name="price[{$key}]" value="{$vo.price}"/>
 		 <present name="change['edit'][$key]['price']">

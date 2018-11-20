@@ -279,7 +279,7 @@ class AdminOrdersupController extends AdminInfo0Controller
         $data=$this->request->param();
        
         $fields_int=[
-           'uid','store','freight','paytype','pay_type','goods_num',
+           'uid','store','paytype','pay_type','goods_num',
         ];
         foreach($fields_int as $v){
             $data[$v]=intval($data[$v]);
@@ -301,7 +301,7 @@ class AdminOrdersupController extends AdminInfo0Controller
         $admin=$this->admin;
         $time=time();
         $data_ordersup=[
-            'ordersup_type'=>1,
+            'order_type'=>1,
             'aid'=>$admin['id'],
             'shop'=>($admin['shop']==1)?2:$admin['shop'],
             'company'=>$data['company'],
@@ -503,7 +503,7 @@ class AdminOrdersupController extends AdminInfo0Controller
          
         $this->cates();
         $this->assign('infos',$res['infos']);
-        $this->assign('ordersups',$res['ordersups']);
+        $this->assign('orders',$res['orders']);
         $this->assign('goods',$res['goods']);
         
         $this->assign('info',$info); 
@@ -567,7 +567,7 @@ class AdminOrdersupController extends AdminInfo0Controller
             $m->ordersup_edit($info, $data,1);
             
             $this->success('已修改',url('edit',['id'=>$info['id']]));
-        }
+        } 
         $content=$m->ordersup_edit($info, $data);
         if(!is_array($content)){
             $this->error($content);
@@ -721,7 +721,7 @@ class AdminOrdersupController extends AdminInfo0Controller
          $res=$m->ordersup_goods($info,$admin['id']);
         $this->cates(); 
         $this->assign('infos',$res['infos']);
-        $this->assign('ordersups',$res['ordersups']);
+        $this->assign('orders',$res['orders']);
         $this->assign('goods',$res['goods']);
  
         $this->assign('info',$info);
@@ -882,8 +882,9 @@ class AdminOrdersupController extends AdminInfo0Controller
        
         $this->assign('statuss',config('ordersup_status'));
         $this->assign('pay_status',config('pay_status'));
-        $this->assign('pay_type',config('pay_type'));
-       
+        
+        $this->assign('pay_types',config('pay_type'));
+        $this->assign('order_types',config('ordersup_type'));
         //获取产品分类
         $where=[
             'fid'=>0,
@@ -936,7 +937,7 @@ class AdminOrdersupController extends AdminInfo0Controller
         //公司
         $companys=Db::name('company')->where($where)->order($ordersup)->column($field);
         //付款方式
-        $paytypes=Db::name('paytype')->where($where)->order($ordersup)->column($field.',type');
+        $paytypes=Db::name('paytype')->where($where)->order($ordersup)->column($field);
         //获取所有仓库
         $stores=Db::name('store')->where($where)->order($ordersup)->column($field); 
         //获取所有物流方式
@@ -1480,5 +1481,21 @@ class AdminOrdersupController extends AdminInfo0Controller
         
         $m_edit->commit();
         $this->success('已提交修改');
+    }
+    /**
+     * 快递查询
+     * @adminMenu(
+     *     'name'   => ' 快递查询',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 20,
+     *     'icon'   => '快递查询',
+     *     'param'  => ''
+     * )
+     */
+    public function express_query(){
+        $id=$this->request->param('id');
+        
     }
 }

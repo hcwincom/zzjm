@@ -231,7 +231,9 @@
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">添加产品</label>
 				<div class="col-md-6 col-sm-10">
-				   <include file="public@cate_goods0" />  
+				   <select id="goods">
+				   
+				   </select>
 					 <button type="button" id="goods_add">确定</button>
 				 
 				</div>
@@ -439,7 +441,24 @@
 						</select>
 						</present>
 					 </label>
-					 
+					   <label class="input-inline"> 
+						 采购单类型：
+						 <select  class="form-control freight short-auto" name="order_type0[{$kk}]"  >
+					    	 
+						<foreach name="order_types" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.order_type">selected</if>>{$vo}</option>
+						</foreach>
+						</select> 
+						
+						 <present name="change['edit'][$kk]['order_type']">
+						 <select  class="form-control short-auto red"  > 
+						<foreach name="order_types" item="vo">
+							<option value="{$key}" <if condition="$key eq $change['edit'][$kk]['order_type']">selected</if>>{$vo}</option>
+						</foreach>
+						</select>
+						</present>
+						
+					 </label>
 				    <label class="input-inline"> 
 					 包装总重：<input type="text" class="form-control short order_weight" name="weight0[{$kk}]" value="{$vv.weight}" required/> 
 					 <present name="change['edit'][$kk]['weight']" >
@@ -501,14 +520,26 @@
 						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['order_amount']}" />
 					</present> 
 				 	</label>
-					   快递单号： 
-					<input type="text" class="form-control short2 express_no" name="express_no0[{$kk}]" value="{$vv.express_no}" /> 
-				<present name="change['edit'][$kk]['express_no']">
-					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['express_no']}" />
-				</present> 
-				  <a href="{:url('store/AdminStorein/index',['type'=>10,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
-				<a href="{:url('ordersup/AdminOrdersup/express_query',['type'=>'ordersup','id'=>$kk])}" target="{$zztarget.other}">查快递</a> 
-					   采购单备注： 
+				 	 <label class="input-inline">
+					 付款状态：
+					 <input type="text" class="form-control short" value=" {$pay_status[$vv.pay_status]|default='未知'}" readonly/> 
+					 
+				 	</label>
+				 	 <label class="input-inline">
+				 	   采购单状态：<input type="text" class="form-control short" value="{$statuss[$vv.status]|default='未知'}" readonly/> 
+					  
+				 	</label>
+				 	<label class="input-inline">
+						   快递单号： 
+						<input type="text" class="form-control short2 express_no" name="express_no0[{$kk}]" value="{$vv.express_no}" /> 
+					<present name="change['edit'][$kk]['express_no']">
+						<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['express_no']}" />
+					</present> 
+					</label>
+					<a href="{:url('express/AdminFreight/express_query',['freight'=>$vv.freight,'no'=>$vv.express_no])}" target="{$zztarget.other}">查快递</a> 
+				 	&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="{:url('store/AdminStorein/index',['type'=>1,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
+				   	采购单备注： 
 					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
 				<present name="change['edit'][$kk]['dsc']">
 					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['dsc']}" />
@@ -662,9 +693,16 @@
 						<foreach name="freights" item="vo">
 							<option value="{$key}" class="freight{$vo.store}" <if condition="$key eq $vv.store">selected</if>>{$vo.name}</option>
 						</foreach>
-						</select>
-						 
-					 
+						</select> 
+					 </label>
+					  <label class="input-inline"> 
+						 采购单类型：
+						 <select  class="form-control freight short-auto" name="order_type0[{$kk}]"  >
+					    	 
+						<foreach name="order_types" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.order_type">selected</if>>{$vo}</option>
+						</foreach>
+						</select> 
 					 </label>
 					 
 				    <label class="input-inline"> 
@@ -676,7 +714,7 @@
 					 
 					</label>
 				 	 <label class="input-inline"> 
-					 用户支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" /> 
+					 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" /> 
 					 
 					</label>
 				 	 <label class="input-inline"> 
@@ -700,7 +738,7 @@
 					 其它费用：<input type="text" class="form-control short other_money"  name="other_money0[{$kk}]" value="{$vv.other_money}" /> 
 					</label>
 				 	 <label class="input-inline">
-					 用户付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
+					 付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
 					  
 				 	</label>
 					 
@@ -720,22 +758,19 @@
 	 	<div class="form-group fleft-all "  >
 			<label class="col-sm-2 control-label">费用计算说明</label>
 			<div class="col-md-6 col-sm-10">
-			    <p class="notice">运费计算根据最终的包装总体积、总重和预先指定的快递规则计算。
-					   若快递规则未设置请到配送管理->店铺合作快递中添加快递或给已有快递设置关联仓库，然后再联系人和付款中添加快递区域和对应的费用。
-					   运费计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费 。
-			   </p> 
-			   <p class="notice">用户付款=产品总金额+用户支付运费-优惠金额+税费+其它费用。
-			   	计算税费后用户付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后用户付款金额也会改变
-				  采购单付款或发货后则不能修改用户付款</p> 
+			    
+			   <p class="notice">付款=产品总金额+支付运费-优惠金额+税费+其它费用。
+			   	计算税费后付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后付款金额也会改变
+				  采购单付款或发货后则不能修改付款</p> 
 			</div>
 		</div>
  
     <if condition="empty($info1) && !empty($info) && ($info.fid eq 0)">  
 	  <div class="form-group fleft-all "  >
-			<label class="col-sm-2 control-label">采购单确认</label>
+			<label class="col-sm-2 control-label">采购单拆分确认</label>
 			<div class="col-md-6 col-sm-10">
 				<button id="break_ok" type="button">采购单确认</button>
-			    <p class="notice">拆分采购单后点击确认，继续拆分则会产生新采购单 </p> 
+			    <p class="notice">采购单拆分后点击确认，继续拆分则会产生新采购单 </p> 
 			   <p class="notice">采购单生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
 			</div>
 		</div>
@@ -748,7 +783,7 @@
 				   <select  class="form-control short-auto" name="paytype" id="paytype"  required >
 				   		<option value="0">请选择</option>
 					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo.name}</option>
+						<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
 					</foreach>
 					</select> 
 					  
@@ -757,15 +792,13 @@
 				   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option> 
 					</select>   
 				 </present>
-				  付款类型：
-				   <select  class="form-control short-auto" name="pay_type" id="pay_type"  required >
-				   		<option value="0">请选择</option>
-					<foreach name="pay_type" item="vo">
+				   货款结算方式：
+				   <select  class="form-control short-auto" name="pay_type" id="pay_type"   > 
+					<foreach name="pay_types" item="vo">
 						<option value="{$key}" <if condition="$key eq $info.pay_type">selected</if>>{$vo}</option>
 					</foreach>
-					</select> 
-					 
-					
+					</select>  
+				  
 				 <present name="change.pay_type">
 				 	 <select  class="form-control short-auto red" >
 				   		<option value="{$change.pay_type}">{$pay_types[$change.pay_type]|default='未知'}</option>
@@ -797,7 +830,7 @@
 					</present> 
 					</label>
 				 	 <label class="input-inline"> 
-					供货商税号：<input type="text" class="form-control short-auto" name="invoice_ucode" value="{$invoice.ucode}"/>
+					税号：<input type="text" class="form-control short-auto" name="invoice_ucode" value="{$invoice.ucode}"/>
 					<present name="change.invoice.ucode">
 						<input type="text" class="form-control short-auto red"  value="{$change.invoice.ucode}"/> 
 					</present>
@@ -830,7 +863,7 @@
 						<input type="text" class="form-control red"  value="{$change.invoice.dsc}"/> 
 					</present>
 					   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息；
-					   开票金额为空则自动计算开票金额，(产品总金额-优惠金额+其他费用+用户支付运费)*(1+税点/100)；
+					   开票金额为空则自动计算开票金额，(产品总金额-优惠金额+其他费用+支付运费)*(1+税点/100)；
 					   开票税费为开票金额*	(税点/100)/(1+税点/100)													
 					   </p>  
 				</div>

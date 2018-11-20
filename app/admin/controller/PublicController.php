@@ -250,5 +250,10 @@ class PublicController extends AdminBaseController
         $city=Db::name('area')->field('id,name,code,postcode,fid')->where($where)->find();
         $this->success('ok','',['name'=>$city['name'],'city_code'=>$city['code'],'postcode'=>$city['postcode'],'fid'=>$city['fid']]);
     }
-   
+   /* 查快递 */
+    public function express_query(){
+        $freight=$this->request->param('freight',0,'intval');
+        $no=$this->request->param('no');
+        $code=Db::name('');
+    }
 }

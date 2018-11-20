@@ -16,7 +16,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         //没有店铺区分
         $this->isshop=1;
-        $this->edit=['name','company','cid','city_code','code_num','postcode','paytype',
+        $this->edit=['name','company','cid','city_code','code_num','postcode','paytype','pay_type',
             'email','mobile','level','url','shopurl','wechat','qq','fax',
             'province','city','area','street','other','announcement','invoice_type',
             'tax_point','freight','payer','dsc','sort',
@@ -182,22 +182,16 @@ class CustomBaseController extends AdminInfo0Controller
         }
  
         //先查询得到id再关联得到数据，否则sql查询太慢
-        $list=$m
-        ->alias('p')
-        ->field('p.id')
+        $ids=$m
+        ->alias('p') 
         ->join('cmf_tel tels','p.id=tels.uid and tels.type='.$tel_type,'left')
-        ->where($where) 
+        ->where($where)  
         ->order('p.status asc,p.sort asc,p.time desc')
-        ->paginate();
-        // 获取分页显示
-        $page = $list->appends($data)->render();
-        $ids=[];
-        foreach($list as $k=>$v){
-            $ids[$v['id']]=$v['id'];
-        }
-       
+        ->column('p.id');
+        
         if(empty($ids)){
             $list=[];
+            $page=null;
         }else{
             //关联表
             $join=[
@@ -214,8 +208,9 @@ class CustomBaseController extends AdminInfo0Controller
             ->field($field)
             ->join($join)
             ->where('p.id','in',$ids)
-            ->order('p.status asc,p.sort asc,p.time desc')
-            ->select(); 
+            ->order('p.status asc,p.sort asc,p.id desc')
+            ->paginate();
+            $page = $list->appends($data)->render();
         }
        
         $this->assign('page',$page);
@@ -919,6 +914,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes);
+        $this->assign('pay_types',config('pay_type'));
          
         $this->assign('cates',$cates);
       
@@ -1406,7 +1402,7 @@ class CustomBaseController extends AdminInfo0Controller
         } 
         $ugoods=$m_ugoods->where('uid',$id)->order('sort asc')->column('*','goods');
         //比较记录的字段
-        $fields=['price','name','cate','dsc','sort','num'];
+        $fields=['price','name','cate','dsc','sort','num','url'];
         //记录数据id,最后用来比较是否有删除
         $data_ids=[];
         //循环所有变量

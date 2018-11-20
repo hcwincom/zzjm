@@ -26,7 +26,7 @@
 				</div>
 			</div>
 			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">付款类型</label>
+				<label for="" class="col-sm-2 control-label">付款方式</label>
 				<div class="col-md-6 col-sm-10">
 				<select name="paytype" id="paytype"  class=" form-control"  required> 
 						<option value="0">未选择</option>
@@ -37,6 +37,22 @@
 				<present name='change.paytype'>
 				 	<select class="red form-control"  >  
 						<option value="{$change.paytype}"  >{$paytypes[$change.paytype]|default='不存在'}</option> 
+					</select>
+				 </present>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">付款类型</label>
+				<div class="col-md-6 col-sm-10">
+				<select name="pay_type" id="pay_type"  class=" form-control"  required> 
+						<option value="0">未选择</option>
+					<foreach name="pay_types" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.pay_type">selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				<present name='change.pay_type'>
+				 	<select class="red form-control"  >
+						<option value="{$change.pay_type}"  >{$pay_types[$change.pay_type]|default='不存在'}</option> 
 					</select>
 				 </present>
 				</div>
@@ -60,7 +76,7 @@
 			<div class="form-group">
 				<label for="" class="col-sm-2 control-label">公司代码</label>
 				<div class="col-md-6 col-sm-10">
-					 <input type="text" class="form-control" name="code" value="{$info.code}" required/>
+					 <input type="text" class="form-control" name="code" value="{$info.code}" />
 				 <present name='change.code'>
 				 	<input type="text" class="red form-control" value="{$change.code}" />
 				 </present>

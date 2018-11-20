@@ -213,7 +213,7 @@
 			</div>
 			<div style="clear:both"></div>
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">客户付款类型</label>
+				<label  class="col-sm-2 control-label">付款类型</label>
 				<div class="col-md-6 col-sm-10">
 				   <select  class="form-control" name="paytype" id="" required>
 				   		<option value="0">请选择</option>
@@ -226,6 +226,25 @@
 				   		<option value="0">请选择</option>
 					<foreach name="paytypes" item="vo">
 						<option value="{$key}" <if condition="$key eq $change.paytype" >selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">货款结算类型</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control" name="pay_type" id="" required>
+				   		<option value="0">请选择</option>
+					<foreach name="pay_types" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.pay_type" >selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				<present name="change.pay_type">
+					<select  class="form-control red"  >
+				   		<option value="0">请选择</option>
+					<foreach name="pay_types" item="vo">
+						<option value="{$key}" <if condition="$key eq $change.pay_type" >selected</if>>{$vo}</option>
 					</foreach>
 					</select>
 				</present>

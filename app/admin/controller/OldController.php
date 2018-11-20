@@ -520,40 +520,59 @@ class OldController extends AdminBaseController
         $m_tel=Db::name('tel');
         $m_account=Db::name('account');
         $data_user=[];
-        
+        $time=time();
         foreach($data as $k=>$v){
             if(empty($v['name'])){
                 continue;
             }
+            
             //组装数据
             $tmp=[
                 'id'=>$v['id'],
                 'name'=>$v['name'],
                 'company'=>intval($v['khly']),
                 'cid'=>intval($v['customcate_id']),
-                'city_code'=>$v['khqh'],
+                'city_code'=>intval($v['khqh']),
                 'code_num'=>intval($v['khbh']), 
                 'paytype'=>intval($v['suppaytype_id']),
-                'email'=>$v['email'],
-                'mobile'=>$v['mobile'], 
+                'email'=>empty($v['email'])?'':$v['email'],
+                'mobile'=>empty($v['phone'])?'':$v['phone'],
                 'level'=>intval($v['level']),
-                'url'=>$v['url'],
-                'shopurl'=>$v['shopurl'],
-                'wechat'=>$v['wechat'],
-                'qq'=>$v['qq'],
-                'fax'=>$v['fax'],
+                'url'=>empty($v['url'])?'':$v['url'],
+                'shopurl'=>empty($v['shopurl'])?'':$v['shopurl'],
+                'wechat'=>empty($v['wechat'])?'':$v['wechat'],
+                'qq'=>empty($v['qq'])?'':$v['qq'],
+                'fax'=>empty($v['fax'])?'':$v['fax'],
                 'province'=>intval($v['province']),
                 'city'=>intval($v['city']),
                 'area'=>intval($v['area']),
-                'street'=>$v['street'],
-                'other'=>$v['other'],
-                'announcement'=>$v['announcement'],
+                'street'=>empty($v['street'])?'':$v['street'],
+                'other'=>empty($v['other'])?'':$v['other'],
+                'announcement'=>empty($v['announcement'])?'':$v['announcement'],
                 'invoice_type'=>intval($v['invoice_type']),
-                'tax_point'=>$v['tax_point'],
-                'freight'=>intval($v['freight']), 
-                'atime'=>$v['addtime'],
+                'tax_point'=>round($v['tax_point'],2),
+                'dsc'=>empty($v['remark'])?'':$v['remark'],
+                'atime'=>intval($v['addtime']),
+                'status'=>2,
+                'aid'=>1,
+                'rid'=>1,
+                'rtime'=>$time,
             ];
-           
+           switch ($tmp['paytype']){ 
+               case 2:
+                   $tmp['pay_type']=3;
+                   break;
+               case 10:
+               case 11:
+                   $tmp['pay_type']=2;
+                   break;
+               case 12:
+                   $tmp['pay_type']=4;
+                   break;
+               default:
+                   $tmp['pay_type']=1;
+                   break;
+           }
             //客户编号
             $tmp['code']='KF-'.
                 str_pad($tmp['city_code'], 4,'0',STR_PAD_LEFT).'-'.
@@ -661,7 +680,7 @@ class OldController extends AdminBaseController
         $m_new=Db::name('custom');
         $m_new->execute('truncate table cmf_custom');  
         $m_new->insertAll($data_user);
-        $m_new->where($this->where_corrects)->update($correct);
+        
         $m_new->commit();
         $this->success('已同步数据数'.$row_mew);
         exit;
@@ -692,7 +711,7 @@ class OldController extends AdminBaseController
         $m_tel=Db::name('tel');
         $m_account=Db::name('account');
         $data_user=[];
-        
+        $time=time();
         foreach($data as $k=>$v){
             if(empty($v['name'])){
                 continue;
@@ -706,27 +725,46 @@ class OldController extends AdminBaseController
                 'code_num'=>intval($v['nummm']),
                 'code'=>$v['supcode'],
                 'paytype'=>intval($v['suppaytype_id']),
-                'email'=>$v['email'],
-                'mobile'=>$v['phone'],
+                'email'=>empty($v['email'])?'':$v['email'],
+                'mobile'=>empty($v['phone'])?'':$v['phone'],
                 'level'=>intval($v['level']),
-                'url'=>$v['url'],
-                'shopurl'=>$v['shopurl'],
-                'wechat'=>$v['wechat'],
-                'qq'=>$v['qq'],
-                'fax'=>$v['fax'],
+                'url'=>empty($v['url'])?'':$v['url'],
+                'shopurl'=>empty($v['shopurl'])?'':$v['shopurl'],
+                'wechat'=>empty($v['wechat'])?'':$v['wechat'],
+                'qq'=>empty($v['qq'])?'':$v['qq'],
+                'fax'=>empty($v['fax'])?'':$v['fax'],
                 'province'=>intval($v['province_id']),
                 'city'=>intval($v['city_id']),
                 'area'=>intval($v['area_id']),
-                'street'=>$v['street'],
-                'other'=>$v['other'],
-                'announcement'=>$v['announcement'],
+                'street'=>empty($v['street'])?'':$v['street'],
+                'other'=>empty($v['other'])?'':$v['other'],
+                'announcement'=>empty($v['announcement'])?'':$v['announcement'],
                 'invoice_type'=>intval($v['invoice_type']),
-                'tax_point'=>$v['tax_point'],  
+                'tax_point'=>round($v['tax_point'],2),  
                 'dsc'=>$v['remark'].'退货地址'.$v['backdz'], 
-                'atime'=>$v['addtime'],
+                'atime'=>intval($v['addtime']),
+                'status'=>2,
+                'aid'=>1,
+                'rid'=>1,
+                'rtime'=>$time,
             ];
+            switch ($tmp['paytype']){
+                case 2:
+                    $tmp['pay_type']=3;
+                    break;
+                case 10:
+                case 11:
+                    $tmp['pay_type']=2;
+                    break;
+                case 12:
+                    $tmp['pay_type']=4;
+                    break;
+                default:
+                    $tmp['pay_type']=1;
+                    break;
+            }
+            //编号,供货商编号不重编
             
-            //客户编号
             
             $i=1;
             $receiver=1;

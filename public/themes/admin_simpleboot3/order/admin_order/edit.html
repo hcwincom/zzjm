@@ -16,14 +16,15 @@
 				<div class="col-sm-offset-2 col-sm-10"> 
 				 <p>
 				 <input type="hidden"  name="id" value="{$info.id}" />
+				   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					<button type="submit" action="{:url('edit_do')}" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
 					  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-					 <if condition="$info.pay_status eq 1 && $info.status elt 10">
+					 <if condition="$info.pay_status elt 2 && $info.status elt 22">
 					 	 <button type="submit" action="{:url('order_abandon')}" class="save btn btn-primary js-ajax-submit" >废弃订单</button>
 					 </if>
 				</p>
 				
-					<p>
+					<p>  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					<eq name="info.is_real" value="1">
 					   <switch name="info.status">
 					   
@@ -59,8 +60,7 @@
 						 	 
 						 </case>
 					 </switch> 
-					  
-					  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+					    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					 <button type="submit" action="{:url('status_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改订单状态</button>
 					<else/>
 					 	<eq name="info.status" value="2"> 
@@ -68,8 +68,8 @@
 						 </eq>
 					</eq>
 					</p>
-			 			
-					<p>
+			 	<lt name="info.status" value="80">
+					<p>  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					  <switch name="info.pay_status">
 						 <case value="1">
 						 	<button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >用户付款提交</button> 
@@ -84,16 +84,17 @@
 						 	<button type="submit" action="{:url('pay_do4')}" class="save btn btn-primary js-ajax-submit" >退款完成</button>
 						 </case>
 					 </switch> 
-					 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+				   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改支付状态</button>
 					</p>
-			 
+			 	</lt>
 					 <p class="notice">不同仓库发货的必须拆分订单。 已付款和已发货的订单不能再修改，只能拆分订单发货。
 					 <br/>用户在未发货前可以取消订单，管理员在用户未付款且未发货前可以废弃订单 。
 					 <br/>新添加的订单未提交前视为草稿，只有创建人本人可以编辑，编辑即时生效。若要提交订单，先选择订单状态为提交待审核再编辑保存。其他点击按钮均需审核
 					 <br/>订单总费用的更改只能在用户付款和公司发货前修改 。
 					 <br/>子订单是不显示用户付款信息和发票信息的，拆分订单只能到主订单下操作。</p>
 					 <p class="notice">如果要确认订单或发货等操作，请点击对应的按钮，可以在编辑备注里填写信息以便管理员审核。<br/>
+					只有未出库且未确认付款的订单才能废弃。 <br/>
 					 点击“确认订单”后订单状态根据付款方式显示为待付款或待发货。 <br/>
 					 点击“用户付款提交”，订单支付状态为付款待确认。<br/>
 					 点击“财务确认付款”，订单支付状态为已确认付款,若订单还未发货，则订单状态为待发货。<br/>

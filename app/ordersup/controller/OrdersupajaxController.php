@@ -92,8 +92,7 @@ class OrdersupajaxController extends AdminBase0Controller
         $company=$this->request->param('company',0,'intval');
         $province=$this->request->param('province',0,'intval');
         $city=$this->request->param('city',0,'intval');
-        $type=$this->request->param('type',1,'intval');
-       
+        
         $m=Db::name('supplier');
        
         $where=[
@@ -120,7 +119,7 @@ class OrdersupajaxController extends AdminBase0Controller
     public function get_supplier_info(){
         $admin=$this->admin;
         $uid=$this->request->param('uid',0,'intval');
-        
+        $type=2;
         $where_supplier=['id'=>$uid];
         $where=[
             'p.uid'=>$uid,
@@ -134,7 +133,7 @@ class OrdersupajaxController extends AdminBase0Controller
         //付款方式,发票信息
          $m=Db::name('supplier');
         
-        $field='invoice_type,tax_point,freight,announcement,paytype,receiver,payer';
+        $field='invoice_type,tax_point,freight,announcement,paytype,pay_type,receiver,payer';
         $info=$m->field($field)->where($where_supplier)->find();
          
         //支付账号
@@ -144,6 +143,8 @@ class OrdersupajaxController extends AdminBase0Controller
         ->where($where)
         ->order('p.site asc')
         ->column('p.*','p.site');
+        //供应产品 
+        $info['ugoods']=Db::name('supplier_goods')->where('uid',$uid)->column('goods,name,cate');
         
         $this->success('ok','',$info);
     }

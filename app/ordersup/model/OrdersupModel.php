@@ -32,7 +32,7 @@ class OrdersupModel extends Model
         ->field('ff.price0')
         ->join('cmf_express_area ea','ea.city='.$city.' and ea.area=ff.expressarea')
         ->where('ff.freight','in',$freights)
-        ->ordersup('ff.price0 asc')
+        ->order('ff.price0 asc')
         ->column('ff.freight');
         if(empty($fees)){
             return 0;
@@ -56,15 +56,15 @@ class OrdersupModel extends Model
          $content=[];
          //检测改变了哪些字段 
          //所有采购单都有,但只有虚拟采购单会记录,真实采购单在子采购单里记录
-         $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
-             'goods_num','goods_money','discount_money','tax_money','other_money','ordersup_amount','express_no'
+         $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight','order_type',
+             'goods_num','goods_money','discount_money','tax_money','other_money','order_amount','express_no'
              
          ];
          //收货信息，子采购单可以单独修改，总采购单修改后同步到子采购单
          $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode',];
           
          //总采购单信息系
-         $edit_fid0=['company','udsc','paytype','invoice_type'];
+         $edit_fid0=['company','udsc','paytype','invoice_type','pay_type'];
          //组装需要判断的字段,普通采购单未拆分的不比较总采购单信息
          if($info['fid']==0){
              $fields=array_merge($edit_accept,$edit_fid0);
@@ -146,14 +146,14 @@ class OrdersupModel extends Model
          $where_goods=[];
          if($info['is_real']==1 ){
              $where_goods['oid']=['eq',$info['id']];
-             $ordersups=[$info['id']=>$info];
+             $orders=[$info['id']=>$info];
              $ordersup_ids=[$info['id']];
          }else{
              $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
-                 ',real_freight,other_money,tax_money,ordersup_amount,dsc';
-             $ordersups=$this->where('fid',$info['id'])->column($fields);
+                 ',real_freight,other_money,tax_money,order_amount,dsc';
+             $orders=$this->where('fid',$info['id'])->column($fields);
              
-             $ordersup_ids=array_keys($ordersups);
+             $ordersup_ids=array_keys($orders);
              
              $where_goods['oid']=['in',$ordersup_ids];
          }
@@ -171,7 +171,7 @@ class OrdersupModel extends Model
          //子采购单nums-{$kk}[{$key}],只有在主采购单下才能拆分采购单
          
          /*  $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
-          'goods_num','goods_money','discount_money','tax_money','other_money','ordersup_amount',
+          'goods_num','goods_money','discount_money','tax_money','other_money','order_amount',
           ]; */
          $edit_goods=['num','pay','weight','size','dsc','price_real'];
         
@@ -181,7 +181,7 @@ class OrdersupModel extends Model
              if(in_array($void,$ordersup_ids)){
                  //编辑采购单信息
                  foreach($edit_base as $kk=>$vv){
-                     if($ordersups[$void][$vv]!=$data[$vv.'0'][$void]){
+                     if($orders[$void][$vv]!=$data[$vv.'0'][$void]){
                          $content['edit'][$void][$vv]=$data[$vv.'0'][$void];
                      }
                      
@@ -229,13 +229,7 @@ class OrdersupModel extends Model
                  } 
              }
          }
-         //改变了付款方式要检查
-         if(isset($content['paytype'])){
-             $content['pay_type']=Db::name('paytype')->where('id',$content['paytype'])->value('type');
-             if(empty($content['pay_type'])){
-                 return '付款方式错误';
-             }
-         }
+         
          if($is_do==1){
              if($info['status']==1 && $data['status']==2){
                  $content['status']=2;
@@ -252,15 +246,15 @@ class OrdersupModel extends Model
      {
          //获取采购单状态信息
          if($ordersup['is_real']==1 ){ 
-             $ordersups=[$ordersup['id']=>$ordersup]; 
+             $orders=[$ordersup['id']=>$ordersup]; 
          }else{ 
-             $ordersups=$this->where('fid',$ordersup['id'])->column('id,is_real,pay_status,status,sort');
-             $ordersups[$ordersup['id']]=$ordersup; 
+             $orders=$this->where('fid',$ordersup['id'])->column('id,is_real,pay_status,status,sort');
+             $orders[$ordersup['id']]=$ordersup; 
          }
          $time=time();
          $m_ogoods=Db::name('ordersup_goods');
-         $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
-             'goods_num','goods_money','discount_money','tax_money','other_money','ordersup_amount','express_no'
+         $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight','order_type',
+             'goods_num','goods_money','discount_money','tax_money','other_money','order_amount','express_no'
              
          ];
          //收货信息，状态信息，子采购单可以单独修改，总采购单修改后同步到子采购单
@@ -319,7 +313,7 @@ class OrdersupModel extends Model
                  //采购单信息,状态待定,跟随主采购单
                  $tmp++; 
                  $data_ordersup=[
-                     'ordersup_type'=>$ordersup['ordersup_type'],
+                     'order_type'=>$ordersup['order_type'],
                      'aid'=>$ordersup['aid'],
                      'shop'=>$ordersup['shop'],
                      'company'=>$ordersup['company'],
@@ -408,7 +402,7 @@ class OrdersupModel extends Model
          
          
           
-         //检查库存,删除旧出库，添加新出库
+         //检查库存,删除旧入库，添加新入库
          if(!empty($instore_oids)){
              //有产品数量变化的  
              $instore_oids=array_unique($instore_oids);
@@ -466,8 +460,9 @@ class OrdersupModel extends Model
          $where=[
              'oid'=>$ordersup['id'],
              'aid'=>$admin['id'],
+             'type'=>2,
          ];
-         $tmp=Db::name('ordersup_aid')->where($where)->find();
+         $tmp=Db::name('order_aid')->where($where)->find();
          if(!empty($tmp)){
              return 1;
          }
@@ -475,7 +470,7 @@ class OrdersupModel extends Model
      }
      /* 采购单排序 */
      public function ordersup_sort($id){
-         //   sort专门排序，待发货10，仓库发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0 
+         //   sort专门排序，待收货10，仓库收货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0 
          //pay_status
          //是否有待审核
          $where=[
@@ -497,7 +492,7 @@ class OrdersupModel extends Model
          }else{
              $ordersup=$this->where('id',$id)->find();
              
-             //   sort专门排序，待发货10，准备发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
+             //   sort专门排序，待收货10，准备收货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
              switch ($ordersup['status']){
                  case 20:
                      $sort=10;
@@ -530,32 +525,9 @@ class OrdersupModel extends Model
          $this->where('id',$id)->setField('sort',$sort);
            
      }
-     /* 采购单产品数量检查 */
-     public function ordersup_store($id){
-         //在store_goods表中num1数值减少
-         $ordersup=$this->where('id',$id)->find();
-         if($ordersup['is_real']==2){
-             return '已拆分采购单请分开发货';
-         }
-         $goods_ordersup=Db::name('ordersup_goods')->where('oid',$id)->column('goods,goods_name,num');
-         if(empty($goods_ordersup)){
-             return 1;
-         }
-         $goods_ids=array_keys($goods_ordersup);
-         $where=[
-             'store'=>['eq',$ordersup['store']],
-             'goods'=>['in',$goods_ids]
-         ];
-         $goods_store=Db::name('store_goods')->where($where)->column('goods,num');
-         foreach($goods_ordersup as $k=>$v){
-             if(!isset($goods_store[$k]) || $goods_store[$k]<$v['num']){
-                 return $v['goods_name'].'库存不足';
-             }
-         }
-         return 1;
-     }
-     /* 采购单确认后，产品出库未提交 */
-     public function ordersup_storein0($id){
+     
+     /* 采购单确认后，产品入库未提交 */
+     public function ordersup_storein0($id,$dsc='采购入库'){
          //在store_goods表中num1数值减少
          $ordersup=$this->where('id',$id)->find();
          $ordersup=$ordersup->data;
@@ -566,10 +538,10 @@ class OrdersupModel extends Model
          $where_goods=[];
          if($ordersup['is_real']==1){
              $where_goods['oid']=['eq',$ordersup['id']]; 
-             $ordersups=[$ordersup['id']=>['id'=>$ordersup['id'],'name'=>$ordersup['name'],'store'=>$ordersup['store']]];
+             $orders=[$ordersup['id']=>['id'=>$ordersup['id'],'name'=>$ordersup['name'],'store'=>$ordersup['store']]];
          }else{ 
-             $ordersups=$this->where('fid',$ordersup['id'])->column('id,name,store'); 
-             $ordersup_ids=array_keys($ordersups);
+             $orders=$this->where('fid',$ordersup['id'])->column('id,name,store'); 
+             $ordersup_ids=array_keys($orders);
              $where_goods['oid']=['in',$ordersup_ids];
          }
          //全部采购单产品
@@ -584,23 +556,23 @@ class OrdersupModel extends Model
          $m_store_goods=new StoreGoodsModel();
          $time=time();
          $aid=session('ADMIN_ID');
-         //一个个地出库
+         //一个个地入库
          foreach($goods_ordersup as $k=>$v){
-             if($ordersups[$v['oid']]['store']==0){
+             if($orders[$v['oid']]['store']==0){
                  continue;
              }
              $data=[
                  'shop'=>$ordersup['shop'],
-                 'store'=>$ordersups[$v['oid']]['store'],
+                 'store'=>$orders[$v['oid']]['store'],
                  'goods'=>$v['goods'],
-                 'num'=>(0-$v['num']),
+                 'num'=>$v['num'],
                  'atime'=>$time,
                  'aid'=>$aid,
-                 'adsc'=>'客户下单出库',
+                 'adsc'=>$dsc,
                  'rstatus'=>4,
-                 'type'=>10,
+                 'type'=>1,
                  'about'=>$v['oid'],
-                 'about_name'=>$ordersups[$v['oid']]['name'],
+                 'about_name'=>$orders[$v['oid']]['name'],
              ];
              $res=$m_store_goods->instore0($data);
              if($res!==1){
@@ -611,34 +583,8 @@ class OrdersupModel extends Model
          return 1;
      }
      /**
-      *  采购单准备发货后，出库记录可审核 */
+      *  采购单准备收货后，入库记录可审核 */
      public function ordersup_storein1($id){
-         //在store_goods表中num1数值减少
-         $ordersup=$this->where('id',$id)->find();
-         $ordersup=$ordersup->data;
-         if($ordersup['status']!=22){
-             return '采购单状态错误';
-         }
-         if($ordersup['is_real']!=1){
-             return '已拆分采购单请在子采购单页面发货';
-         }
-          
-         $m_store_goods=new StoreGoodsModel();
-         $where=[
-             'type'=>10,
-             'about'=>$id,
-             'rstatus'=>4,
-         ];
-         $update=[
-             'adsc'=>'采购单准备发货',
-             'rstatus'=>1,
-         ];
-         $m_store_goods->where($where)->update($update);
-         return 1;
-     }
-     /**
-      *  采购单确认发货要检查出库记录是否都已审核 */
-     public function ordersup_storein_check($id){
          //在store_goods表中num1数值减少
          $ordersup=$this->where('id',$id)->find();
          $ordersup=$ordersup->data;
@@ -646,37 +592,57 @@ class OrdersupModel extends Model
              return '采购单状态错误';
          }
          if($ordersup['is_real']!=1){
-             return '已拆分采购单请在子采购单页面发货';
+             return '已拆分采购单请在子采购单页面收货';
+         }
+          
+         //出入库记录要变为待审核
+         $where=[
+             'type'=>1,
+             'about'=>$id,
+             'rstatus'=>4,
+         ];
+         $update=[ 
+             'rstatus'=>1,
+         ];
+         Db::name('store_in')->where($where)->update($update);
+         return 1;
+     }
+     /**
+      *  采购单确认收货要检查入库记录是否都已审核 */
+     public function ordersup_storein_check($id){
+         //在store_goods表中num1数值减少
+         $ordersup=$this->where('id',$id)->find();
+         $ordersup=$ordersup->data;
+         
+         if($ordersup['is_real']!=1){
+             return '已拆分采购单请在子采购单页面收货';
          }
          
          $m_store_in=Db::name('store_in');
          $where=[
-             'type'=>10,
+             'type'=>1,
              'about'=>$id,
              'rstatus'=>3,
          ];
           
-         $goods_store=$m_store_in->where($where)->ordersup('goods')->column('goods,num');
-         $goods_ordersup=Db::name('ordersup_goods')->where('oid',$id)->ordersup('goods')->column('goods,num');
+         $goods_store=$m_store_in->where($where)->order('goods')->column('goods,num');
+         $goods_ordersup=Db::name('ordersup_goods')->where('oid',$id)->order('goods')->column('goods,num');
          foreach($goods_ordersup as $k=>$v){
              if(!isset($goods_store[$k]) || $goods_store[$k] != $v){
-                 return '出库不完全';
+                 return '入库不完全';
              }
-         }
-         
+         } 
          return 1;
          
      }
-     /* 采购单改变后废弃原出库记录 */
-     public function ordersup_storein5($id){
+     /* 采购单改变后废弃原入库记录 */
+     public function ordersup_storein5($id,$dsc='采购单变化，废弃原出入库'){
          //在store_goods表中num1数值减少
          $ordersup=$this->where('id',$id)->find();
          $ordersup=$ordersup->data;
-         if($ordersup['status']<10 || $ordersup['status']>20){
-             return '采购单状态错误';
-         }
+         
          //采购单产品
-         $where_about=['type'=>10];
+         $where_about=['type'=>1];
          
          if($ordersup['is_real']==1){
              $where_about['about']=['eq',$ordersup['id']]; 
@@ -700,7 +666,7 @@ class OrdersupModel extends Model
          $update_info=[
              'rstatus'=>5,
              'time'=>time(),
-             'rdsc'=>'采购单变化，废弃原出入库',
+             'rdsc'=>$dsc,
              'rid'=>session('ADMIN_ID'),
          ];
          Db::name('store_in')->where('id','in',$in_ids)->update($update_info);
@@ -721,13 +687,13 @@ class OrdersupModel extends Model
          $where_goods=[];
          if($info['is_real']==1){
              $where_goods['oid']=['eq',$info['id']];
-             $ordersups=[$info['id']=>$info];
+             $orders=[$info['id']=>$info];
          }else{
              $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
-                 ',real_freight,other_money,tax_money,ordersup_amount,dsc,express_no';
-             $ordersups=$this->where('fid',$info['id'])->column($fields);
+                 ',real_freight,other_money,tax_money,order_amount,dsc,express_no,order_type,status,pay_status';
+             $orders=$this->where('fid',$info['id'])->column($fields);
              
-             $ordersup_ids=array_keys($ordersups);
+             $ordersup_ids=array_keys($orders);
              $where_goods['oid']=['in',$ordersup_ids];
          }
          //全部采购单产品
@@ -783,6 +749,6 @@ class OrdersupModel extends Model
                  'num1'=>$v['num1'],
              ];
          } 
-         return ['ordersups'=>$ordersups,'goods'=>$goods,'infos'=>$infos]; 
+         return ['orders'=>$orders,'goods'=>$goods,'infos'=>$infos]; 
      }
 }

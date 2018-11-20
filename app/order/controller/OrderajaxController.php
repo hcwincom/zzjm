@@ -140,7 +140,7 @@ class OrderajaxController extends AdminBase0Controller
         }else{
             $m=Db::name('supplier');
         }
-        $field='invoice_type,tax_point,freight,announcement,paytype,receiver,payer';
+        $field='invoice_type,tax_point,freight,announcement,paytype,pay_type,receiver,payer';
         $info=$m->field($field)->where($where_custom)->find();
         //联系人 
         $field='p.site,p.id,p.name,p.mobile,p.phone,p.street,p.postcode'.
