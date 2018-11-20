@@ -106,7 +106,7 @@
 					 点击“退货中”，订单状态为退货中。<br/>
 					 点击“退货完成”，订单状态为退货完成。<br/>
 					 点击“废弃订单”，订单状态为已废弃，不可修改。<br/>
-					 
+					 超管修改状态可以自由选择要改变的状态，但是不会引发付款和出入库的变化，请注意！<br/>
 					 </p>
 					  
 				</div>
@@ -346,7 +346,8 @@ $('.order_break').click(function(){
 		$order_new.find('.order_pay .other_money').attr('name','other_money0['+oid+']');
 		$order_new.find('.order_pay .order_amount').attr('name','order_amount0['+oid+']');
 		$order_new.find('.order_pay .dsc').attr('name','dsc0['+oid+']');
-	 
+		$order_new.find('.order_pay .express_no').attr('name','express_no0['+oid+']');
+		
 		$('.price_real').each(function(){
 			goods_id=$(this).parents('tr').find('.goods_id').val(); 
 			 
@@ -399,6 +400,7 @@ $('.order_break').click(function(){
 		$order_new.find('.order_pay .other_money').attr('name','other_money0['+oid+']');
 		$order_new.find('.order_pay .order_amount').attr('name','order_amount0['+oid+']');
 		$order_new.find('.order_pay .dsc').attr('name','dsc0['+oid+']');
+		$order_new.find('.order_pay .express_no').attr('name','express_no0['+oid+']');
 		
 		$order_new.find('.order_pay select').val(0);
 		$order_new.find('.order_pay input').val(0);

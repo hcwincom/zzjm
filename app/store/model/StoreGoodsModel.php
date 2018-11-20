@@ -142,7 +142,8 @@ class StoreGoodsModel extends Model
         }
          
         if($row===2){
-            return 1;
+            //返回料位
+            return $box;
         }else{
             return '库存信息更新失败，可能是库存不足';
         }

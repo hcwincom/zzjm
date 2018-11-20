@@ -917,9 +917,10 @@ class AdminOrderController extends AdminInfo0Controller
                         if($order['status']==22){
                             $row=$m->order_storein_check($order['id']);
                         }
-                        if($row!==1 && empty($order['express_no']) && empty($change['express_no'])){
+                        if($row!==1 && empty($order['express_no']) && empty($change['edit'][$order['id']]['express_no'])){
                             $row='快递单号未填写';
                         }
+                        
                         break;
                     case 81:
                         //废弃

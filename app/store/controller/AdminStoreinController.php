@@ -396,12 +396,7 @@ class AdminStoreinController extends AdminBaseController
         if(empty($update['rdsc'])){
             $update['rdsc']=$review_status[$status];
         }
-        $row=$m->where('id',$id)->update($update);
-        
-        if($row!==1){
-            $m->rollback();
-            $this->error('审核失败，请刷新后重试');
-        }
+       
        
         //是否更新,2同意，3不同意 
         $m_store_goods=new StoreGoodsModel();
@@ -409,6 +404,8 @@ class AdminStoreinController extends AdminBaseController
         if($status==2){
             //更新仓库和总库存
             $res=$m_store_goods->instore2($info,$box);
+            //返回更新真正入库的料位
+            $update['box']=$res;
         }elseif($status==3){
             //更新仓库和总库存
             $res=$m_store_goods->instore3($info);
@@ -416,9 +413,14 @@ class AdminStoreinController extends AdminBaseController
             $m->rollback();
             $this->error('只能审核为通过和不通过');
         }
-        if($res!==1){
+        if(!($res>0)){
             $m->rollback();
             $this->error($res);
+        }
+        $row=$m->where('id',$id)->update($update); 
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
         }
         //审核成功，记录操作记录,发送审核信息 
         $data_action=[

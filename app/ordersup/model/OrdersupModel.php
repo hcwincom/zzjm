@@ -204,9 +204,8 @@ class OrdersupModel extends Model
              }else{
                  //不存在新增
                  $content['add'][$void]=[];
-                 //添加采购单信息
-               
-                 foreach($edit_base as $kk=>$vv){
+                 //添加采购单信息 
+                 foreach($edit_base as $kk=>$vv){ 
                      $content['add'][$void][$vv]=$data[$vv.'0'][$void];
                  }
                  foreach ($data['nums-'.$void] as $kgoodsid=>$kv){
@@ -229,7 +228,9 @@ class OrdersupModel extends Model
                  } 
              }
          }
-         
+         if(isset($change['add']) && $info['status']>=26){
+             return '已收货不能拆分';
+         }
          if($is_do==1){
              if($info['status']==1 && $data['status']==2){
                  $content['status']=2;
@@ -244,6 +245,9 @@ class OrdersupModel extends Model
      /* 审核采购单编辑 */
      public function ordersup_edit_review($ordersup,$change)
      {
+         if(isset($change['add']) && $ordersup['status']>=26){
+             return '已收货不能拆分';
+         }
          //获取采购单状态信息
          if($ordersup['is_real']==1 ){ 
              $orders=[$ordersup['id']=>$ordersup]; 
@@ -622,7 +626,7 @@ class OrdersupModel extends Model
          $where=[
              'type'=>1,
              'about'=>$id,
-             'rstatus'=>3,
+             'rstatus'=>2,
          ];
           
          $goods_store=$m_store_in->where($where)->order('goods')->column('goods,num');

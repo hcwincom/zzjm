@@ -832,20 +832,22 @@ class AdminOrdersupController extends AdminInfo0Controller
                         }
                         break;
                     case 22:
-                        //准备收货后更新出库未待审核
-                        if($ordersup['status']==20){
-                            $row=$m->ordersup_storein1($ordersup['id']);
-                        }
-                        
+                        //供货商发货，检测单号有无填写
+                        if(empty($ordersup['express_no']) && empty($change['edit'][$ordersup['id']]['express_no'])){
+                            $row='快递单号未填写';
+                        } 
                         break;
                     case 24:
-                        //仓库收货要检查出库记录是否都已审核
+                        //准备收货后更新出库未待审核
                         if($ordersup['status']==22){
+                            $row=$m->ordersup_storein1($ordersup['id']);
+                        } 
+                        break;
+                    case 26: 
+                        //仓库收货要检查出库记录是否都已审核
+                        if($ordersup['status']==24){
                             $row=$m->ordersup_storein_check($ordersup['id']);
-                        }
-                        if($row!==1 && empty($ordersup['express_no']) && empty($change['express_no'])){
-                            $row='快递单号未填写';
-                        }
+                        } 
                         break;
                         
                 }
@@ -1004,6 +1006,26 @@ class AdminOrdersupController extends AdminInfo0Controller
         
     }
     /**
+     * 采购单已发货
+     * @adminMenu(
+     *     'name'   => '采购单已发货',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '采购单已发货',
+     *     'param'  => ''
+     * )
+     */
+    public function status_do20(){
+        
+        $flag='已发货';
+        $data=$this->request->param();
+        $this->status_do($data,20,$flag);
+        
+    }
+    /**
      * 采购单准备收货
      * @adminMenu(
      *     'name'   => '采购单准备收货',
@@ -1016,29 +1038,9 @@ class AdminOrdersupController extends AdminInfo0Controller
      *     'param'  => ''
      * )
      */
-    public function status_do20(){
-        
-        $flag='准备收货';
-        $data=$this->request->param();
-        $this->status_do($data,20,$flag);
-        
-    }
-    /**
-     * 采购单仓库收货
-     * @adminMenu(
-     *     'name'   => '采购单仓库收货',
-     *     'parent' => 'index',
-     *     'display'=> false,
-     *     'hasView'=> false,
-     *     'order'  => 20,
-     *     'icon'   => '',
-     *     'remark' => '采购单仓库收货',
-     *     'param'  => ''
-     * )
-     */
     public function status_do22(){
         
-        $flag='仓库收货';
+        $flag='准备收货';
         $data=$this->request->param();
         $this->status_do($data,22,$flag);
         
@@ -1202,22 +1204,14 @@ class AdminOrdersupController extends AdminInfo0Controller
                 $content['status']=20;
                 break;
             case 20:
-                //准备收货
+                //供货商发货
                 $content['status']=22;
-                //检查库存
-                $res=$m->ordersup_store($id);
-                if($res!==1){
-                    $this->error($res);
-                }
+                
                 break;
             case 22:
-                //仓库收货
+                //准备收货
                 $content['status']=24;
-                //检查库存
-                $res=$m->ordersup_store($id);
-                if($res!==1){
-                    $this->error($res);
-                }
+                
                 break;
             case 24:
                 // 点击“确认收货”，采购单状态为已收货，若已支付，则采购单状态为已完成。

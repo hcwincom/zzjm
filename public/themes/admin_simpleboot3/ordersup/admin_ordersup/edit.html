@@ -38,11 +38,11 @@
 						 	 
 						 </case>
 						  <case value="20"> 
-						 	<button type="submit" action="{:url('status_do20')}" class="save btn btn-primary js-ajax-submit" >准备收货</button>
+						 	<button type="submit" action="{:url('status_do20')}" class="save btn btn-primary js-ajax-submit" >供货商已发货</button>
 						 	 
 						 </case>
 						  <case value="22"> 
-						 	<button type="submit" action="{:url('status_do22')}" class="save btn btn-primary js-ajax-submit" >仓库收货</button>
+						 	<button type="submit" action="{:url('status_do22')}" class="save btn btn-primary js-ajax-submit" >准备收货</button>
 						 	 
 						 </case>
 						  <case value="24"> 
@@ -110,6 +110,7 @@
 					 点击“退货中”，采购单状态为退货中。<br/>
 					 点击“退货完成”，采购单状态为退货完成。<br/>
 					 点击“废弃采购单”，采购单状态为已废弃，不可修改。<br/>
+					超管修改状态可以自由选择要改变的状态，但是不会引发付款和出入库的变化，请注意！<br/>
 					 
 					 </p>
 					  
@@ -146,49 +147,7 @@ $(document).on('change','.price_real input',function(){
 $(document).on('change','.size1,.weight1',function(){ 
 	order_change($(this).parents('.order'),'num');
 });
-var url_freight_count="{:url('order/Orderajax/freight_count')}";
-$(document).on('click','.freight_count',function(){
-	 
-	var $div=$(this).parents('.order');
-	var store=$div.find('.store').val();
-	var freight=$div.find('.freight').val();
-	var weight=$div.find('.order_weight').val();
-	var size=$div.find('.order_size').val();
-	if(!(store>0)){
-		msg('先选择收货仓库');
-		return false;
-	}
-	if(!(freight>0)){
-		msg('先选择快递公司');
-		return false;
-	} 
-	if(!(weight>0) || !(size>0)){
-		msg('先填写重量和体积');
-		return false;
-	} 
-	 
-	var city=$('#city').val();
-	 
-	$.ajax({
-        type: 'POST',
-        url: url_freight_count,
-        dataType: 'json', 
-        data:{'freight':freight,'city':city,'size':size,'weight':weight},
-        success: function (data) {
-     	    if(data.code!=1){
-     	    	msg(data.msg);
-     	    	return false;
-     	    }  
-     	    $div.find('.real_freight').val(data.data);
-     	    if(($.trim($div.find('.pay_freight').val()))==''){
-     	    	$div.find('.pay_freight').val(data.data);
-     	    } 
-        }, 
-        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-            msg(event.responseText,1);
-        }
-    }); 
-});
+ 
 $(document).on('change','.discount_money,.other_money,.pay_freight,.tax_money',function(){ 
 	var $div=$(this).parents('.order_pay');
 	money_count($div);
@@ -339,6 +298,7 @@ $('.order_break').click(function(){
 		$order_new=$('.order'+oid);
 		$order_new.find('.order_pay .store').attr('name','store0['+oid+']');
 		$order_new.find('.order_pay .freight').attr('name','freight0['+oid+']');
+		$order_new.find('.order_pay .order_type').attr('name','order_type0['+oid+']');
 		$order_new.find('.order_pay .order_weight').attr('name','weight0['+oid+']');
 		$order_new.find('.order_pay .order_size').attr('name','size0['+oid+']');
 		$order_new.find('.order_pay .pay_freight').attr('name','pay_freight0['+oid+']');
@@ -350,6 +310,7 @@ $('.order_break').click(function(){
 		$order_new.find('.order_pay .other_money').attr('name','other_money0['+oid+']');
 		$order_new.find('.order_pay .order_amount').attr('name','order_amount0['+oid+']');
 		$order_new.find('.order_pay .dsc').attr('name','dsc0['+oid+']');
+		$order_new.find('.order_pay .express_no').attr('name','express_no0['+oid+']');
 	 
 		$('.price_real').each(function(){
 			goods_id=$(this).parents('tr').find('.goods_id').val(); 
@@ -392,6 +353,7 @@ $('.order_break').click(function(){
 		
 		$order_new.find('.order_pay .store').attr('name','store0['+oid+']');
 		$order_new.find('.order_pay .freight').attr('name','freight0['+oid+']');
+		$order_new.find('.order_pay .order_type').attr('name','order_type0['+oid+']');
 		$order_new.find('.order_pay .order_weight').attr('name','weight0['+oid+']');
 		$order_new.find('.order_pay .order_size').attr('name','size0['+oid+']');
 		$order_new.find('.order_pay .pay_freight').attr('name','pay_freight0['+oid+']');
@@ -403,10 +365,12 @@ $('.order_break').click(function(){
 		$order_new.find('.order_pay .other_money').attr('name','other_money0['+oid+']');
 		$order_new.find('.order_pay .order_amount').attr('name','order_amount0['+oid+']');
 		$order_new.find('.order_pay .dsc').attr('name','dsc0['+oid+']');
+		$order_new.find('.order_pay .express_no').attr('name','express_no0['+oid+']');
 		
 		$order_new.find('.order_pay select').val(0);
 		$order_new.find('.order_pay input').val(0);
 		$order_new.find('.order_pay select').val(0);
+		$order_new.find('.order_pay order_type').val(2);
 		$order_new.find('.order_pay dsc').val('');
 		is_end=0;
 	} 

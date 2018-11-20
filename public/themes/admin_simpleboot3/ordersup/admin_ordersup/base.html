@@ -388,7 +388,7 @@
     	   			<present name="change['edit'][$kk][$key]['del']">
     	   				<span class="red">删除</span>
     	   			<else/> 
-    	   			<if condition="empty($info1) && $info.fid eq 0">
+    	   			<if condition="empty($info1) && $info.fid eq 0 && $info.status lt 26">
     	   				<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
     	   			 	<input type="number" class="form-control break" value="0"/>
     	   				<button class="order_break" type="button">拆分</button> 
@@ -443,7 +443,7 @@
 					 </label>
 					   <label class="input-inline"> 
 						 采购单类型：
-						 <select  class="form-control freight short-auto" name="order_type0[{$kk}]"  >
+						 <select  class="form-control order_type short-auto" name="order_type0[{$kk}]"  >
 					    	 
 						<foreach name="order_types" item="vo">
 							<option value="{$key}" <if condition="$key eq $vv.order_type">selected</if>>{$vo}</option>
@@ -533,7 +533,7 @@
 						   快递单号： 
 						<input type="text" class="form-control short2 express_no" name="express_no0[{$kk}]" value="{$vv.express_no}" /> 
 					<present name="change['edit'][$kk]['express_no']">
-						<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['express_no']}" />
+						<input type="text" class="form-control short2 red"  value="{$change['edit'][$kk]['express_no']}" />
 					</present> 
 					</label>
 					<a href="{:url('express/AdminFreight/express_query',['freight'=>$vv.freight,'no'=>$vv.express_no])}" target="{$zztarget.other}">查快递</a> 
