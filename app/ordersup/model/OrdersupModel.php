@@ -438,10 +438,10 @@ class OrdersupModel extends Model
              'table'=>['eq','ordersup'],
              'rstatus'=>['eq',1],
          ];
-         $aids=Db::name('edit')
-         ->where($where)
+         $aid=Db::name('edit')
+         ->where($where) 
          ->value('aid');
-         if(!empty($aids) && $admin['id']!=$aids){
+         if(!empty($aid) && $admin['id']!=$aid){
              return '采购单有修改，需等待审核';
          }
          //创建人能修改采购单
@@ -495,36 +495,45 @@ class OrdersupModel extends Model
              $sort=7;
          }else{
              $ordersup=$this->where('id',$id)->find();
-             
-             //   sort专门排序，待收货10，准备收货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
-             switch ($ordersup['status']){
-                 case 20:
-                     $sort=10;
-                     break;
-                 case 22:
-                     $sort=9;
-                     break;
-                 case 10:
-                     switch ($ordersup['pay_status']){
-                         case 1:
-                             $sort=4;
-                             break;
-                         case 2:
-                             $sort=5;
-                             break;
-                         case 4:
-                             $sort=3;
-                             break;
-                         default: 
-                             break;
-                     }  
-                     break;
-                 case 40:
-                     $sort=3;
-                     break;
-                 default:
-                     break;
+             if($ordersup['order_type']==2){
+                 $sort=11;
+             }else{
+                 switch ($ordersup['status']){
+                     case 22:
+                         $sort=10;
+                         break;
+                     case 24:
+                         $sort=9;
+                         break;
+                     case 10:
+                         switch ($ordersup['pay_status']){
+                             case 1:
+                                 $sort=4;
+                                 break;
+                             case 2:
+                                 $sort=5;
+                                 break;
+                             case 4:
+                                 $sort=3;
+                                 break;
+                             default:
+                                 break;
+                         }
+                         break;
+                     case 40:
+                         $sort=3;
+                         break;
+                     case 2:
+                         $sort=2;
+                         break;
+                     case 1:
+                         $sort=1;
+                         break;
+                     default:
+                         break;
+                 }
              }
+              
          }
          $this->where('id',$id)->setField('sort',$sort);
            
@@ -579,7 +588,7 @@ class OrdersupModel extends Model
                  'about_name'=>$orders[$v['oid']]['name'],
              ];
              $res=$m_store_goods->instore0($data);
-             if($res!==1){
+             if(!($res>0)){
                  return $res;
              }
          }

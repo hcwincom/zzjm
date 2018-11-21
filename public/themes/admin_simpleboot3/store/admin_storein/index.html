@@ -139,7 +139,14 @@
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td> 
 						<td>{$vo.aname|default=$vo['aid']}</td> 
 						<td>{$about_type[$vo['type']][0]}</td> 
-						<td > <a href="{$about_type[$vo['type']][1]}/id/{$vo.about}" target="{$zztarget.other}">{$vo.about}</a></td>
+						<td >
+						<empty name="about_type[$vo['type']][1]">
+							{$vo.about}
+						<else/>
+							<a href="{$about_type[$vo['type']][1]}/id/{$vo.about}" target="{$zztarget.other}">{$vo.about}</a>
+						</empty>
+						 
+						</td>
 						<td >{$vo.about_name}</td>
 						<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vo.goods])}"  target="{$zztarget['other']}">{$vo.goods_name}</a></td>
 					    <td>{$vo.goods_code}</td> 

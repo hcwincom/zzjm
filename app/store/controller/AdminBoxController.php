@@ -113,10 +113,22 @@ class AdminBoxController extends AdminInfo0Controller
          
         //查询字段
         $types=$this->search;
-        
+        $this->search=[
+            'code'=>'料位号',
+            'name'=>'名称',
+            'id'=>'ID'
+        ];
+        $types=[
+            1=>['p.code','料位号'],
+            2=>['p.name','料位名'],
+            3=>['p.id','料位id'],
+            4=>['goods.name','产品名'],
+            5=>['goods.code','产品编号'],
+            5=>['p.goods','产品id'],
+        ];
         //选择查询字段
         if(empty($data['type1'])){
-            $data['type1']=key($types);
+            $data['type1']=1;
         }
         //搜索类型
         $search_types=config('search_types');
@@ -126,7 +138,7 @@ class AdminBoxController extends AdminInfo0Controller
         if(!isset($data['name']) || $data['name']==''){
             $data['name']='';
         }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+            $where[$types[$data['type1']][0]]=zz_search($data['type2'],$data['name']);
         }
         
         //时间类别
@@ -272,8 +284,8 @@ class AdminBoxController extends AdminInfo0Controller
             ];
             $m_store_goods=new StoreGoodsModel();
             $res=$m_store_goods->instore0($data_instore);
-            if($res!==1){
-                return $res;
+            if(!($res>0)){
+                $id=$res;
             }
         }
         if($id<=0){
@@ -634,11 +646,12 @@ class AdminBoxController extends AdminInfo0Controller
                 'adsc'=>'管理员为料位'.$info['id'].'-'.$data['name'].'设置产品',
             ];
             $m_store_goods=new StoreGoodsModel();
-            $tmp=$m_store_goods->instore0($data_instore);
-            if($tmp!==1){
+            $res=$m_store_goods->instore0($data_instore);
+            if(!($res>0)){
                 $m->rollback();
-                $this->error($tmp);
+                $this->error($res);
             }
+            
         }
         
         if(empty($content)){

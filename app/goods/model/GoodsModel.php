@@ -38,7 +38,7 @@ class GoodsModel extends Model
      * 获取产品的图片，库存
      * @param $goods_ids产品id
      * @param $shop店铺
-     * @param $field产品信息字段
+     * @param $field产品信息字段 
      */ 
     public function goods_infos($goods_ids,$shop,$field='id,name,pic,code'){
        

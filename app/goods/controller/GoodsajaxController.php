@@ -5,6 +5,7 @@ namespace app\goods\controller;
  
 use app\common\controller\AdminBase0Controller; 
 use think\Db; 
+use app\goods\model\GoodsModel;
 /*
  * 产品页面的ajax  */ 
 class GoodsajaxController extends AdminBase0Controller
@@ -287,6 +288,21 @@ class GoodsajaxController extends AdminBase0Controller
         $admin=$this->admin;
         $where['shop']=($admin['shop']==1)?2:$admin['shop']; 
         $goods=Db::name('goods')->where($where)->column('id,name');
+        $this->success('ok','',$goods);
+    }
+    /*
+     * 根据id获取产品 */
+    public function get_goods_info()
+    {
+        $id=$this->request->param('id');
+        $shop=$this->request->param('shop');
+        if(empty($shop)){
+            $admin=$this->admin;
+            $shop=($admin['shop']==1)?2:$admin['shop'];
+        }
+        
+        $m_goods=new GoodsModel();
+        $goods=$m_goods->goods_info($id,$shop);
         $this->success('ok','',$goods);
     }
     

@@ -1047,8 +1047,11 @@ class AdminOrderController extends AdminInfo0Controller
         $this->assign('freights',$freights); 
         $this->assign('goods_url',url('goods/AdminGoods/edit',false,false)); 
         $this->assign('image_url',cmf_get_image_url('')); 
+      
+        $this->assign('order_url',url('order/AdminOrder/edit',false,false));
+        $this->assign('order_user_url',url('custom/AdminCustom/edit',false,false));
+        $this->assign('edit_url',url('edit_list',['type1'=>'id','type2'=>1],false));
        
-        
     }
     /**
      * 订单确认

@@ -75,8 +75,16 @@
 		 			</table>
 				</div>
 			</div> 
-		 <div style="clear:both;"></div>
-		 <div class="form-group fleft-all">
+		 	<div style="clear:both;"></div>
+		 <eq name="info.sn_type" value="3">
+		 	<div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">一货一码，用,分隔录入</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" name="sns" value="{$info.sns}" />
+				</div>
+			</div> 
+		 </eq>
+		 	<div class="form-group fleft-all">
 				<label for=" " class="col-sm-2 control-label">备注</label>
 				<div class="col-md-6 col-sm-10">  
 					<input type="text" class="form-control" value="{$info.adsc}" />
@@ -133,6 +141,7 @@
 					<button type="submit" class="review_back btn btn-primary js-ajax-submit" >还原已审核数据</button>
 					</lt>
 				</eq> 
+				<p class="notice">一货一码的产品可以输入条码，多个条码用,分隔。修改后即时生效，新数据会覆盖旧数据</p>
 				</div>
 				
 			</div>

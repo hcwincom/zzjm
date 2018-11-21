@@ -170,12 +170,12 @@
 						<td > 
 						{$order_types[$vo.order_type]}
 						</td>
-						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.name}</a></td>
+						<td><a href="{$order_url}/id/{$vo.id}" target="{$zztarget['list']}" >{$vo.name}</a></td>
 					 	<td>
 					 	<eq name="vo.fid" value="0">
-					 		无
+					 		<eq name="vo.is_real" value="2">已拆分</eq>
 					 	<else/> 
-					 		<a href="{:url('edit',['id'=>$vo.fid])}" target="{$zztarget['other']}" >{$vo.fid}</a>
+					 		<a href="{$order_url}/id/{$vo.fid}" target="{$zztarget['other']}" >{$vo.fid}</a>
 					 	</eq>
 					 	</td>
 					 	
@@ -203,7 +203,7 @@
 									<tbody>
 									<foreach name="vo.infos" item="vv" key="kk">
 										<tr>
-											<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vv.goods])}" target="{$zztarget.other}">{$vv.goods_name}</a></td>
+											<td><a href="{$goods_url}/id/{$vv.goods}" target="{$zztarget.other}">{$vv.goods_name}</a></td>
 											<td>{$vv.goods_code}</td>
 											 <td>{$vv.price_sale}</td>
 											<td>{$vv.price_real}</td>
@@ -219,15 +219,14 @@
 						</td>
 					  	<td>{$paytypes[$vo['paytype']]['name']|default=$vo['paytype']}</td>
 					   
-					  	<td><a href="{:url('custom/AdminCustom/edit',['id'=>$vo.uid])}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
+					  	<td><a href="{$order_user_url}/id/{$vo.uid}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
 						<td>{$vo.order_amount}</td>
 						<td>{$pay_status[$vo.pay_status]}</td>
 					 
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
 					 
 						<td>{$statuss[$vo.status]}
-						<eq name="vo.is_real" value="0">-已拆分</eq>
-						 
+							<eq name="vo.is_real" value="2">-已拆分</eq> 
 						</td>
 						 
 					</tr>
@@ -240,7 +239,7 @@
 		</form>
 	 	<div class="pagination">{$page}</div>
 	 	<p class="notice">
-	 	 sort排序，待发货10，已准备发货9，管理员有改动8，员工有改动7，待确认货款5，待付款4，退货退款中3，未提交2，其他0 
+	 	 sort排序，待发货10，已准备发货9，管理员有改动8，员工有改动7，待确认货款5，待付款4，退货退款中3，提交待确认2，未提交1，其他0 
 	 	</p>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>

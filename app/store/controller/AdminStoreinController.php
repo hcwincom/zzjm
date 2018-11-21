@@ -299,7 +299,7 @@ class AdminStoreinController extends AdminBaseController
             ['cmf_user a','p.aid=a.id','left'],
             ['cmf_user r','p.rid=r.id','left'],
         ];
-        $field='p.*,shop.name as sname,goods.name as goods_name,goods.code as goods_code,store.name as store_name'.
+        $field='p.*,shop.name as sname,goods.name as goods_name,goods.code as goods_code,goods.sn_type,store.name as store_name'.
             ',(p.num*goods.price_in) as money,box.code as box_code,a.user_nickname as aname,r.user_nickname as rname';
         
         //获取 数据
@@ -315,6 +315,12 @@ class AdminStoreinController extends AdminBaseController
         $admin=$this->admin;
         if($admin['shop']!=1 && $admin['shop']!=$info['shop']){
             $this->error('只能查看本店铺的数据',$back);
+        }
+        $info['sn_type']=3;
+        //获取产品条码
+        if($info['sn_type']==3){ 
+            $sns=Db::name('goods_sn')->where('store_in',$info['id'])->column('sn');
+            $info['sns']=implode(',', $sns);
         }
         //获取产品库存 
         $where=[
@@ -362,6 +368,7 @@ class AdminStoreinController extends AdminBaseController
         $status=$this->request->param('rstatus',0,'intval');
         $id=$this->request->param('id',0,'intval');
         $box=$this->request->param('box',0,'intval');
+        $sns=$this->request->param('sns');
         
         if($id<=0){
             $this->error('信息错误');
@@ -403,7 +410,7 @@ class AdminStoreinController extends AdminBaseController
         
         if($status==2){
             //更新仓库和总库存
-            $res=$m_store_goods->instore2($info,$box);
+            $res=$m_store_goods->instore2($info,$box,$sns);
             //返回更新真正入库的料位
             $update['box']=$res;
         }elseif($status==3){
@@ -525,7 +532,131 @@ class AdminStoreinController extends AdminBaseController
         $m->commit();
         $this->success('审核成功');
     }
+    /**
+     * 出入库添加
+     * @adminMenu(
+     *     'name'   => '出入库添加',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '出入库添加',
+     *     'param'  => ''
+     * )
+     */
+    public function add()
+    {
+        
+        //检查店铺
+        $admin=$this->admin;
+        $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
+        $this->cates();
+        return $this->fetch();
+    }
+    /**
+     * 出入库添加do
+     * @adminMenu(
+     *     'name'   => '出入库添加do',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '出入库添加do',
+     *     'param'  => ''
+     * )
+     */
+    public function add_do()
+    {
+        $m=$this->m;
+        $data=$this->request->param();
+       
+        $admin=$this->admin;
+        
+        $url=url('index');
+        
+        $table=$this->table;
+        $time=time();
+       
+        $data_add=[
+            
+            'box'=>intval($data['box']),
+            'num'=>intval($data['num']),
+            'type'=>intval($data['type']),
+            'about'=>intval($data['about']), 
+            'type'=>intval($data['type']), 
+            'rstatus'=>1,
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+        ];
+       
+        if($data_add['box']<=0 || $data_add['num']==0){
+            $this->error('请添加有效的出入库');
+        }
+        $types=config('store_in_type');
+        $data_add['about_name']=$types[$data['type']][0].$data_add['about'];
+        $data_add['adsc']=empty($data['adsc'])?('手动入库'.$data_add['about_name']):$data['adsc'];
+        
+        //检查料位信息
+        $box=Db::name('store_box')->where('id',$data_add['box'])->find();
+        if(empty($box) || $box['goods']==0){
+            $this->error('料位信息错误');
+        }
+        if($data_add['num']<0 && abs($data_add['num'])>$box['num']){
+            $this->error('料位产品数量不足');
+        }
+        $data_add['store']=$box['store'];
+        $data_add['shop']=$box['shop'];
+        $data_add['goods']=$box['goods'];
+         
+        $m->startTrans();
+         
+        $m_store_goods=new StoreGoodsModel();
+        $id=$m_store_goods->instore0($data_add);
+        if(!($id>0)){
+            $m->rollback();
+            $this->error($id);
+        }
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'添加'.($this->flag).$id.'-'.$data_add['about_name'],
+            'table'=>($this->table),
+            'type'=>'add',
+            'pid'=>$id,
+            'link'=>url('edit',['id'=>$id]),
+            'shop'=>$admin['shop'],
+            
+        ];
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m->commit();
+        $this->success('添加成功',$url);
+    }
     
-    
+    public function cates($type=3){
+       
+        $shop=$this->where_shop;
+        //获取所有仓库
+        $where=[
+            'shop'=>$shop,
+            'status'=>2,
+        ]; 
+        $stores=Db::name('store')->where($where)->order('sort asc')->column('id,name,shop');
+       
+        //可选货架 
+        $shelfs=Db::name('store_shelf')->where($where)->column('id,name,store');
+        //可选层级
+        $floors=Db::name('store_floor')->where($where)->column('id,floor,store,shelf');
+        //入库类型
+        $this->assign('types',config('store_in_type'));
+        $this->assign('stores',$stores);
+        $this->assign('shelfs',$shelfs);
+        $this->assign('floors',$floors);
+       
+    }
     
 }

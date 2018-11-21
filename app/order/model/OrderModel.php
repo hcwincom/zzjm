@@ -615,6 +615,12 @@ class OrderModel extends Model
                  case 40:
                      $sort=3;
                      break;
+                 case 2:
+                     $sort=2;
+                     break;
+                 case 1:
+                     $sort=1;
+                     break;
                  default:
                      break;
              }
@@ -695,8 +701,8 @@ class OrderModel extends Model
                  'about_name'=>$orders[$v['oid']]['name'],
              ];
              $res=$m_store_goods->instore0($data);
-             if($res!==1){
-                 return $res;
+             if(!($res>0)){
+               return $res;
              }
          }
          

@@ -21,6 +21,7 @@ class AdminGoodsController extends AdminBaseController
     private $goods_type;
     private $units;
     private $fields_link;
+    
     public function _initialize()
     {
         parent::_initialize();
@@ -68,6 +69,7 @@ class AdminGoodsController extends AdminBaseController
             'height1','size1','template',
         ];
         
+        
     }
      
     /**
@@ -95,20 +97,111 @@ class AdminGoodsController extends AdminBaseController
         if($admin['shop']!=1){
             $where['p.shop']=['eq',$admin['shop']];
         }
-       
-        //状态
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
         //类型
         if(empty($data['type'])){
             $data['type']=0;
         }else{
             $where['p.type']=['eq',$data['type']];
         }
+         
+        $tmp=$this->search($where, $data);
+        $where=$tmp['where'];
+        $data=$tmp['data'];
+        //关联设备数
+        $goods_links=[
+            '-1'=>'关联设备',
+            '0'=>'0个',
+            '1'=>'1个',
+            '2'=>'2个',
+            '3'=>'3个以上',
+        ];
+        $this->assign('goods_links',$goods_links);
+        if(!isset($data['goods_link']) || $data['goods_link']==-1){
+            $data['goods_link']=-1;
+        }else{
+            switch($data['goods_link']){
+                case 3:
+                    $where['p.goods_link']=['egt',3];
+                    break;
+                default:
+                    $where['p.goods_link']=['eq',$data['goods_link']];
+                    break;
+            }
+        }
         
+        //关联资料数
+        $file_type=$this->file_type;
+        $about_link_nums=[
+            '-1'=>'数量',
+            '0'=>'0个',
+            '1'=>'1个',
+            '2'=>'2个',
+            '3'=>'3个以上',
+        ];
+        $this->assign('about_link_nums',$about_link_nums);
+        if(empty($data['about_link']) || !isset($data['about_link_num']) || $data['about_link_num']==-1){
+            $data['about_link']=0;
+            $data['about_link_num']=-1;
+            
+        }else{
+            $about=$file_type[$data['about_link']][0];
+            switch($data['about_link_num']){
+                case 3:
+                    $where['p.'.$about]=['egt',3];
+                    break;
+                default:
+                    $where['p.'.$about]=['eq',$data['about_link_num']];
+                    break;
+            }
+        }
+        //先获取id和分页
+        $list=$m
+        ->alias('p')
+        ->field('p.id') 
+        ->where($where)
+        ->order('p.status asc,p.time desc')
+        ->paginate();
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        $ids=[];
+        foreach($list as $k=>$v){
+            $ids[]=$v['id'];
+        }
+        if(empty($ids)){
+            $list=[];
+        }else{
+            $list=$m
+            ->alias('p')
+            ->join('cmf_shop s','s.id=p.shop','left')
+            ->join('cmf_brand b','b.id=p.brand','left')
+            ->join('cmf_user a','a.id=p.aid','left')
+            ->join('cmf_user r','r.id=p.rid','left')
+            ->where('p.id','in',$ids)
+            ->order('p.status asc,p.time desc')
+            ->column('p.*,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname');
+            //取商城图片
+            $list=$m->goods_pics($list);
+            
+        }
+         
+        $this->assign('page',$page);
+        $this->assign('list',$list); 
+        $this->assign('data',$data);
+      
+        return $this->fetch();
+    }
+    /**
+     * 产品查询
+     */
+    public function search($where,$data){
+        
+        
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
         //一级分类
         if(empty($data['cid0'])){
             $data['cid0']=0;
@@ -134,55 +227,9 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $where['p.brand']=['eq',$data['brand']];
         }
-        //关联设备数
-        $goods_links=[
-            '-1'=>'关联设备',
-            '0'=>'0个',
-            '1'=>'1个',
-            '2'=>'2个',
-            '3'=>'3个以上',
-        ];
-        $this->assign('goods_links',$goods_links);
-        if(!isset($data['goods_link']) || $data['goods_link']==-1){
-            $data['goods_link']=-1; 
-        }else{
-            switch($data['goods_link']){ 
-                case 3:
-                    $where['p.goods_link']=['egt',3];
-                    break;
-                default:
-                    $where['p.goods_link']=['eq',$data['goods_link']];
-                    break;
-            } 
-        }
-        
-        //关联资料数
-        $file_type=$this->file_type;
-        $about_link_nums=[
-            '-1'=>'数量',
-            '0'=>'0个',
-            '1'=>'1个',
-            '2'=>'2个',
-            '3'=>'3个以上',
-        ];
-        $this->assign('about_link_nums',$about_link_nums);
-        if(empty($data['about_link']) || !isset($data['about_link_num']) || $data['about_link_num']==-1){
-            $data['about_link']=0;
-            $data['about_link_num']=-1;
-            
-        }else{
-            $about=$file_type[$data['about_link']][0];
-            switch($data['about_link_num']){ 
-                case 3:
-                    $where['p.'.$about]=['egt',3];
-                    break;
-                default:
-                    $where['p.'.$about]=['eq',$data['about_link_num']];
-                    break;
-            }
-        }
-        //价格 
-        $prices=[ 
+         
+        //价格
+        $prices=[
             'price0'=>'价格',
             'price_sale'=>'零售价格',
             'price_in'=>'入库价',
@@ -195,15 +242,15 @@ class AdminGoodsController extends AdminBaseController
             'price_dealer2'=>'经销价2',
             'price_dealer3'=>'经销价3',
             'price_trade'=>'同行价',
-            'price_factory'=>'工程配套价', 
+            'price_factory'=>'工程配套价',
         ];
         $this->assign('prices',$prices);
         if(empty($data['price']) || $data['price']=='price0'){
             $data['price']='price0';
             $data['price1']='';
-            $data['price2']=''; 
+            $data['price2']='';
         }else{
-           
+            
             //判断处理价格参数
             if(!isset($data['price1']) || $data['price1']==''){
                 $data['price1']=='';
@@ -214,7 +261,7 @@ class AdminGoodsController extends AdminBaseController
                 $price1=$data['price1'];
                 if($price1<0){
                     $this->error('价格不能小于0');
-                } 
+                }
             }
             if(!isset($data['price2']) || $data['price2']==''){
                 $data['price2']=='';
@@ -228,28 +275,28 @@ class AdminGoodsController extends AdminBaseController
                 }
             }
             //判断查询条件
-            if(isset($price1)){ 
+            if(isset($price1)){
                 if(isset($price2)){
                     //最大最小价格都有
                     if($price2<$price1){
                         $this->error('最大价格不能小于最小价格');
-                    } 
+                    }
                     $where_price=['between',[$price1,$price2]];
                 }else{
                     //最小价格
                     $where_price=['egt',$price1];
                 }
             }elseif(isset($price2)){
-                //只有最大价 
+                //只有最大价
                 $where_price=['elt',$price2];
-            }  
+            }
             //组装
             if(!empty($where_price)){
                 $where['p.'.$data['price']]=$where_price;
             }
             
         }
-         
+        
         
         //重量体积
         $bigs=[
@@ -257,8 +304,7 @@ class AdminGoodsController extends AdminBaseController
             'weight0'=>'净重量',
             'size0'=>'净体积',
             'weight1'=>'毛重量',
-            'size1'=>'毛体积',
-            
+            'size1'=>'毛体积', 
         ];
         $this->assign('bigs',$bigs);
         if(empty($data['big']) || $data['big']=='big0'){
@@ -271,7 +317,7 @@ class AdminGoodsController extends AdminBaseController
             //判断处理重量体积参数
             if(!isset($data['big1']) || $data['big1']==''){
                 $data['big1']=='';
-               
+                
             }else{
                 $big1=0;
                 $data['big1']=round($data['big1'],2);
@@ -307,17 +353,31 @@ class AdminGoodsController extends AdminBaseController
                 //只有最大价
                 $where_big=['elt',$big2];
             }
-             
+            
             //组装
             if(!empty($where_big)){
                 $where['p.'.$data['big']]=$where_big;
             }
         }
+        
         //查询字段
-        $types=config('goods_search');
+        $types=[
+            1=>['p.name','全名'],
+            2=>['p.code' , '编码'],
+            3=>['p.code_name' , '同级名称'],
+            4=>['p.name2' , '商城名称'],
+            5=>['p.name3' , '打印名称'],
+            11=>['p.sn','条码'],
+            6=>['p.id' , '产品id'],
+            7=>['p.aid' , '创建人id'],
+            
+            9=>['p.rid' , '审核人id'],
+           
+        ];
+           
         //选择查询字段
         if(empty($data['type1'])){
-            $data['type1']=key($types);
+            $data['type1']=1;
         }
         //搜索类型
         $search_types=config('search_types');
@@ -327,8 +387,10 @@ class AdminGoodsController extends AdminBaseController
         if(!isset($data['name']) || $data['name']==''){
             $data['name']='';
         }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+            $where[$types[$data['type1']][0]]=zz_search($data['type2'],$data['name']);
         }
+        $this->assign('types',$types);
+        $this->assign("search_types", $search_types);
         
         //时间类别
         $times=config('time1_search');
@@ -365,44 +427,8 @@ class AdminGoodsController extends AdminBaseController
                 }
             }
         }
-        //先获取id和分页
-        $list=$m
-        ->alias('p')
-        ->field('p.id') 
-        ->where($where)
-        ->order('p.status asc,p.time desc')
-        ->paginate();
-        // 获取分页显示
-        $page = $list->appends($data)->render();
-        $ids=[];
-        foreach($list as $k=>$v){
-            $ids[]=$v['id'];
-        }
-        if(empty($ids)){
-            $list=[];
-        }else{
-            $list=$m
-            ->alias('p')
-            ->join('cmf_shop s','s.id=p.shop','left')
-            ->join('cmf_brand b','b.id=p.brand','left')
-            ->join('cmf_user a','a.id=p.aid','left')
-            ->join('cmf_user r','r.id=p.rid','left')
-            ->where('p.id','in',$ids)
-            ->order('p.status asc,p.time desc')
-            ->column('p.*,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname');
-            //取商城图片
-            $list=$m->goods_pics($list);
-            
-        }
-        
-        
-        $this->assign('page',$page);
-        $this->assign('list',$list);
-       
-        $this->assign('data',$data);
-        $this->assign('types',$types);
         $this->assign('times',$times);
-        $this->assign("search_types", $search_types);
+      
         //分类
         $this->cates();
         $this->assign('cid0',$data['cid0']);
@@ -412,8 +438,8 @@ class AdminGoodsController extends AdminBaseController
         $this->brands();
         $this->assign('bchar',$data['bchar']);
         $this->assign('brand',$data['brand']);
-         
-        return $this->fetch();
+        
+        return ['where'=>$where,'data'=>$data];
     }
     public function print1(){
         $info=[
@@ -489,40 +515,9 @@ class AdminGoodsController extends AdminBaseController
         if($admin['shop']!=1){
             $where['gl.shop']=['eq',$admin['shop']];
         }
-        
-        //状态
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
-       
-        
-        //一级分类
-        if(empty($data['cid0'])){
-            $data['cid0']=0;
-        }else{
-            $where['p.cid0']=['eq',$data['cid0']];
-        }
-        //二级分类
-        if(empty($data['cid'])){
-            $data['cid']=0;
-        }else{
-            $where['p.cid']=['eq',$data['cid']];
-        }
-        
-        //品牌分类
-        if(empty($data['bchar']) || $data['bchar']==-1){
-            $data['bchar']=-1;
-        }else{
-            $where['p.bchar']=['eq',$data['bchar']];
-        }
-        //品牌
-        if(empty($data['brand'])){
-            $data['brand']=0;
-        }else{
-            $where['p.brand']=['eq',$data['brand']];
-        }
+        $tmp=$this->search($where, $data);
+        $where=$tmp['where'];
+        $data=$tmp['data'];
         //关联设备数
         $goods_links=[
             '-1'=>'关联设备',
@@ -562,197 +557,12 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $about=$file_type[$data['about_link']][0];
             switch($data['about_link_num']){
-                case -1:
-                    break;
                 case 3:
                     $where['p.'.$about]=['egt',3];
                     break;
                 default:
                     $where['p.'.$about]=['eq',$data['about_link_num']];
                     break;
-            }
-        }
-        //价格
-        $prices=[
-            'price0'=>'价格',
-            'price_sale'=>'零售价格',
-            'price_in'=>'入库价',
-            'price_cost'=>'出厂价',
-            'price_min'=>'最低销售价',
-            'price_range1'=>'区间价1',
-            'price_range2'=>'区间价2',
-            'price_range3'=>'区间价3',
-            'price_dealer1'=>'经销价1',
-            'price_dealer2'=>'经销价2',
-            'price_dealer3'=>'经销价3',
-            'price_trade'=>'同行价',
-            'price_factory'=>'工程配套价',
-        ];
-        $this->assign('prices',$prices);
-        if(empty($data['price']) || $data['price']=='price0'){
-            $data['price']='price0';
-            $data['price1']='';
-            $data['price2']='';
-        }else{
-           
-            //判断处理价格参数
-            if(!isset($data['price1']) || $data['price1']==''){
-                $data['price1']=='';
-                
-            }else{
-                $price1=0;
-                $data['price1']=round($data['price1'],2);
-                $price1=$data['price1'];
-                if($price1<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            if(!isset($data['price2']) || $data['price2']==''){
-                $data['price2']=='';
-                
-            }else{
-                $price2=0;
-                $data['price2']=round($data['price2'],2);
-                $price2=$data['price2'];
-                if($price2<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($price1)){
-                if(isset($price2)){
-                    //最大最小价格都有
-                    if($price2<$price1){
-                        $this->error('最大价格不能小于最小价格');
-                    }
-                    $where_price=['between',[$price1,$price2]];
-                }else{
-                    //最小价格
-                    $where_price=['egt',$price1];
-                }
-            }elseif(isset($price2)){
-                //只有最大价
-                $where_price=['elt',$price2];
-            }
-            //组装 
-            if(!empty($where_price)){
-                $where['p.'.$data['price']]=$where_price;
-            }
-            
-        }
-        
-        
-        //重量体积
-        $bigs=[
-            'big0'=>'重量体积',
-            'weight0'=>'净重量',
-            'size0'=>'净体积',
-            'weight1'=>'毛重量',
-            'size1'=>'毛体积',
-            
-        ];
-        $this->assign('bigs',$bigs);
-        if(empty($data['big']) || $data['big']=='big0'){
-            $data['big']='big0';
-            $data['big1']='';
-            $data['big2']='';
-            
-        }else{
-            
-            //判断处理重量体积参数
-            if(!isset($data['big1']) || $data['big1']==''){
-                $data['big1']=='';
-                
-            }else{
-                $big1=0;
-                $data['big1']=round($data['big1'],2);
-                $big1=$data['big1'];
-                if($big1<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            if(!isset($data['big2']) || $data['big2']==''){
-                $data['big2']=='';
-                
-            }else{
-                $big2=0;
-                $data['big2']=round($data['big2'],2);
-                $big2=$data['big2'];
-                if($big2<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($big1)){
-                if(isset($big2)){
-                    //最大最小重量体积都有
-                    if($big2<$big1){
-                        $this->error('最大重量体积不能小于最小重量体积');
-                    }
-                    $where_big=['between',[$big1,$big2]];
-                }else{
-                    //最小重量体积
-                    $where_big=['egt',$big1];
-                }
-            }elseif(isset($big2)){
-                //只有最大价
-                $where_big=['elt',$big2];
-            }
-            //组装 
-            if(!empty($where_big)){
-                $where['p.'.$data['big']]=$where_big;
-            }
-        }
-        //查询字段
-        $types=config('goods_search');
-        //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
-        //搜索类型
-        $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(!isset($data['name']) || $data['name']==''){
-            $data['name']='';
-        }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
-        
-        //时间类别
-        $times=config('time1_search');
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where['p.'.$data['time']]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where['p.'.$data['time']]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
-                }
             }
         }
         //主产品还是副产品 
@@ -792,18 +602,7 @@ class AdminGoodsController extends AdminBaseController
         $this->assign('list',$list);
         
         $this->assign('data',$data);
-        $this->assign('types',$types);
-        $this->assign('times',$times);
-        $this->assign("search_types", $search_types);
-        //分类
-        $this->cates();
-        $this->assign('cid0',$data['cid0']);
-        $this->assign('cid',$data['cid']);
-        $this->assign('select_class','form-control');
-        //品牌
-        $this->brands();
-        $this->assign('bchar',$data['bchar']);
-        $this->assign('brand',$data['brand']);
+        
         
         return $this->fetch();
     }
@@ -836,40 +635,9 @@ class AdminGoodsController extends AdminBaseController
         if($admin['shop']!=1){
             $where['gl.shop']=['eq',$admin['shop']];
         }
-        
-        //状态
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
-        
-        
-        //一级分类
-        if(empty($data['cid0'])){
-            $data['cid0']=0;
-        }else{
-            $where['p.cid0']=['eq',$data['cid0']];
-        }
-        //二级分类
-        if(empty($data['cid'])){
-            $data['cid']=0;
-        }else{
-            $where['p.cid']=['eq',$data['cid']];
-        }
-        
-        //品牌分类
-        if(empty($data['bchar']) || $data['bchar']==-1){
-            $data['bchar']=-1;
-        }else{
-            $where['p.bchar']=['eq',$data['bchar']];
-        }
-        //品牌
-        if(empty($data['brand'])){
-            $data['brand']=0;
-        }else{
-            $where['p.brand']=['eq',$data['brand']];
-        }
+        $tmp=$this->search($where, $data);
+        $where=$tmp['where'];
+        $data=$tmp['data'];
         //关联设备数
         $goods_links=[
             '-1'=>'关联设备',
@@ -909,197 +677,12 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $about=$file_type[$data['about_link']][0];
             switch($data['about_link_num']){
-                case -1:
-                    break;
                 case 3:
                     $where['p.'.$about]=['egt',3];
                     break;
                 default:
                     $where['p.'.$about]=['eq',$data['about_link_num']];
                     break;
-            }
-        }
-        //价格
-        $prices=[
-            'price0'=>'价格',
-            'price_sale'=>'零售价格',
-            'price_in'=>'入库价',
-            'price_cost'=>'出厂价',
-            'price_min'=>'最低销售价',
-            'price_range1'=>'区间价1',
-            'price_range2'=>'区间价2',
-            'price_range3'=>'区间价3',
-            'price_dealer1'=>'经销价1',
-            'price_dealer2'=>'经销价2',
-            'price_dealer3'=>'经销价3',
-            'price_trade'=>'同行价',
-            'price_factory'=>'工程配套价',
-        ];
-        $this->assign('prices',$prices);
-        if(empty($data['price']) || $data['price']=='price0'){
-            $data['price']='price0';
-            $data['price1']='';
-            $data['price2']='';
-        }else{
-            
-            //判断处理价格参数
-            if(!isset($data['price1']) || $data['price1']==''){
-                $data['price1']=='';
-                
-            }else{
-                $price1=0;
-                $data['price1']=round($data['price1'],2);
-                $price1=$data['price1'];
-                if($price1<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            if(!isset($data['price2']) || $data['price2']==''){
-                $data['price2']=='';
-                
-            }else{
-                $price2=0;
-                $data['price2']=round($data['price2'],2);
-                $price2=$data['price2'];
-                if($price2<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($price1)){
-                if(isset($price2)){
-                    //最大最小价格都有
-                    if($price2<$price1){
-                        $this->error('最大价格不能小于最小价格');
-                    }
-                    $where_price=['between',[$price1,$price2]];
-                }else{
-                    //最小价格
-                    $where_price=['egt',$price1];
-                }
-            }elseif(isset($price2)){
-                //只有最大价
-                $where_price=['elt',$price2];
-            }
-            //组装
-            if(!empty($where_price)){
-                $where['p.'.$data['price']]=$where_price;
-            }
-            
-        }
-        
-        
-        //重量体积
-        $bigs=[
-            'big0'=>'重量体积',
-            'weight0'=>'净重量',
-            'size0'=>'净体积',
-            'weight1'=>'毛重量',
-            'size1'=>'毛体积',
-            
-        ];
-        $this->assign('bigs',$bigs);
-        if(empty($data['big']) || $data['big']=='big0'){
-            $data['big']='big0';
-            $data['big1']='';
-            $data['big2']='';
-            
-        }else{
-            
-            //判断处理重量体积参数
-            if(!isset($data['big1']) || $data['big1']==''){
-                $data['big1']=='';
-                
-            }else{
-                $big1=0;
-                $data['big1']=round($data['big1'],2);
-                $big1=$data['big1'];
-                if($big1<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            if(!isset($data['big2']) || $data['big2']==''){
-                $data['big2']=='';
-                
-            }else{
-                $big2=0;
-                $data['big2']=round($data['big2'],2);
-                $big2=$data['big2'];
-                if($big2<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($big1)){
-                if(isset($big2)){
-                    //最大最小重量体积都有
-                    if($big2<$big1){
-                        $this->error('最大重量体积不能小于最小重量体积');
-                    }
-                    $where_big=['between',[$big1,$big2]];
-                }else{
-                    //最小重量体积
-                    $where_big=['egt',$big1];
-                }
-            }elseif(isset($big2)){
-                //只有最大价
-                $where_big=['elt',$big2];
-            }
-            //组装
-            if(!empty($where_big)){
-                $where['p.'.$data['big']]=$where_big;
-            }
-        }
-        //查询字段
-        $types=config('goods_search');
-        //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
-        //搜索类型
-        $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(!isset($data['name']) || $data['name']==''){
-            $data['name']='';
-        }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
-        
-        //时间类别
-        $times=config('time1_search');
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where['p.'.$data['time']]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where['p.'.$data['time']]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
-                }
             }
         }
         //主产品还是副产品
@@ -1139,18 +722,7 @@ class AdminGoodsController extends AdminBaseController
         $this->assign('list',$list);
         
         $this->assign('data',$data);
-        $this->assign('types',$types);
-        $this->assign('times',$times);
-        $this->assign("search_types", $search_types);
-        //分类
-        $this->cates();
-        $this->assign('cid0',$data['cid0']);
-        $this->assign('cid',$data['cid']);
-        $this->assign('select_class','form-control');
-        //品牌
-        $this->brands();
-        $this->assign('bchar',$data['bchar']);
-        $this->assign('brand',$data['brand']);
+        
         
         return $this->fetch();
     }
@@ -1181,39 +753,9 @@ class AdminGoodsController extends AdminBaseController
             $where['gl.shop']=['eq',$admin['shop']];
         }
         
-        //状态
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
-        
-        
-        //一级分类
-        if(empty($data['cid0'])){
-            $data['cid0']=0;
-        }else{
-            $where['p.cid0']=['eq',$data['cid0']];
-        }
-        //二级分类
-        if(empty($data['cid'])){
-            $data['cid']=0;
-        }else{
-            $where['p.cid']=['eq',$data['cid']];
-        }
-        
-        //品牌分类
-        if(empty($data['bchar']) || $data['bchar']==-1){
-            $data['bchar']=-1;
-        }else{
-            $where['p.bchar']=['eq',$data['bchar']];
-        }
-        //品牌
-        if(empty($data['brand'])){
-            $data['brand']=0;
-        }else{
-            $where['p.brand']=['eq',$data['brand']];
-        }
+        $tmp=$this->search($where, $data);
+        $where=$tmp['where'];
+        $data=$tmp['data'];
         //关联设备数
         $goods_links=[
             '-1'=>'关联设备',
@@ -1253,197 +795,12 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $about=$file_type[$data['about_link']][0];
             switch($data['about_link_num']){
-                case -1:
-                    break;
                 case 3:
                     $where['p.'.$about]=['egt',3];
                     break;
                 default:
                     $where['p.'.$about]=['eq',$data['about_link_num']];
                     break;
-            }
-        }
-        //价格
-        $prices=[
-            'price0'=>'价格',
-            'price_sale'=>'零售价格',
-            'price_in'=>'入库价',
-            'price_cost'=>'出厂价',
-            'price_min'=>'最低销售价',
-            'price_range1'=>'区间价1',
-            'price_range2'=>'区间价2',
-            'price_range3'=>'区间价3',
-            'price_dealer1'=>'经销价1',
-            'price_dealer2'=>'经销价2',
-            'price_dealer3'=>'经销价3',
-            'price_trade'=>'同行价',
-            'price_factory'=>'工程配套价',
-        ];
-        $this->assign('prices',$prices);
-        if(empty($data['price']) || $data['price']=='price0'){
-            $data['price']='price0';
-            $data['price1']='';
-            $data['price2']='';
-        }else{
-            
-            //判断处理价格参数
-            if(!isset($data['price1']) || $data['price1']==''){
-                $data['price1']=='';
-                
-            }else{
-                $price1=0;
-                $data['price1']=round($data['price1'],2);
-                $price1=$data['price1'];
-                if($price1<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            if(!isset($data['price2']) || $data['price2']==''){
-                $data['price2']=='';
-                
-            }else{
-                $price2=0;
-                $data['price2']=round($data['price2'],2);
-                $price2=$data['price2'];
-                if($price2<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($price1)){
-                if(isset($price2)){
-                    //最大最小价格都有
-                    if($price2<$price1){
-                        $this->error('最大价格不能小于最小价格');
-                    }
-                    $where_price=['between',[$price1,$price2]];
-                }else{
-                    //最小价格
-                    $where_price=['egt',$price1];
-                }
-            }elseif(isset($price2)){
-                //只有最大价
-                $where_price=['elt',$price2];
-            }
-            //组装
-            if(!empty($where_price)){
-                $where['p.'.$data['price']]=$where_price;
-            }
-            
-        }
-        
-        
-        //重量体积
-        $bigs=[
-            'big0'=>'重量体积',
-            'weight0'=>'净重量',
-            'size0'=>'净体积',
-            'weight1'=>'毛重量',
-            'size1'=>'毛体积',
-            
-        ];
-        $this->assign('bigs',$bigs);
-        if(empty($data['big']) || $data['big']=='big0'){
-            $data['big']='big0';
-            $data['big1']='';
-            $data['big2']='';
-            
-        }else{
-            
-            //判断处理重量体积参数
-            if(!isset($data['big1']) || $data['big1']==''){
-                $data['big1']=='';
-                
-            }else{
-                $big1=0;
-                $data['big1']=round($data['big1'],2);
-                $big1=$data['big1'];
-                if($big1<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            if(!isset($data['big2']) || $data['big2']==''){
-                $data['big2']=='';
-                
-            }else{
-                $big2=0;
-                $data['big2']=round($data['big2'],2);
-                $big2=$data['big2'];
-                if($big2<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($big1)){
-                if(isset($big2)){
-                    //最大最小重量体积都有
-                    if($big2<$big1){
-                        $this->error('最大重量体积不能小于最小重量体积');
-                    }
-                    $where_big=['between',[$big1,$big2]];
-                }else{
-                    //最小重量体积
-                    $where_big=['egt',$big1];
-                }
-            }elseif(isset($big2)){
-                //只有最大价
-                $where_big=['elt',$big2];
-            }
-            //组装
-            if(!empty($where_big)){
-                $where['p.'.$data['big']]=$where_big;
-            }
-        }
-        //查询字段
-        $types=config('goods_search');
-        //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
-        //搜索类型
-        $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(!isset($data['name']) || $data['name']==''){
-            $data['name']='';
-        }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
-        
-        //时间类别
-        $times=config('time1_search');
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where['p.'.$data['time']]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where['p.'.$data['time']]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
-                }
             }
         }
         //主产品还是副产品
@@ -1487,19 +844,7 @@ class AdminGoodsController extends AdminBaseController
         $this->assign('list',$list);
         
         $this->assign('data',$data);
-        $this->assign('types',$types);
-        $this->assign('times',$times);
-        $this->assign("search_types", $search_types);
-        //分类
-        $this->cates();
-        $this->assign('cid0',$data['cid0']);
-        $this->assign('cid',$data['cid']);
-        $this->assign('select_class','form-control');
-        //品牌
-        $this->brands();
-        $this->assign('bchar',$data['bchar']);
-        $this->assign('brand',$data['brand']);
-        
+         
         return $this->fetch();
     }
     /**
@@ -1529,40 +874,9 @@ class AdminGoodsController extends AdminBaseController
         if($admin['shop']!=1){
             $where['gl.shop']=['eq',$admin['shop']];
         }
-        
-        //状态
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
-        
-        
-        //一级分类
-        if(empty($data['cid0'])){
-            $data['cid0']=0;
-        }else{
-            $where['p.cid0']=['eq',$data['cid0']];
-        }
-        //二级分类
-        if(empty($data['cid'])){
-            $data['cid']=0;
-        }else{
-            $where['p.cid']=['eq',$data['cid']];
-        }
-        
-        //品牌分类
-        if(empty($data['bchar']) || $data['bchar']==-1){
-            $data['bchar']=-1;
-        }else{
-            $where['p.bchar']=['eq',$data['bchar']];
-        }
-        //品牌
-        if(empty($data['brand'])){
-            $data['brand']=0;
-        }else{
-            $where['p.brand']=['eq',$data['brand']];
-        }
+        $tmp=$this->search($where, $data);
+        $where=$tmp['where'];
+        $data=$tmp['data'];
         //关联设备数
         $goods_links=[
             '-1'=>'标签数量',
@@ -1584,8 +898,6 @@ class AdminGoodsController extends AdminBaseController
                     break;
             }
         }
-        
-        
         //关联资料数
         $file_type=$this->file_type;
         $about_link_nums=[
@@ -1598,8 +910,7 @@ class AdminGoodsController extends AdminBaseController
         $this->assign('about_link_nums',$about_link_nums);
         if(empty($data['about_link']) || !isset($data['about_link_num']) || $data['about_link_num']==-1){
             $data['about_link']=0;
-            $data['about_link_num']=-1;
-            
+            $data['about_link_num']=-1; 
         }else{
             $about=$file_type[$data['about_link']][0];
             switch($data['about_link_num']){
@@ -1613,189 +924,8 @@ class AdminGoodsController extends AdminBaseController
                     break;
             }
         }
-        //价格
-        $prices=[
-            'price0'=>'价格',
-            'price_sale'=>'零售价格',
-            'price_in'=>'入库价',
-            'price_cost'=>'出厂价',
-            'price_min'=>'最低销售价',
-            'price_range1'=>'区间价1',
-            'price_range2'=>'区间价2',
-            'price_range3'=>'区间价3',
-            'price_dealer1'=>'经销价1',
-            'price_dealer2'=>'经销价2',
-            'price_dealer3'=>'经销价3',
-            'price_trade'=>'同行价',
-            'price_factory'=>'工程配套价',
-        ];
-        $this->assign('prices',$prices);
-        if(empty($data['price']) || $data['price']=='price0'){
-            $data['price']='price0';
-            $data['price1']='';
-            $data['price2']='';
-        }else{
-            
-            //判断处理价格参数
-            if(!isset($data['price1']) || $data['price1']==''){
-                $data['price1']=='';
-                
-            }else{
-                $price1=0;
-                $data['price1']=round($data['price1'],2);
-                $price1=$data['price1'];
-                if($price1<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            if(!isset($data['price2']) || $data['price2']==''){
-                $data['price2']=='';
-                
-            }else{
-                $price2=0;
-                $data['price2']=round($data['price2'],2);
-                $price2=$data['price2'];
-                if($price2<0){
-                    $this->error('价格不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($price1)){
-                if(isset($price2)){
-                    //最大最小价格都有
-                    if($price2<$price1){
-                        $this->error('最大价格不能小于最小价格');
-                    }
-                    $where_price=['between',[$price1,$price2]];
-                }else{
-                    //最小价格
-                    $where_price=['egt',$price1];
-                }
-            }elseif(isset($price2)){
-                //只有最大价
-                $where_price=['elt',$price2];
-            }
-            //组装
-            if(!empty($where_price)){
-                $where['p.'.$data['price']]=$where_price;
-            }
-            
-        }
         
-        
-        //重量体积
-        $bigs=[
-            'big0'=>'重量体积',
-            'weight0'=>'净重量',
-            'size0'=>'净体积',
-            'weight1'=>'毛重量',
-            'size1'=>'毛体积',
-            
-        ];
-        $this->assign('bigs',$bigs);
-        if(empty($data['big']) || $data['big']=='big0'){
-            $data['big']='big0';
-            $data['big1']='';
-            $data['big2']='';
-            
-        }else{
-            
-            //判断处理重量体积参数
-            if(!isset($data['big1']) || $data['big1']==''){
-                $data['big1']=='';
-                
-            }else{
-                $big1=0;
-                $data['big1']=round($data['big1'],2);
-                $big1=$data['big1'];
-                if($big1<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            if(!isset($data['big2']) || $data['big2']==''){
-                $data['big2']=='';
-                
-            }else{
-                $big2=0;
-                $data['big2']=round($data['big2'],2);
-                $big2=$data['big2'];
-                if($big2<0){
-                    $this->error('重量体积不能小于0');
-                }
-            }
-            //判断查询条件
-            if(isset($big1)){
-                if(isset($big2)){
-                    //最大最小重量体积都有
-                    if($big2<$big1){
-                        $this->error('最大重量体积不能小于最小重量体积');
-                    }
-                    $where_big=['between',[$big1,$big2]];
-                }else{
-                    //最小重量体积
-                    $where_big=['egt',$big1];
-                }
-            }elseif(isset($big2)){
-                //只有最大价
-                $where_big=['elt',$big2];
-            }
-            //组装
-            if(!empty($where_big)){
-                $where['p.'.$data['big']]=$where_big;
-            }
-        }
-        //查询字段
-        $types=config('goods_search');
-        //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
-        //搜索类型
-        $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(!isset($data['name']) || $data['name']==''){
-            $data['name']='';
-        }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
-        
-        //时间类别
-        $times=config('time1_search');
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where['p.'.$data['time']]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where['p.'.$data['time']]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
-                }
-            }
-        }
+         
         //主产品还是副产品
         if(empty($data['is_link'])){
             $data['is_link']=0;
@@ -1833,22 +963,91 @@ class AdminGoodsController extends AdminBaseController
         $this->assign('list',$list);
         
         $this->assign('data',$data);
-        $this->assign('types',$types);
-        $this->assign('times',$times);
-        $this->assign("search_types", $search_types);
-        //分类
-        $this->cates();
-        $this->assign('cid0',$data['cid0']);
-        $this->assign('cid',$data['cid']);
-        $this->assign('select_class','form-control');
-        //品牌
-        $this->brands();
-        $this->assign('bchar',$data['bchar']);
-        $this->assign('brand',$data['brand']);
         
         return $this->fetch();
     }
-    
+    /**
+     * 一货一码查询
+     * @adminMenu(
+     *     'name'   => '一货一码查询',
+     *     'parent' => 'goods/AdminIndex/default',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 6,
+     *     'icon'   => '',
+     *     'remark' => '一货一码查询',
+     *     'param'  => ''
+     * )
+     */
+    public function link_sn()
+    {
+        
+        $admin=$this->admin;
+        
+        $m=$this->m;
+        $data=$this->request->param();
+        $admin=$this->admin;
+        $where=[];
+        
+        //查询字段
+        $types=[
+            1=>['p.name','全名'], 
+            3=>['p.code_name' , '同级名称'],
+            4=>['p.name2' , '商城名称'],
+            5=>['p.name3' , '打印名称'],
+            11=>['gs.sn','条码'],
+            6=>['p.id' , '产品id'],
+            7=>['p.aid' , '创建人id'], 
+            9=>['p.rid' , '审核人id'], 
+        ];
+        
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=1;
+        }
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        if(!isset($data['name']) || $data['name']==''){
+            $data['name']='';
+        }else{
+            $where[$types[$data['type1']][0]]=zz_search($data['type2'],$data['name']);
+        }
+        $this->assign('types',$types);
+        $this->assign("search_types", $search_types);
+        //
+        $fields='gs.*,p.name as goods_name,p.code as goods_code,p.time as goods_time'.
+                ',shop.name as shop_name,si.type,si.about,si.about_name,si.atime,si.rtime';
+        $list=Db::name('goods_sn')
+        ->alias('gs')
+        ->join('cmf_goods p','p.id=gs.goods')
+        ->join('cmf_store_in si','si.id=gs.store_in')
+        ->join('cmf_shop shop','shop.id=gs.shop')
+        ->field($fields)
+        ->where($where)
+        ->order('gs.goods asc,gs.store_in desc')
+        ->paginate();
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+         
+        
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        $this->assign('store_in_types',config('store_in_type'));
+        $this->assign('goods_url',url('goods/AdminGoods/edit',false,false));
+        $this->assign('image_url',cmf_get_image_url(''));
+        $this->assign('order_url',url('ordersup/AdminOrdersup/edit',false,false));
+        $this->assign('store_in_url',url('store/AdminStorein/edit',false,false));
+       
+        return $this->fetch();
+    }
     /**
      * 产品技术资料列表
      * @adminMenu(

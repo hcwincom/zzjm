@@ -57,6 +57,10 @@ class AdminIndexController extends AdminBaseController
     public function index()
     {
         $where   = ['user_type'=>2];
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            $where['shop']= $admin['shop'];
+        }
         $request = input('request.');
 
         if (!empty($request['uid'])) {

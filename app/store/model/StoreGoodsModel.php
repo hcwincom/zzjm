@@ -47,7 +47,9 @@ class StoreGoodsModel extends Model
                 return '库存不足，请选择其他产品或仓库';
             }
             //入库记录
-            Db::name('store_in')->insert($data);
+            $store_in_id=Db::name('store_in')->insertGetId($data);
+        }else{
+            $store_in_id=1;
         }
         if(empty($tmp)){ 
             //不存在，要添加.总库存也要添加
@@ -89,7 +91,7 @@ class StoreGoodsModel extends Model
             
         }
        
-        return 1;
+        return $store_in_id;
     }
     /**
      * 审核同意入库
@@ -98,7 +100,7 @@ class StoreGoodsModel extends Model
      * @param number $box
      * @return string|number
      *  */
-    public function instore2($info,$box=0){
+    public function instore2($info,$box=0,$sns=''){
         //未选择料位则自动选择
         $m_box=Db::name('store_box');
         if($box==0){
@@ -125,7 +127,41 @@ class StoreGoodsModel extends Model
         if($row!==1){ 
             return '料位信息更新失败，请刷新后重试';
         }
-      
+        //一货一码
+        if(!empty($sns)){
+            $m_goods_sn=Db::name('goods_sn');
+            $sns=explode(',', $sns);
+            //去除重复
+            $sns=array_unique($sns);
+            $sns0=$m_goods_sn->where('store_in',$info['id'])->column('sn');
+            //不要的去掉
+            $sn_delete=array_diff($sns0, $sns);
+            if(!empty($sn_delete[0])){
+                $where_delete=[
+                    'store_in'=>$info['id'],
+                    'sn'=>['in',$sn_delete]
+                ];
+                $m_goods_sn->where($where_delete)->delete();
+            }
+            //新增
+            $sn_add=array_diff($sns,$sns0);
+            if(!empty($sn_add[0])){
+                $data_sn=[];
+                foreach($sn_add as $v){
+                    if(empty($v)){
+                        continue;
+                    }
+                    $data_sn[]=[
+                        'sn'=>$v,
+                        'store_in'=>$info['id'],
+                        'shop'=>$info['shop'],
+                        'goods'=>$info['goods'],
+                    ];
+                }
+                $m_goods_sn->insertAll($data_sn);
+            }
+            
+        }
         $where=[ 
             'goods'=>$info['goods'],
             'shop'=>$info['shop'],
