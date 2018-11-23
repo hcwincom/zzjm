@@ -143,7 +143,8 @@ class AdminOrderController extends AdminInfo0Controller
         }
         
         //时间类别
-        $times=config('time1_search');
+        $times=config('order_time');
+        
         if(empty($data['time'])){
             $data['time']=key($times);
             $data['datetime1']='';
@@ -159,21 +160,21 @@ class AdminOrderController extends AdminInfo0Controller
                 }else{
                     //只有结束时间
                     $time2=strtotime($data['datetime2']);
-                    $where['p.'.$data['time']]=['elt',$time2];
+                    $where[$times[$data['time']][0]]=['elt',$time2];
                 }
             }else{
                 //有开始时间
                 $time1=strtotime($data['datetime1']);
                 if(empty($data['datetime2'])){
                     $data['datetime2']='';
-                    $where['p.'.$data['time']]=['egt',$time1];
+                    $where[$times[$data['time']][0]]=['egt',$time1];
                 }else{
                     //有结束时间有开始时间between
                     $time2=strtotime($data['datetime2']);
                     if($time2<=$time1){
                         $this->error('结束时间必须大于起始时间');
                     }
-                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
+                    $where[$times[$data['time']][0]]=['between',[$time1,$time2]];
                 }
             }
         }

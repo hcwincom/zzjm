@@ -11,16 +11,20 @@ use app\store\model\StoreGoodsModel;
 
 class AdminTaobaoController extends AdminBaseController
 {
-    
+    private $m;
+    private $flag;
+    private $table;
+    private $order_type;
+   
+   
     public function _initialize()
     {
         parent::_initialize();
-        //没有店铺区分
-        $this->isshop=1;
+       
         $this->flag='订单';
         $this->table='order';
         $this->m=new OrderModel();
-       
+        $this->order_type=3;
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
          
@@ -43,7 +47,7 @@ class AdminTaobaoController extends AdminBaseController
         error_reporting(0);
         
         set_time_limit(0);
-        exit('add');
+       
         header("Content-type: text/html; charset=utf-8");
         $admin=$this->admin;
         $shop=($admin['shop']==1)?2:$admin['shop'];
@@ -52,24 +56,17 @@ class AdminTaobaoController extends AdminBaseController
             'type'=>2,
             'status'=>2,
         ];
-        $companys=Db::name('company')->where()->column('id,key_account,key_key');
-        $order_type=3;
+        $companys=Db::name('company')->where($where)->column('id,name,key_account,key_key');
+        $order_type=$this->order_type;
+      
+       
         $log='taobao.log';
       
         $m_store_goods=new StoreGoodsModel();
-//         $fields = "tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time"; 
-        $fields = "tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time"; 
-        $fields_info = "tid,orders,receiver_name,receiver_state,receiver_city,receiver_district,receiver_town,'.
-        'receiver_address,receiver_mobile,receiver_phone,buyer_message,buyer_memo,invoice_name,invoice_type,buyer_cod_fee";
-     
- 
-//批量查询只能得到是否有买家留言，发票类型也得不到
-        //buyer_message	String	要送的礼物的，不要忘记的哦	买家留言
-        //buyer_memo	String	上衣要大一号	买家备注（与淘宝网上订单的买家备注对应，只有买家才能查看该字段）
-        //invoice_name	String	淘宝	发票抬头
-//         invoice_type	String	水果，图书	发票类型 
-//货到付款服务费暂时不计算
-//         buyer_cod_fee	String	12.07	买家货到付款服务费。精确到2位小数;单位:元。如:12.07，表示:12元7分
+//      
+        $fields = 'tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time,'.
+            'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
+          
         $time=time();
         $time_start=$time-24*3600*30;
         $date_start=date('Y-m-d',$time_start);
@@ -86,9 +83,8 @@ class AdminTaobaoController extends AdminBaseController
         $oids=$m->where($where)->column('name,id,status,pay_status,paytype,pay_type,order_amount','name');
         $m->startTrans();
         foreach($companys as $k=>$v){
-            $ak0=$v['key_account'];
-            $as0=$v['key_key']; 
-            $client = new Taobao($ak0, $as0); 
+           
+            $client = new Taobao($v['key_account'], $v['key_key']); 
             $status = ""; 
             $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
             
@@ -96,103 +92,47 @@ class AdminTaobaoController extends AdminBaseController
             $state=intval($order);
             //返回状态失败
             if($state!=200){
-                zz_log('分公司'.$k.'淘宝同步失败'.$order,$log);
+                echo '分公司'.$v['name'].'淘宝同步失败';
+                zz_log('分公司'.$v['name'].'淘宝同步失败'.$order,$log);
                 continue;
             } 
             $order=str_replace($state,'',$order);
             $json=json_decode($order,true);
-            zz_log('分公司'.$k.'淘宝同步数'.$json['trades_sold_get_response']['total_results'],$log);
-            //要废弃出入库的id
-            $oids_close=[];
+            zz_log('分公司'.$v['name'].'淘宝同步数'.$json['trades_sold_get_response']['total_results'],$log);
+            
             //所有的订单
             $trades=$json['trades_sold_get_response']['trades']['trade'];
            
             foreach($trades as $kk=>$vv){
+                
                 //订单已存在
                 $update_order=[];
                 $where_order=['id'=>$oids[$vv['tid']]['id']];
                 if(isset($oids[$vv['tid']])){
+                    $oid=$oids[$vv['tid']]['id'];
                     //要比较订单状态和产品
                     //根据订单状态比较
-                    switch ($vv['status']){
-                        case 'WAIT_SELLER_SEND_GOODS':
-                            //等待卖家发货,即:买家已付款)
-                            if($oids[$vv['tid']]['status']==10){
-                                //付款了要状态修改
-                                $update_order['pay_status']=3;
-                                $update_order['status']=20;
-                                $update_order['sort']=10;
-                            } 
-                            break;
-                        case 'TRADE_CLOSED_BY_TAOBAO':
-                            //付款以前，卖家或买家主动关闭交易) 
-                            if($oids[$vv['tid']]['status']>=80){
-                                //'已废弃', 
-                                continue; 
-                            }else{
-                                $update_order['status']=80;
-                                $update_order['pay_status']=1;
-                                $update_order['sort']=0;
-                                
-                            }
-                            break;
-                        case 'TRADE_BUYER_SIGNED':
-                            //买家已签收,货到付款专用) 
-                            if($oids[$vv['tid']]['status']==24){
-                                //已收货，货款也到付了,待确认
-                                $update_order['pay_status']=2;
-                                $update_order['status']=26;
-                                $update_order['sort']=5;
-                            } 
-                            break;
-                        case 'TRADE_FINISHED':
-                            //(交易成功) 
-                            if($oids[$vv['tid']]['status']==24 || $oids[$vv['tid']]['status']==26){ 
-                                $update_order['pay_status']=3;
-                                $update_order['status']=30;
-                                $update_order['sort']=0;
-                            }
-                            break;
-                        case 'TRADE_CLOSED':
-                            // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭) 
-                            if($oids[$vv['tid']]['pay_status']==4){ 
-                                $update_order['pay_status']=5;
-                                $update_order['status']=70;
-                                $update_order['sort']=0;
-                            }
-                            break; 
-                    }
-                    //有更新
-                    if(!empty($update_order)){
-                        $m->where($where_order)->update($update_order);
-                        $res=$m->order_storein5($oids[$vv['tid']]['id'],'淘宝同步，取消订单');
-                        if(!($res>0)){
-                            $m->rollback();
-                            exit('淘宝同步，取消订单'.$vv['tid'].'失败,'.$res);
-                        }
-                    } 
+                    $res=$this->order_update($vv,$oids[$vv['tid']]);
+                    if(!($res>0)){
+                        $m->rollback();
+                        exit('淘宝更新订单'.$vv['tid'].'失败,'.$res);
+                    }  
+                    //已存在订单可能有修改价格,暂时不管
                 }else{
                      
-                    $update_order=[
-                        'name'=>$vv['tid'],
-                        'order_type'=>$order_type,
-                        'company'=>$k,
-                        'uid'=>0,
-                        'aid'=>1,
-                        'order_amount'=>$vv['payment'],
-                        'pay_freight'=>$vv['post_fee'],
-                          
-                    ];
-                    $oid=$m->insertGetId($update_order);
+                     //新增 
+                    $oid=$this->order_add($vv,$k,$shop); 
+                    if(!($oid>0)){
+                        $m->rollback();
+                        exit('淘宝增加订单'.$vv['tid'].'失败,'.$oid);
+                    } 
+                    
                 }
-                dump($vv);
-                //237391564163094719
-                $m->commit();
-                exit('订单'.$vv['tid']);
-                exit;
+                
             }
-            exit;
+           
         }
+        $m->commit();
         exit;
             
     }   
@@ -200,12 +140,12 @@ class AdminTaobaoController extends AdminBaseController
      * 根据淘宝订单状态判断是否需要更改
      * @param string $taobao_status
      * @param array $order
-     * @return array|string
+     * @return number|string
      */
-    public function order_status($taobao_status,$order){
+    public function order_update($taobao,$order){
         $update_order=[];
         //根据订单状态比较
-        switch ($taobao_status){
+        switch ($taobao['status']){
             case 'WAIT_SELLER_SEND_GOODS':
                 //等待卖家发货,即:买家已付款)
                 if($order['status']==10){
@@ -253,9 +193,137 @@ class AdminTaobaoController extends AdminBaseController
                 }
                 break;
         }
-        return $update_order;
+        $m=$this->m;
+        if(empty($update_order)){
+            return 1;
+        }else{
+            $m->where('id',$order['id'])->update($update_order); 
+            if(isset($update_order['status']) && $update_order['status']>80){
+                $res=$m->order_storein5($order['id'],'淘宝同步，取消订单');
+                if(!($res>0)){ 
+                    return ('淘宝同步，取消订单'.$order['name'].'失败,'.$res);
+                }
+             }
+        } 
+        return 1;
     }
-   
+    /**
+     * 根据淘宝订单数组组装新增数据
+     * @param array $taobao
+     * @param number $company所属公司
+     * @param number $shop店铺
+     * @return number|string
+     */
+    public function order_add($taobao,$company,$shop=2){
+        //新增
+        $update_order=[
+            'name'=>$taobao['tid'],
+            'order_type'=>$this->order_type,
+            'company'=>$company,
+            'uid'=>0,
+            'aid'=>1,
+            'shop'=>$shop,
+            'order_amount'=>$taobao['payment'],
+            'pay_freight'=>$taobao['post_fee'], 
+            'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.$taobao['receiver_district'],
+            'address'=>$taobao['receiver_address'],
+            'accept_name'=>$taobao['receiver_name'],
+            'mobile'=>$taobao['receiver_mobile'],
+            'pay_time'=>strtotime($taobao['pay_time']),
+            'create_time'=>time(),
+            
+        ];
+        //根据订单状态比较
+        switch ($taobao['status']){
+            case 'WAIT_SELLER_SEND_GOODS':
+                //等待卖家发货,即:买家已付款) 
+                $update_order['pay_status']=3;
+                $update_order['status']=20;
+                $update_order['sort']=10; 
+                break;
+            case 'TRADE_CLOSED_BY_TAOBAO':
+                //付款以前，卖家或买家主动关闭交易) 
+                $update_order['status']=80;
+                $update_order['pay_status']=1;
+                $update_order['sort']=0; 
+                break;
+            case 'TRADE_BUYER_SIGNED':
+                //买家已签收,货到付款专用) 
+                $update_order['pay_status']=2;
+                $update_order['status']=26;
+                $update_order['sort']=5; 
+                break;
+            case 'TRADE_FINISHED':
+                //(交易成功) 
+                $update_order['pay_status']=3;
+                $update_order['status']=30;
+                $update_order['sort']=0; 
+                break;
+            case 'TRADE_CLOSED':
+                // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭) 
+                $update_order['pay_status']=5;
+                $update_order['status']=70;
+                $update_order['sort']=0; 
+                break;
+        }
+        $m=$this->m;
+        $oid=$m->insertGetId($update_order);
+        
+        $iids=[];
+        $goods_add=[];
+        $ogs=$taobao['orders']['order'];
+        foreach($ogs as $k=>$v){
+            
+            $rows=['oid'=>$oid];
+            
+            //outer_sku_id	String	81893848	外部网店自己定义的Sku编号
+            //outer_sku_id
+            //$tmp_goods['goods_code'] = $v['outer_sku_id'];//产品编码
+            //outer_iid	String	152e442aefe88dd41cb0879232c0dcb0
+            //商家外部编码(可与商家外部系统对接)。外部商家自己定义的商品Item的id，可以通过taobao.items.custom.get获取商品的Item的信息
+            //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
+            $rows['goods_code'] = (empty($v['outer_sku_id']))?$v['outer_iid']:$v['outer_sku_id'];//产品编码
+            $iids[]= $rows['goods_code'];
+            
+            $rows['goods_uname'] = $v['title'];//产品名称
+         
+            $rows['goods_ucate']=$v['sku_properties_name'];//产品型号
+            $rows['price_sale'] = $v['price'];//产品单价
+            
+            $rows['num'] = $v['num'];//产品数量
+            $rows['goods_pic'] = $v['pic_path'];//产品数量
+            
+            $rows['price_real'] = $v['divide_order_fee'];//正式价格
+            
+            $rows['pay'] = $v['total_fee'];//产品总价
+          
+            $goods_add[$rows['goods_code']]=$rows;
+        }
+        $where_goods=[
+            'shop'=>['eq',$shop],
+            'code'=>['in',$iids],
+        ];
+        $goods_infos=Db::name('goods')->where($where_goods)->column('code,id,name,name3,price_in');
+        foreach ($goods_add as $k=>$v){
+            if(empty($goods_infos[$k])){
+                $goods_infos[$k]=[
+                    'id'=>1,
+                    'name'=>'name',
+                    'name3'=>'name3',
+                    'price_in'=>'11', 
+                ];
+                return '未找到产品'.$k;
+            }
+            $goods_add[$k]['goods']=$goods_infos[$k]['id'];
+            $goods_add[$k]['goods_name']=$goods_infos[$k]['name'];
+            $goods_add[$k]['print_name']=$goods_infos[$k]['name3'];
+            $goods_add[$k]['price_in']=$goods_infos[$k]['price_in'];
+        }
+        Db::name('order_goods')->insertAll($goods_add);
+       
+        return $oid;
+    }
+    
 }
         //string(12913) "{"trades_sold_get_response":{"total_results":13,"trades":{"trade":[{"modified":"2018-10-23 10
        

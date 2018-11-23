@@ -112,7 +112,7 @@
             <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
-	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
+	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo[1]}</option>
 	        </foreach> 
 	        </select>
 			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">

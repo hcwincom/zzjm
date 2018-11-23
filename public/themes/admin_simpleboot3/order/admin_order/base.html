@@ -304,7 +304,7 @@
      	    		<td>{$vo.goods_code}</td> 
     	    		 
      	   			<td class="tableImg">
-     	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vo.goods_pic});"></div>
+     	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({:cmf_get_image_url($vo.goods_pic)});"></div>
      	   				 <notempty name="goods[$key]['pics']">
      	   				<div class="listposi"> 
      	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
