@@ -13,15 +13,22 @@
     <div class="col-md-6 col-sm-10">
         <foreach name="param_types" item="vo">
             <label class="radio-inline">
-                <input type="radio" name="type" value="{$key}" required/>{$vo}
+                <input type="radio" name="type" value="{$key}" <if condition="$key eq $info.type">checked</if> required/>{$vo}
             </label>
         </foreach>
+        <present name='change.type'>
+         	<span class="red">{$param_types[$change.type]|default='未知类型'}</span> 
+        </present>
     </div>
 </div>
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">可选数据(用,分隔)</label>
     <div class="col-md-6 col-sm-10">
-        <textarea class="form-control" name="content" rows="5"  maxlength="250"></textarea>
+        <textarea class="form-control" name="content" rows="5"  maxlength="250">{$info.content}</textarea>
+        <present name='change.content'>
+          <textarea class="form-control red" name="content" rows="5"  maxlength="250">{$change.content}</textarea>
+           
+        </present>
     </div>
 </div>
 <div class="form-group">

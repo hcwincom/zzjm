@@ -52,7 +52,7 @@ class OldController extends AdminBaseController
             '产品分类同步'=>url('cate'),
             '产品分类数据更正'=>url('cate_correct'),
             '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
-            '所属公司+付款银行+付款类型'=>url('sys'),
+            '付款银行+付款类型'=>url('sys'),
             '(客户/供货商)联系人+对应付款账号+物流公司对应联系人和账号'=>url('tel'),
             '客户(同步分类和主体，关联联系人和付款账号)'=>url('custom'), 
             '供货商(同步分类和主体，关联联系人和付款账号)'=>url('supplier'),   
@@ -320,17 +320,17 @@ class OldController extends AdminBaseController
     {
         //  '所属公司+付款银行+付款类型 
         $m_old=Db::connect($this->db_old);
-        $sql='select id,company as name,code,allname,account_name,account_bank,account_num,feenum,contact,address'.
-            ' from sp_company ';
-        $data=$m_old->query($sql); 
-        $m_new=Db::name('company');
-        //开启事务
-        $m_new->startTrans();
-        //先截取旧数据
-        $m_new->execute('truncate table cmf_company');
-        $row_mew=$m_new->insertAll($data); 
-        
-        $m_new->where($this->where_corrects)->update($this->corrects);
+        //2018-11-22添加了淘宝关联，数据结构已变化
+//         $sql='select id,company as name,code,allname,account_name,account_bank,account_num,feenum,contact,address'.
+//             ' from sp_company ';
+//         $data=$m_old->query($sql); 
+//         $m_new=Db::name('company');
+//         //开启事务
+//         $m_new->startTrans();
+//         //先截取旧数据
+//         $m_new->execute('truncate table cmf_company');
+//         $row_mew=$m_new->insertAll($data);  
+//         $m_new->where($this->where_corrects)->update($this->corrects);
         
         //转账银行
         $sql='select id,bank_name as name'.
@@ -523,7 +523,7 @@ class OldController extends AdminBaseController
         $time=time();
         foreach($data as $k=>$v){
             if(empty($v['name'])){
-                continue;
+               continue;
             }
             
             //组装数据
@@ -574,7 +574,7 @@ class OldController extends AdminBaseController
                    break;
            }
             //客户编号
-            $tmp['code']='KF-'.
+            $tmp['code']='KH-'.
                 str_pad($tmp['city_code'], 4,'0',STR_PAD_LEFT).'-'.
                 str_pad($tmp['code_num'], 3,'0',STR_PAD_LEFT);
             

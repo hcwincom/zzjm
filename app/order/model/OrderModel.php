@@ -440,12 +440,8 @@ class OrderModel extends Model
                  //产品新增
                  if(isset($vo['goods'])){ 
                      foreach($vo['goods'] as $kgoods_id=>$vgoods){
-                         $vgoods['oid']=$tmp_oid;
-                         $vgoods['weight1']=bcdiv($vgoods['weight'],$vgoods['num'],2);
-                         $vgoods['size1']=bcdiv($vgoods['size'],$vgoods['num'],2);
-                         $vgoods['weight1']=($vgoods['weight1']<=0.01)?0.01:$vgoods['weight1'];
-                         $vgoods['size1']=($vgoods['size1']<=0.01)?0.01:$vgoods['size1'];
-                         $goods_adds[]=$vgoods;  
+                         $vgoods['oid']=$tmp_oid; 
+                         $goods_adds[]=$vgoods;
                      } 
                  } 
              }
@@ -843,9 +839,7 @@ class OrderModel extends Model
              if($is_auth==false){
                  $v['price_in']='--';
              }
-             $v['weight1']=bcdiv($v['weight'],$v['num'],2);
-             $v['size1']=bcdiv($v['size'],$v['num'],2);
-             
+ 
              $infos[$v['oid']][$v['goods']]=$v;
          }
          

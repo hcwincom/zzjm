@@ -17,7 +17,7 @@ class AdminCompanyController extends AdminInfo0Controller
         $this->table='company';
         $this->m=Db::name('company');
         $this->edit=['name','sort','dsc','code','allname','account_name','account_bank','account_num',
-            'feenum','contact','address',
+            'feenum','contact','address','type','key_account','key_key'
         ];
         $this->search=[
             'name' => '公司名称',
@@ -30,6 +30,7 @@ class AdminCompanyController extends AdminInfo0Controller
         $this->isshop=1;
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
+        $this->assign('company_type',config('company_type'));
         
     }
     /**

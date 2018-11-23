@@ -87,11 +87,10 @@ class AdminCateController extends GoodsBaseController
         }else{
             $fid=$info['fid'];
         }
-        $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
         
         $this->assign('fid',$fid);
         $this->assign('info',null);
-        $this->assign('cates',$cates);
+        $this->cates();
         return $this->fetch();
     }
     /**
@@ -474,12 +473,11 @@ class AdminCateController extends GoodsBaseController
         //获取改变的信息  
         $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
-        $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
-        
+       
         $this->assign('fid',$info['fid']);
         $this->assign('info',$info);
         $this->assign('info1',$info1);
-        $this->assign('cates',$cates);
+        $this->cates();
         $this->assign('change',$change);
         return $this->fetch();
     }
@@ -712,7 +710,14 @@ class AdminCateController extends GoodsBaseController
         parent::del_all();
         
     }
-     
+    
+    public function cates($type=3){
+        parent::cates($type);
+        $m=$this->m;
+        $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
+         
+        $this->assign('cates',$cates);
+    }
     //获取同级分类编码
     public function cid_change(){
         $id=$this->request->param('id',0,'intval');

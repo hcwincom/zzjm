@@ -269,7 +269,7 @@ class CustomBaseController extends AdminInfo0Controller
             $data_add[$v]=$data[$v];
         }
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -463,7 +463,7 @@ class CustomBaseController extends AdminInfo0Controller
             
         }
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -659,7 +659,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         //获取关联信息
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -1116,7 +1116,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         //获取关联信息
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -1416,6 +1416,7 @@ class CustomBaseController extends AdminInfo0Controller
             if(isset($ugoods[$k])){
                 foreach($fields as $kk=>$vv){
                     if($ugoods[$k][$vv] != $data[$vv][$k]){
+                       
                         $tmp[$vv]=$data[$vv][$k];
                     }
                 }
@@ -1428,6 +1429,7 @@ class CustomBaseController extends AdminInfo0Controller
                 //不存在的直接添加,保存uid,goods
                 $tmp=['uid'=>$id,'goods'=>$k,'shop'=>$info['shop']];
                 foreach($fields as $vv){
+                   
                     $tmp[$vv]=$data[$vv][$k];
                 }
                 $content['add'][$k]=$tmp;

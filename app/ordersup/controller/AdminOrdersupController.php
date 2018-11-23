@@ -355,7 +355,7 @@ class AdminOrdersupController extends AdminInfo0Controller
         $where=[
             'id'=>['in',$goods], 
         ];
-        $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale');
+        $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale,unit,weight1,size1');
         //添加客户用名
         $where=['uid'=>$data_ordersup['uid'],'goods'=>['in',$goods]];
         $ugoods=Db::name('supplier_goods')->where($where)->column('goods,name,cate');
@@ -384,13 +384,30 @@ class AdminOrdersupController extends AdminInfo0Controller
                 'dsc'=>$data['dscs'][$k],
                 'weight'=>round($data['weights'][$k],2),
                 'size'=>round($data['sizes'][$k],2),
-                'weight1'=>bcdiv($data['weights'][$k],$v,2),
-                'size1'=>bcdiv($data['sizes'][$k],$v,2), 
+                
             ]; 
            
             if($ordersup_goods[$k]['pay'] != $data['price_counts'][$k]){
                 $this->error('产品费用错误');
             } 
+            
+            //判断产品重量体积单位,统一转化为kg,cm3
+            switch($goods_infos[$k]['unit']){
+                case 1:
+                    $order_goods[$k]['weight1']=bcdiv($goods_infos[$k]['weight1'],1000,2);
+                    $order_goods[$k]['size1']=bcdiv($goods_infos[$k]['size1'],1000000000,2);
+                    break;
+                case 3:
+                    $order_goods[$k]['weight1']=bcmul($goods_infos[$k]['weight1'],1000,2);
+                    $order_goods[$k]['size1']=bcmul($goods_infos[$k]['size1'],1000000000,2);
+                    break;
+                default:
+                    $order_goods[$k]['weight1']=$goods_infos[$k]['weight1'];
+                    $order_goods[$k]['size1']=$goods_infos[$k]['size1'];
+                    break;
+            }
+            $order_goods[$k]['weight1']=($order_goods[$k]['weight1']==0)?0.01:$order_goods[$k]['weight1'];
+            $order_goods[$k]['size1']=($order_goods[$k]['size1']==0)?0.01:$order_goods[$k]['size1'];
         }
          
         $dsc='采购单添加成功';

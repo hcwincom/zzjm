@@ -190,26 +190,7 @@ function accept_change(){
         }
     });
 }
-$('#account').change(function(){
-	account_change(); 
-});
-function account_change(){
-	 var account=$('#account').val();
-	 if(account==0){
-		 return false;
-	 }
-	 var selected=$('#account option:selected');
-	 $('#account-bank1').val(selected.attr('bank1'));
-	 $('#account-bank2').val(selected.attr('bank2'));
-	 $('#account-num2').val(selected.attr('num2'));
-	 $('#account-name2').val(selected.attr('name2'));
-	 $('#account-location2').val(selected.attr('location2'));
-	 $('#account-num1').val(selected.attr('num1'));
-	 $('#account-name1').val(selected.attr('name1'));
-	 $('#account-location1').val(selected.attr('location1'));
-	 
-	 
-}
+
 var goods=0;
 var url_goods_add="{:url('order/Orderajax/goods_add')}";
 var href_goods="{:url('goods/AdminGoods/edit','',false,false)}";

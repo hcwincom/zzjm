@@ -189,41 +189,36 @@ class AdminOrderController extends AdminInfo0Controller
             
         ];
         $field='p.*,custom.name as custom_name';
-        $list=$m
+        
+        $list0=$m
         ->alias('p')
-        ->field('p.id') 
+        ->field('p.id')
+        ->join($join)
         ->where($where)
         ->order('p.sort desc,p.id asc')
         ->paginate();
         // 获取分页显示
-        $page = $list->appends($data)->render();
+        $page = $list0->appends($data)->render();
+       
         $ids=[];
-        foreach($list as $k=>$v){
+        foreach($list0 as $k=>$v){
             $ids[$v['id']]=$v['id'];
-        }
-        
-        if(empty($ids)){
-            $list=[];
-        }else{
-            //关联表
-            $join=[ 
-                ['cmf_custom custom','p.uid=custom.id','left'], 
-            ];
-            $field='p.*,custom.name as custom_name';
             
-            $list=$m
-            ->alias('p')
-            ->join($join)
-            ->where('p.id','in',$ids)
-            ->order('p.sort desc,p.id asc')
-            ->column($field); 
-            $goods=Db::name('order_goods')->where('oid','in',$ids)
-            ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
-            foreach($goods as $k=>$v){ 
-                $list[$v['oid']]['infos'][]=$v;
-            }
         }
+        $list=$m
+        ->alias('p') 
+        ->join($join)
+        ->where('p.id','in',$ids)
+        ->order('p.sort desc,p.id asc')
+        ->column($field);
         
+      
+        $goods=Db::name('order_goods')->where('oid','in',$ids)
+        ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
+        foreach($goods as $k=>$v){
+            $list[$v['oid']]['infos'][]=$v;
+        }
+         
         $this->assign('page',$page);
         $this->assign('list',$list);
         
@@ -376,7 +371,7 @@ class AdminOrderController extends AdminInfo0Controller
         $where=[
             'id'=>['in',$goods], 
         ];
-        $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale');
+        $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale,unit,weight1,size1');
         //添加客户用名
         $where=['uid'=>$data_order['uid'],'goods'=>['in',$goods]];
         $ugoods=Db::name('custom_goods')->where($where)->column('goods,name,cate');
@@ -404,14 +399,30 @@ class AdminOrderController extends AdminInfo0Controller
                 'price_sale'=>$goods_infos[$k]['price_sale'],
                 'dsc'=>$data['dscs'][$k],
                 'weight'=>round($data['weights'][$k],2),
-                'size'=>round($data['sizes'][$k],2),
-                'weight1'=>bcdiv($data['weights'][$k],$v,2),
-                'size1'=>bcdiv($data['sizes'][$k],$v,2), 
+                'size'=>round($data['sizes'][$k],2), 
             ]; 
-           
             if($order_goods[$k]['pay'] != $data['price_counts'][$k]){
                 $this->error('产品费用错误');
             } 
+          
+            //判断产品重量体积单位,统一转化为kg,cm3
+            switch($goods_infos[$k]['unit']){
+                case 1:
+                    $order_goods[$k]['weight1']=bcdiv($goods_infos[$k]['weight1'],1000,2);
+                    $order_goods[$k]['size1']=bcdiv($goods_infos[$k]['size1'],1000000000,2);
+                    break;
+                case 3:
+                    $order_goods[$k]['weight1']=bcmul($goods_infos[$k]['weight1'],1000,2);
+                    $order_goods[$k]['size1']=bcmul($goods_infos[$k]['size1'],1000000000,2);
+                    break;
+                default:
+                    $order_goods[$k]['weight1']=$goods_infos[$k]['weight1'];
+                    $order_goods[$k]['size1']=$goods_infos[$k]['size1'];
+                    break;
+            }
+            $order_goods[$k]['weight1']=($order_goods[$k]['weight1']==0)?0.01:$order_goods[$k]['weight1'];
+            $order_goods[$k]['size1']=($order_goods[$k]['size1']==0)?0.01:$order_goods[$k]['size1'];
+           
         }
         //检查是否拆分订单
         $i=0;
@@ -536,6 +547,7 @@ class AdminOrderController extends AdminInfo0Controller
         ->join('cmf_user a','a.id=p.aid','left') 
         ->where('p.id',$id)
         ->find();
+        
         if(empty($info)){
             $this->error('数据不存在');
         }
@@ -1276,6 +1288,7 @@ class AdminOrderController extends AdminInfo0Controller
         if(!is_array($content)){
             $this->error($content);
         }
+       
         switch ($status){
             case 2:
                 //判断是先付款后发货还是先发货
@@ -1331,7 +1344,10 @@ class AdminOrderController extends AdminInfo0Controller
             default:
                 $this->error('操作错误');
         }
-          
+        //淘宝订单的不能线下先收款，和到货
+        if(isset($content['status']) && $info['order_type']==3){
+            //淘宝订单只能点击准备发货和确认发货，暂时不做
+        }
         
         //保存更改
         $m_edit=Db::name('edit');
@@ -1662,4 +1678,5 @@ class AdminOrderController extends AdminInfo0Controller
         $m_edit->commit();
         $this->success('已提交修改');
     }
+    
 }

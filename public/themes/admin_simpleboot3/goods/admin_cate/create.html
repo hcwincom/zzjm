@@ -113,7 +113,7 @@
 						<eq name="vo.fid" value="0">
 						一级分类
 						<else/>
-						<a href="{:url('edit',['id'=>$vo.fid])}"  target="{$zztarget['edit']}">{$vo.fname|default='未找到父类'}</a>
+						<a href="{:url('edit',['id'=>$vo.fid])}"  target="{$zztarget['edit']}">{$cates[$vo.fid]|default='未找到父类'}</a>
 						</eq> 
 						</td>
 						<td>{$vo.code}</td>

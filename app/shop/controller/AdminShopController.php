@@ -267,10 +267,13 @@ class AdminShopController extends AdminInfo0Controller
      * )
      */
     public function del_all()
-    {
-         
+    { 
+        $ids=$this->request->param('ids');
+        if(empty($ids)){
+            $this->error('未选择信息');
+        }
         parent::del_all();
     }
-   
+    
      
 }
