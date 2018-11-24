@@ -372,7 +372,9 @@ class AdminOrdersupController extends AdminInfo0Controller
                 'goods'=>$k,
                 'num'=>$v, 
                 'price_real'=>round($data['prices'][$k],2),
-                'pay'=>bcmul($data['prices'][$k],$v,2), 
+                'pay_discount'=>round($data['pay_discounts'][$k],2),
+                'pay'=>round($data['price_counts'][$k],2), 
+                
                 'goods_name'=>$goods_infos[$k]['name'],
                 'print_name'=>$goods_infos[$k]['name3'],
                 'goods_uname'=>(isset($ugoods[$k]['name'])?$ugoods[$k]['name']:''),
@@ -386,10 +388,12 @@ class AdminOrdersupController extends AdminInfo0Controller
                 'size'=>round($data['sizes'][$k],2),
                 
             ]; 
-           
-            if($ordersup_goods[$k]['pay'] != $data['price_counts'][$k]){
+            //计算产品费用
+            $pay=round($ordersup_goods[$k]['price_real']*$ordersup_goods[$k]['num']-$ordersup_goods[$k]['pay_discount'],2);
+            if($ordersup_goods[$k]['pay'] != $pay){
                 $this->error('产品费用错误');
             } 
+            
             
             //判断产品重量体积单位,统一转化为kg,cm3
             switch($goods_infos[$k]['unit']){
@@ -437,8 +441,7 @@ class AdminOrdersupController extends AdminInfo0Controller
         if(!empty($data['account_name1']) ){
             $data_pay=[
                 'pay_type'=>1,
-                'oid'=>$oid,
-               
+                'oid'=>$oid, 
                 'bank1'=>$data['account_bank1'],
                 'num1'=>$data['account_num1'],
                 'name1'=>$data['account_name1'],

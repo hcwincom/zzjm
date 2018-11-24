@@ -270,7 +270,7 @@ class OrderModel extends Model
          /*  $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
           'goods_num','goods_money','discount_money','tax_money','other_money','order_amount',
           ]; */
-         $edit_goods=['num','pay','weight','size','dsc','price_real'];
+         $edit_goods=['num','pay','weight','size','dsc','price_real','pay_discount'];
         
           
          //多个要一个个比较,先比较是否存在

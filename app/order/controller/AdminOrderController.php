@@ -1684,5 +1684,35 @@ class AdminOrderController extends AdminInfo0Controller
         $m_edit->commit();
         $this->success('已提交修改');
     }
-    
+    /**
+     * 配货单打印
+     * @adminMenu(
+     *     'name'   => '配货单打印',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '配货单打印',
+     *     'param'  => ''
+     * )
+     */
+    public function print_order(){
+        $id=$this->request->param('id');
+        $m=$this->m; 
+        $info=$m
+        ->field('p.*,custom.name as uname,custom.mobile sa umobile')
+        ->alias('p')
+        ->join('cmf_custom custom','custom.id=p.uid')
+        ->where('p.id',$id)->find();
+        if($info['is_real']!=1){
+            $this->error('已拆分订单请单独打印');
+        }
+        
+        $goods=Db::name('order_goods')->where('oid',$id)->column('');
+        $this->assign('info',$info);
+        $this->assign('goods',$goods);
+        $this->assign('date',date('Y-m-d'));
+        return $this->fetch();
+    }
 }

@@ -1,0 +1,192 @@
+<include file="public@header" />
+<style media="print" type="text/css">
+    .noprint {
+        display: none
+    }
+</style>
+
+<style>
+    body {
+        font: 14px/1.5 "宋体", Arial, Helvetica, sans-serif;
+        color: #404040;
+        background-color: #fff;
+    }
+
+    p {
+        margin: 0;
+        padding: 0;
+    }
+
+    .print {
+        width: 90%;
+        margin: 0 auto;
+        margin-bottom: 20px;
+    }
+
+    .print_head {
+        display: flex;
+        display: -webkit-flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .print_head>div {
+        line-height: 1.5;
+    }
+
+    .print_head>div:nth-child(2)>p {
+        font-size: 18px;
+    }
+
+    .print_head>div:nth-child(3){
+       padding-top: 20px;
+    }
+    .print_head>div:nth-child(3)>span{
+        margin-right: 10px;
+    }
+    .tableBorder tr th,
+    .tableBorder tr td {
+        text-align: center;
+    }
+
+    .tableBorder tr td:first-child {
+        text-align: left;
+    }
+
+    .tableBorder tr td{
+        font-size: 16px;
+    }
+    .tableBorder tr td>span {
+        font-size: 16px;
+        margin-right: 3px;
+    }
+
+    .tableBorder>thead>tr>th,
+    .tableBorder>tbody>tr>th,
+    .tableBorder>thead>tr>td,
+    .tableBorder>tbody>tr>td,
+    .tableBorder>tfoot>tr>td {
+        border: 1px solid #666 !important;
+    }
+
+    .tableNone>thead>tr>th,
+    .tableNone>tbody>tr>th,
+    .tableNone>tfoot>tr>th,
+    .tableNone>thead>tr>td,
+    .tableNone>tbody>tr>td,
+    .tableNone>tfoot>tr>td {
+        border-top: none;
+    }
+
+    .signature {
+        text-align: left;
+        border-top: 1px solid #666;
+        line-height: 2;
+    }
+
+    .signature>p {
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .btn_print {
+        width: 112px;
+        height: 31px;
+        margin: 20px auto;
+        border: 0;
+    }
+</style>
+</head>
+
+<body>
+   
+    
+    <div class="print" style="margin-top:50px;">
+        <div class="print_head" id="print_head">
+            <div>
+                <p><span>订单号：</span>{$info.name}</p>
+                <p><span>日期：</span>{$date}</p>
+            
+            </div>
+            <div>
+                <p>配货清单</p>
+            </div>
+            <div>
+                <span>客户:{$info.uname|default=$info.accept_name}</span>
+                <span>电话：{$info.umobile|default=$info.mobile}</span>
+            </div>
+        </div>
+        <table class="table table-hover table-bordered tableBorder">
+            <thead>
+                <tr>
+                    <th width="40%">商品名称</th>
+                    <th>商品货号</th>                    
+                    <th>单价</th>
+                    <th>数量</th>
+                    <th>小计</th>
+                </tr>
+            </thead>
+            <tbody>
+            <foreach name="goods" item="vo">
+                <tr>
+                    <td>{$vo.goods_name}</td>   
+                    <td>{$info.goodsStyle}</td>  
+                    <td>￥<span>{$info.goodsPrice}</span></td>
+                    <td>{$info.goodsNum}</td>
+                    <td>￥<span>{$info.subtotal}</span></td>
+                </tr>
+             </foreach>
+                <tr>
+                    <td>{$info.goodsName}</td>
+                    <td>{$info.goodsStyle}</td>
+                    <td>￥<span>{$info.goodsPrice}</span></td>
+                    <td>{$info.goodsNum}</td>
+                    <td>￥<span>{$info.subtotal}</span></td>
+                </tr>
+                <tr>
+                    <td>{$info.goodsName}</td>
+                    <td>{$info.goodsStyle}</td>
+                    <td>￥<span>{$info.goodsPrice}</span></td>
+                    <td>{$info.goodsNum}</td>
+                    <td>￥<span>{$info.subtotal}</span></td>
+                </tr>
+            
+            </tbody>
+        </table>
+
+    <table class="table tableNone">
+
+        <tbody>
+            <colgroup>            
+                <col width="50%"><col>            
+            </colgroup>
+            <tr>
+                <td>订单附言：{$info.postscript}</td>
+                <td>配送：先收款后发货</td>
+            </tr>
+            <tr>
+                <td>地址：{$info.rece_address}</td>
+                <td>收货人：{$info.customer}</td>
+            </tr>
+            <tr>
+                <td>手机：{$info.cusTele}</td>
+                <td>电话：{$info.cusPhone}</td>
+            </tr>
+    
+        </tbody>
+    </table>
+
+        <div class="signature">
+            <p>签字：</p>
+        </div>
+        <div class="mimeograph" style="text-align:center;">
+            <input type="submit" class="btn_print noprint" onclick="window.print();" value="打印">
+        </div>
+    
+
+    </div>
+
+   
+
+</body>
+</html>
