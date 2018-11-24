@@ -387,9 +387,11 @@ class AdminOrderController extends AdminInfo0Controller
             $order_goods[$k]=[
                 'oid'=>$oid,
                 'goods'=>$k,
-                'num'=>$v, 
+                'num'=>intval($v), 
                 'price_real'=>round($data['prices'][$k],2),
-                'pay'=>bcmul($data['prices'][$k],$v,2), 
+                'pay_discount'=>round($data['pay_discounts'][$k],2), 
+                'pay'=>round($data['price_counts'][$k],2), 
+              
                 'goods_name'=>$goods_infos[$k]['name'],
                 'print_name'=>$goods_infos[$k]['name3'],
                 'goods_uname'=>(isset($ugoods[$k]['name'])?$ugoods[$k]['name']:''),
@@ -398,11 +400,14 @@ class AdminOrderController extends AdminInfo0Controller
                 'goods_pic'=>$goods_infos[$k]['pic'],
                 'price_in'=>$goods_infos[$k]['price_in'],
                 'price_sale'=>$goods_infos[$k]['price_sale'],
+                
                 'dsc'=>$data['dscs'][$k],
                 'weight'=>round($data['weights'][$k],2),
                 'size'=>round($data['sizes'][$k],2), 
             ]; 
-            if($order_goods[$k]['pay'] != $data['price_counts'][$k]){
+            //计算产品费用
+            $pay=round($order_goods[$k]['price_real']*$order_goods[$k]['num']-$order_goods[$k]['pay_discount'],2);
+            if($order_goods[$k]['pay'] != $pay){
                 $this->error('产品费用错误');
             } 
           

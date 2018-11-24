@@ -268,6 +268,7 @@ $('#goods_add').click(function(){
      	   '<td>'+info['price_sale']+'</td>'+ 
      	    '<td><input type="text" name="prices['+info['id']+']" class="form-control price_sale " value="'+info['price_pay']+'"/></td>'+
      	    '<td><input type="number" name="nums['+info['id']+']" class="form-control input-order num" value="1"/></td>'+
+     	    '<td><input type="text" name="pay_discounts['+info['id']+']" class="form-control pay_discount" value="0"/></td>'+
      	    '<td><input type="text" name="price_counts['+info['id']+']" class="form-control price_count" value="'+info['price_sale']+'" /></td>'+ 
      	    '<td><input type="text"  name="weights['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
      	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td>'+
@@ -277,6 +278,8 @@ $('#goods_add').click(function(){
     	   '<td><button type="button" class="goods_del">删除</td></tr>';
      	    $('#goods-list').append(tr);
      	   money_change($('#goods'+info['id']),'num');
+     	   
+     	  
         }, 
         error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
             msg(event.responseText,1);
@@ -291,6 +294,9 @@ $(document).on('click','.goods_del',function(){
 $(document).on('change','.price_sale',function(){
 	money_change($(this).parents('tr'),'price');
 }); 
+$(document).on('change','.pay_discount',function(){
+	money_change($(this).parents('tr'),'price');
+});
 $(document).on('change','.num',function(){ 
 	money_change($(this).parents('tr'),'num'); 
 });
@@ -328,6 +334,7 @@ function order_change(){
 function money_change($tr,type='price'){  
 	var num=parseInt($tr.find('.num').val()); 
 	var price_sale=parseFloat($tr.find('.price_sale').val());
+	var pay_discount=parseFloat($tr.find('.pay_discount').val());
 	if(!(num>0)){
 		msg('产品数量错误');
 		$tr.find('.num').focus();
@@ -339,9 +346,17 @@ function money_change($tr,type='price'){
 		$tr.find('.price_sale').focus();
 		return false;
 	}
+	if(!(pay_discount>=0)){
+	 
+		$tr.find('.pay_discount').val(0);
+		pay_discount=0;
+	}
 	price_sale=price_sale.toFixed(2);
 	$tr.find('.price_sale').val(price_sale);
-	var price_count1=(num*price_sale).toFixed(2);
+	pay_discount=pay_discount.toFixed(2);
+	$tr.find('.pay_discount').val(pay_discount);
+	
+	var price_count1=(num*price_sale-pay_discount).toFixed(2);
 	$tr.find('.price_count').val(price_count1); 
 	//重量体积改变
 	if(type=='num'){

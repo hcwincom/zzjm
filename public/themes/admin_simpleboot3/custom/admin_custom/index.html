@@ -125,6 +125,7 @@
 						<th width="100">{$flag}ID</th> 
 						<th>{$flag}名</th>  
 						<th>客户编码</th>
+						<th>客户类型</th>
 						 <th>产品数</th>
 						<th>总订购金额</th>
 						<th>总笔数</th>
@@ -152,6 +153,7 @@
 						</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.name}</a></td>
 					  	<td>{$vo.code}</td>
+					  	<td>{$cates[$vo.cid]|default='未知类型'}</td>
 					  	<td>{$vo.goods_num}</td>
 					  	<td>{$vo.order_money}</td>
 					  	<td>{$vo.order_num}</td>

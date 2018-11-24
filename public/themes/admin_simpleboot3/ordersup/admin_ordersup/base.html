@@ -243,7 +243,7 @@
 			 	<tr id="goods0">
 				 	 <td>产品名称</td>
 				 	 <td >产品编码</td> 
-				 	 <td  >产品图片</td> 
+				 	 <td  >产品图片</td>
 				 	 <td  >总库存</td> 
 				 	  <td >供货商用名</td>
 					 <td >供货商型号</td> 
@@ -251,7 +251,8 @@
 					 <td >零售价</td> 
 					 <td >供应价</td>
 					 <td >数量</td>
-					 <td >金额</td>
+					 <td >优惠金额</td>
+					 <td >应付金额</td>
 					 <td >毛重</td> 
 					 <td >体积</td> 
 					 <td >包装说明/备注</td> 
@@ -278,7 +279,8 @@
 					 <td >零售价</td> 
 					 <td >供应价</td>
 					 <td >数量</td>
-					 <td >金额</td>
+					 <td >优惠金额</td>
+					 <td >应付金额</td>
 					 <td >毛重</td> 
 					 <td >体积</td> 
 					 <td >包装说明/备注</td> 
@@ -356,6 +358,12 @@
      	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" readonly/>
      	    		<present name="change['edit'][$kk]['goods'][$key]['num']">
      	    		 	<input type="number" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['num']}" readonly/> 
+     	    		</present> 
+     	    		</td>
+     	    		<td class="pay_discount">
+     	    			<input type="text" name="pay_discounts-{$kk}[{$key}]" class="form-control " value="{$vo.pay_discount}" />
+     	    		<present name="change['edit'][$kk]['goods'][$key]['pay_discount']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['pay_discount']}" readonly/> 
      	    		</present> 
      	    		</td>
      	    		<td class="pay">
@@ -561,13 +569,14 @@
 				 	 <td >产品编码</td> 
 				 	 <td  >产品图片</td> 
 				 	 <td  >总库存</td> 
-				 	  <td  >成本价</td>
-				 	   <td >供货商用名</td>
+				 	 <td  >成本价</td>
+				 	 <td >供货商用名</td>
 					 <td >供货商型号</td> 
 					 <td >零售价</td> 
 					 <td >供应价</td>
 					 <td >数量</td>
-					 <td >金额</td>
+					 <td >优惠金额</td>
+					 <td >应付金额</td>
 					 <td >毛重</td> 
 					 <td >体积</td> 
 					 <td >包装说明/备注</td> 
@@ -642,6 +651,10 @@
      	    		<td class="num">
      	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" readonly/>
      	    		 
+     	    		</td>
+     	    		<td class="pay_discount">
+     	    			<input type="text" name="pay_discounts-{$kk}[{$key}]" class="form-control " value="{$vo.pay_discount}" />
+     	    	 
      	    		</td>
      	    		<td class="pay">
      	    			<input type="text" name="pays-{$kk}[{$key}]" class="form-control " value="{$vo.pay}" readonly/>

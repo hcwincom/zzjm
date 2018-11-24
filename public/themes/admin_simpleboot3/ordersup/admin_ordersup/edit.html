@@ -137,11 +137,14 @@ var size1=0;
 var $tmp_tr;
 var weight0=0;
 var size0=0;
-  
+var pay_discount=0;
 
 city_js($('#province'),'{$info.province}',$('#city'),'{$info.city}',$('#area'),'{$info.area}');
 
 $(document).on('change','.price_real input',function(){
+	tr_change($(this).parents('tr'),'price');
+});
+$(document).on('change','.pay_discount input',function(){
 	tr_change($(this).parents('tr'),'price');
 });
 $(document).on('change','.size1,.weight1',function(){ 
@@ -170,9 +173,15 @@ function tr_change($tr,type='price'){
 	if(!(price_real>0)){
 		price_real=0;
 	}
+	if(!(pay_discount>0)){
+		pay_discount=0;
+	}
 	price_real=price_real.toFixed(2);
+	pay_discount=pay_discount.toFixed(2);
 	$tr.find('.price_real input').val(price_real);
-	price_count=(num*price_real).toFixed(2);
+	$tr.find('.pay_discount input').val(pay_discount);
+	price_count=(num*price_real-pay_discount).toFixed(2);
+	 
 	$tr.find('.pay input').val(price_count); 
 	//重量体积改变
 	if(type=='num'){
@@ -317,6 +326,7 @@ $('.order_break').click(function(){
 			 
 			$order_new.find('.goods'+goods_id+' .goods_id').attr('name','goods_ids-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .price_real input').attr('name','price_reals-'+oid+'['+goods_id+']');
+			$order_new.find('.goods'+goods_id+' .pay_discount input').attr('name','pay_discounts-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .num input').attr('name','nums-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .pay input').attr('name','pays-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .weight1').attr('name','weights-'+oid+'['+goods_id+']');
@@ -340,7 +350,8 @@ $('.order_break').click(function(){
 			 '<td width="100">零售价</td> '+
 			 '<td width="100">供应价</td>'+
 			 '<td width="100">数量</td>'+
-			 '<td width="100">金额</td>'+
+			 '<td width="100">优惠金额</td>'+
+			 '<td width="100">应付金额</td>'+
 			 '<td width="100">毛重</td>'+
 			 '<td width="100">体积</td>'+
 			 '<td >包装说明/备注</td>'+
@@ -383,6 +394,7 @@ $('.order_break').click(function(){
 		$order_new.find('.goods'+goods_id+' .goods_id').attr('name','goods_ids-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .price_real input').attr('name','price_reals-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .num input').attr('name','nums-'+oid+'['+goods_id+']');
+		$order_new.find('.goods'+goods_id+' .pay_discount input').attr('name','pay_discounts-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .pay input').attr('name','pays-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .weight1').attr('name','weights-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .size1').attr('name','sizes-'+oid+'['+goods_id+']');
@@ -394,6 +406,19 @@ $('.order_break').click(function(){
 	 
 	$tmp_tr.find('.break').val(0);
 	 
+	//折扣金额计算
+	 var pay_discount0=	$tmp_tr.find('.pay_discount input').val();
+	 var pay_discount1=0;
+	 if(num0==num){
+		 pay_discount1=pay_discount0;
+		 pay_discount0=0;
+	 }else{
+		 pay_discount1=pay_discount0/num0*num;
+		 pay_discount0=pay_discount0-pay_discount1;
+	 } 
+	$order_new.find('.goods'+goods_id+' .pay_discount input').val(pay_discount1.toFixed(2));
+	tmp_tr.find('.pay_discount input').val(pay_discount0.toFixed(2));
+	
   	$tmp_tr.find('.num input').val(num0-num);
   	tr_change($tmp_tr,'num');
 	tr_change($order_new.find('.goods'+goods_id),'num');

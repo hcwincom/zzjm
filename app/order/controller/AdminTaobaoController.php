@@ -44,7 +44,6 @@ class AdminTaobaoController extends AdminBaseController
      */
     public function index()
     {
-        error_reporting(0);
         
         set_time_limit(0);
        
@@ -56,7 +55,7 @@ class AdminTaobaoController extends AdminBaseController
             'type'=>2,
             'status'=>2,
         ];
-        $companys=Db::name('company')->where($where)->column('id,name,key_account,key_key');
+        $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key');
         $order_type=$this->order_type;
       
        
@@ -68,9 +67,10 @@ class AdminTaobaoController extends AdminBaseController
             'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
           
         $time=time();
-        $time_start=$time-24*3600*30;
+        $time_start=$time-3600*24-30;
+        $time_end=$time-3600*24-30;
         $date_start=date('Y-m-d',$time_start);
-        $date_end=date('Y-m-d',$time_start);
+        $date_end=date('Y-m-d',$time_end);
         $start_created = $date_start."%2000:00:00";
         $end_created = $date_end."%2023:59:59";
         //获取近期的所有的淘宝id，比较是否需要更换
@@ -80,7 +80,7 @@ class AdminTaobaoController extends AdminBaseController
             'create_time'=>['egt',$time_start],
         ];
         $m=$this->m;
-        $oids=$m->where($where)->column('name,id,status,pay_status,paytype,pay_type,order_amount','name');
+        $oids=$m->where($where)->column('name,id,status,pay_status,paytype,pay_type,order_amount,pay_time','name');
         $m->startTrans();
         foreach($companys as $k=>$v){
            
@@ -88,17 +88,16 @@ class AdminTaobaoController extends AdminBaseController
             $status = ""; 
             $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
             
-            $order = $client->status.$client->getContent(); 
-            $state=intval($order);
+            $order = $client->getContent(); 
+            
+            $state=intval($client->status);
             //返回状态失败
             if($state!=200){
-                echo '分公司'.$v['name'].'淘宝同步失败';
-                zz_log('分公司'.$v['name'].'淘宝同步失败'.$order,$log);
+                echo '<h2>分公司'.$v['name'].'淘宝同步失败</h2>'; 
                 continue;
             } 
-            $order=str_replace($state,'',$order);
+            
             $json=json_decode($order,true);
-            zz_log('分公司'.$v['name'].'淘宝同步数'.$json['trades_sold_get_response']['total_results'],$log);
             
             //所有的订单
             $trades=$json['trades_sold_get_response']['trades']['trade'];
@@ -107,7 +106,7 @@ class AdminTaobaoController extends AdminBaseController
                 
                 //订单已存在
                 $update_order=[];
-                $where_order=['id'=>$oids[$vv['tid']]['id']];
+               
                 if(isset($oids[$vv['tid']])){
                     $oid=$oids[$vv['tid']]['id'];
                     //要比较订单状态和产品
@@ -115,21 +114,19 @@ class AdminTaobaoController extends AdminBaseController
                     $res=$this->order_update($vv,$oids[$vv['tid']]);
                     if(!($res>0)){
                         $m->rollback();
-                        exit('淘宝更新订单'.$vv['tid'].'失败,'.$res);
+                        exit('分公司'.$v['name'].'淘宝更新订单'.$vv['tid'].'失败,'.$res);
                     }  
                     //已存在订单可能有修改价格,暂时不管
-                }else{
-                     
+                }else{ 
                      //新增 
-                    $oid=$this->order_add($vv,$k,$shop); 
+                    $oid=$this->order_add($vv,$k,$shop,$admin['id']); 
                     if(!($oid>0)){
                         $m->rollback();
-                        exit('淘宝增加订单'.$vv['tid'].'失败,'.$oid);
-                    } 
-                    
-                }
-                
+                        exit('分公司'.$v['name'].'淘宝增加订单'.$vv['tid'].'失败,'.$oid);
+                    }  
+                } 
             }
+            echo '<h2>分公司'.$v['name'].'淘宝同步完成</h2>'; 
            
         }
         $m->commit();
@@ -197,6 +194,9 @@ class AdminTaobaoController extends AdminBaseController
         if(empty($update_order)){
             return 1;
         }else{
+            if(empty($order['pay_time']) && isset($taobao['pay_time'])){
+                $update_order['pay_time']=strtotime($taobao['pay_time']);
+            }
             $m->where('id',$order['id'])->update($update_order); 
             if(isset($update_order['status']) && $update_order['status']>80){
                 $res=$m->order_storein5($order['id'],'淘宝同步，取消订单');
@@ -212,16 +212,17 @@ class AdminTaobaoController extends AdminBaseController
      * @param array $taobao
      * @param number $company所属公司
      * @param number $shop店铺
+     * @param number $aid管理员
      * @return number|string
      */
-    public function order_add($taobao,$company,$shop=2){
+    public function order_add($taobao,$company,$shop=2,$aid=1){
         //新增
         $update_order=[
             'name'=>$taobao['tid'],
             'order_type'=>$this->order_type,
             'company'=>$company,
             'uid'=>0,
-            'aid'=>1,
+            'aid'=>$aid,
             'shop'=>$shop,
             'order_amount'=>$taobao['payment'],
             'pay_freight'=>$taobao['post_fee'], 
@@ -229,7 +230,7 @@ class AdminTaobaoController extends AdminBaseController
             'address'=>$taobao['receiver_address'],
             'accept_name'=>$taobao['receiver_name'],
             'mobile'=>$taobao['receiver_mobile'],
-            'pay_time'=>strtotime($taobao['pay_time']),
+            'pay_time'=>isset($taobao['pay_time'])?strtotime($taobao['pay_time']):0,
             'create_time'=>time(),
             
         ];
@@ -275,25 +276,31 @@ class AdminTaobaoController extends AdminBaseController
         foreach($ogs as $k=>$v){
             
             $rows=['oid'=>$oid];
-            
+           
             //outer_sku_id	String	81893848	外部网店自己定义的Sku编号
             //outer_sku_id
             //$tmp_goods['goods_code'] = $v['outer_sku_id'];//产品编码
             //outer_iid	String	152e442aefe88dd41cb0879232c0dcb0
             //商家外部编码(可与商家外部系统对接)。外部商家自己定义的商品Item的id，可以通过taobao.items.custom.get获取商品的Item的信息
             //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
-            $rows['goods_code'] = (empty($v['outer_sku_id']))?$v['outer_iid']:$v['outer_sku_id'];//产品编码
-            $iids[]= $rows['goods_code'];
-            
+            if(empty($v['outer_sku_id'])){
+                if(empty($v['outer_iid'])){
+                    return '产品'.$v['title'].'没有编码outer_sku_id和outer_iid，'.'num_iid'.$v['num_iid'];
+                }else{
+                    $rows['goods_code'] = $v['outer_iid'];//产品编码
+                }
+            }else{
+                $rows['goods_code'] = $v['outer_sku_id'];//产品编码
+            }
+           
+            $iids[]= $rows['goods_code']; 
             $rows['goods_uname'] = $v['title'];//产品名称
-         
-            $rows['goods_ucate']=$v['sku_properties_name'];//产品型号
-            $rows['price_sale'] = $v['price'];//产品单价
-            
+            $rows['goods_ucate']=isset($v['sku_properties_name'])?$v['sku_properties_name']:'';//产品型号
             $rows['num'] = $v['num'];//产品数量
             $rows['goods_pic'] = $v['pic_path'];//产品数量
             
-            $rows['price_real'] = $v['divide_order_fee'];//正式价格
+            $rows['price_real'] = $v['price'];//产品单价
+            $rows['pay_discount'] = $v['discount_fee'];//优惠费用
             
             $rows['pay'] = $v['total_fee'];//产品总价
           
@@ -303,7 +310,7 @@ class AdminTaobaoController extends AdminBaseController
             'shop'=>['eq',$shop],
             'code'=>['in',$iids],
         ];
-        $goods_infos=Db::name('goods')->where($where_goods)->column('code,id,name,name3,price_in');
+        $goods_infos=Db::name('goods')->where($where_goods)->column('code,id,name,name3,price_in,price_sale');
         foreach ($goods_add as $k=>$v){
             if(empty($goods_infos[$k])){
                 $goods_infos[$k]=[
@@ -312,12 +319,13 @@ class AdminTaobaoController extends AdminBaseController
                     'name3'=>'name3',
                     'price_in'=>'11', 
                 ];
-                return '未找到产品'.$k;
+                return '未找到产品'.$k.$v['goods_uname'];
             }
             $goods_add[$k]['goods']=$goods_infos[$k]['id'];
             $goods_add[$k]['goods_name']=$goods_infos[$k]['name'];
             $goods_add[$k]['print_name']=$goods_infos[$k]['name3'];
             $goods_add[$k]['price_in']=$goods_infos[$k]['price_in'];
+            $goods_add[$k]['price_sale']=$goods_infos[$k]['price_sale'];
         }
         Db::name('order_goods')->insertAll($goods_add);
        
