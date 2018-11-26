@@ -380,17 +380,19 @@ $('.order_break').click(function(){
 			'<input type="hidden" class="oid" value="'+oid+'" name="oids[]"/>'+
 			'<table class="table table-hover table-bordered table-list goods-list"  ><tr >'+ 
 		 	 '<td>新子订单'+oid+'</td>'+
-		 	 '<td width="100">产品编码</td>'+
-		 	 '<td width="100">产品图片</td>'+
-		 	 '<td width="100">总库存</td>'+
-		 	 '<td width="100">成本价</td>'+
-			 '<td width="100">零售价</td> '+
-			 '<td width="100">供应价</td>'+
-			 '<td width="100">数量</td>'+
-			 '<td width="100">优惠金额</td>'+
-			 '<td width="100">应付金额</td>'+
-			 '<td width="100">毛重</td>'+
-			 '<td width="100">体积</td>'+
+		 	 '<td >产品编码</td>'+
+		 	 '<td >产品图片</td>'+
+		 	 '<td >总库存</td>'+
+		 	 '<td >客户用名</td>'+
+		 	 '<td>客户型号</td>'+
+		 	 '<td >成本价</td>'+
+			 '<td >零售价</td> '+
+			 '<td  >供应价</td>'+
+			 '<td >数量</td>'+
+			 '<td >优惠金额</td>'+
+			 '<td >应付金额</td>'+
+			 '<td >毛重</td>'+
+			 '<td >体积</td>'+
 			 '<td >包装说明/备注</td>'+
 			 '<td width="100">拆分</td></tr> </table></div>'; 
 		$('.orders').append(div);
@@ -451,7 +453,7 @@ $('.order_break').click(function(){
 		 pay_discount0=pay_discount0-pay_discount1;
 	 } 
 	$order_new.find('.goods'+goods_id+' .pay_discount input').val(pay_discount1.toFixed(2));
-	tmp_tr.find('.pay_discount input').val(pay_discount0.toFixed(2));
+	$tmp_tr.find('.pay_discount input').val(pay_discount0.toFixed(2));
 	
   	$tmp_tr.find('.num input').val(num0-num);
   	tr_change($tmp_tr,'num');

@@ -149,8 +149,10 @@ class OrdersupModel extends Model
              $orders=[$info['id']=>$info];
              $ordersup_ids=[$info['id']];
          }else{
-             $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
-                 ',real_freight,other_money,tax_money,order_amount,dsc';
+             $fields='id,name,'.(implode(',',$edit_base));
+             
+             /*  $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
+              ',real_freight,other_money,tax_money,order_amount,dsc,express_no'; */
              $orders=$this->where('fid',$info['id'])->column($fields);
              
              $ordersup_ids=array_keys($orders);

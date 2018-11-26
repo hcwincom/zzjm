@@ -417,7 +417,7 @@ $('.order_break').click(function(){
 		 pay_discount0=pay_discount0-pay_discount1;
 	 } 
 	$order_new.find('.goods'+goods_id+' .pay_discount input').val(pay_discount1.toFixed(2));
-	tmp_tr.find('.pay_discount input').val(pay_discount0.toFixed(2));
+	$tmp_tr.find('.pay_discount input').val(pay_discount0.toFixed(2));
 	
   	$tmp_tr.find('.num input').val(num0-num);
   	tr_change($tmp_tr,'num');
