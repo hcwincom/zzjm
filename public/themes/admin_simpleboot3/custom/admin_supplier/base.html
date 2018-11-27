@@ -220,14 +220,14 @@
 				   <select  class="form-control" name="paytype" id="" required>
 				   		<option value="0">请选择</option>
 					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo.name}</option>
 					</foreach>
 					</select>
 				<present name="change.paytype">
 					<select  class="form-control red"  >
 				   		<option value="0">请选择</option>
 					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.paytype" >selected</if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $change.paytype" >selected</if>>{$vo.name}</option>
 					</foreach>
 					</select>
 				</present>
@@ -346,7 +346,7 @@
 				</present> 
 					<label class="radio-inline">
 				 		<input type="radio" value="1" name="payer" checked/>
-				 		默认付款账号
+				 		默认收款账号
 				 		<present name="change.payer">
 						 <eq name="change.payer" value="1"><span class="red">新选中</span></eq> 
 						</present> 
@@ -356,12 +356,24 @@
 			</div>
 			<div style="clear:both"></div>
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">对应收款账号1</label>
+				<label  class="col-sm-2 control-label">对应付款账号1</label>
 				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank2[1]" id="">
+				   <select  class="form-control paytypes" flag="1" >
+				    	<option value="0">请选择</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" bank="{$vo.bank}" location="{$vo.location}" num="{$vo.num}" account="{$vo.account}" >{$vo.name}</option>
+					</foreach>
+					</select>
+				 
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">银行</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control " name="bank2[1]" id="pay_bank1">
 				    	<option value="0">请选择</option>
 					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $account1.bank2" >selected</if>>{$vo}</option>
+						<option value="{$key}"  <if condition="$key eq $account1.bank2" >selected</if>>{$vo}</option>
 					</foreach>
 					</select>
 				 <present name="change.account1.bank2">
@@ -374,11 +386,10 @@
 				</present>  
 				</div>
 			</div>
-			 
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">账户名</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name2[1]" value="{$account1.name2}" />
+					<input type="text" class="form-control" name="name2[1]" value="{$account1.name2}" id="pay_name1"/>
 				<present name="change.account1.name2">
 					<input type="text" class="form-control red"  value="{$change.account1.name2}" />
 				</present> 
@@ -387,7 +398,7 @@
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">账号</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num2[1]" value="{$account1.num2}" />
+					<input type="text" class="form-control" name="num2[1]" value="{$account1.num2}" id="pay_num1"/>
 				 <present name="change.account1.num2">
 					<input type="text" class="form-control red"  value="{$change.account1.num2}" />
 				</present> 
@@ -396,7 +407,7 @@
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">开户行</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location2[1]" value="{$account1.location2}" />
+					<input type="text" class="form-control" name="location2[1]" value="{$account1.location2}" id="pay_location1"/>
 				 <present name="change.account1.location2">
 					<input type="text" class="form-control red"  value="{$change.account1.location2}" />
 				</present> 	
@@ -404,7 +415,7 @@
 			</div>
 			<div style="clear:both;"></div>
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">供应商常用账号2</label>
+				<label  class="col-sm-2 control-label">供货商常用账号2</label>
 				<div class="col-md-6 col-sm-10">
 				   <select  class="form-control" name="bank1[2]" id="">
 				    <option value="0">请选择</option>
@@ -450,7 +461,7 @@
 				</present> 
 					<label class="radio-inline">
 				 		<input type="radio" value="2" name="payer" <eq name="info.payer" value="2">checked</eq> />
-				 		默认付款账号
+				 		默认收款账号
 				 		<present name="change.payer">
 						 <eq name="change.payer" value="2"><span class="red">新选中</span></eq> 
 						</present> 
@@ -460,12 +471,24 @@
 			</div>
 			<div style="clear:both"></div>
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">对应收款账号2</label>
+				<label  class="col-sm-2 control-label">对应付款账号2</label>
 				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank2[2]" id="">
+				   <select  class="form-control paytypes" flag="2" >
+				    	<option value="0">请选择</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" bank="{$vo.bank}" location="{$vo.location}" num="{$vo.num}" account="{$vo.account}" >{$vo.name}</option>
+					</foreach>
+					</select>
+				 
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">银行</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control " name="bank2[2]" id="pay_bank2">
 				    	<option value="0">请选择</option>
 					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $account2.bank2" >selected</if>>{$vo}</option>
+						<option value="{$key}"  <if condition="$key eq $account2.bank2" >selected</if>>{$vo}</option>
 					</foreach>
 					</select>
 				 <present name="change.account2.bank2">
@@ -478,11 +501,11 @@
 				</present>  
 				</div>
 			</div>
-			 
+		 
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">账户名</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name2[2]" value="{$account2.name2}" />
+					<input type="text" class="form-control" name="name2[2]" value="{$account2.name2}" id="pay_name2"/>
 				<present name="change.account2.name2">
 					<input type="text" class="form-control red"  value="{$change.account2.name2}" />
 				</present> 
@@ -491,7 +514,7 @@
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">账号</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num2[2]" value="{$account2.num2}" />
+					<input type="text" class="form-control" name="num2[2]" value="{$account2.num2}" id="pay_num2"/>
 				 <present name="change.account2.num2">
 					<input type="text" class="form-control red"  value="{$change.account2.num2}" />
 				</present> 
@@ -500,7 +523,7 @@
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">开户行</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location2[2]" value="{$account2.location2}" />
+					<input type="text" class="form-control" name="location2[2]" value="{$account2.location2}" id="pay_location2"/>
 				 <present name="change.account2.location2">
 					<input type="text" class="form-control red"  value="{$change.account2.location2}" />
 				</present> 	
@@ -508,7 +531,7 @@
 			</div>
 			<div style="clear:both;"></div>
 			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">供应商常用账号3</label>
+				<label  class="col-sm-2 control-label">供货商常用账号3</label>
 				<div class="col-md-6 col-sm-10">
 				   <select  class="form-control" name="bank1[3]" id="">
 				    <option value="0">请选择</option>
@@ -554,7 +577,7 @@
 				</present> 
 					<label class="radio-inline">
 				 		<input type="radio" value="3" name="payer" <eq name="info.payer" value="3">checked</eq>/>
-				 		默认付款账号
+				 		默认收款账号
 				 		
 				 		<present name="change.payer">
 						 <eq name="change.payer" value="3"><span class="red">新选中</span></eq> 
@@ -564,16 +587,28 @@
 				</div>
 			</div>
 			<div style="clear:both"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">对应收款账号3</label>
+				<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">对应付款账号3</label>
 				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="bank2[3]" id="">
+				   <select  class="form-control paytypes" flag="3" >
 				    	<option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $account3.bank2" >selected</if>>{$vo}</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" bank="{$vo.bank}" location="{$vo.location}" num="{$vo.num}" account="{$vo.account}" >{$vo.name}</option>
 					</foreach>
 					</select>
-				 <present name="change.account3.bank2">
+				 
+				</div>
+			</div>
+			 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">银行</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control " name="bank2[3]" id="pay_bank3">
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}"  <if condition="$key eq $account3.bank2" >selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				 <present name="change.account2.bank3">
 					<select  class="form-control red"  >
 				   	  <option value="0">请选择</option>
 					<foreach name="banks" item="vo">
@@ -583,11 +618,12 @@
 				</present>  
 				</div>
 			</div>
+		 
 			 
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">账户名</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="name2[3]" value="{$account3.name2}" />
+					<input type="text" class="form-control" name="name2[3]" value="{$account3.name2}" id="pay_name3"/>
 				<present name="change.account3.name2">
 					<input type="text" class="form-control red"  value="{$change.account3.name2}" />
 				</present> 
@@ -596,7 +632,7 @@
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">账号</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="num2[3]" value="{$account3.num2}" />
+					<input type="text" class="form-control" name="num2[3]" value="{$account3.num2}" id="pay_num3"/>
 				 <present name="change.account3.num2">
 					<input type="text" class="form-control red"  value="{$change.account3.num2}" />
 				</present> 
@@ -605,7 +641,7 @@
 			 <div class="form-group fleft">
 				<label class="col-sm-2 control-label">开户行</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="location2[3]" value="{$account3.location2}" />
+					<input type="text" class="form-control" name="location2[3]" value="{$account3.location2}" id="pay_location3"/>
 				 <present name="change.account3.location2">
 					<input type="text" class="form-control red"  value="{$change.account3.location2}" />
 				</present> 	
@@ -700,5 +736,18 @@
 				$('#code_num').focus();
 			}
 		},'json');
+	});
+	$('.paytypes').change(function(){
+		var pay=this.value;
+		
+		if(pay=='0'){
+			return 0;
+		}
+		var flag=$(this).attr('flag');
+		var $option=$(this).find('option:selected').eq(0);
+		$('#pay_name'+flag).val($option.attr('account'));
+		$('#pay_num'+flag).val($option.attr('num'));
+		$('#pay_location'+flag).val($option.attr('location'));
+		$('#pay_bank'+flag).val($option.attr('bank'));
 	});
 </script>

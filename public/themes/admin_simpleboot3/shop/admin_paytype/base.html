@@ -6,7 +6,53 @@
         <input type="text" class="form-control" name="name" value="{$info.name}" required/>
     </div>
 </div>
- 
+<div class="form-group ">
+	<label  class="col-sm-2 control-label">银行</label>
+	<div class="col-md-6 col-sm-10">
+	   <select  class="form-control" name="bank" id="">
+	    	<option value="0">请选择</option>
+		<foreach name="banks" item="vo">
+			<option value="{$key}" <if condition="$key eq $info.bank" >selected</if>>{$vo}</option>
+		</foreach>
+		</select>
+	 <present name="change.bank">
+		<select  class="form-control red"  >
+	   	  <option value="0">请选择</option>
+		<foreach name="banks" item="vo">
+			<option value="{$key}" <if condition="$key eq $change.bank" >selected</if>>{$vo}</option>
+		</foreach>
+		</select>
+	</present>  
+	</div>
+</div>
+  <div class="form-group ">
+	<label class="col-sm-2 control-label">账户名</label>
+	<div class="col-md-6 col-sm-10">
+		<input type="text" class="form-control" name="account" value="{$info.account}" />
+	<present name="change.account">
+		<input type="text" class="form-control red"  value="{$change.account}" />
+	</present> 
+	</div>
+</div>
+  <div class="form-group ">
+	<label class="col-sm-2 control-label">账号</label>
+	<div class="col-md-6 col-sm-10">
+		<input type="text" class="form-control" name="num" value="{$info.num}" />
+	<present name="change.num">
+		<input type="text" class="form-control red"  value="{$change.num}" />
+	</present> 
+	</div>
+</div>
+  <div class="form-group ">
+	<label class="col-sm-2 control-label">开户行</label>
+	<div class="col-md-6 col-sm-10">
+		<input type="text" class="form-control" name="location" value="{$info.location}" />
+	<present name="change.location">
+		<input type="text" class="form-control red"  value="{$change.location}" />
+	</present> 
+	</div>
+</div>
+  
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">简介</label>
     <div class="col-md-6 col-sm-10">

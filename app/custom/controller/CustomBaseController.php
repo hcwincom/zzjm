@@ -895,6 +895,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
             //可选物流
             $freights=Db::name('freight')->where($where)->order('shop asc,sort asc')->column($field);
+            
             //开票类型
             $invoice_types=config('invoice_type');
             //付款银行
@@ -902,7 +903,7 @@ class CustomBaseController extends AdminInfo0Controller
                 'status'=>2,
             ];
             $banks=Db::name('bank')->where($where)->column('id,name');
-          
+             
             $this->assign('freights',$freights);
             $this->assign('invoice_types',$invoice_types);
             $this->assign('banks',$banks);
@@ -910,6 +911,7 @@ class CustomBaseController extends AdminInfo0Controller
         $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field);
         
         //付款类型 
+        $field.=',bank,location,account,num';
         $paytypes=Db::name('paytype')->where($where)->order('shop asc,sort asc')->column($field);
         
         $this->assign('companys',$companys);
