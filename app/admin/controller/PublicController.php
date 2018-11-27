@@ -100,6 +100,8 @@ class PublicController extends AdminBaseController
                 session('ADMIN_ID', $result["id"]);
                 session('name', $result["user_login"]);
                 session('shop', $result["shop"]);
+                $is_review=Db::name('shop')->where('id',$result["shop"])->value('is_review');
+                session('shop_review', $is_review);
                 $result['last_login_ip']   = get_client_ip(0, true);
                 $result['last_login_time'] = time();
                 $token                     = cmf_generate_user_token($result["id"], 'web');

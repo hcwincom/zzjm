@@ -379,7 +379,7 @@ class AdminOrderController extends AdminInfo0Controller
         $where=[
             'id'=>['in',$goods], 
         ];
-        $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale,unit,weight1,size1');
+        $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale,type,weight1,size1');
         //添加客户用名
         $where=['uid'=>$data_order['uid'],'goods'=>['in',$goods]];
         $ugoods=Db::name('custom_goods')->where($where)->column('goods,name,cate');

@@ -20,7 +20,7 @@ class AdminShopController extends AdminInfo0Controller
         $this->isshop=0;
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
-        
+        $this->assign('is_review',[1=>'二次审核',2=>'直接审核']);
     }
     /**
      * 加盟店铺列表

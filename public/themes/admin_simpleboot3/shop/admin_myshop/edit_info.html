@@ -1,0 +1,61 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="shop@admin_myshop:nav"/>
+			<li class="active"><a href="{:url('edit_info',['id'=>$info1.id])}">审核{$flag}</a></li>  
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('review_edit')}">
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="id" value="{$info.id}" />
+					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
+				</div>
+			</div>
+			<include file="shop@admin_myshop:base"/>
+			<div class="form-group">
+				<label for="" class="col-sm-2 control-label">{$flag}状态</label>
+				<div class="col-md-6 col-sm-10">
+				 	<input type="text" class="form-control"  name="status" value="{$statuss[$info.status]}" />
+				</div>
+			</div>
+			<div class="form-group rstatus">
+				<label for="" class="col-sm-2 control-label">审核状态</label>
+				<div class="col-md-6 col-sm-10">
+				 <foreach name="review_status" item="vo">
+				 <label class="radio-inline">
+				 		<input type="radio" value="{$key}" name="rstatus" <if condition="$key eq $info1.rstatus">checked</if>/>{$vo}
+				 </label>
+				 </foreach>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+					<input type="hidden" name="id" value="{$info1.id}" /> 
+					<eq name="info1.rstatus" value="1">
+					<button type="submit" class="review_edit btn btn-primary js-ajax-submit"  >审核</button> 
+					 </eq> 
+					 
+					 <p> </p>
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+ <script>
+ $('.review_edit').click(function(){
+	 var status=$('.rstatus input:checked').val();
+	 if(status=='1'){
+		 
+		 return false;
+	 }
+	 
+	 $(this).parents('form').attr('action',"{:url('edit_review')}");
+ });
+ </script>
