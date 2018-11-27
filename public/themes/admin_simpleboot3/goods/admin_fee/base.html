@@ -26,7 +26,7 @@
     <div class="col-md-6 col-sm-10">
         <foreach name="param_types" item="vo">
             <label class="radio-inline">
-                <input type="radio" name="type" value="{$key}" required/>{$vo}
+                <input type="radio" name="type" value="{$key}"  <if condition="$key eq $info.type">checked</if>  required/>{$vo}
             </label>
         </foreach>
     </div>
