@@ -4849,12 +4849,12 @@ class AdminGoodsController extends AdminBaseController
             'fid'=>0,
             'status'=>2,
         ];
-        $cates0=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,code');
+        $cates0=$m_cate->where($where_cate)->order('code_num asc')->column('id,name,code,type');
         $where_cate=[
             'fid'=>['neq',0],
             'status'=>['eq',2],
         ];
-        $cates=$m_cate->where($where_cate)->order('sort asc,code_num asc')->column('id,name,fid,code');
+        $cates=$m_cate->where($where_cate)->order('code asc')->column('id,name,fid,code,type');
         $this->assign('cates0',$cates0);
         $this->assign('cates',$cates);
          
@@ -4866,7 +4866,7 @@ class AdminGoodsController extends AdminBaseController
         $where_brand=[ 
             'status'=>['eq',2],
         ];
-        $brands=Db::name('brand')->where($where_brand)->order('sort asc')->column('id,name,char');
+        $brands=Db::name('brand')->where($where_brand)->order('char asc,sort asc')->column('id,name,char');
         $this->assign('bcates',$bcates);
         $this->assign('brands',$brands);
     }
@@ -4920,7 +4920,7 @@ class AdminGoodsController extends AdminBaseController
             'name3'=>$data0['name3'],
             'brand'=>$data0['brand'],
             'bchar'=>$data0['bchar'],
-            'unit'=>$data0['unit'],
+           
         ];
         if(empty($data['code_num'])){
             return ('未添加编码');
@@ -4972,16 +4972,16 @@ class AdminGoodsController extends AdminBaseController
         $data['height1']=round($data0['height1'],2);
         
         if($data['weight0'] <= 0){
-            return '请填写产品重量';
+            $data['weight0']=0;
         } 
         if($data['length0'] <= 0){
-            return '请填写产品长度';
+            $data['length0']=0;
         }
         if($data['width0'] <= 0){
-            return '请填写产品宽度';
+            $data['length0']=0;
         }
         if($data['height0'] <= 0){
-            return '请填写产品高度';
+            $data['length0']=0;
         }
         $data['size0']=bcmul($data['length0']*$data['width0'],$data['height0']);
         
@@ -4997,16 +4997,16 @@ class AdminGoodsController extends AdminBaseController
             $data['width1']=round($data['width1'],2);
             $data['height1']=round($data['height1'],2);
             if($data['weight1'] <= 0){
-                return '请填写产品毛重量';
+                $data['weight1']=0;
             }
             if($data['length1'] <= 0){
-                return '请填写产品内盒长度';
+                $data['length1'] = 0;
             }
             if($data['width1'] <= 0){
-                return '请填写产品内盒宽度';
+                $data['width1'] = 0;
             }
             if($data['height1'] <= 0){
-                return '请填写产品内盒高度';
+                $data['height1'] =0;
             }
             $data['size1']=bcmul($data['length1']*$data['width1'],$data['height1']);
         }

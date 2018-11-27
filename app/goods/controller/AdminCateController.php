@@ -131,6 +131,11 @@ class AdminCateController extends GoodsBaseController
         if($data_add['code_num']<=0){
             $this->error('编码错误');
         }
+        //二级分类类型跟随父级
+        if($fid!=0){
+            $fcate=$m->where(['id'=>$fid])->find();
+            $data_add['type']=$fcate['type'];
+        }
         //检查编码是否合法
         $where=['code_num'=>$data_add['code_num'],'fid'=>$fid];
         $tmp=$m->where($where)->find();
@@ -145,8 +150,7 @@ class AdminCateController extends GoodsBaseController
             } 
             $data_add['code']=(str_pad($data_add['code_num'],2,'0',STR_PAD_LEFT));
         }else{
-            //，如果是2级要更新一级中的最大编码
-            $fcate=$m->where(['id'=>$fid])->find();
+            //，如果是2级要更新一级中的最大编码 
             if($data_add['code_num'] > $fcate['max_num']){
                 $m->where(['id'=>$fid])->update(['max_num'=>$data_add['code_num']]); 
             } 
@@ -192,7 +196,141 @@ class AdminCateController extends GoodsBaseController
     public function create()
     {
         
-        parent::index();
+        $table=$this->table;
+        $m=$this->m;
+        $admin=$this->admin;
+        $data=$this->request->param();
+        $where=[];
+        //判断是否有店铺
+        $join=[
+            ['cmf_user a','a.id=p.aid','left'],
+            ['cmf_user r','r.id=p.rid','left'],
+            
+        ];
+        $field='p.*,a.user_nickname as aname,r.user_nickname as rname';
+        //店铺,分店只能看到自己的数据，总店可以选择店铺
+        if($this->isshop){
+            $join[]= ['cmf_shop shop','p.shop=shop.id','left'];
+            $field.=',shop.name as sname';
+            //店铺,分店只能看到自己的数据，总店可以选择店铺
+            if($admin['shop']==1){
+                if(empty($data['shop'])){
+                    $data['shop']=0;
+                }else{
+                    $where['p.shop']=['eq',$data['shop']];
+                }
+            }else{
+                $where['p.shop']=['eq',$admin['shop']];
+            }
+        }
+        
+        
+        
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
+        //分类
+        if(empty($data['fid'])){
+            $data['fid']=0;
+        }else{
+            $where['p.fid']=['eq',$data['fid']];
+        }
+        
+        //添加人
+        if(empty($data['aid'])){
+            $data['aid']=0;
+        }else{
+            $where['p.aid']=['eq',$data['aid']];
+        }
+        //审核人
+        if(empty($data['rid'])){
+            $data['rid']=0;
+        }else{
+            $where['p.rid']=['eq',$data['rid']];
+        }
+        
+        //类型
+        if(empty($data['type'])){
+            $data['type']=0;
+        }else{
+            $where['p.type']=['eq',$data['type']];
+        }
+        //查询字段
+        $types=$this->search;
+        
+        //选择查询字段
+        if(empty($data['type1'])){
+            $data['type1']=key($types);
+        }
+        //搜索类型
+        $search_types=config('search_types');
+        if(empty($data['type2'])){
+            $data['type2']=key($search_types);
+        }
+        if(!isset($data['name']) || $data['name']==''){
+            $data['name']='';
+        }else{
+            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+        }
+        
+        //时间类别
+        $times=config('time1_search');
+        if(empty($data['time'])){
+            $data['time']=key($times);
+            $data['datetime1']='';
+            $data['datetime2']='';
+        }else{
+            //时间处理
+            if(empty($data['datetime1'])){
+                $data['datetime1']='';
+                $time1=0;
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $time2=0;
+                }else{
+                    //只有结束时间
+                    $time2=strtotime($data['datetime2']);
+                    $where['p.'.$data['time']]=['elt',$time2];
+                }
+            }else{
+                //有开始时间
+                $time1=strtotime($data['datetime1']);
+                if(empty($data['datetime2'])){
+                    $data['datetime2']='';
+                    $where['p.'.$data['time']]=['egt',$time1];
+                }else{
+                    //有结束时间有开始时间between
+                    $time2=strtotime($data['datetime2']);
+                    if($time2<=$time1){
+                        $this->error('结束时间必须大于起始时间');
+                    }
+                    $where['p.'.$data['time']]=['between',[$time1,$time2]];
+                }
+            }
+        }
+        $list=$m
+        ->alias('p')
+        ->field($field)
+        ->join($join)
+        ->where($where)
+        ->order('p.status asc,p.sort asc,p.time desc')
+        ->paginate();
+        
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        $this->assign('types',$types);
+        $this->assign('times',$times);
+        $this->assign("search_types", $search_types);
+        
+        $this->cates(1);
         return $this->fetch();
     }
     /**
@@ -224,9 +362,9 @@ class AdminCateController extends GoodsBaseController
             $this->error('数据不存在');
         }
         if($info['fid']==0){
-            $cates=['0'=>'一级分类'];
+            $cates=['0'=>['id'=>0,'name'=>'一级分类','type'=>1,'code'=>0]];
         }else{
-            $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
+            $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name,type,code');
         }
         
         $this->assign('fid',$info['fid']);
@@ -357,7 +495,10 @@ class AdminCateController extends GoodsBaseController
             }
             
         }
-        
+        //二级分类类型跟随父级 
+        if(isset($content['type']) && $info['fid']!=0){
+            unset($content['type']);
+        }
         //修改了分类或编码
         if(isset($content['fid']) || isset($content['code_num'])){
             //检查分类是否错误，级别不能错误
@@ -506,7 +647,7 @@ class AdminCateController extends GoodsBaseController
         $table=$this->table;
         $m_edit=Db::name('edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,a.user_nickname as aname')
+        ->field('e.*,p.name as pname,p.fid as pfid,p.type as ptype,p.code_num as pcode_num,a.user_nickname as aname')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
@@ -562,17 +703,20 @@ class AdminCateController extends GoodsBaseController
             foreach($change as $k=>$v){
                 $update_info[$k]=$v;
             }
-             
+            //有修改类型要同步下级
+            if(isset($update_info['type']) && $info['pfid']==0){
+                $m->where('fid',$info['pid'])->update(['type'=>$update_info['type']]);
+             }
             //修改了分类或编码
             if((isset($update_info['fid']) || isset($update_info['code_num']))){
-                //得到编码和fid
-                $info_tmp=$m->where('id',$info['pid'])->find();
+                 
                 //检查分类是否错误，级别不能错误
-                if(isset($update_info['fid']) && ($info_tmp['fid']==0 || $update_info['fid']==0)){
+                if(isset($update_info['fid']) && ($info['pfid']==0 || $update_info['fid']==0)){
                     $this->error('一级分类和二级分类不能直接转换');
                 }
-                $fid=isset($update_info['fid'])?$update_info['fid']:$info_tmp['fid'];
-                $code_num=isset($update_info['code_num'])?$update_info['code_num']:$info_tmp['code_num'];
+                //得到编码和fid
+                $fid=isset($update_info['fid'])?$update_info['fid']:$info['pfid'];
+                $code_num=isset($update_info['code_num'])?$update_info['code_num']:$info['pcode_num'];
                 //检查编码是否合法
                 $where=['code_num'=>$code_num,'fid'=>$fid];
                 $tmp=$m->where($where)->find();
@@ -596,7 +740,8 @@ class AdminCateController extends GoodsBaseController
                 }
                 
             }
-                    
+            //修改了类型
+            
             $row=$m->where('id',$info['pid'])->update($update_info);
             if($row!==1){
                 $m->rollback();
@@ -714,7 +859,7 @@ class AdminCateController extends GoodsBaseController
     public function cates($type=3){
         parent::cates($type);
         $m=$this->m;
-        $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name');
+        $cates=$m->where('fid',0)->order('sort asc,code_num asc')->column('id,name,type,code');
          
         $this->assign('cates',$cates);
     }

@@ -110,6 +110,8 @@
 			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
 			 	 
 			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
+			 	
+			 	<button type="button" class="order  btn-sm btn-primary  js-ajax-submit">下单</button>
 			 	<p class='error'></p>
 			</div>
 
@@ -208,6 +210,15 @@ $('.review_all').click(function(){
 $('.del_all').click(function(){
     $(this).parents('form').attr('action',"{:url('del_all')}");
     return is_check('批量删除');
+});
+
+$('.order').click(function(){
+	id=check_one();
+	if(id){
+		$('.error').text('前往下单');
+		location.href="{:url('ordersup/AdminOrdersup/add','',false,false)}"+'/uid/'+id;
+	} 
+	return false; 
 });
 </script>
 </body>

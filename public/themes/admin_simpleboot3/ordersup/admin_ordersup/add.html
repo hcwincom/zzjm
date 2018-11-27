@@ -57,7 +57,7 @@ var stores={$stores_json};
 var stores_tr="{$stores_tr}";
 
 $('#order_pay').show();
-  
+supplier_change("{$supplier.id|default=0}");
 $('#invoice_type').val(2);
 $('#province').change(function(){
 	province=$('#province').val();
@@ -94,14 +94,17 @@ function supplier_get(company,cid,province,city){
 }
 $('#supplier').change(function(){
 	 var supplier=$(this).val();
-	 
-	 if(supplier==0){ 
-		 
+	 supplier_change(supplier);
+});
+function supplier_change(supplier){
+	 console.log(supplier);
+	 if(supplier==0){  
 		 $('#supplier_link').attr('href',url_supplier+supplier);
 		 return false;
 	 } 
 	  $('#supplier_link').attr('href',url_supplier+supplier);
 	 $.post(url_supplier_info,{'uid':supplier},function(data){
+		 console.log(data);
 			if(data.code!=1){
 				return false;
 			}  
@@ -147,11 +150,10 @@ $('#supplier').change(function(){
 			 $('#tax_point').val(info.tax_point); 
 			
 			 $('#paytype').val(info.paytype); 
-			 paytype_change();
+			 $('#pay_type').val(info.pay_type); 
 		},'json'); 
 	 
-});
-
+}
  
 var url_accept_change="{:url('order/Orderajax/accept_change')}";
 $('#accept').change(function(){

@@ -53,7 +53,7 @@ var stores={$stores_json};
 var stores_tr="{$stores_tr}";
 
 $('#order_pay').show();
-  
+custom_change("{$custom.id|default=0}");
 $('#invoice_type').val(2);
 $('#province').change(function(){
 	province=$('#province').val();
@@ -90,6 +90,9 @@ function custom_get(company,cid,province,city){
 }
 $('#custom').change(function(){
 	 var custom=$(this).val();
+	 custom_change(custom);
+});
+function custom_change(custom){ 
 	 
 	 if(custom==0){ 
 		 $('.accept select').val(0);
@@ -148,10 +151,11 @@ $('#custom').change(function(){
 			 $('#tax_point').val(info.tax_point); 
 			
 			 $('#paytype').val(info.paytype); 
-			 paytype_change();
+			 $('#pay_type').val(info.pay_type); 
+			 
 		},'json'); 
 	 
-});
+}
 
  
 var url_accept_change="{:url('order/Orderajax/accept_change')}";

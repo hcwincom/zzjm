@@ -1,5 +1,5 @@
 
-<select class="bcates {$select_class|default=''}" name="bchar" >
+<select class="bcates form-control short-auto" name="bchar" >
 	<option value='-1'>品牌首字母</option> 
 	 <foreach name="bcates" item="vo" >
 	<option value="{$vo}" <if condition="$vo eq $bchar">selected</if>> 
@@ -7,8 +7,8 @@
 	</option>
 	</foreach>
 </select> 
-<select class=" brands {$select_class|default=''}" name="brand" >
-	<option class="brand0" value='0'>全部品牌</option> 
+<select class=" brands form-control short-auto" name="brand" >
+	<option class="brand30" value='0'>全部品牌</option> 
 	 <foreach name="brands" item="vo" >
 	<option class="brand1 brand2{$vo.char} brand3{$key}" value="{$key}" <if condition="$key eq $brand">selected</if>> 
 	 {$vo.name}
@@ -20,16 +20,22 @@
  
 $(function(){ 
 	 
-	var bchar="{$bchar|default=0}";
+	var bchar="{$bchar|default=-1}";
 	var brand="{$brand|default=0}";
-	brand_change(bchar,$('body'),bchar);
+	 
 	$('.bcates').change(function(){
 		bchar=$(this).val(); 
 		brand_change(bchar,$(this).parent(),0);
 	});
-	function brand_change(bchar,$dir,brand){
-		$dir.find('.brands .brand1').hide();
-		$dir.find('.brands .brand2'+bchar).show();
+	function brand_change(bchar,$dir,brand=0){
+	 
+		if(bchar=='-1'){ 
+			$dir.find('.brands .brand1').show(); 
+		}else{
+			$dir.find('.brands .brand1').hide();
+			$dir.find('.brands .brand2'+bchar).show();
+		}
+	 
 		$dir.find('.brands .brand3'+brand).prop('selected','selected');
 	}
 });

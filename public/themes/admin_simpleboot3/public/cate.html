@@ -1,17 +1,17 @@
 
-<select class=" cate0 {$select_class|default=''}" name="cid0" >
+<select class=" cate0 form-control short-auto" name="cid0" >
 	<option value='0'>全部一级分类</option> 
 	 <foreach name="cates0" item="vo" >
 	<option value="{$key}" <if condition="$key eq $cid0">selected</if>> 
-	 {$vo.name} 
+	 {$vo.code},{$vo.name} 
 	</option>
 	</foreach>
 </select>  
-<select class=" cate {$select_class|default=''}" name="cid" >
+<select class=" cate form-control short-auto" name="cid" >
 	<option class="cate230" value='0'>全部二级分类</option> 
 	 <foreach name="cates" item="vo" >
-	<option class="cate20 cate21{$vo.fid} cate23{$key}" value="{$key}" <if condition="$key eq $cid">selected</if>> 
-	 {$vo.name} 
+	<option ttype="{$vo.type}" class="cate20 cate21{$vo.fid} cate23{$key}" value="{$key}" <if condition="$key eq $cid">selected</if>> 
+	 {$vo.code},{$vo.name} 
 	</option>
 	</foreach>
 </select> &nbsp;&nbsp; 
@@ -22,14 +22,18 @@ $(function(){
 	 
 	var cid0="{$cid0|default=0}";
 	var cid="{$cid|default=0}";
-	cate(cid0,$('body'),cid);
+	 
 	$('.cate0').change(function(){
 		cid0=$(this).val(); 
 		cate(cid0,$(this).parent(),0);
 	});
 	function cate(cid0,$dir,cid){
-		$dir.find('.cate .cate20').hide();
-		$dir.find('.cate .cate21'+cid0).show();
+		if(cid0==0){
+			$dir.find('.cate .cate20').show(); 
+		}else{
+			$dir.find('.cate .cate20').hide();
+			$dir.find('.cate .cate21'+cid0).show();
+		} 
 		$dir.find('.cate .cate23'+cid).prop('selected','selected');
 	}
 });

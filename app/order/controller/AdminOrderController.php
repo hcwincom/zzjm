@@ -252,12 +252,19 @@ class AdminOrderController extends AdminInfo0Controller
         $admin=$this->admin;
         $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
         $this->cates();
-        
+        $uid=$this->request->param('uid',0,'intval');
+        if($uid==0){
+            $custom=null;
+        }else{
+            //获取客户信息
+            $custom=Db::name('custom')->where('id',$uid)->find();
+            
+        }
         $this->assign('info',null);
       
         $this->assign('tels',null);
         $this->assign('accounts',null);
-        $this->assign('custom',null);
+        $this->assign('custom',$custom);
         $this->assign('pay',null);
         $this->assign('invoice',null);
        
@@ -412,17 +419,15 @@ class AdminOrderController extends AdminInfo0Controller
             } 
           
             //判断产品重量体积单位,统一转化为kg,cm3
-            switch($goods_infos[$k]['unit']){
-                case 1:
-                    $order_goods[$k]['weight1']=bcdiv($goods_infos[$k]['weight1'],1000,2);
-                    $order_goods[$k]['size1']=bcdiv($goods_infos[$k]['size1'],1000000000,2);
-                    break;
-                case 3:
-                    $order_goods[$k]['weight1']=bcmul($goods_infos[$k]['weight1'],1000,2);
-                    $order_goods[$k]['size1']=bcmul($goods_infos[$k]['size1'],1000000000,2);
-                    break;
-                default:
+            switch($goods_infos[$k]['type']){
+                case 5:
+                    //设备kg,m
                     $order_goods[$k]['weight1']=$goods_infos[$k]['weight1'];
+                    $order_goods[$k]['size1']=bcmul($goods_infos[$k]['size1'],1000000,2);
+                    break; 
+                default:
+                    //其他g,cm
+                    $order_goods[$k]['weight1']=bcdiv($goods_infos[$k]['weight1'],1000,2);
                     $order_goods[$k]['size1']=$goods_infos[$k]['size1'];
                     break;
             }

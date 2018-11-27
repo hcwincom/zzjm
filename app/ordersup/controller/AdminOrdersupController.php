@@ -249,12 +249,19 @@ class AdminOrdersupController extends AdminInfo0Controller
         $admin=$this->admin;
         $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
         $this->cates();
-        
+        $uid=$this->request->param('uid',0,'intval');
+        if($uid==0){
+            $supplier=null;
+        }else{
+            //获取客户信息
+            $supplier=Db::name('supplier')->where('id',$uid)->find();
+            
+        }
         $this->assign('info',null);
       
         $this->assign('tels',null);
         $this->assign('accounts',null);
-        $this->assign('supplier',null);
+        $this->assign('supplier',$supplier);
         $this->assign('pay',null);
         $this->assign('invoice',null);
        

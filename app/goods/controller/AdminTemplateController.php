@@ -62,6 +62,7 @@ class AdminTemplateController extends GoodsBaseController
        
        $this->assign('params',$params);
        $this->assign('end',count($params)-1);
+       $this->assign('ids',[]);
         return $this->fetch();  
         
     }

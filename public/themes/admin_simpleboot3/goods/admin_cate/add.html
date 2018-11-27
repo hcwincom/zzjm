@@ -20,34 +20,4 @@
 	 
 </body>
 </html>
-<script>
-var cid=$('#cid').val(); 
-cid_change(cid); 
-
-$('#cid').change(function(){
-	cid=$(this).val();
-	cid_change(cid);
-});
-$('#code_num').change(function(){
-	cid=$('#cid').val();
-	var code_num=parseInt($('#code_num').val());
-	
-	$.post("{:url('code_change')}",{'cid':cid,'code_num':code_num},function(data){ 
-		if(data.code!=1){
-			alert(data.msg);
-			cid_change(cid);
-			return false;
-		} 
-	},'json');
-});
-function cid_change(cid){
-	$.post("{:url('cid_change')}",{'cid':cid},function(data){ 
-		if(data.code!=1){
-			alert(data.msg);
-			return false;
-		}
-		$('#code_num').val(data.msg);
-	},'json');
-}
  
-</script>

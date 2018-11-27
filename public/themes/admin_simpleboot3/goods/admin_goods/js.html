@@ -2,6 +2,7 @@
 $('.cid .cate').change(function(){ 
 	var cid=parseInt($('.cid .cate').val()); 
 	cid_change(cid);
+	
 });
 $('#add').click(function(){
 	var name=$.trim($('.code_name input').val());
@@ -19,6 +20,8 @@ $('#add').click(function(){
 			return false;
 		} 
 		$('#name').val(data.msg);
+		$('#name2').val(data.msg);
+		$('#name3').val(data.msg);
 		$('#code').val(data.data.code);
 	},'json');
 });
@@ -35,6 +38,14 @@ function cid_change(cid){
 		}
 		
 		$('#code_num').val(data.msg);
+		var type=$('.cid .cate option:selected').attr('ttype');
+		if(type==1){
+			 
+			$('#ttype1').prop('checked','checked');
+		}else{
+			$('#ttype5').prop('checked','checked');
+		}
+		 
 	},'json');
 }
 //计算体积

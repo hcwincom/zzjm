@@ -246,11 +246,9 @@ class OrderModel extends Model
              $orders=[$info['id']=>$info];
              $order_ids=[$info['id']];
          }else{
-             
              $fields='id,name,'.(implode(',',$edit_base));
-             
-            /*  $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
-                 ',real_freight,other_money,tax_money,order_amount,dsc,express_no'; */
+           /*   $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
+                 ',real_freight,other_money,tax_money,order_amount,dsc'; */
              $orders=$this->where('fid',$info['id'])->column($fields);
              
              $order_ids=array_keys($orders);
