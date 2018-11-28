@@ -234,6 +234,7 @@ class AdminInfo0Controller extends AdminBaseController
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m->commit();
+        //直接审核
         $rule='review';
         $res=$this->check_review($admin,$rule);
         if($res){
@@ -545,6 +546,7 @@ class AdminInfo0Controller extends AdminBaseController
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        //判断是否直接审核
         $rule='edit_review';
         $res=$this->check_review($admin,$rule);
         if($res){

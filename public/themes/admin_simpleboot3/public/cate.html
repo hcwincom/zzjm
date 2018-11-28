@@ -1,19 +1,9 @@
 
-<select class=" cate0 form-control short-auto" name="cid0" >
-	<option value='0'>全部一级分类</option> 
-	 <foreach name="cates0" item="vo" >
-	<option value="{$key}" <if condition="$key eq $cid0">selected</if>> 
-	 {$vo.code},{$vo.name} 
-	</option>
-	</foreach>
+<select class=" cate0 form-control short-auto" name="cid0" id="cate1">
+	<option value='0'>全部一级分类</option>
 </select>  
-<select class=" cate form-control short-auto" name="cid" >
-	<option class="cate230" value='0'>全部二级分类</option> 
-	 <foreach name="cates" item="vo" >
-	<option ttype="{$vo.type}" class="cate20 cate21{$vo.fid} cate23{$key}" value="{$key}" <if condition="$key eq $cid">selected</if>> 
-	 {$vo.code},{$vo.name} 
-	</option>
-	</foreach>
+<select class=" cate form-control short-auto" name="cid" id="cate2">
+	<option class="cate230" value='0'>未选择二级分类</option> 
 </select> &nbsp;&nbsp; 
  
 <script>
@@ -22,8 +12,33 @@ $(function(){
 	 
 	var cid0="{$cid0|default=0}";
 	var cid="{$cid|default=0}";
-	 
-	$('.cate0').change(function(){
+	var url_get_cates="{:url('goods/Goodsajax/get_cates')}";
+	$.post(get_cates_url,{'cid0':cid0},function(data){
+		if(data.code!=1){ 
+			return false;
+		} 
+		var list=data.data; 
+		var options1='<option value="0">全部一级分类</option>';
+		var options2='<option class="cate230" value="0">未选择二级分类</option> ';
+		for(var i in list){
+			if(list[i]['fid']==0){
+				options1+='<option value="'+i+'" >'+list[i]['code']+','+list[i]['name']+'</option>';
+			}else{
+				options2+='<option ttype="'+list[i]['type']+'" class="cate20 cate21'+list[i]['fid']+' cate23'+i+'" value="'+i+'" >'+list[i]['code']+','+list[i]['name']+'</option>';
+			}
+		 
+		} 
+		$('#cate1').html(options1); 
+		$('#cate2').html(options2); 
+		if(cid0>0){
+			$('#cate1').val(cid0);  
+		}
+		if(cid>0){
+			$('#cate2').val(cid);  
+		}
+		
+	},'json'); 
+	$('#cate1').change(function(){
 		cid0=$(this).val(); 
 		cate(cid0,$(this).parent(),0);
 	});

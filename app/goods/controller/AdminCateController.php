@@ -161,23 +161,27 @@ class AdminCateController extends GoodsBaseController
         } catch (\Exception $e) {
             $this->error('操作失败，请重试');
         }
-        
         //记录操作记录
-        $flag=$this->flag;
-        $table=$this->table; 
         $data_action=[
             'aid'=>$admin['id'],
             'time'=>$time,
             'ip'=>get_client_ip(),
-            'action'=>'添加'.$flag.$id.'-'.$data['name'],
-            'table'=>$table,
+            'action'=>$admin['user_nickname'].'添加'.($this->flag).$id.'-'.$data['name'],
+            'table'=>($this->table),
             'type'=>'add',
             'pid'=>$id,
-            'link'=>url('admin/'.$table.'/edit',['id'=>$id]),
+            'link'=>url('edit',['id'=>$id]),
             'shop'=>$admin['shop'],
+            
         ];
-        Db::name('action')->insert($data_action);
+        zz_action($data_action,['department'=>$admin['department']]);
         
+        //直接审核
+        $rule='review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$id,'status'=>2]);
+        }
         $this->success('添加成功',$url);
     }
     /**
@@ -547,6 +551,12 @@ class AdminCateController extends GoodsBaseController
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        //直接审核
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
     }
     /**

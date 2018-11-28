@@ -1414,6 +1414,12 @@ class AdminGoodsController extends AdminBaseController
         $m->commit();
         //添加收藏关联
         $this->goods_collect($id,$admin['id'],1);
+        //直接审核5
+        $rule='review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$id,'status'=>2]);
+        }
         $this->success('添加成功',url('index'));
     }
      
@@ -1896,6 +1902,12 @@ class AdminGoodsController extends AdminBaseController
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
+        //直接审核
+        $rule='image_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
     }
     /**
@@ -2326,6 +2338,12 @@ class AdminGoodsController extends AdminBaseController
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
+        //直接审核
+        $rule='content_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
     }
     /**
@@ -2621,6 +2639,12 @@ class AdminGoodsController extends AdminBaseController
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
+        //直接审核
+        $rule='type2_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
          
     }
@@ -2950,6 +2974,12 @@ class AdminGoodsController extends AdminBaseController
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
+        //直接审核
+        $rule='type4_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
         
     }
@@ -3387,6 +3417,13 @@ class AdminGoodsController extends AdminBaseController
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
+        
+        //直接审核
+        $rule='type3_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
         
     }
@@ -3721,6 +3758,12 @@ class AdminGoodsController extends AdminBaseController
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
+        //直接审核
+        $rule='type5_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
         
     }
@@ -4210,6 +4253,13 @@ class AdminGoodsController extends AdminBaseController
         $m_edit->commit();
         //添加收藏关联
         $this->goods_collect($info['id'],$admin['id'],2);
+        
+        //判断是否直接审核
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
     }
     /**

@@ -84,6 +84,9 @@ class OrderModel extends Model
          //
          $num0=0;
          $num1=0;
+         dump($store);
+         dump($goods);
+         dump($store_num);exit;
          //如果默认库存不足就按优先仓库发货,重新计算费用和重量体积
          foreach($goods as $k=>$v){
             if(empty($store_num[$k][$store])){
@@ -96,6 +99,7 @@ class OrderModel extends Model
                 $num1= $v['num']-$num0;
                 $order[$store][$k]=$v;
                 $order[$store][$k]['num']=$num0;
+                $order[$store][$k]['pay_discount']=round($v['pay_discount'],$num0/($v['num']),2);
                 $order[$store][$k]['pay']=bcmul($v['price_real'],$num0,2);
                 $order[$store][$k]['weight']=bcmul($v['weight1'],$num0,2);
                 $order[$store][$k]['size']=bcmul($v['size1'],$num0,2);

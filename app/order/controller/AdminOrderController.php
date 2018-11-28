@@ -37,6 +37,7 @@ class AdminOrderController extends AdminInfo0Controller
      */
     public function index()
     {
+        
         $table=$this->table;
         $m=$this->m;
         $admin=$this->admin;
@@ -704,6 +705,7 @@ class AdminOrderController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        //直接审核
         $rule='edit_review';
         $res=$this->check_review($admin,$rule);
         if($res){

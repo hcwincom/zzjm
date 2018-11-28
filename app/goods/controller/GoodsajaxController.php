@@ -265,15 +265,14 @@ class GoodsajaxController extends AdminBase0Controller
         $this->success('ok','',['goods'=>$goods,'param'=>$param]);
     }
     /*
-     * 根据fid获取分类 */
+     * 获取分类 */
     public function get_cates()
     {
-        $fid=$this->request->param('fid',0,'intval'); 
+        
         $where=[
-            'status'=>2,
-            'fid'=>$fid,
-        ];
-        $list=Db::name('cate')->where($where)->order('sort asc,code_num asc')->column('id,name');
+            'status'=>2, 
+        ]; 
+        $list=Db::name('cate')->where($where)->order('code asc')->column('id,name,code,type,fid');
         $this->success('ok','',$list);
     }
     /*

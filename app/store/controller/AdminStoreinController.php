@@ -634,6 +634,13 @@ class AdminStoreinController extends AdminBaseController
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m->commit();
+        //判断是否直接审核
+        $rule='review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$id,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        
         $this->success('添加成功',$url);
     }
     
