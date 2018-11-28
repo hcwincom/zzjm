@@ -414,8 +414,7 @@ function weight_change(){
 	var weight1=0;
 	var size1=0;
 	var $tr;
-	 
-	$('#size').val('weight_change');
+	  
 	$('.weight1').each(function(){
 		$tr=$(this).parents('tr'); 
 		//重量体积改变
@@ -433,8 +432,8 @@ function weight_change(){
 		size_count+=size1; 
 		console.log(size_count);
 	}); 
-	$('#size').val(size_count);
-	$('#weight').val(weight_count);
+	$('#size').val(size_count.toFixed(2));
+	$('#weight').val(weight_count.toFixed(2));
 } 
 var url_freight_count="{:url('order/Orderajax/freight_count')}";
 $('#freight_count').click(function(){

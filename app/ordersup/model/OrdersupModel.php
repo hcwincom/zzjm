@@ -7,48 +7,7 @@ use think\Db;
 use app\store\model\StoreGoodsModel;
 class OrdersupModel extends Model
 {
-    /**
-     * 下单时为仓库排序，按首重价格计算
-     * @param $city收货地
-     * @param $shop店铺
-     */ 
-    public function store_sort($city,$shop){
-        
-        //先获取所有仓库，物流
-        $where=[
-            'shop'=>['eq',$shop],
-            'status'=>['eq',2],
-            'store'=>['gt',0]
-        ];
-        $stores=Db::name('freight')->where($where)->column('id,store');
-        if(empty($stores)){
-           return 0;
-        }
-        $freights=array_keys($stores);
-        $freights=implode(',', $freights);
-        //按首重费用排序，花费小的优先
-        $fees=Db::name('freight_fee')
-        ->alias('ff')
-        ->field('ff.price0')
-        ->join('cmf_express_area ea','ea.city='.$city.' and ea.area=ff.expressarea')
-        ->where('ff.freight','in',$freights)
-        ->order('ff.price0 asc')
-        ->column('ff.freight');
-        if(empty($fees)){
-            return 0;
-        }
-        $sort=[];
-        foreach($fees as $v){
-            if(!in_array($stores[$v],$sort)){
-                $sort[]=$stores[$v];
-            }
-        }
-        return $sort;
-        
-    }
-     
-     
-     
+      
      /* 采购单编辑 */
      public function ordersup_edit($info,$data,$is_do=0)
      {

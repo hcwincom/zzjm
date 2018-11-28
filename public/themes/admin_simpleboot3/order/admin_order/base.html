@@ -210,7 +210,22 @@
 				</present>
 				</div>
 			</div>
-	  		 
+	  		 <div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">是否允许拆分订单</label>
+				<div class="col-md-6 col-sm-10"> 
+				 	<label class="radio-inline"> 
+				 		<input type="radio" name="ok_break" value="1" id="ok_break" checked/>允许
+					 </label>
+					 <label class="radio-inline"> 
+				 		<input type="radio" name="ok_break" value="2" <eq name="info.ok_break" value="2">checked</eq>/>不允许
+					 </label>
+				<present name="change.ok_break">
+					<span class="red">
+					<eq name="change.ok_break" value="1">允许<else/>不允许</eq>
+					</span>
+				</present>
+				</div>
+			</div>
 			<div style="clear:both"></div>
 			 
 	  		
@@ -273,13 +288,25 @@
 	 		</div>
 	 		<div class="form-group fleft-all"></div>
 	 	<else/>
+	 		<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">添加产品</label>
+				<div class="col-md-6 col-sm-10">
+				   <include file="public@cate_goods" />  
+					 <button type="button" id="goods_add">确定</button>
+				 
+				</div>
+			</div>
 		<div class="orders">
 		<foreach name="orders" item="vv" key="kk"> 
 			<div class="order order{$kk}" > 
 			<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
 			  <table class="table table-hover table-bordered table-list goods-list"  > 
 			 	<tr >
-				 	 <td class="order_name"><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.name}</a></td>
+				 	 <td class="order_name">
+				 	 <input type="radio" name="check" class="check" ttype="order"/>
+				 	 	<a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">订单{$vv.name}</a>
+				 		
+				 	 </td>
 				 	 <td >产品编码</td> 
 				 	 <td  >产品图片</td> 
 				 	 <td  >总库存</td> 
@@ -301,6 +328,7 @@
 			   
      	     	<tr class="goods{$key}"> 
      	     		<td>
+     	     		 <input type="radio" name="check" class="check" ttype="goods"/>
      	     			<a href="{$goods_url}/id/{$key}" target="{$zztarget.other}">{$vo.goods_name}</a> 
      	     		</td> 
      	    		<td>{$vo.goods_code}</td> 
@@ -406,7 +434,8 @@
     	   			<present name="change['edit'][$kk][$key]['del']">
     	   				<span class="red">删除</span>
     	   			<else/> 
-    	   			<if condition="empty($info1) && $info.fid eq 0 && $info.status lt 24">
+    	   			
+    	   			<if condition="empty($info1) && $ok_break eq 1">
     	   				<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
     	   			 	<input type="number" class="form-control break" value="0"/>
     	   				<button class="order_break" type="button">拆分</button> 

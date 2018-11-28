@@ -11,8 +11,9 @@ class OrderModel extends Model
      * 下单时为仓库排序，按首重价格计算
      * @param $city收货地
      * @param $shop店铺
+     * @param $store已选择的仓库,要排除
      */ 
-    public function store_sort($city,$shop){
+    public function store_sort($city,$shop,$store=0){
         
         //先获取所有仓库，物流
         $where=[
@@ -39,7 +40,7 @@ class OrderModel extends Model
         }
         $sort=[];
         foreach($fees as $v){
-            if(!in_array($stores[$v],$sort)){
+            if(!in_array($stores[$v],$sort) && $stores[$v]!=$store){
                 $sort[]=$stores[$v];
             }
         }
@@ -56,11 +57,20 @@ class OrderModel extends Model
      * @param $shop
      *  */
     public function order_break($goods,$oid,$store,$city,$shop){
+        //获取优先的仓库,已去除默认的
+        $sort=$this->store_sort($city,$shop,$store);
+        if(empty($sort)){ 
+            $sort=[];
+        } 
+        //获取可用的仓库，优先仓库+默认选择的
+        $stores=$sort;
+        $stores[]=$store;
          //获取所有库存
          $goods_id=array_keys($goods);
          $where=[
              'goods'=>['in',$goods_id],
              'shop'=>['eq',$shop],
+             'store'=>['in',$stores],
          ];
          $list=Db::name('store_goods')->where($where)->column('id,store,goods,num');
          //循环得到数据
@@ -68,27 +78,17 @@ class OrderModel extends Model
          foreach($list as $k=>$v){
              $store_num[$v['goods']][$v['store']]=$v['num'];
          }
-         //获取优先的仓库,去除默认的
-         $sort=$this->store_sort($city,$shop);
-         if(empty($sort)){
-             $sort=[];
-         }else{
-             $index=array_search ($store,$sort);
-             if($index){
-                 unset($sort[$index]);
-             }
-         }
+        
          
          //最终order
          $order=[];
          //
          $num0=0;
          $num1=0;
-         dump($store);
-         dump($goods);
-         dump($store_num);exit;
+        
          //如果默认库存不足就按优先仓库发货,重新计算费用和重量体积
          foreach($goods as $k=>$v){
+             $ave_discount=bcdiv($v['pay_discount'],$v['num'],2);
             if(empty($store_num[$k][$store])){
                 //没有库存，下面优先仓库发货
                 $num0=0;
@@ -99,8 +99,8 @@ class OrderModel extends Model
                 $num1= $v['num']-$num0;
                 $order[$store][$k]=$v;
                 $order[$store][$k]['num']=$num0;
-                $order[$store][$k]['pay_discount']=round($v['pay_discount'],$num0/($v['num']),2);
-                $order[$store][$k]['pay']=bcmul($v['price_real'],$num0,2);
+                $order[$store][$k]['pay_discount']=bcmul($ave_discount,$num0,2);
+                $order[$store][$k]['pay']=bcsub($v['price_real']*$num0, $order[$store][$k]['pay_discount'],2);
                 $order[$store][$k]['weight']=bcmul($v['weight1'],$num0,2);
                 $order[$store][$k]['size']=bcmul($v['size1'],$num0,2);
                 
@@ -109,8 +109,10 @@ class OrderModel extends Model
                 $order[$store][$k]=$v;
                 continue;
             }
+          
             //按优先仓库发货
             foreach($sort as $vv){
+                
                 if(empty($store_num[$k][$vv])){
                     //没有库存
                     continue;
@@ -120,7 +122,8 @@ class OrderModel extends Model
                     $num1= $num1-$num0;
                     $order[$vv][$k]=$v;
                     $order[$vv][$k]['num']=$num0;
-                    $order[$vv][$k]['pay']=bcmul($v['price_real'],$num0,2);
+                    $order[$vv][$k]['pay_discount']=bcmul($ave_discount,$num0,2);
+                    $order[$vv][$k]['pay']=bcsub($v['price_real']*$num0, $order[$vv][$k]['pay_discount'],2);
                     $order[$vv][$k]['weight']=bcmul($v['weight1'],$num0,2);
                     $order[$vv][$k]['size']=bcmul($v['size1'],$num0,2);
                     
@@ -129,7 +132,8 @@ class OrderModel extends Model
                      //数量足够
                     $order[$vv][$k]=$v;
                     $order[$vv][$k]['num']=$num1;
-                    $order[$vv][$k]['pay']=bcmul($v['price_real'],$num1,2);
+                    $order[$vv][$k]['pay_discount']=bcmul($ave_discount,$num0,2);
+                    $order[$vv][$k]['pay']=bcsub($v['price_real']*$num0, $order[$vv][$k]['pay_discount'],2);
                     $order[$vv][$k]['weight']=bcmul($v['weight1'],$num1,2);
                     $order[$vv][$k]['size']=bcmul($v['size1'],$num1,2);
                     $num1=0;
@@ -140,7 +144,9 @@ class OrderModel extends Model
             if($num1>0){
                 $order[0][$k]=$v;
                 $order[0][$k]['num']=$num1;
-                $order[0][$k]['pay']=bcmul($v['price_real'],$num1,2);
+                $order[0][$k]['pay_discount']=bcmul($ave_discount,$num0,2);
+                $order[0][$k]['pay']=bcsub($v['price_real']*$num0, $order[0][$k]['pay_discount'],2);
+               
                 $order[0][$k]['weight']=bcmul($v['weight1'],$num1,2);
                 $order[0][$k]['size']=bcmul($v['size1'],$num1,2);
                
@@ -156,16 +162,16 @@ class OrderModel extends Model
           
          $content=[];
          //检测改变了哪些字段 
-         //所有订单都有,但只有虚拟订单会记录,真实订单在子订单里记录
+         //所有订单都有,都能修改
          $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
              'goods_num','goods_money','discount_money','tax_money','other_money','order_amount','express_no'
              
          ];
          //收货信息，子订单可以单独修改，总订单修改后同步到子订单
-         $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode',];
+         $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode'];
           
          //总订单信息系
-         $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type'];
+         $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','ok_break'];
          //组装需要判断的字段,普通订单未拆分的不比较总订单信息
          if($info['fid']==0){
              $fields=array_merge($edit_accept,$edit_fid0);
@@ -363,7 +369,7 @@ class OrderModel extends Model
          $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','status','pay_status'];
          
          //总订单信息系，子订单不能单独修改，总订单修改后同步到子订单
-         $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type'];
+         $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','ok_break'];
          //记录有订单拆分，需要废弃原出入库的订单id,重新添加
          $instore_oids=[];
          //新添加订单号

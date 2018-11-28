@@ -337,6 +337,7 @@ class AdminOrderController extends AdminInfo0Controller
             'dsc'=>$data['dsc'],
             'create_time'=>$time,
             'sort'=>2,
+            'ok_break'=>$data['ok_break'],
         ];
  
         //收货地址信息 
@@ -437,14 +438,18 @@ class AdminOrderController extends AdminInfo0Controller
            
         }
         //检查是否拆分订单
-        $i=0;
-        $orders=$m->order_break($order_goods, $oid,$store,  $data_order['city'],  $data_order['shop']);
+        if($data_order['ok_break']==1){
+            $orders=$m->order_break($order_goods, $oid,$store,  $data_order['city'],  $data_order['shop']);
+        }else{
+            $orders=[1];
+        } 
         if(count($orders)==1){
             $dsc='订单添加成功';
             
             $m_info->insertAll($order_goods);
         }else{
             $dsc='订单已拆分';
+            $i=0;
             //主单号标记
             $m->where('id',$oid)->update(['is_real'=>2]);
             //拆分订单要生成子单号
@@ -474,11 +479,12 @@ class AdminOrderController extends AdminInfo0Controller
                     'udsc'=>$data_order['udsc'],
                     'dsc'=>$data_order['dsc'],
                     'sort'=>$data_order['sort'],
-                   
+                    'ok_break'=>$data_order['ok_break'],
                     'goods_money'=>0, 
                     'goods_num'=>0, 
                     'weight'=>0, 
                     'size'=>0, 
+                   
                 ];
                 foreach($v as $kk=>$vv){
                     $tmp_order['goods_money']+=$vv['pay']; 
@@ -600,6 +606,14 @@ class AdminOrderController extends AdminInfo0Controller
         $res=$m->order_goods($info,$admin['id']);
          
         $this->cates();
+        //是否允许拆分
+        if($info['ok_break']!=1 || $info['fid']!=0){
+            $ok_break=2;
+        }else{
+            $ok_break=1;
+        }
+        $this->assign('ok_break',$ok_break); 
+        
         $this->assign('infos',$res['infos']);
         $this->assign('orders',$res['orders']);
         $this->assign('goods',$res['goods']);
