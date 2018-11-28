@@ -8,14 +8,15 @@
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('review_edit')}">
 			<div class="form-group">
-				<label  class="col-sm-2 control-label">id</label>
+				<label  class="col-sm-2 control-label">{$flag}id</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" value="{$info.id}" readonly/>
+					<input type="text" class="form-control" value="{$info.id}" />
 					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a>
 				</div>
 			</div>
 
-				<include file="custom@admin_supplier_cate:base"/>
+
+			<include file="custom@admin_supplier_cate:base"/>
 			<div class="form-group">
 				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>
 				<div class="col-md-6 col-sm-10">
