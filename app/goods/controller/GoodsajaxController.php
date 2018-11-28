@@ -248,7 +248,7 @@ class GoodsajaxController extends AdminBase0Controller
         $admin=$this->admin; 
         $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         
-        $goods=Db::name('goods')->where($where)->column('id,name');
+        $goods=Db::name('goods')->where($where)->column('id,name,code');
         $this->success('ok','',$goods);
     }
     //获取产品的参数值

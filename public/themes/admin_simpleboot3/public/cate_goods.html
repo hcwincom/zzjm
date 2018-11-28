@@ -1,7 +1,7 @@
  <include file="public@cate" />  
 
  <select class=" goods form-control short-auto" >
-	  
+	 <option value="0"> 产品编码,名称</option>
 </select> &nbsp;&nbsp; 
 <script>
  
@@ -11,8 +11,7 @@ $(function(){
 	 
 	$('#cate2').change(function(){
 		var cid=parseInt($(this).val()); 
-		 if(cid<=0){
-			 $('.goods').html('');
+		 if(cid<=0){ 
 			 return false;
 		 }
 		 $.post(url,{'cid':cid},function(data){
@@ -23,7 +22,7 @@ $(function(){
 			 var list=data.data;
 			 var options='';
 			 for(var i in list){
-				 options+='<option value="'+i+'">'+list[i]+'</option>';
+				 options+='<option value="'+i+'">'+list[i]['code']+','+list[i]['name']+'</option>';
 			 }
 			 $('.goods').html(options);
 		 },'json');

@@ -4894,7 +4894,7 @@ class AdminGoodsController extends AdminBaseController
     public function cates($type=3){
        
         //分类
-        $m_cate=Db::name('cate');
+       /*  $m_cate=Db::name('cate');
         $where_cate=[
             'fid'=>0,
             'status'=>2,
@@ -4906,7 +4906,7 @@ class AdminGoodsController extends AdminBaseController
         ];
         $cates=$m_cate->where($where_cate)->order('code asc')->column('id,name,fid,code,type');
         $this->assign('cates0',$cates0);
-        $this->assign('cates',$cates);
+        $this->assign('cates',$cates); */
          
     }
     //获取品牌信息
