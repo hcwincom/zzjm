@@ -268,7 +268,7 @@ class AdminOrderController extends AdminInfo0Controller
         $this->assign('custom',$custom);
         $this->assign('pay',null);
         $this->assign('invoice',null);
-       
+        $this->assign('ok_break',2); 
         return $this->fetch();  
         
     }

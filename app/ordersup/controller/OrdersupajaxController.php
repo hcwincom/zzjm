@@ -33,20 +33,20 @@ class OrdersupajaxController extends AdminBase0Controller
             $goods['price_in']='--';
         }
         //判断产品重量体积单位,统一转化为kg,cm3
-        switch($goods['unit']){
-            case 1:
-                $goods['weight1']=bcdiv($goods['weight1'],1000,2);
-                $goods['size1']=bcdiv($goods['size1'],1000000000,2);
-                break; 
-            case 3:
-                $goods['weight1']=bcmul($goods['weight1'],1000,2);
-                $goods['size1']=bcmul($goods['size1'],1000000000,2);
+        //判断产品重量体积单位,统一转化为kg,cm3
+        switch($goods['type']){
+            case 5:
+                //设备kg,m
+                $goods['weight1']=$goods['weight1'];
+                $goods['size1']=bcmul($goods['size1'],1000000,2);
                 break;
             default:
-                $goods['weight1']=$goods['weight1'];
+                //其他g,cm
+                $goods['weight1']=bcdiv($goods['weight1'],1000,2);
                 $goods['size1']=$goods['size1'];
                 break;
         }
+        
         $goods['weight1']=($goods['weight1']==0)?0.01:$goods['weight1'];
         $goods['size1']=($goods['size1']==0)?0.01:$goods['size1'];
         
