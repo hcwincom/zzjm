@@ -4,6 +4,7 @@ namespace app\order\controller;
 
 use app\common\controller\AdminBase0Controller;  
 use think\Db; 
+use app\order\model\OrderModel;
   
 class OrderajaxController extends AdminBase0Controller
 {
@@ -28,26 +29,13 @@ class OrderajaxController extends AdminBase0Controller
         $name       = strtolower('goods/AdminGoodsauth/price_in_get'); 
         $is_auth=$authObj->check($admin['id'], $name);
         
-        $goods=Db::name('goods')->field('id,name,code,sn,pic,price_in,price_sale,type,weight1,size1')->where($where)->find();
+        $goods=Db::name('goods')->field('id,name,code,pic,price_in,price_sale,type,weight1,size1')->where($where)->find();
         if($is_auth==false){
             $goods['price_in']='--';
         }
         //判断产品重量体积单位,统一转化为kg,cm3 
-        switch($goods['type']){
-            case 5:
-                //设备kg,m
-                $goods['weight1']=$goods['weight1'];
-                $goods['size1']=bcmul($goods['size1'],1000000,2);
-                break;  
-            default:
-                //其他g,cm
-                $goods['weight1']=bcdiv($goods['weight1'],1000,2);
-                $goods['size1']=$goods['size1'];
-                break;
-        }
-        $goods['weight1']=($goods['weight1']==0)?0.01:$goods['weight1'];
-        $goods['size1']=($goods['size1']==0)?0.01:$goods['size1'];
-        
+        $m=new OrderModel();
+        $goods=$m->unit_change($goods); 
         //产品库存
         $where['goods']=$id;
         unset($where['id']); 

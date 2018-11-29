@@ -24,7 +24,6 @@
 </body>
 </html>
 <script>
- 
 $('form').submit(function(){
 	if($('#order_company').val()=='0'){
 		$('#order_company').focus();
@@ -195,7 +194,47 @@ function accept_change(){
 }
 
  
-function money_change1111($tr,type='price'){  
+$(document).on('change','.price_sale',function(){
+	money_change($(this).parents('tr'),'price');
+}); 
+$(document).on('change','.pay_discount',function(){
+	money_change($(this).parents('tr'),'price');
+});
+$(document).on('change','.num',function(){ 
+	money_change($(this).parents('tr'),'num'); 
+});
+function order_change(){  
+	var num=0; 
+	var price_count1=0;
+	 
+	var price_count=0;
+	var num_count=0;  
+	$('.price_count').each(function(){
+		$tr=$(this).parents('tr'); 
+		num=parseInt($tr.find('.num').val()); 
+		if(!(num>0)){
+			num=1; 
+			$(this).val($tr.find('.price_sale').val());
+		}
+		$tr.find('.num').val(num);
+		num_count+=num;
+		
+		price_count1=parseFloat($(this).val());
+		if(!(price_count1>=0)){
+			price_count1=0;
+			$(this).val(price_count1);
+		}
+		price_count+=price_count1; 
+	});
+	$('#goods_money').val(price_count.toFixed(2));
+	$('#goods_num').val(num_count);
+	//重量体积改变
+	if(type=='num'){ 
+		weight_change();
+	}  
+	order_account();
+}
+function money_change($tr,type='price'){  
 	var num=parseInt($tr.find('.num').val()); 
 	var price_sale=parseFloat($tr.find('.price_sale').val());
 	var pay_discount=parseFloat($tr.find('.pay_discount').val());
@@ -257,7 +296,33 @@ function money_change1111($tr,type='price'){
 	}  
 	order_account();
 }
- 
+function weight_change(){
+	var weight_count=0;
+	var size_count=0;
+	var weight1=0;
+	var size1=0;
+	var $tr;
+	 
+	$('.weight1').each(function(){
+		$tr=$(this).parents('tr'); 
+		//重量体积改变
+		weight1=parseFloat($tr.find('.weight1').val());
+		if(!(weight1>0)){
+			weight1=0.01;
+			$tr.find('.weight1').val(weight1); 
+		}
+		weight_count+=weight1;
+		size1=parseFloat($tr.find('.size1').val());
+		if(!(size1>0)){
+			size1=0.01;
+			$tr.find('.size1').val(size1); 
+		}
+		size_count+=size1; 
+		 
+	}); 
+	$('#size').val(size_count.toFixed(2));
+	$('#weight').val(weight_count.toFixed(2));
+} 
 var url_freight_count="{:url('order/Orderajax/freight_count')}";
 $('#freight_count').click(function(){
 	var freight=$('#freight').val();

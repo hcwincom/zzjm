@@ -265,25 +265,47 @@ class OrderModel extends Model
              
              $where_goods['oid']=['in',$order_ids];
          }
+         
          //全部订单产品
          $order_goods=Db::name('order_goods')
          ->where($where_goods)
          ->column('');
          //数据转化，按订单分组
          $infos=[];
+         //先组装所有订单，防止有的订单没有产品
+         foreach($order_ids as $v){
+             $infos[$v]=[];
+         }
          $goods_info=[];
+        
          foreach($order_goods as $k=>$v){
              $infos[$v['oid']][$v['goods']]=$v;
              $goods_info[$v['goods']]=$v;
          }
+         //得到原有产品
+         $goods_ids0=array_keys($goods_info);
+        
+         $goods_ids1=$data['goods_ids'];
+         $ids_add=array_diff($goods_ids1,$goods_ids0); 
+         if(!empty($ids_add)){
+             //有新增产品 
+             $goods_add=Db::name('goods')->where('id','in',$ids_add)->column('id as goods,name as goods_name,name3 as print_name,code as goods_code,pic as goods_pic,price_in,price_sale,type,weight1,size1');
+             foreach($goods_add as $k=>$v){
+                 //判断产品重量体积单位,统一转化为kg,cm3
+                 $v=$this->unit_change($v);
+                 unset($v['type']);
+                 $goods_info[$k]=$v;
+             } 
+         }
+        
          //子订单nums-{$kk}[{$key}],只有在主订单下才能拆分订单
          
          /*  $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
           'goods_num','goods_money','discount_money','tax_money','other_money','order_amount',
           ]; */
-         $edit_goods=['num','pay','weight','size','dsc','price_real','pay_discount'];
+         $edit_goods=['num','pay','weight','size','dsc','price_real','pay_discount','goods_uname','goods_ucate'];
         
-          
+         
          //多个要一个个比较,先比较是否存在
          foreach($data['oids'] as $k=>$void){
              if(in_array($void,$order_ids)){
@@ -291,24 +313,49 @@ class OrderModel extends Model
                  foreach($edit_base as $kk=>$vv){
                      if($orders[$void][$vv]!=$data[$vv.'0'][$void]){
                          $content['edit'][$void][$vv]=$data[$vv.'0'][$void];
-                     }
-                     
+                     } 
                  }
-                 //一个个比较产品，只有删除，没有新增
+                 
+                 //一个个比较产品，是否有删除或编辑
                  foreach ($infos[$void] as $kgoodsid=>$kv){ 
                      //data不存在就是没有该产品了,删除
                      if(!isset($data['nums-'.$void][$kgoodsid]) ){
-                         $content['edit'][$void]['goods'][$kgoodsid]['del']=1;
+                         $content['edit'][$void]['goods_del'][$kgoodsid]=$kv;
                          continue;
-                     }
+                     } 
                      //循环商品信息
                      foreach($edit_goods as $vv){
-                         if($data[$vv.'s-'.$void][$kgoodsid] !=  $infos[$void][$kgoodsid][$vv]){
+                         if($data[$vv.'s-'.$void][$kgoodsid] !=  $kv[$vv]){
                              $content['edit'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
                          } 
                      } 
                  }
-                 
+                 if(isset($data['nums-'.$void])){
+                     //再用data数据循环，检查是否有新增，没有继续向下
+                     foreach ($data['nums-'.$void] as $kgoodsid=>$kv){
+                         if(isset($infos[$void][$kgoodsid])){
+                             continue;
+                         }
+                         $content['edit'][$void]['goods_add'][$kgoodsid]=[];
+                         //保存订单号
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['oid']=$void;
+                         //添加商品id
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['goods']=$kgoodsid;
+                         //循环商品信息
+                         foreach($edit_goods as $vv){
+                             $content['edit'][$void]['goods_add'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
+                         }
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['goods_name']=$goods_info[$kgoodsid]['goods_name'];
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['print_name']=$goods_info[$kgoodsid]['print_name'];
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['goods_code']=$goods_info[$kgoodsid]['goods_code'];
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['goods_pic']=$goods_info[$kgoodsid]['goods_pic'];
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['price_in']=$goods_info[$kgoodsid]['price_in'];
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['price_sale']=$goods_info[$kgoodsid]['price_sale'];
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['weight1']=$goods_info[$kgoodsid]['weight1'];
+                         $content['edit'][$void]['goods_add'][$kgoodsid]['size1']=$goods_info[$kgoodsid]['size1'];
+                         
+                     } 
+                 }  
              }else{
                  //不存在新增
                  $content['add'][$void]=[];
@@ -317,24 +364,30 @@ class OrderModel extends Model
                  foreach($edit_base as $kk=>$vv){
                      $content['add'][$void][$vv]=$data[$vv.'0'][$void];
                  }
-                 foreach ($data['nums-'.$void] as $kgoodsid=>$kv){
-                     //添加商品id
-                     $content['add'][$void]['goods'][$kgoodsid]['goods']=$kgoodsid;
-                     //循环商品信息
-                     foreach($edit_goods as $vv){
-                         $content['add'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid]; 
-                     }
-                     $content['add'][$void]['goods'][$kgoodsid]['goods_name']=$goods_info[$kgoodsid]['goods_name']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['goods_code']=$goods_info[$kgoodsid]['goods_code']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['goods_uname']=$goods_info[$kgoodsid]['goods_uname']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['goods_ucate']=$goods_info[$kgoodsid]['goods_ucate']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['goods_pic']=$goods_info[$kgoodsid]['goods_pic']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['price_in']=$goods_info[$kgoodsid]['price_in']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['price_sale']=$goods_info[$kgoodsid]['price_sale']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['weight1']=$goods_info[$kgoodsid]['weight1']; 
-                     $content['add'][$void]['goods'][$kgoodsid]['size1']=$goods_info[$kgoodsid]['size1']; 
-                     
-                 } 
+                 if(isset($data['nums-'.$void])){
+                     foreach ($data['nums-'.$void] as $kgoodsid=>$kv){ 
+                         $content['add'][$void]['goods'][$kgoodsid]=[];
+                         $content['add'][$void]['goods'][$kgoodsid]['oid']=0;
+                         //添加商品id
+                         $content['add'][$void]['goods'][$kgoodsid]['goods']=$kgoodsid;
+                         dump($data);
+                         //循环商品信息
+                         foreach($edit_goods as $vv){
+                             $content['add'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
+                         }
+                         $content['add'][$void]['goods'][$kgoodsid]['goods_name']=$goods_info[$kgoodsid]['goods_name'];
+                         $content['add'][$void]['goods'][$kgoodsid]['print_name']=$goods_info[$kgoodsid]['print_name'];
+                         $content['add'][$void]['goods'][$kgoodsid]['goods_code']=$goods_info[$kgoodsid]['goods_code']; 
+                         $content['add'][$void]['goods'][$kgoodsid]['goods_pic']=$goods_info[$kgoodsid]['goods_pic'];
+                         $content['add'][$void]['goods'][$kgoodsid]['price_in']=$goods_info[$kgoodsid]['price_in'];
+                         $content['add'][$void]['goods'][$kgoodsid]['price_sale']=$goods_info[$kgoodsid]['price_sale'];
+                         $content['add'][$void]['goods'][$kgoodsid]['weight1']=$goods_info[$kgoodsid]['weight1'];
+                         $content['add'][$void]['goods'][$kgoodsid]['size1']=$goods_info[$kgoodsid]['size1']; 
+                     } 
+                 }else{
+                     $content['add'][$void]['goods']=[];
+                 }
+                 
              }
          }
          
@@ -349,7 +402,10 @@ class OrderModel extends Model
          }
          
      }
-     /* 审核订单编辑 */
+    
+     /**
+      * 审核订单编辑 
+      */
      public function order_edit_review($order,$change)
      {
          //获取订单状态信息
@@ -370,7 +426,7 @@ class OrderModel extends Model
          
          //总订单信息系，子订单不能单独修改，总订单修改后同步到子订单
          $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','ok_break'];
-         //记录有订单拆分，需要废弃原出入库的订单id,重新添加
+         //记录有订单变化，需要废弃原出入库的订单id,重新添加
          $instore_oids=[];
          //新添加订单号
          $instore_add_oids=[];
@@ -379,21 +435,30 @@ class OrderModel extends Model
          if(isset($change['edit'])){
              foreach($change['edit'] as $koid=>$vo){
                  $where=['oid'=>$koid];
+                 //先处理已删除的产品
+                 if(isset($vo['goods_del'])){
+                     $instore_oids[]=$koid; 
+                     $where['goods']=['in',array_keys($vo['goods_del'])];  
+                     $m_ogoods->where($where)->delete();
+                     unset($vo['goods_del']);
+                 }
+                 //编辑产品
                  if(isset($vo['goods'])){
                      foreach($vo['goods'] as $kgoods_id=>$vgoods){
                          $where['goods']=$kgoods_id;
-                        
-                         if(isset($vgoods['del'])){
-                             $instore_oids[]=$koid;
-                             $m_ogoods->where($where)->delete();
-                             continue;
-                         }
+                         //产品数量变化要重新出入库
                          if(isset($vgoods['num'])){
                              $instore_oids[]=$koid;
                          }
                          $m_ogoods->where($where)->update($vgoods);
                      }
                      unset($vo['goods']);
+                 }
+                 //添加产品
+                 if(isset($vo['goods_add'])){
+                     $instore_oids[]=$koid;
+                     $m_ogoods->insertAll($vo['goods_add']); 
+                     unset($vo['goods_add']);
                  }
                  $where=['id'=>$koid];
                  $this->where($where)->update($vo);
@@ -405,7 +470,7 @@ class OrderModel extends Model
              //有新增一定是虚拟主单号了,拆分单号,删除原产品
              if($order['is_real']==1){
                  $change['is_real']=2;
-                 
+                 $instore_oids[]=$order['id'];
                  $m_ogoods->where('oid',$order['id'])->delete();
              }
             
@@ -817,7 +882,15 @@ class OrderModel extends Model
      /**
       * 得到订单的产品详情,返回字订单和产品详情
       * */
-     public function order_goods($info,$aid){
+     
+     /**
+      * 得到订单的产品详情,返回字订单和产品详情
+      * @param array $info
+      * @param int $aid
+      * @param array $change
+      * @return array[]
+      */
+     public function order_goods($info,$aid,$change=[]){
          //订单产品
          $where_goods=[];
          if($info['is_real']==1){
@@ -854,6 +927,29 @@ class OrderModel extends Model
              $infos[$v['oid']][$v['goods']]=$v;
          }
          
+         //要修改的订单中是否有新增产品
+         if(isset($change['edit'])){
+             foreach($change['edit'] as $k=>$v){
+                 if(isset($v['goods_add'])){
+                     foreach($v['goods_add'] as $kk=>$vv){
+                         $goods_id[$vv['goods']]=$vv['goods'];
+                     } 
+                 }
+             }
+         }
+         //新增订单中检查是否有新产品
+         if(isset($change['add'])){
+             foreach($change['add'] as $k=>$v){
+                 if(isset($v['goods'])){
+                     foreach($v['goods'] as $kk=>$vv){
+                         if(!isset($goods_id[$vv['goods']])){
+                             $goods_id[$vv['goods']]=$vv['goods'];
+                         } 
+                     }
+                 }
+             }
+         }
+         
          //获取产品图片
          $where=[
              'pid'=>['in',$goods_id],
@@ -883,5 +979,28 @@ class OrderModel extends Model
              ];
          } 
          return ['orders'=>$orders,'goods'=>$goods,'infos'=>$infos]; 
+     }
+     /**
+      * 把产品的重量和体积统一转化
+      * @param array $goods
+      * @return array
+      */
+     public function unit_change($goods){
+         //判断产品重量体积单位,统一转化为kg,cm3
+         switch($goods['type']){
+             case 5:
+                 //设备kg,m
+                 $goods['weight1']=$goods['weight1'];
+                 $goods['size1']=bcmul($goods['size1'],1000000,2);
+                 break;
+             default:
+                 //其他g,cm
+                 $goods['weight1']=bcdiv($goods['weight1'],1000,2);
+                 $goods['size1']=$goods['size1'];
+                 break;
+         }
+         $goods['weight1']=($goods['weight1']==0)?0.01:$goods['weight1'];
+         $goods['size1']=($goods['size1']==0)?0.01:$goods['size1'];
+         return $goods;
      }
 }

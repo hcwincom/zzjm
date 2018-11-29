@@ -305,7 +305,7 @@ class AdminOrderController extends AdminInfo0Controller
         foreach($fields_round as $v){
             $data[$v]=round($data[$v],2); 
         }
-        if(empty($data['nums'])){
+        if(empty($data['nums-0'])){
             $this->error('未选择产品');
         }
         //店铺和下单人
@@ -373,7 +373,7 @@ class AdminOrderController extends AdminInfo0Controller
         $m->startTrans();
         $oid= $m->insertGetId($data_order);
         //添加订单产品order_goods
-        $nums=$data['nums'];
+        $nums=$data['nums-0'];
         $store=$data_order['store'];
         $goods=array_keys($nums);
         
@@ -382,10 +382,7 @@ class AdminOrderController extends AdminInfo0Controller
             'id'=>['in',$goods], 
         ];
         $goods_infos=Db::name('goods')->where($where)->column('id,name,name3,code,pic,price_in,price_sale,type,weight1,size1');
-        //添加客户用名
-        $where=['uid'=>$data_order['uid'],'goods'=>['in',$goods]];
-        $ugoods=Db::name('custom_goods')->where($where)->column('goods,name,cate');
-        
+         
         $order_goods=[];
         //标记是否需要拆分订单 
         foreach($nums as $k=>$v){
@@ -397,22 +394,24 @@ class AdminOrderController extends AdminInfo0Controller
                 'oid'=>$oid,
                 'goods'=>$k,
                 'num'=>intval($v), 
-                'price_real'=>round($data['prices'][$k],2),
-                'pay_discount'=>round($data['pay_discounts'][$k],2), 
-                'pay'=>round($data['price_counts'][$k],2), 
-              
+                'price_real'=>round($data['price_reals-0'][$k],2),
+                'pay_discount'=>round($data['pay_discounts-0'][$k],2), 
+                'pay'=>round($data['pays-0'][$k],2), 
+                'dsc'=>$data['dscs-0'][$k],
+                'weight'=>round($data['weights-0'][$k],2),
+                'size'=>round($data['sizes-0'][$k],2), 
+                
+                'goods_uname'=>$data['goods_unames-0'][$k],
+                'goods_ucate'=>$data['goods_ucates-0'][$k],
+                
                 'goods_name'=>$goods_infos[$k]['name'],
-                'print_name'=>$goods_infos[$k]['name3'],
-                'goods_uname'=>(isset($ugoods[$k]['name'])?$ugoods[$k]['name']:''),
-                'goods_ucate'=>(isset($ugoods[$k]['cate'])?$ugoods[$k]['cate']:''),
+                'print_name'=>$goods_infos[$k]['name3'], 
                 'goods_code'=>$goods_infos[$k]['code'],
                 'goods_pic'=>$goods_infos[$k]['pic'],
                 'price_in'=>$goods_infos[$k]['price_in'],
                 'price_sale'=>$goods_infos[$k]['price_sale'],
                 
-                'dsc'=>$data['dscs'][$k],
-                'weight'=>round($data['weights'][$k],2),
-                'size'=>round($data['sizes'][$k],2), 
+               
             ]; 
             //计算产品费用
             $pay=round($order_goods[$k]['price_real']*$order_goods[$k]['num']-$order_goods[$k]['pay_discount'],2);
@@ -421,20 +420,9 @@ class AdminOrderController extends AdminInfo0Controller
             } 
           
             //判断产品重量体积单位,统一转化为kg,cm3
-            switch($goods_infos[$k]['type']){
-                case 5:
-                    //设备kg,m
-                    $order_goods[$k]['weight1']=$goods_infos[$k]['weight1'];
-                    $order_goods[$k]['size1']=bcmul($goods_infos[$k]['size1'],1000000,2);
-                    break; 
-                default:
-                    //其他g,cm
-                    $order_goods[$k]['weight1']=bcdiv($goods_infos[$k]['weight1'],1000,2);
-                    $order_goods[$k]['size1']=$goods_infos[$k]['size1'];
-                    break;
-            }
-            $order_goods[$k]['weight1']=($order_goods[$k]['weight1']==0)?0.01:$order_goods[$k]['weight1'];
-            $order_goods[$k]['size1']=($order_goods[$k]['size1']==0)?0.01:$order_goods[$k]['size1'];
+            $tmp_goods=$m->unit_change($goods_infos[$k]); 
+            $order_goods[$k]['weight1']=$tmp_goods['weight1'];
+            $order_goods[$k]['size1']=$tmp_goods['size1'];
            
         }
         //检查是否拆分订单
@@ -836,7 +824,7 @@ class AdminOrderController extends AdminInfo0Controller
              
          }
         //订单产品
-         $res=$m->order_goods($info,$admin['id']);
+         $res=$m->order_goods($info,$admin['id'],$change);
         $this->cates(); 
         $this->assign('infos',$res['infos']);
         $this->assign('orders',$res['orders']);
