@@ -14,6 +14,7 @@ var $tmp_tr;
 var weight0=0;
 var size0=0;
 var ok_break="{$ok_break|default=2}";
+var ok_add="{$ok_add|default=2}";
 $('#invoice_type').change(function(){
 	invoice_type_change(); 
 });
@@ -182,7 +183,8 @@ $('#goods_add').click(function(){
 		    	button_break= '<input type="text" class="form-control input-order break" value="0"/>'+
 				'<button class="order_break" type="button">拆分</button>';
 		    }
-		   
+		    var button_del='<button type="button" class="goods_del">删除</button>';
+		     
      	    tr+='<tr class="goods'+info['id']+'">'+
      	    '<td><a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td>'+
      	    '<td>'+info['code']+'</td>'+  
@@ -202,8 +204,7 @@ $('#goods_add').click(function(){
     	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td>'+
     	   '<td class="dsc"><input type="text"  name="dscs-'+oid+'['+info['id']+']" class="form-control " value=""/></td>'+ 
     	   '<td> <input type="hidden" class="goods_id" value="'+info['id']+'" name="goods_ids['+info['id']+']"/>'+
-    	   button_break+
-    	   '<button type="button" class="goods_del">删除</td></tr>';
+    	   button_break+button_del+'</td></tr>';
     	  
     	  
     	   $table.append(tr);

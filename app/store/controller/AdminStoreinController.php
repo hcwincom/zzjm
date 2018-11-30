@@ -339,9 +339,9 @@ class AdminStoreinController extends AdminBaseController
         $where=[
           'store'=>$info['store'],
           'goods'=>$info['goods'],
-            'status'=>2,
+          'status'=>2,
         ];
-        $boxes=Db::name('store_box')->where($where)->column('id,name,code');
+        $boxes=Db::name('store_box')->where($where)->order('sort asc,id asc')->column('id,name,code,num');
         $this->assign('stores',$stores);
         $this->assign('boxes',$boxes);
         $this->assign('goods',$goods);

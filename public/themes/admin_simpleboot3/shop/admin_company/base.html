@@ -70,6 +70,24 @@
     </div>
 </div>
 <div class="form-group">
+    <label for="" class="col-sm-2 control-label">默认仓库</label>
+    <div class="col-md-6 col-sm-10">
+    	<select  class="form-control" name="store" id="">
+    	<foreach name="stores" item="vo">
+    		<option value="{$key}" <if condition="$info.store eq $key">selected</if>>{$vo}</option>
+    	</foreach>
+    	</select> 
+      <present name='change.store'>
+        <select  class="form-control red" >
+    	<foreach name="stores" item="vo">
+    		<option value="{$key}" <if condition="$change.store eq $key">selected</if>>{$vo}</option>
+    	</foreach>
+    	</select>
+      </present>
+
+    </div>
+</div>
+<div class="form-group">
     <label for="" class="col-sm-2 control-label">开户行</label>
     <div class="col-md-6 col-sm-10">
         <input type="text" class="form-control" name="account_bank" value="{$info.account_bank}" />

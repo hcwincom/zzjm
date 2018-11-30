@@ -17,17 +17,16 @@ $(function(){
 		if(data.code!=1){ 
 			return false;
 		} 
-		var list=data.data; 
+		var list1=data.data.list1; 
+		var list2=data.data.list2; 
 		var options1='<option value="0">全部一级分类</option>';
 		var options2='<option class="cate230" value="0">未选择二级分类</option> ';
-		for(var i in list){
-			if(list[i]['fid']==0){
-				options1+='<option value="'+i+'" >'+list[i]['code']+','+list[i]['name']+'</option>';
-			}else{
-				options2+='<option ttype="'+list[i]['type']+'" class="cate20 cate21'+list[i]['fid']+' cate23'+i+'" value="'+i+'" >'+list[i]['code']+','+list[i]['name']+'</option>';
-			}
-		 
+		for(var i in list1){
+			options1+='<option value="'+list1[i]['id']+'" >'+list1[i]['code']+','+list1[i]['name']+'</option>'; 
 		} 
+		for(var j in list2){
+			options2+='<option ttype="'+list2[j]['type']+'" class="cate20 cate21'+list2[j]['fid']+' cate23'+list2[j]['id']+'" value="'+list2[j]['id']+'" >'+list2[j]['code']+','+list2[j]['name']+'</option>';
+	    } 
 		$('#cate1').html(options1); 
 		$('#cate2').html(options2); 
 		if(cid0>0){

@@ -35,12 +35,11 @@
 				</div>
 			</div> 
 			<div class="form-group fleft-all">
-				<label for=" " class="col-sm-2 control-label">入库货架</label>
+				<label for=" " class="col-sm-2 control-label">入库料位</label>
 				<div class="col-md-6 col-sm-10">  
-					<select name="box" class="form-control">
-					<option value="0">未选择</option>
+					<select name="box" class="form-control"> 
 					<foreach name="boxes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.box">selected</if>>{$vo.name}--{$vo.code}</option>
+						<option value="{$key}" <if condition="$key eq $info.box">selected</if>>{$vo.code},{$vo.name},{$vo.num}</option>
 					</foreach>
 					</select>
 				</div>

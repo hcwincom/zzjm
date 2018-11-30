@@ -120,6 +120,7 @@ class AdminOrderController extends AdminInfo0Controller
         $types=[
             'p.name'=>'订单编号',
             'p.express_no'=>'物流编号',
+            'p.id'=>'订单id',
             'custom.name'=>'客户名称',
             'custom.code'=>'客户编号',
            
@@ -601,6 +602,13 @@ class AdminOrderController extends AdminInfo0Controller
             $ok_break=1;
         }
         $this->assign('ok_break',$ok_break); 
+        //是否允许添加，删除
+        if($info['fid']!=0){
+            $ok_add=2;
+        }else{
+            $ok_add=1;
+        }
+        $this->assign('ok_add',$ok_add); 
         
         $this->assign('infos',$res['infos']);
         $this->assign('orders',$res['orders']);
@@ -613,6 +621,7 @@ class AdminOrderController extends AdminInfo0Controller
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
+        
         
         return $this->fetch();  
     }
@@ -634,7 +643,7 @@ class AdminOrderController extends AdminInfo0Controller
         $m=$this->m;
         $table=$this->table;
         $flag=$this->flag;
-        $data=$this->request->param();
+        $data=$this->request->param();  
         $info=$m->where('id',$data['id'])->find();
         if(empty($info)){
             $this->error('数据不存在');
@@ -662,22 +671,31 @@ class AdminOrderController extends AdminInfo0Controller
             'shop'=>$admin['shop'],
         ];
         $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
-      
-        if($info['status']==1){
-            $m->order_edit($info, $data,1);
-            
-            $this->success('已修改',url('edit',['id'=>$info['id']]));
-        }
+       
         $content=$m->order_edit($info, $data);
         if(!is_array($content)){
             $this->error($content);
-        } 
+        }  
         if(empty($content)){
             $this->error('未修改');
         }
         //保存更改
         $m_edit=Db::name('edit');
         $m_edit->startTrans();
+        //未提交的直接修改
+        if($info['status']==1){
+            if($data['status']==2){
+                $content['status']=2;
+            }
+            $res=$m->order_edit_review($info,$content);
+            if(!($res>0)){
+                $m_edit->rollback();
+                $this->error($res);
+            }
+            $m_edit->commit();
+            $this->success('已修改',url('edit',['id'=>$info['id']]));
+        } 
+       
         $eid=$m_edit->insertGetId($update);
         if($eid>0){
             $data_content=[
@@ -839,7 +857,9 @@ class AdminOrderController extends AdminInfo0Controller
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
-      
+        //是否允许拆分,添加，删除
+        $this->assign('ok_break',2); 
+        $this->assign('ok_add',2); 
         return $this->fetch();  
         
     }
@@ -961,9 +981,6 @@ class AdminOrderController extends AdminInfo0Controller
                         }else{
                             $row=$m->order_storein5($order['id']);
                         }
-                       
-                       
-                       
                         
                         break;
                         
@@ -1161,6 +1178,10 @@ class AdminOrderController extends AdminInfo0Controller
         
         $flag='仓库发货';
         $data=$this->request->param();
+      
+        if(empty($data['express_no0'][$data['id']])){
+            $this->error('发货前请填写快递单号');
+        }
         $this->status_do($data,22,$flag);
         
     }

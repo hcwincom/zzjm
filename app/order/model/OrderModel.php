@@ -279,6 +279,9 @@ class OrderModel extends Model
          $goods_info=[];
         
          foreach($order_goods as $k=>$v){
+             if($v['goods']<=0){
+                 return '产品'.$v['goods_code'].$v['goods_uname'].'不存在，要调整';
+             }
              $infos[$v['oid']][$v['goods']]=$v;
              $goods_info[$v['goods']]=$v;
          }
@@ -370,7 +373,7 @@ class OrderModel extends Model
                          $content['add'][$void]['goods'][$kgoodsid]['oid']=0;
                          //添加商品id
                          $content['add'][$void]['goods'][$kgoodsid]['goods']=$kgoodsid;
-                         dump($data);
+                       
                          //循环商品信息
                          foreach($edit_goods as $vv){
                              $content['add'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
@@ -390,21 +393,16 @@ class OrderModel extends Model
                  
              }
          }
-         
-         if($is_do==1){
-             if($info['status']==1 && $data['status']==2){
-                 $content['status']=2;
-             }
-             $row=$this->order_edit_review($info,$content);
-             return $row;
-         }else{
-             return $content;
-         }
+          
+         return $content;
          
      }
-    
+     
      /**
       * 审核订单编辑 
+      * @param array $order
+      * @param array $change
+      * @return number|string
       */
      public function order_edit_review($order,$change)
      {
@@ -640,6 +638,7 @@ class OrderModel extends Model
      /* 订单排序 */
      public function order_sort($id){
          //   sort专门排序，待发货10，仓库发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0 
+         
          //pay_status
          //是否有待审核
          $where=[
@@ -660,7 +659,10 @@ class OrderModel extends Model
              $sort=7;
          }else{
              $order=$this->where('id',$id)->find();
-             
+             //淘宝订单检查是否有产品未设置
+             if($order['type']==3){
+                 $goods_ids=Db::name('order_goods')->where('oid',$id)->column('id');
+             }
              //   sort专门排序，待发货10，准备发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
              switch ($order['status']){
                  case 20:
@@ -714,7 +716,7 @@ class OrderModel extends Model
          $goods_ids=array_keys($goods_order);
          $where=[
              'store'=>['eq',$order['store']],
-             'goods'=>['in',$goods_ids]
+             'goods'=>['in',$goods_ids],
          ];
          $goods_store=Db::name('store_goods')->where($where)->column('goods,num');
          foreach($goods_order as $k=>$v){
@@ -725,22 +727,23 @@ class OrderModel extends Model
          return 1;
      }
      /* 订单确认后，产品出库未提交 */
-     public function order_storein0($id){
+     /**
+      * 订单提交配货申请,只能是实际单号提交
+      * @param number $id
+      * @param number $num_ok是否严格审核库存,1严格，2不审核
+      * @return number|string
+      */
+     public function order_storein0($id,$num_ok=1){
          //在store_goods表中num1数值减少
          $order=$this->where('id',$id)->find();
          $order=$order->data;
-         if($order['status']<10 || $order['status']>20){
-             return '订单状态错误';
-         }
+         
          //订单产品
          $where_goods=[];
          if($order['is_real']==1){
-             $where_goods['oid']=['eq',$order['id']]; 
-             $orders=[$order['id']=>['id'=>$order['id'],'name'=>$order['name'],'store'=>$order['store']]];
+             $where_goods['oid']=['eq',$order['id']];  
          }else{ 
-             $orders=$this->where('fid',$order['id'])->column('id,name,store'); 
-             $order_ids=array_keys($orders);
-             $where_goods['oid']=['in',$order_ids];
+             return '虚拟主单号不能发货';
          }
          //全部订单产品
          $goods_order=Db::name('order_goods')
@@ -756,12 +759,12 @@ class OrderModel extends Model
          $aid=session('ADMIN_ID');
          //一个个地出库
          foreach($goods_order as $k=>$v){
-             if($orders[$v['oid']]['store']==0){
-                 continue;
+             if($order['store']==0){
+                 return '没有选择仓库';
              }
              $data=[
                  'shop'=>$order['shop'],
-                 'store'=>$orders[$v['oid']]['store'],
+                 'store'=>$order['store'],
                  'goods'=>$v['goods'],
                  'num'=>(0-$v['num']),
                  'atime'=>$time,
@@ -770,9 +773,9 @@ class OrderModel extends Model
                  'rstatus'=>4,
                  'type'=>10,
                  'about'=>$v['oid'],
-                 'about_name'=>$orders[$v['oid']]['name'],
+                 'about_name'=>$order['name'],
              ];
-             $res=$m_store_goods->instore0($data);
+             $res=$m_store_goods->instore0($data,$num_ok);
              if(!($res>0)){
                return $res;
              }
@@ -780,18 +783,13 @@ class OrderModel extends Model
          
          return 1;
      }
+    
      /**
-      *  订单准备发货后，出库记录可审核 */
+      *  订单准备发货后，出库记录可审核,现在省略该步骤，不用
+      * @param number $id
+      * @return number
+      */
      public function order_storein1($id){
-         
-         $order=$this->where('id',$id)->find();
-         $order=$order->data;
-         if($order['status']!=22){
-             return '订单状态错误';
-         }
-         if($order['is_real']!=1){
-             return '已拆分订单请在子订单页面发货';
-         }
           
          //出入库记录要变为待审核
          $where=[
@@ -805,8 +803,38 @@ class OrderModel extends Model
          Db::name('store_in')->where($where)->update($update);
          return 1;
      }
+    
      /**
-      *  订单确认发货要检查出库记录是否都已审核 */
+      *  订单发货后，出库记录批量同意
+      * @param number $id
+      *  * @param number $num_ok是否检查库存，1严格2不检查
+      * @return string|number 
+      */
+     public function order_storein2($id,$num_ok=1){
+          
+         //出入库记录要变为已同意
+         $where=[
+             'type'=>10,
+             'about'=>$id,
+             'rstatus'=>1,
+         ]; 
+         $list=Db::name('store_in')->where($where)->column('');
+         $m_store_goods=new StoreGoodsModel();
+         foreach($list as $k=>$v){
+             $res=$m_store_goods->instore2($v,0,'',$num_ok);
+             if(!($res>0)){
+                 return $res;
+             }
+         }
+       
+         return 1;
+     }
+     
+     /**
+      * 订单确认发货要检查出库记录是否都已审
+      * @param number $id
+      * @return string|number
+      */
      public function order_storein_check($id){
         
          $order=$this->where('id',$id)->find();
@@ -873,16 +901,19 @@ class OrderModel extends Model
          return 1;
      }
      
-     /* 检查产品的更新操作是否合法 */
+    
+     /**
+      * 检查产品的更新操作是否合法
+      * @param array $order
+      * @param array $change
+      * @return number
+      */
      public function is_option($order,$change){
          
          
          return 1;
      }
-     /**
-      * 得到订单的产品详情,返回字订单和产品详情
-      * */
-     
+    
      /**
       * 得到订单的产品详情,返回字订单和产品详情
       * @param array $info
@@ -1002,5 +1033,52 @@ class OrderModel extends Model
          $goods['weight1']=($goods['weight1']==0)?0.01:$goods['weight1'];
          $goods['size1']=($goods['size1']==0)?0.01:$goods['size1'];
          return $goods;
+     }
+     /**
+      * 根据现有的状态判断是否做出库操作
+      * @param number $oid
+      * @param number $old_status
+      * @param number $num_ok是否严格检查库存
+      * @return number
+      */
+     public function status_change($oid,$old_status=1,$num_ok=1){
+        
+         $res=1;
+         $order=$this->where('id',$oid)->find();
+         $order=$order->data;
+        
+         if($order['status']==$old_status){
+             return 1;
+         } 
+         //状态判断
+         if($order['status']<22 || $order['status']>=80){
+             //不应该发货的,统一废弃 
+             $res=$this->order_storein5($order['id']); 
+         }elseif($order['status']==22){
+             if($old_status>22 && $old_status<80){
+                 //已发货的，废弃 
+                 $res=$this->order_storein5($order['id']);
+                 if(!($res>0)){
+                     return $res;
+                 }
+             }
+             //应该准备发货的 
+             $res=$this->order_storein0($order['id'],$num_ok); 
+         }elseif($order['status']<=30){
+             //已收货
+             if($old_status<22){
+                 //没准备发货的先添加出库记录 
+                 $res=$this->order_storein0($order['id'],$num_ok); 
+                 if(!($res>0)){
+                     return $res;
+                 }
+             }
+             //审核出库 
+             $res=$this->order_storein2($order['id'],$num_ok); 
+         }else{
+             //退货问题先不管
+         }
+         
+         return $res;
      }
 }

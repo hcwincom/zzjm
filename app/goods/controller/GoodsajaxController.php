@@ -269,11 +269,17 @@ class GoodsajaxController extends AdminBase0Controller
     public function get_cates()
     {
         
-        $where=[
+        $where1=[
             'status'=>2, 
+            'fid'=>0,
         ]; 
-        $list=Db::name('cate')->where($where)->order('code asc')->column('id,name,code,type,fid');
-        $this->success('ok','',$list);
+        $list1=Db::name('cate')->where($where1)->order('code_num asc')->column('id,name,code,type,fid','code_num');
+        $where2=[
+            'status'=>2,
+            'fid'=>['gt',0],
+        ];
+        $list2=Db::name('cate')->where($where2)->order('code asc')->column('id,name,code,type,fid','code');
+        $this->success('ok','',['list1'=>$list1,'list2'=>$list2]);
     }
     /*
      * 根据cid获取产品 */

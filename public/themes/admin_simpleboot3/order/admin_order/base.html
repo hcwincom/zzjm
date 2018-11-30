@@ -293,16 +293,17 @@
 	 		</div>
 	 		<div style="clear:both"></div>
 	 	<else/>
+	 	<eq name="ok_add" value="1"> 
 	 		<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">添加产品</label>
 				<div class="col-md-6 col-sm-10">
 				   <include file="public@cate_goods" />  
 					 <button type="button" id="goods_add">确定</button>
-					 <p class="notice">确定添加前要选中产品添加</p>
-				 
+					 <p class="notice">确定添加前要选中产品添加</p> 
 				</div>
 			</div>
 			<div style="clear:both"></div>
+		</eq>
 		<div class="orders">
 		<foreach name="orders" item="vv" key="kk"> 
 		<notempty name="change['edit'][$kk]">
@@ -417,7 +418,7 @@
      	    		</td>
      	    			
      	    		<td class="num">
-     	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" />
+     	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" <eq name="ok_add" value="2">readonly</eq> />
      	    		<present name="changevv['goods'][$key]['num']">
      	    		 	<input type="number" class="form-control  red" value="{$changevv['goods'][$key]['num']}" readonly/> 
      	    		</present> 
@@ -459,11 +460,13 @@
     	   				<span class="red">删除</span>
     	   			<else/> 
     	   			 	<input type="hidden" class="goods_id" value="{$key}" name="goods_ids[{$key}]"/> 
-    	   			<if condition="empty($info1) && $ok_break eq 1"> 
-    	   			 	<input type="number" class="form-control break" value="0"/>
-    	   				<button class="order_break" type="button">拆分</button>  
-    	   			</if>
-    	   			 	<button type="button" class="goods_del">删除</td>
+	    	   			<eq name="ok_break" value="1"> 
+	    	   			 	<input type="number" class="form-control break" value="0"/>
+	    	   				<button class="order_break" type="button">拆分</button>  
+	    	   			</eq>
+    	   				<eq name="ok_add" value="1">
+    	   			 		<button type="button" class="goods_del">删除</td>
+    	   			 	</eq>
     	   			</present> 
     	   			</td>
     	   		</tr>

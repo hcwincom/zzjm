@@ -34,7 +34,7 @@ class AdminTaobaoController extends AdminBaseController
      * @adminMenu(
      *     'name'   => '淘宝订单导入',
      *     'parent' => 'order/AdminIndex/default',
-     *     'display'=> true,
+     *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 2,
      *     'icon'   => '',
@@ -55,7 +55,7 @@ class AdminTaobaoController extends AdminBaseController
             'type'=>2,
             'status'=>2,
         ];
-        $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key');
+        $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key,store');
         $order_type=$this->order_type;
       
        
@@ -67,8 +67,8 @@ class AdminTaobaoController extends AdminBaseController
             'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
           
         $time=time();
-        $time_start=$time-3600*24-30;
-        $time_end=$time-3600*24-30;
+        $time_start=$time-3600*24*10;
+        $time_end=$time-3600*24*10;
         $date_start=date('Y-m-d',$time_start);
         $date_end=date('Y-m-d',$time_end);
         $start_created = $date_start."%2000:00:00";
@@ -80,8 +80,9 @@ class AdminTaobaoController extends AdminBaseController
             'create_time'=>['egt',$time_start],
         ];
         $m=$this->m;
+        $m_store_goods=
         $oids=$m->where($where)->column('name,id,status,pay_status,paytype,pay_type,order_amount,pay_time','name');
-        $m->startTrans();
+//         $m->startTrans();
         foreach($companys as $k=>$v){
            
             $client = new Taobao($v['key_account'], $v['key_key']); 
@@ -91,14 +92,18 @@ class AdminTaobaoController extends AdminBaseController
             $order = $client->getContent(); 
             
             $state=intval($client->status);
+           
             //返回状态失败
             if($state!=200){
                 echo '<h2>分公司'.$v['name'].'淘宝同步失败</h2>'; 
                 continue;
-            } 
-            
+            }  
             $json=json_decode($order,true);
-            
+            if(empty($json['trades_sold_get_response'])){
+                echo '<h2>分公司'.$v['name'].'淘宝同步失败'.$order.'</h2>';
+                echo '<h2>'.$order.'</h2>';
+                continue;
+            } 
             //所有的订单
             $trades=$json['trades_sold_get_response']['trades']['trade'];
            
@@ -106,12 +111,13 @@ class AdminTaobaoController extends AdminBaseController
                 
                 //订单已存在
                 $update_order=[];
-               
+                $old_status=1;
                 if(isset($oids[$vv['tid']])){
                     $oid=$oids[$vv['tid']]['id'];
+                    $old_status=$oids[$vv['tid']]['status'];
                     //要比较订单状态和产品
                     //根据订单状态比较
-                    $res=$this->order_update($vv,$oids[$vv['tid']]);
+                    $res=$this->order_update($vv,$oids[$vv['tid']],$v);
                     if(!($res>0)){
                         $m->rollback();
                         exit('分公司'.$v['name'].'淘宝更新订单'.$vv['tid'].'失败,'.$res);
@@ -119,12 +125,17 @@ class AdminTaobaoController extends AdminBaseController
                     //已存在订单可能有修改价格,暂时不管
                 }else{ 
                      //新增 
-                    $oid=$this->order_add($vv,$k,$shop,$admin['id']); 
+                    $oid=$this->order_add($vv,$v,$shop,$admin['id']); 
                     if(!($oid>0)){
                         $m->rollback();
                         exit('分公司'.$v['name'].'淘宝增加订单'.$vv['tid'].'失败,'.$oid);
                     }  
                 } 
+                $res=$m->status_change($oid,$old_status,2);
+                if(!($res>0)){
+                    $m->rollback();
+                    exit('分公司'.$v['name'].'淘宝订单'.$vv['tid'].'库存更新失败,'.$res);
+                }  
             }
             echo '<h2>分公司'.$v['name'].'淘宝同步完成</h2>'; 
            
@@ -139,7 +150,7 @@ class AdminTaobaoController extends AdminBaseController
      * @param array $order
      * @return number|string
      */
-    public function order_update($taobao,$order){
+    public function order_update($taobao,$order,$company){
         $update_order=[];
         //根据订单状态比较
         switch ($taobao['status']){
@@ -220,7 +231,8 @@ class AdminTaobaoController extends AdminBaseController
         $update_order=[
             'name'=>$taobao['tid'],
             'order_type'=>$this->order_type,
-            'company'=>$company,
+            'company'=>$company['id'],
+            'store'=>$company['store'],
             'uid'=>0,
             'aid'=>$aid,
             'shop'=>$shop,
@@ -229,11 +241,14 @@ class AdminTaobaoController extends AdminBaseController
             'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.$taobao['receiver_district'],
             'address'=>$taobao['receiver_address'],
             'accept_name'=>$taobao['receiver_name'],
-            'mobile'=>$taobao['receiver_mobile'],
+            'mobile'=>isset($taobao['receiver_mobile'])?$taobao['receiver_mobile']:'',
             'pay_time'=>isset($taobao['pay_time'])?strtotime($taobao['pay_time']):0,
             'create_time'=>time(),
-            
+            'pay_status'=>1,
+            'status'=>10,
+            'sort'=>5,
         ];
+       
         //根据订单状态比较
         switch ($taobao['status']){
             case 'WAIT_SELLER_SEND_GOODS':
@@ -269,10 +284,13 @@ class AdminTaobaoController extends AdminBaseController
         }
         $m=$this->m;
         $oid=$m->insertGetId($update_order);
-        
+        //标记排序，如果产品没有编码20，没找到产品21 
+        $sort=0;
         $iids=[];
         $goods_add=[];
         $ogs=$taobao['orders']['order'];
+        //用于没查找到数据的产品的goods-id
+        $flag=0;
         foreach($ogs as $k=>$v){
             
             $rows=['oid'=>$oid];
@@ -285,7 +303,9 @@ class AdminTaobaoController extends AdminBaseController
             //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
             if(empty($v['outer_sku_id'])){
                 if(empty($v['outer_iid'])){
-                    return '产品'.$v['title'].'没有编码outer_sku_id和outer_iid，'.'num_iid'.$v['num_iid'];
+                    //标记排序，如果产品没有编码,没找到产品 
+                    $sort=20; 
+                    $rows['goods_code']=$flag--;
                 }else{
                     $rows['goods_code'] = $v['outer_iid'];//产品编码
                 }
@@ -311,48 +331,30 @@ class AdminTaobaoController extends AdminBaseController
             'code'=>['in',$iids],
         ];
         $goods_infos=Db::name('goods')->where($where_goods)->column('code,id,name,name3,price_in,price_sale');
+        
         foreach ($goods_add as $k=>$v){
-            if(empty($goods_infos[$k])){
-                $goods_infos[$k]=[
-                    'id'=>1,
-                    'name'=>'name',
-                    'name3'=>'name3',
-                    'price_in'=>'11', 
-                ];
-                return '未找到产品'.$k.$v['goods_uname'];
+            if(empty($goods_infos[$k])){ 
+                $sort=20; 
+                $goods_add[$k]['goods']=$flag--;
+                $goods_add[$k]['goods_name']='';
+                $goods_add[$k]['print_name']='';
+                $goods_add[$k]['price_in']=0;
+                $goods_add[$k]['price_sale']=0;
+            }else{
+                $goods_add[$k]['goods']=$goods_infos[$k]['id'];
+                $goods_add[$k]['goods_name']=$goods_infos[$k]['name'];
+                $goods_add[$k]['print_name']=$goods_infos[$k]['name3'];
+                $goods_add[$k]['price_in']=$goods_infos[$k]['price_in'];
+                $goods_add[$k]['price_sale']=$goods_infos[$k]['price_sale'];
             }
-            $goods_add[$k]['goods']=$goods_infos[$k]['id'];
-            $goods_add[$k]['goods_name']=$goods_infos[$k]['name'];
-            $goods_add[$k]['print_name']=$goods_infos[$k]['name3'];
-            $goods_add[$k]['price_in']=$goods_infos[$k]['price_in'];
-            $goods_add[$k]['price_sale']=$goods_infos[$k]['price_sale'];
+            
         }
         Db::name('order_goods')->insertAll($goods_add);
-       
+        if($sort>0){
+            $m->where('id',$oid)->update(['sort'=>$sort,'dsc'=>'产品要调整']);
+        }
         return $oid;
     }
     
 }
-        //string(12913) "{"trades_sold_get_response":{"total_results":13,"trades":{"trade":[{"modified":"2018-10-23 10
        
-        //trades":{"trade":[
-//         {"modified":"2018-10-23 10:31:20",
-//         "orders":
-//         {"order":[
-//         {"adjust_fee":"0.00","buyer_rate":true,"cid":50021631,"consign_time":"2018-09-28 10:21:38",
-//         "discount_fee":"20.00","divide_order_fee":"140.00","end_time":"2018-10-08 10:21:44",
-//         "invoice_no":"048929553270","is_daixiao":false,"logistics_company":"顺丰速运","num":1,
-//         "num_iid":559884639463,"oid":"227668460417201790","outer_iid":"06-18-08","payment":"148.00",
-//         "pic_path":"https://img.alicdn.com/bao/uploaded/i2/21040156/TB2IatkjxOMSKJjSZFlXXXqQFXa_!!21040156.jpg",
-//         "price":"160.00","refund_status":"NO_REFUND","seller_rate":true,"seller_type":"C","shipping_type":"express",
-//         "status":"TRADE_FINISHED","title":"潍柴发动机专用停机断油熄火电磁阀612600180175/+A装载机熄火器","total_fee":"140.00"
-//         }    ]   }
-//         ,"pay_time":"2018-09-27 19:54:34","payment":"148.00","post_fee":"8.00","status":"TRADE_FINISHED","tid":"227668460417201790",
-//"type":"fixed"},
-//         {"modified":"20
-        //echo '状态：'.$state."<br>";
-        
-        //echo '订单：'.$order."<br><br>";
-        
-        
-
