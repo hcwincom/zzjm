@@ -16,7 +16,7 @@ class AdminFreightController extends AdminInfo0Controller
         $this->flag='店铺合作快递';
         $this->table='freight';
         $this->m=Db::name('freight');
-        $this->edit=['name','sort','dsc','code','paytype','express','store'];
+        $this->edit=['name','sort','dsc','code','paytype','pay_type','express','store'];
         
         //没有店铺区分
         $this->isshop=1;
@@ -805,13 +805,41 @@ class AdminFreightController extends AdminInfo0Controller
         
         $paytypes=Db::name('paytype')->where($where)->column('id,name');
         $this->assign('paytypes',$paytypes);
-        
+        $this->assign('pay_types',config('pay_type'));
         //关联仓库
         $where['type']=1; 
         $stores=Db::name('store')->where($where)->order('shop asc,sort asc')->column('id,name');
         $this->assign('stores',$stores);
-       
         
-       
+    }
+    /**
+     * 按单号查询快递
+     * @adminMenu(
+     *     'name'   => '按单号查询快递',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 30,
+     *     'icon'   => '',
+     *     'remark' => '按单号查询快递',
+     *     'param'  => ''
+     * )
+     */
+    public function express_query(){
+        $freight=$this->request->param('freight',0,'intval');
+        $no=$this->request->param('no');
+        if(empty($no)){
+            $this->error('没有单号');
+        }
+        
+        $m=$this->m;
+        $code=$m
+        ->alias('freight')
+        ->join('cmf_express express','express.id=freight.express')
+        ->where('freight.id',$freight)
+        ->value('express.code');
+        
+        $url='https://www.kuaidi100.com/chaxun?';
+        header('location:'.$url.'com='.$code.'&nu='.$no);
     }
 }

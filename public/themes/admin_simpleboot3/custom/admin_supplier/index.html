@@ -46,7 +46,7 @@
 				</foreach>
 			</select> &nbsp;&nbsp;
 			<select class="form-control" name="cid" >
-				<option value='0'>客户类型</option> 
+				<option value='0'>供货商类型</option> 
 				 <foreach name="cates" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.cid">selected</if>>{$vo}
 				</option>
@@ -110,6 +110,8 @@
 			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
 			 	 
 			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
+			 	
+			 	<button type="button" class="order  btn-sm btn-primary  js-ajax-submit">下单</button>
 			 	<p class='error'></p>
 			</div>
 
@@ -124,11 +126,12 @@
 						</th>
 						<th width="100">{$flag}ID</th> 
 						<th>{$flag}名</th>  
-						<th>客户编码</th>
+						<th>供货商编码</th>
+						<th>供货商类型</th>
 						 <th>产品数</th>
 						<th>总订购金额</th>
 						<th>总笔数</th>
-						<th>客户电话</th>
+						<th>供货商电话</th>
 						<th>主要负责人</th>
 						<th>负责人手机</th>  
 						<th>负责人QQ</th>
@@ -152,6 +155,7 @@
 						</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}" target="{$zztarget['list']}" >{$vo.name}</a></td>
 					  	<td>{$vo.code}</td>
+					  	<td>{$cates[$vo.cid]|default='未知类型'}</td>
 					  	<td>{$vo.goods_num}</td>
 					  	<td>{$vo.order_money}</td>
 					  	<td>{$vo.order_num}</td>
@@ -206,6 +210,15 @@ $('.review_all').click(function(){
 $('.del_all').click(function(){
     $(this).parents('form').attr('action',"{:url('del_all')}");
     return is_check('批量删除');
+});
+
+$('.order').click(function(){
+	id=check_one();
+	if(id){
+		$('.error').text('前往下单');
+		location.href="{:url('ordersup/AdminOrdersup/add','',false,false)}"+'/uid/'+id;
+	} 
+	return false; 
 });
 </script>
 </body>

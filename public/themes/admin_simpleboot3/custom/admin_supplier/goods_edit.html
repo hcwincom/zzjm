@@ -115,6 +115,7 @@ $('#goods_add').click(function(){
      	    '<td>'+units_json[info['unit']][0]+'-'+units_json[info['unit']][1]+'</td>'+ 
     	   '<td><input type="text"  name="dsc['+info['id']+']" class="form-control dsc" value="'+info['dsc']+'"/></td>'+
     	   '<td><input type="text" name="num['+info['id']+']" class=" input-order" value="1"/></td>'+
+    	   '<td><input type="text" name="url['+info['id']+']" class="form-control" value=""/></td>'+
     	   '<td><input type="text" name="sort['+info['id']+']" class=" input-order" value="1000"/></td>'+
     	   '<td><button type="button" class="goods_del">删除</td></tr>';
      	    $('#goods-list').append(tr);

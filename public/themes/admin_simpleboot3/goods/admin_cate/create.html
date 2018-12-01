@@ -34,6 +34,14 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
+			一级分类: 
+			<select class="form-control" name="fid" >
+				<option value='0'>全部</option> 
+				 <foreach name="cates" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.fid">selected</if>>{$vo.code},{$vo.name}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
 			<select class="form-control" name="type1" id="">
 	        <foreach name="types" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
@@ -113,7 +121,7 @@
 						<eq name="vo.fid" value="0">
 						一级分类
 						<else/>
-						<a href="{:url('edit',['id'=>$vo.fid])}"  target="{$zztarget['edit']}">{$vo.fname|default='未找到父类'}</a>
+						<a href="{:url('edit',['id'=>$vo.fid])}"  target="{$zztarget['edit']}">{$cates[$vo.fid]['name']|default='未找到父类'}</a>
 						</eq> 
 						</td>
 						<td>{$vo.code}</td>

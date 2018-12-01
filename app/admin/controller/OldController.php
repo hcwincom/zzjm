@@ -52,7 +52,7 @@ class OldController extends AdminBaseController
             '产品分类同步'=>url('cate'),
             '产品分类数据更正'=>url('cate_correct'),
             '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
-            '所属公司+付款银行+付款类型'=>url('sys'),
+            '付款银行+付款类型'=>url('sys'),
             '(客户/供货商)联系人+对应付款账号+物流公司对应联系人和账号'=>url('tel'),
             '客户(同步分类和主体，关联联系人和付款账号)'=>url('custom'), 
             '供货商(同步分类和主体，关联联系人和付款账号)'=>url('supplier'),   
@@ -78,32 +78,39 @@ class OldController extends AdminBaseController
      */
     public function cate()
     {
-        $m= mysqli_init();
-        $m->options(MYSQLI_OPT_CONNECT_TIMEOUT, 2);//设置超时时间
-        $dbconfig=$this->dbconfig;
-        $m->real_connect($dbconfig['host'],$dbconfig['user'],$dbconfig['psw'],$dbconfig['dbname'],$dbconfig['port']);
+        debug('begin');
+        $m_old=Db::connect($this->db_old);
+        
         $sql='select id,cate_name as name,code_num,t_num as code,pid as fid,sortnum as sort '.
             ' from sp_category2 ';
-       
-        $res=$m->query($sql);
-        if(empty($res)){
+        
+        $data=$m_old->query($sql); 
+        if(empty($data)){
             $this->error('数据查询错误');
         }
-        //一次读出所有
-        $data=$res->fetch_all(MYSQLI_ASSOC);
-       /*  while($tmp=($res->fetch_assoc())){ 
-            $data[]=$tmp; 
-        } */ 
-      
+        
         $m_new=Db::name('cate');
         //开启事务
         $m_new->startTrans();
         //先截取旧数据
         $m_new->execute('truncate table cmf_cate');
-        $row_mew=$m_new->insertAll($data); 
+        $row_mew=$m_new->insertAll($data);
+      
         $m_new->where($this->where_corrects)->update($this->corrects);
+       
+        echo '<h2>已添加产品分类'.$row_mew.'</h2>';
+        
+        //根据分类编码修正
+         
         $m_new->commit();
-        $this->success('已同步数据数'.$row_mew);
+       
+        // ...其他代码段
+        debug('end');
+        // ...也许这里还有其他代码
+        // 进行统计区间
+        echo debug('begin','end').'s'; 
+        echo debug('begin','end','m').'kb';
+        exit;
     }
     /**
      * 产品分类数据更正
@@ -120,18 +127,9 @@ class OldController extends AdminBaseController
      */
     public function cate_correct()
     {
-        $row=0;
+        debug('begin');
         $m=Db::name('cate');
-        //先审核
-        $where=['status'=>1];
-        $time=time();
-        $data=[
-            'status'=>2,
-            'rid'=>1,
-            'rtime'=>$time,
-            'time'=>$time,
-        ];
-        $m->where($where)->update($data);
+        
         //得到最大一级分类
 //         $where=['fid'=>0];
 //         $info=$m->where($where)->order('code_num desc')->find();
@@ -145,6 +143,7 @@ class OldController extends AdminBaseController
         foreach($list as $k=>$v){
             $m->where('id',$k)->update(['max_num'=>$v]);
         }
+        echo '<h2>已更新产品一级分类编码记录值</h2>';
         //更新二级分类的max_num
         $list=Db::name('goods')->group('cid')->column('cid,max(code_num)');
         if(isset($list[0])){
@@ -153,17 +152,23 @@ class OldController extends AdminBaseController
         foreach($list as $k=>$v){
             $m->where('id',$k)->update(['max_num'=>$v]);
         }
+        echo '<h2>已更新产品二级分类的编码记录值</h2>';
+        // ...其他代码段
+        debug('end');
+        // ...也许这里还有其他代码
+        // 进行统计区间
+        echo debug('begin','end').'s';
+        echo debug('begin','end','m').'kb';
+        exit;
          //根据分类编码修正
-        $this->success('已更正数据数');
+       
     }
     /* 产品基本数据 */
     public function goods()
     {
-         
-        $m= mysqli_init();
-        $m->options(MYSQLI_OPT_CONNECT_TIMEOUT, 2);//设置超时时间
-        $dbconfig=$this->dbconfig;
-        $m->real_connect($dbconfig['host'],$dbconfig['user'],$dbconfig['psw'],$dbconfig['dbname'],$dbconfig['port']);
+        debug('begin');
+        $m=Db::connect($this->db_old);
+        
         $sql='select * from sp_codegoods';
         //$fields='id,name,name2,goods_no,tiao as sn,codename as code_name,codenum as code_num';
         $res=$m->query($sql);
@@ -176,7 +181,7 @@ class OldController extends AdminBaseController
         $data_info=[];
         $data_tech=[];
         $time=time();
-        while($tmp=($res->fetch_assoc())){
+        foreach ($res as $k=>$tmp){ 
             $data_goods[]=[
                 'id'=>$tmp['id'],
                 'name'=>$tmp['name'],
@@ -218,8 +223,7 @@ class OldController extends AdminBaseController
                     'name'=>'技术文档'.$tmp['id'],
                     'type'=>7,
                 ];
-            }
-         
+            } 
          }  
         
         $m_goods=Db::name('goods');
@@ -228,25 +232,25 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_goods->execute('truncate table cmf_goods');
         $row_mew=$m_goods->insertAll($data_goods);
-        
+        echo '<h2>已添加产品数据数'.$row_mew.'</h2>';
         //详情
         $m_info=Db::name('goods_info'); 
         //先截取旧数据
         $m_info->execute('truncate table cmf_goods_info');
-        $m_info->insertAll($data_info);
-        
+        $row_mew=$m_info->insertAll($data_info);
+        echo '<h2>已添加产品详情'.$row_mew.'</h2>';
         //技术资料
         $m_tech=Db::name('goods_tech');
         //先截取旧数据
         $m_tech->execute('truncate table cmf_goods_tech');
-        $m_tech->insertAll($data_tech);
-        
+        $row_mew=$m_tech->insertAll($data_tech);
+        echo '<h2>已添加产品资料'.$row_mew.'</h2>';
         //说明书
         $m_file=Db::name('goods_file');
         //先截取旧数据
         $m_file->execute('truncate table cmf_goods_file');
-        $m_file->insertAll($data_file);
-        
+        $row_mew=$m_file->insertAll($data_file);
+        echo '<h2>已添加产品说明书'.$row_mew.'</h2>';
         //产品图片
         $sql='select id,goods_id as pid,img as file from sp_goods_photo where goods_id>0';
        
@@ -261,7 +265,7 @@ class OldController extends AdminBaseController
         $pid=0;
         //转化图片
         set_time_limit(0);
-        while($tmp=($res->fetch_assoc())){
+        foreach ($res as $k=>$tmp){ 
             $pathid='seller2/goods'.$tmp['pid'].'/';
             if(!is_dir($path.$pathid)){
                 mkdir($path.$pathid);
@@ -284,11 +288,10 @@ class OldController extends AdminBaseController
                 $result =copy($path.$tmp['file'], $path.$new_file);
                 if(!$result){
                     echo '复制文件错误';
+                    $m_goods->rollback();
                     exit;
                 }
-            }
-           
-            
+            } 
             //判断是否需要编制图片 
             $tmp_file=['file'=>$new_file];
             $tmp_file['file1']= $tmp_file['file'].'1.jpg';
@@ -309,9 +312,15 @@ class OldController extends AdminBaseController
                 zz_set_image($tmp_file['file'], $tmp_file['file3'], $pic_size[3][0], $pic_size[3][1]);
             } 
         }
-        $m_file->insertAll($data_file);
-        
+        $row_mew=$m_file->insertAll($data_file);
+        echo '<h2>已添加产品图片'.$row_mew.'</h2>';
         $m_goods->commit();
+        debug('end');
+        // ...也许这里还有其他代码
+        // 进行统计区间
+        echo debug('begin','end').'s';
+        echo debug('begin','end','m');
+        exit;
         $this->success('已同步数据数'.$row_mew);
     }
      
@@ -320,17 +329,17 @@ class OldController extends AdminBaseController
     {
         //  '所属公司+付款银行+付款类型 
         $m_old=Db::connect($this->db_old);
-        $sql='select id,company as name,code,allname,account_name,account_bank,account_num,feenum,contact,address'.
-            ' from sp_company ';
-        $data=$m_old->query($sql); 
-        $m_new=Db::name('company');
-        //开启事务
-        $m_new->startTrans();
-        //先截取旧数据
-        $m_new->execute('truncate table cmf_company');
-        $row_mew=$m_new->insertAll($data); 
-        
-        $m_new->where($this->where_corrects)->update($this->corrects);
+        //2018-11-22添加了淘宝关联，数据结构已变化
+//         $sql='select id,company as name,code,allname,account_name,account_bank,account_num,feenum,contact,address'.
+//             ' from sp_company ';
+//         $data=$m_old->query($sql); 
+//         $m_new=Db::name('company');
+//         //开启事务
+//         $m_new->startTrans();
+//         //先截取旧数据
+//         $m_new->execute('truncate table cmf_company');
+//         $row_mew=$m_new->insertAll($data);  
+//         $m_new->where($this->where_corrects)->update($this->corrects);
         
         //转账银行
         $sql='select id,bank_name as name'.
@@ -520,42 +529,61 @@ class OldController extends AdminBaseController
         $m_tel=Db::name('tel');
         $m_account=Db::name('account');
         $data_user=[];
-        
+        $time=time();
         foreach($data as $k=>$v){
             if(empty($v['name'])){
-                continue;
+               continue;
             }
+            
             //组装数据
             $tmp=[
                 'id'=>$v['id'],
                 'name'=>$v['name'],
                 'company'=>intval($v['khly']),
                 'cid'=>intval($v['customcate_id']),
-                'city_code'=>$v['khqh'],
+                'city_code'=>intval($v['khqh']),
                 'code_num'=>intval($v['khbh']), 
                 'paytype'=>intval($v['suppaytype_id']),
-                'email'=>$v['email'],
-                'mobile'=>$v['mobile'], 
+                'email'=>empty($v['email'])?'':$v['email'],
+                'mobile'=>empty($v['phone'])?'':$v['phone'],
                 'level'=>intval($v['level']),
-                'url'=>$v['url'],
-                'shopurl'=>$v['shopurl'],
-                'wechat'=>$v['wechat'],
-                'qq'=>$v['qq'],
-                'fax'=>$v['fax'],
+                'url'=>empty($v['url'])?'':$v['url'],
+                'shopurl'=>empty($v['shopurl'])?'':$v['shopurl'],
+                'wechat'=>empty($v['wechat'])?'':$v['wechat'],
+                'qq'=>empty($v['qq'])?'':$v['qq'],
+                'fax'=>empty($v['fax'])?'':$v['fax'],
                 'province'=>intval($v['province']),
                 'city'=>intval($v['city']),
                 'area'=>intval($v['area']),
-                'street'=>$v['street'],
-                'other'=>$v['other'],
-                'announcement'=>$v['announcement'],
+                'street'=>empty($v['street'])?'':$v['street'],
+                'other'=>empty($v['other'])?'':$v['other'],
+                'announcement'=>empty($v['announcement'])?'':$v['announcement'],
                 'invoice_type'=>intval($v['invoice_type']),
-                'tax_point'=>$v['tax_point'],
-                'freight'=>intval($v['freight']), 
-                'atime'=>$v['addtime'],
+                'tax_point'=>round($v['tax_point'],2),
+                'dsc'=>empty($v['remark'])?'':$v['remark'],
+                'atime'=>intval($v['addtime']),
+                'status'=>2,
+                'aid'=>1,
+                'rid'=>1,
+                'rtime'=>$time,
             ];
-           
+           switch ($tmp['paytype']){ 
+               case 2:
+                   $tmp['pay_type']=3;
+                   break;
+               case 10:
+               case 11:
+                   $tmp['pay_type']=2;
+                   break;
+               case 12:
+                   $tmp['pay_type']=4;
+                   break;
+               default:
+                   $tmp['pay_type']=1;
+                   break;
+           }
             //客户编号
-            $tmp['code']='KF-'.
+            $tmp['code']='KH-'.
                 str_pad($tmp['city_code'], 4,'0',STR_PAD_LEFT).'-'.
                 str_pad($tmp['code_num'], 3,'0',STR_PAD_LEFT);
             
@@ -661,7 +689,7 @@ class OldController extends AdminBaseController
         $m_new=Db::name('custom');
         $m_new->execute('truncate table cmf_custom');  
         $m_new->insertAll($data_user);
-        $m_new->where($this->where_corrects)->update($correct);
+        
         $m_new->commit();
         $this->success('已同步数据数'.$row_mew);
         exit;
@@ -692,7 +720,7 @@ class OldController extends AdminBaseController
         $m_tel=Db::name('tel');
         $m_account=Db::name('account');
         $data_user=[];
-        
+        $time=time();
         foreach($data as $k=>$v){
             if(empty($v['name'])){
                 continue;
@@ -706,27 +734,46 @@ class OldController extends AdminBaseController
                 'code_num'=>intval($v['nummm']),
                 'code'=>$v['supcode'],
                 'paytype'=>intval($v['suppaytype_id']),
-                'email'=>$v['email'],
-                'mobile'=>$v['phone'],
+                'email'=>empty($v['email'])?'':$v['email'],
+                'mobile'=>empty($v['phone'])?'':$v['phone'],
                 'level'=>intval($v['level']),
-                'url'=>$v['url'],
-                'shopurl'=>$v['shopurl'],
-                'wechat'=>$v['wechat'],
-                'qq'=>$v['qq'],
-                'fax'=>$v['fax'],
+                'url'=>empty($v['url'])?'':$v['url'],
+                'shopurl'=>empty($v['shopurl'])?'':$v['shopurl'],
+                'wechat'=>empty($v['wechat'])?'':$v['wechat'],
+                'qq'=>empty($v['qq'])?'':$v['qq'],
+                'fax'=>empty($v['fax'])?'':$v['fax'],
                 'province'=>intval($v['province_id']),
                 'city'=>intval($v['city_id']),
                 'area'=>intval($v['area_id']),
-                'street'=>$v['street'],
-                'other'=>$v['other'],
-                'announcement'=>$v['announcement'],
+                'street'=>empty($v['street'])?'':$v['street'],
+                'other'=>empty($v['other'])?'':$v['other'],
+                'announcement'=>empty($v['announcement'])?'':$v['announcement'],
                 'invoice_type'=>intval($v['invoice_type']),
-                'tax_point'=>$v['tax_point'],  
+                'tax_point'=>round($v['tax_point'],2),  
                 'dsc'=>$v['remark'].'退货地址'.$v['backdz'], 
-                'atime'=>$v['addtime'],
+                'atime'=>intval($v['addtime']),
+                'status'=>2,
+                'aid'=>1,
+                'rid'=>1,
+                'rtime'=>$time,
             ];
+            switch ($tmp['paytype']){
+                case 2:
+                    $tmp['pay_type']=3;
+                    break;
+                case 10:
+                case 11:
+                    $tmp['pay_type']=2;
+                    break;
+                case 12:
+                    $tmp['pay_type']=4;
+                    break;
+                default:
+                    $tmp['pay_type']=1;
+                    break;
+            }
+            //编号,供货商编号不重编
             
-            //客户编号
             
             $i=1;
             $receiver=1;
@@ -905,7 +952,7 @@ class OldController extends AdminBaseController
         4=>'其他',
     ],
      
-        sort专门排序，待发货10，待付款4，，待确认货款5，退货中3，未提交2，其他0
+       //   sort专门排序，待发货10，仓库发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
          */
         //先检查pay_status
         for($i=0;$i<$page;$i++){

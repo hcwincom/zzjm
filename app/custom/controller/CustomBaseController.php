@@ -16,7 +16,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         //没有店铺区分
         $this->isshop=1;
-        $this->edit=['name','company','cid','city_code','code_num','postcode','paytype',
+        $this->edit=['name','company','cid','city_code','code_num','postcode','paytype','pay_type',
             'email','mobile','level','url','shopurl','wechat','qq','fax',
             'province','city','area','street','other','announcement','invoice_type',
             'tax_point','freight','payer','dsc','sort',
@@ -182,22 +182,16 @@ class CustomBaseController extends AdminInfo0Controller
         }
  
         //先查询得到id再关联得到数据，否则sql查询太慢
-        $list=$m
-        ->alias('p')
-        ->field('p.id')
+        $ids=$m
+        ->alias('p') 
         ->join('cmf_tel tels','p.id=tels.uid and tels.type='.$tel_type,'left')
-        ->where($where) 
+        ->where($where)  
         ->order('p.status asc,p.sort asc,p.time desc')
-        ->paginate();
-        // 获取分页显示
-        $page = $list->appends($data)->render();
-        $ids=[];
-        foreach($list as $k=>$v){
-            $ids[$v['id']]=$v['id'];
-        }
-       
+        ->column('p.id');
+        
         if(empty($ids)){
             $list=[];
+            $page=null;
         }else{
             //关联表
             $join=[
@@ -214,8 +208,9 @@ class CustomBaseController extends AdminInfo0Controller
             ->field($field)
             ->join($join)
             ->where('p.id','in',$ids)
-            ->order('p.status asc,p.sort asc,p.time desc')
-            ->select(); 
+            ->order('p.status asc,p.sort asc,p.id desc')
+            ->paginate();
+            $page = $list->appends($data)->render();
         }
        
         $this->assign('page',$page);
@@ -274,7 +269,7 @@ class CustomBaseController extends AdminInfo0Controller
             $data_add[$v]=$data[$v];
         }
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -468,7 +463,7 @@ class CustomBaseController extends AdminInfo0Controller
             
         }
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -664,7 +659,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         //获取关联信息
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -900,6 +895,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
             //可选物流
             $freights=Db::name('freight')->where($where)->order('shop asc,sort asc')->column($field);
+            
             //开票类型
             $invoice_types=config('invoice_type');
             //付款银行
@@ -907,7 +903,7 @@ class CustomBaseController extends AdminInfo0Controller
                 'status'=>2,
             ];
             $banks=Db::name('bank')->where($where)->column('id,name');
-          
+             
             $this->assign('freights',$freights);
             $this->assign('invoice_types',$invoice_types);
             $this->assign('banks',$banks);
@@ -915,10 +911,12 @@ class CustomBaseController extends AdminInfo0Controller
         $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field);
         
         //付款类型 
+        $field.=',bank,location,account,num';
         $paytypes=Db::name('paytype')->where($where)->order('shop asc,sort asc')->column($field);
         
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes);
+        $this->assign('pay_types',config('pay_type'));
          
         $this->assign('cates',$cates);
       
@@ -1120,7 +1118,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         //获取关联信息
         if($table=='custom'){
-            $code_first='KF';
+            $code_first='KH';
             $tel_type=1;
         }else{
             $code_first='GY';
@@ -1406,7 +1404,7 @@ class CustomBaseController extends AdminInfo0Controller
         } 
         $ugoods=$m_ugoods->where('uid',$id)->order('sort asc')->column('*','goods');
         //比较记录的字段
-        $fields=['price','name','cate','dsc','sort','num'];
+        $fields=['price','name','cate','dsc','sort','num','url'];
         //记录数据id,最后用来比较是否有删除
         $data_ids=[];
         //循环所有变量
@@ -1420,6 +1418,7 @@ class CustomBaseController extends AdminInfo0Controller
             if(isset($ugoods[$k])){
                 foreach($fields as $kk=>$vv){
                     if($ugoods[$k][$vv] != $data[$vv][$k]){
+                       
                         $tmp[$vv]=$data[$vv][$k];
                     }
                 }
@@ -1432,6 +1431,7 @@ class CustomBaseController extends AdminInfo0Controller
                 //不存在的直接添加,保存uid,goods
                 $tmp=['uid'=>$id,'goods'=>$k,'shop'=>$info['shop']];
                 foreach($fields as $vv){
+                   
                     $tmp[$vv]=$data[$vv][$k];
                 }
                 $content['add'][$k]=$tmp;
@@ -1841,6 +1841,7 @@ class CustomBaseController extends AdminInfo0Controller
        
         if(empty($uids)){
             $list=[];
+            $page=null;
         }else{
             $where_goods['p.uid']=['in',$uids];
             //关联表

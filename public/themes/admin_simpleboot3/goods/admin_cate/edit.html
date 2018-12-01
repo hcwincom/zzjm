@@ -62,35 +62,4 @@ $('.cancel_ban').click(function(){
 	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
 });
  
-var cid=$('#cid').val(); 
-var id=$('#id').val(); 
- 
-
-$('#cid').change(function(){
-	cid=$(this).val();
-	cid_change(cid,id);
-});
-$('#code_num').change(function(){
-	cid=$('#cid').val();
-	var code_num=parseInt($('#code_num').val());
-	
-	$.post("{:url('code_change')}",{'cid':cid,'code_num':code_num,'id':id},function(data){ 
-		if(data.code!=1){
-			alert(data.msg);
-			cid_change(cid,id);
-			return false;
-		} 
-	},'json');
-});
-function cid_change(cid,id=0){
-	$.post("{:url('cid_change')}",{'cid':cid,'id':id},function(data){ 
-		if(data.code!=1){
-			alert(data.msg);
-			return false;
-		}
-		$('#code_num').val(data.msg);
-	},'json');
-}
- 
- 
 </script>

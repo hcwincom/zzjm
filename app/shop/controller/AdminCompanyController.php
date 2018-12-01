@@ -17,7 +17,7 @@ class AdminCompanyController extends AdminInfo0Controller
         $this->table='company';
         $this->m=Db::name('company');
         $this->edit=['name','sort','dsc','code','allname','account_name','account_bank','account_num',
-            'feenum','contact','address',
+            'feenum','contact','address','type','key_account','key_key','store',
         ];
         $this->search=[
             'name' => '公司名称',
@@ -30,6 +30,7 @@ class AdminCompanyController extends AdminInfo0Controller
         $this->isshop=1;
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
+        $this->assign('company_type',config('company_type'));
         
     }
     /**
@@ -283,5 +284,21 @@ class AdminCompanyController extends AdminInfo0Controller
         parent::del_all();
     }
    
+    public function cates($type=3){
+        parent::cates($type);
+        if($type==3){
+            $shop=$this->where_shop;
+            if(empty($shop)){
+                $admin=$this->admin;
+                $shop=($admin['shop']==1)?2:$admin['shop'];
+            }
+            $where=[
+                'shop'=>$shop,
+                'status'=>2,
+            ];
+            $stores=Db::name('store')->where($where)->order('sort asc')->column('id,name');
+            $this->assign('stores',$stores);
+        } 
+    }
      
 }

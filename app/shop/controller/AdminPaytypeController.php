@@ -16,15 +16,14 @@ class AdminPaytypeController extends AdminInfo0Controller
         $this->flag='付款类型';
         $this->table='paytype';
         $this->m=Db::name('paytype');
-        $this->edit=['name','sort','dsc','type'];
+        $this->edit=['name','sort','dsc','bank','location','num','account'];
          
         //pay_type
         //没有店铺区分
         $this->isshop=1;
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
-        $this->assign('pay_type',config('pay_type'));
-        
+       
     }
     /**
      * 付款类型列表
@@ -274,6 +273,16 @@ class AdminPaytypeController extends AdminInfo0Controller
     {
          
         parent::del_all();
+    }
+    /**
+     * 公共元素
+     */
+    public function cates($type=3)
+    {
+        
+        parent::cates($type);
+        $banks=Db::name('bank')->column('id,name');
+        $this->assign('banks',$banks);
     }
    
      

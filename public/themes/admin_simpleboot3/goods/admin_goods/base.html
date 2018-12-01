@@ -16,6 +16,19 @@
 					 <include file="public@cate" /> 
 				</div>
 			</div> 
+			 <div class="form-group">
+				<label for="" class="col-sm-2 control-label">产品类型</label>
+				<div class="col-md-6 col-sm-10">
+					<foreach name="goods_type" item="vo"> 
+					 <label class="radio-inline type">
+	                    <input type="radio" name="type" value="{$key}" id="ttype{$key}" <if condition="$key eq $info.type">checked</if> required/>{$vo}
+	                </label>
+					</foreach>
+					<p class='notice'>非基础产品有产品关联页面，有产品关联的产品改为基础产品后自动删除关联
+					<br/>加标产品的重量体积和技术参数跟随主产品改变，无法单独编辑
+					<br/>类型为设备的产品计量单位为kg,m，其他都是g,cm</p>
+				</div>
+			</div>
 			<div class="form-group">
 				<label for="" class="col-sm-2 control-label">三级名称</label>
 				<div class="col-md-6 col-sm-10 code_name">
@@ -46,27 +59,16 @@
 			<div class="form-group">
 				<label for="" class="col-sm-2 control-label">商城名称</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"  name="name2" value="{$info.name2}" />
+					<input type="text" class="form-control" id="name2" name="name2" value="{$info.name2}" />
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="" class="col-sm-2 control-label">打印名称</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control"   name="name3" value="{$info.name3}" />
+					<input type="text" class="form-control" id="name3"  name="name3" value="{$info.name3}" />
 				</div>
 			</div>
-			 <div class="form-group">
-				<label for="" class="col-sm-2 control-label">产品类型</label>
-				<div class="col-md-6 col-sm-10">
-					<foreach name="goods_type" item="vo"> 
-					 <label class="radio-inline type">
-	                    <input class="" type="radio" name="type" value="{$key}" <if condition="$key eq $info.type">checked</if> required/>{$vo}
-	                </label>
-					</foreach>
-					<p class='notice'>非基础产品有产品关联页面，有产品关联的产品改为基础产品后自动删除关联</p>
-					<p class='notice'>加标产品的重量体积和技术参数跟随主产品改变，无法单独编辑</p>
-				</div>
-			</div>
+			
 	  		
 	 
 			 <div class="form-group">
@@ -87,17 +89,7 @@
 					 
 				</div>
 			</div>
-			<div class="form-group">
-				<label for="" class="col-sm-2 control-label">计量单位</label>
-				<div class="col-md-6 col-sm-10">
-					<foreach name="units" item="vo"> 
-					 <label class="radio-inline type">
-	                    <input class="" type="radio" name="unit" value="{$key}" <if condition="$key eq $info.unit">checked</if> required/>{$vo}
-	                </label>
-					</foreach>
-					 
-				</div>
-			</div>
+			 
 			 <div class="form-group">
 				<label for="" class="col-sm-2 control-label">重量体积参数</label>
 				<div class="col-md-6 col-sm-10">
@@ -121,11 +113,11 @@
 						<tbody>
 					  
 						 	<tr>  
-								<td><input type="text" id="weight0" name="weight0" value="{$info.weight0}" required/></td> 
-								<td> <input type="text" id="length0" name="length0" value="{$info.length0}" required/></td> 
-								<td><input type="text" id="width0" name="width0" value="{$info.width0}" required/></td> 
-								<td><input type="text" id="height0" name="height0" value="{$info.height0}" required/></td>
-								<td><input type="text" id="size0" name="size0" value="{$info.size0}" required/></td> 
+								<td><input type="text" id="weight0" name="weight0" value="{$info.weight0}" /></td> 
+								<td> <input type="text" id="length0" name="length0" value="{$info.length0}" /></td> 
+								<td><input type="text" id="width0" name="width0" value="{$info.width0}" /></td> 
+								<td><input type="text" id="height0" name="height0" value="{$info.height0}" /></td>
+								<td><input type="text" id="size0" name="size0" value="{$info.size0}" /></td> 
 								<td>
 							 		<select name="is_box" id="is_box">
 									<foreach name="is_box" item="vo"> 
@@ -144,6 +136,7 @@
 						</tbody>
 					 
 					</table>
+					<p class="notice">类型为设备的产品计量单位为kg,m，其他都是g,cm</p>
 				</div>
 			 </div>
 		 

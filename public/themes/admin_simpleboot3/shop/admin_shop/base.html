@@ -2,7 +2,7 @@
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">名称</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control"  value="{$info.name}" />
+        <input type="text" class="form-control" name="name" value="{$info.name}" />
 
         <present name='change.name'>
             <input type="text" class="red form-control" value="{$change.name}" />
@@ -10,12 +10,22 @@
 
     </div>
 </div>
-
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">审核模式</label>
+    <div class="col-md-6 col-sm-10">
+    <foreach name="is_review" item="vo">
+ 		<label class="radio-inline"> 
+		 <input type="radio" name="is_review" value="{$key}" <if condition="$key eq $info.is_review">checked</if>/>{$vo} 
+		</label>
+	</foreach>
+	 <p class="notice">审核模式由商家在我的店铺修改</p>
+    </div>
+</div>
 
 <div class="form-group">
     <label class="col-sm-2 control-label">简介</label>
     <div class="col-md-6 col-sm-10">
-        <textarea class="form-control"  rows="5" >{$info.dsc}</textarea>
+        <textarea class="form-control" name="dsc" rows="5" >{$info.dsc}</textarea>
         <present name='change.dsc'>
             <textarea class="red form-control" rows="5" >{$change.dsc}</textarea>
         </present>
@@ -24,7 +34,7 @@
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">排序</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control"  value="{$info.sort|default=1000}" />
+        <input type="text" class="form-control" name="sort" value="{$info.sort|default=1000}" />
         <present name='change.sort'>
             <input type="text" class="red form-control" value="{$change.sort}" />
         </present>

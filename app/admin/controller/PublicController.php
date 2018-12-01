@@ -100,6 +100,8 @@ class PublicController extends AdminBaseController
                 session('ADMIN_ID', $result["id"]);
                 session('name', $result["user_login"]);
                 session('shop', $result["shop"]);
+                $is_review=Db::name('shop')->where('id',$result["shop"])->value('is_review');
+                session('shop_review', $is_review);
                 $result['last_login_ip']   = get_client_ip(0, true);
                 $result['last_login_time'] = time();
                 $token                     = cmf_generate_user_token($result["id"], 'web');
@@ -250,5 +252,10 @@ class PublicController extends AdminBaseController
         $city=Db::name('area')->field('id,name,code,postcode,fid')->where($where)->find();
         $this->success('ok','',['name'=>$city['name'],'city_code'=>$city['code'],'postcode'=>$city['postcode'],'fid'=>$city['fid']]);
     }
-   
+   /* 查快递 */
+    public function express_query(){
+        $freight=$this->request->param('freight',0,'intval');
+        $no=$this->request->param('no');
+        $code=Db::name('');
+    }
 }

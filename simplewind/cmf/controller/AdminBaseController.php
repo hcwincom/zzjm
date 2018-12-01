@@ -106,5 +106,36 @@ class AdminBaseController extends BaseController
             return true;
         }
     }
+    
+    /**
+     *  检查后台用户权限,是否直接审核
+     * @param array $admin用户
+     * @param string $action操作方法
+     * @param string $rule0模块/控制器
+     * @return boolean 通过验证返回true;失败返回false
+     */
+    public function check_review($admin,$action,$rule0='')
+    {
+        //先判断店铺是否允许直接审核
+        $shop_review=session('shop_review');
+        if($shop_review!=2){
+            return false;
+        }
+        // 如果用户id是1，则无需判断
+        if ($admin['id']== 1) {
+            return true;
+        }
+        if(empty($rule0)){
+            $module     = $this->request->module();
+            $controller = $this->request->controller(); 
+            $rule0= strtolower($module . "/" . $controller);
+        }
+        $rule=strtolower($rule0. "/" . $action);
+        
+        $res=cmf_auth_check($admin['id'],$rule);
+        
+        return $res;
+       
+    }
 
 }

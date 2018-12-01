@@ -1,0 +1,806 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
+			 
+			 		 
+	   		 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">订单来源</label>
+				<div class="col-md-6 col-sm-10">
+				<select  class="form-control "  name="company"  required>
+					<option value="0">订单来源</option>
+					<foreach name="companys" item="vo">
+					<option value="{$key}"  >{$vo}</option>
+					</foreach>
+					</select>  
+				</div>
+			</div>
+ 
+			 <div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">客户筛选</label>
+				<div class="col-md-6 col-sm-10">
+			 		<select  class="form-control  short-auto" id="company"   >
+						<option value="0">客户来源</option>
+					<foreach name="companys" item="vo">
+						<option value="{$key}"  >{$vo}</option>
+					</foreach>
+					</select>  
+					 
+					<select  class="form-control short-auto" id="custom_cate"  > 
+						<option value="0">客户分类</option>
+					<foreach name="custom_cates" item="vo">
+						<option value="{$key}"  >{$vo}</option>
+					</foreach>
+					</select>
+					<select  class="form-control short-auto" id="province"  > 
+						<option value="0">客户所在省</option> 
+					</select>
+					<select  class="form-control short-auto" id="city"  > 
+						<option value="0">客户所在市</option> 
+					</select> 
+					<p class="notice">客户所在省为必选项</p>
+				</div>
+			</div>
+	 
+			 <div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">客户</label>
+				<div class="col-md-6 col-sm-10"> 
+					 
+					<select  class="form-control " name="uid" id="custom"   required>
+						<option value="0" >请选择客户</option>
+					</select>
+					<a href="{:url('custom/AdminCustom/edit',['id'=>0])}" target="{$zztarget['other']}" id="custom_link">客户详情</a>
+				</div>
+			</div>
+			 <div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">收货人</label>
+				<div class="col-md-6 col-sm-10">
+				 
+					<select  class="form-control " name="accept" id="accept" required >  
+					</select> 
+				 
+				</div>
+			</div>
+			
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">发货仓库</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control" name="store" id="store" required>
+				    	<option value="0">请选择</option>
+					<foreach name="stores" item="vo">
+						<option value="{$key}" >{$vo}</option>
+					</foreach>
+					</select>
+				 
+				 </div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">物流方式</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control" name="freight" id="freight" required>
+				    	<option value="0">请选择</option>
+					<foreach name="freights" item="vo">
+						<option id="freight{$key}" class="store{$vo.store}" value="{$key}" >{$vo.name}</option>
+					</foreach>
+					</select> 
+					<p class="notice">字体红色的物流是推荐物流</p>
+				 </div>
+			</div>
+			
+			<div style="clear:both"></div>
+			 <div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">注意事项</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control " name="dsc" value="" id="announcement"/> 
+				</div>
+			</div>
+	  		<div class="form-group fleft-all"  >
+				<label  class="col-sm-2 control-label">用户留言</label>
+				<div class="col-md-6 col-sm-10" > 
+				  <input type="text" class="form-control" name="udsc" value="{$info.udsc}" />
+				<present name="change.udsc">
+					<input type="text" class="form-control red"  value="{$change.udsc}" />
+				</present>
+				</div>
+			</div>
+			<div style="clear:both"></div>
+			  
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">添加产品</label>
+				<div class="col-md-6 col-sm-10">
+				   <include file="public@cate_goods0" />  
+					 <button type="button" id="goods_add">确定</button>
+				 
+				</div>
+			</div>
+			 
+			<table class="table table-hover table-bordered table-list" id="goods-list">
+				 
+			 	<tr id="goods0">
+				 	<td>产品名称</td>
+				 	<td>产品编码</td>
+				 	<td width="100">产品图片</td>
+				 
+				 	<td width="150">库存</td>
+				  
+					 <td width="100">供应价</td>
+					 <td width="50">数量</td>
+					 <td width="100">金额</td>
+					 <td width="100">毛重</td> 
+					  <td width="100">体积</td> 
+					 <td >备注</td>
+			 	</tr> 
+	 
+	 		</table>
+	 		<p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
+		 
+			 <div class="form-group fleft-all"  >
+				 
+			</div>
+			
+			 <div class="form-group fleft-all"  >
+				<label class="col-sm-2 control-label">物流费用</label>
+				<div class="col-md-6 col-sm-10">
+				    <label class="input-inline"> 
+					 包装总重：<input type="text" class="form-control short" id="weight" name="weight" value="" required/> 
+					 </label>
+				 	 <label class="input-inline"> 
+					 包装总体积：<input type="text" class="form-control short" id="size" name="size" value="" required/> 
+					</label>
+				 	 <label class="input-inline"> 
+					 用户支付运费：<input type="text" class="form-control short" id="pay_freight" name="pay_freight" value="" required/> 
+					
+					</label>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short" id="real_freight" name="real_freight" value="" required/> 
+					 	<button id="freight_count" type="button">运费计算</button>
+					 </label>
+					   <p class="notice">运费计算根据最终的包装总体积、总重和预先指定的快递规则计算。
+					   <br/>计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费</p> 
+				</div>
+			</div> 
+			 
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">客户付款和发票</label>
+				<div class="col-md-6 col-sm-10">
+				        付款方式：
+				   <select  class="form-control short-auto" name="paytype" id="paytype" required>
+				   		<option value="0">请选择</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" type0="{$vo.type}" >{$vo.name}</option>
+					</foreach>
+					</select> 
+					<input type="hidden" name="pay_type" id="pay_type"/>
+					开票类型：
+					 <select  class="form-control short-auto" name="invoice_type" id="invoice_type">
+					<foreach name="invoice_types" item="vo">
+					<option value="{$key}" point="{$vo[1]}" >{$vo[0]}</option>
+					</foreach>
+					</select>
+					 
+				</div>
+			</div>
+			 <div class="form-group fleft-all" id="invoice_info">
+				<label class="col-sm-2 control-label">发票信息</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="hidden"  name="invoice_id" value="{$invoice.id}"/>
+					 <label class="input-inline"> 
+					发票抬头：<input type="text" class="form-control short-auto" name="invoice_title" value="{$invoice.title}"/>
+					</label>
+				 	 <label class="input-inline"> 
+					客户税号：<input type="text" class="form-control short-auto" name="invoice_ucode" value="{$invoice.ucode}"/>
+					</label>
+				 	 <label class="input-inline"> 
+					税点%：<input type="text" class="form-control short" id="invoice_point" name="invoice_point" value="{$invoice.point}"/>
+					</label>
+				 	 <label class="input-inline"> 
+					开票金额：<input type="text" class="form-control short" id="invoice_invoice_money" name="invoice_invoice_money" value="{$invoice.invoice_money}"/>
+					 </label>
+					  <label class="input-inline"> 
+					税费：<input type="text" class="form-control short" id="invoice_tax_money" name="invoice_tax_money" value="{$invoice.invoice_money}"/>
+					 <button id="invoice_count" type="button">税费计算</button>
+					 </label>
+					 
+					
+						
+					 <br/> 
+					开票说明：<input type="text" class="form-control" name="invoice_dsc" value="{$invoice.dsc}"/>
+					   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息。
+					   <br/>开票金额为空则自动计算开票金额</p>  
+				</div>
+			</div>
+			<div class="form-group fleft-all"  >
+				<label class="col-sm-2 control-label">订单总计</label>
+				<div class="col-md-6 col-sm-10">
+				 	<label class="input-inline">
+					 产品总数量：<input type="text" class="form-control short " id="num" name="num" value="" readonly/> 
+					</label>
+				 	 <label class="input-inline">
+					 产品总金额：<input type="text" class="form-control short " id="goods_money" name="goods_money" value="" readonly/> 
+					</label>
+				 	 <label class="input-inline">
+					 优惠金额：<input type="text" class="form-control short" id="discount_money" name="discount_money" value="0" /> 
+					</label>
+					 <label class="input-inline">
+					 税费：<input type="text" class="form-control short" id="tax_money" name="tax_money" value="0" /> 
+					</label>
+					 <label class="input-inline">
+					 其它费用：<input type="text" class="form-control short" id="other_money" name="other_money" value="0" /> 
+					</label>
+				 	 <label class="input-inline"> 
+					 用户付款：<input type="text" class="form-control short" id="order_amount" name="order_amount" value="" required/> 
+					  
+				 	</label>
+				   <p class="notice">用户付款=产品总金额-优惠金额+税费+其它费用。
+				   <br/>计算税费后用户付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后用户付款金额也会改变
+					 </p> 
+				 	  
+				</div>
+			</div> 
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">用户付款</label>
+				<div class="col-md-6 col-sm-10">
+				用户付款账号：
+					<select  class="form-control" id="account">
+				    	<option value="0">请选择</option> 
+					</select> 
+				付款银行：
+					<select  class="form-control" name="account_bank1" id="account_bank1">
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}"  >{$vo}</option>
+					</foreach>
+					</select>
+				   付款 账户名：<input type="text"  class="form-control" name="account_name1" id="account_name1"/>
+				    <p class="notice">付款账户名为空则不保存付款信息</p>  
+				   付款账号：<input type="text"  class="form-control" name="account_num1" id="account_num1"/>
+				   付款开户行：<input type="text"  class="form-control" name="account_location1" id="account_location1"/>
+				   收款银行：
+					<select  class="form-control" name="account_bank2" id="account_bank2">
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}"  >{$vo}</option>
+					</foreach>
+					</select>
+				   收款 账户名：<input type="text"  class="form-control" name="account_name2" id="account_name2"/>
+				   收款账号：<input type="text"  class="form-control" name="account_num2" id="account_num2"/>
+				   收款开户行：<input type="text"  class="form-control" name="account_location2" id="account_location2"/>
+				
+				</div>
+			</div>
+			 
+			 
+		<div style="clear:both"></div>
+		 
+		<div style="clear:both"></div>
+		<notempty name="info1.aid">
+			<div class="form-group ">
+				<label for="" class="col-sm-2 control-label">修改人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info1.aname|default=$info1['aid']}" readonly/>
+				</div>
+			</div>
+		</notempty>
+		<notempty name="info1.rid">
+			<div class="form-group ">
+				<label for="" class="col-sm-2 control-label">修改审核人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info1.rname|default=$info1['rid']}" readonly/>
+				</div>
+			</div>
+		</notempty>
+		<div style="clear:both"></div>
+		<present name="info.id">
+			<div class="form-group "  >
+				<label class="col-sm-2 control-label">修改备注</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="adsc" value="{$info1.adsc|default=''}"  />
+					<p class="notice">修改人修改信息时可以先写此备注提醒审核人</p>
+				</div>
+			</div>
+		</present>
+		<present name="change">
+			<div class="form-group "  >
+				<label class="col-sm-2 control-label">审核意见</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="rdsc" value="{$info1.rdsc|default=''}"  />
+					<p class="notice">审核人审核信息时可以填写</p>
+				</div>
+			</div>
+		</present>
+		 <div style="clear:both"></div>
+ 
+			 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+					 <p>添加订单后需管理员审核后才能生效</p>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
+<script>
+//城市选择js初始化 
+get_citys($('#province'),1,0);
+var company=0;
+var cid=0;
+var province=0;
+var city=0;
+ 
+var url_custom_get="{:url('order/Orderajax/get_customs')}";
+var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
+var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
+var arr;
+var store=0; 
+//仓库
+var stores={$stores_json};
+var num_table='</div><div class="goodsInfo"><table class="table table-hover table-bordered"><thead><tr>';
+for(var i in stores){
+	num_table+='<th>'+stores[i]+'</th>';
+}
+num_table+='</tr></thead><tbody><tr>';
+
+  
+$('#invoice_type').val(2);
+$('#province').change(function(){
+	province=$('#province').val();
+	get_citys($('#city'),province,0);
+	
+	company=$('#company').val();
+	cid=$('#custom_cate').val(); 
+	city=0;
+	custom_get(company,cid,province,city);
+});
+$('#company,#custom_cate,#city').change(function(){
+	company=$('#company').val();
+	cid=$('#custom_cate').val();
+	province=$('#province').val();
+	city=$('#city').val();
+	custom_get(company,cid,province,city); 
+});
+function custom_get(company,cid,province,city){
+	if(province==0){
+		return false;
+	}
+	$.post(url_custom_get,{'company':company,'cid':cid,'type':1,'province':province,'city':city},function(data){
+		if(data.code!=1){
+			return false;
+		} 
+		var list=data.data;
+		var options='<option value="0">请选择客户</option>';
+		for(var i in list){
+			options+='<option value="'+i+'" >'+list[i]+'</option>';
+		}
+		$('#custom').html(options); 
+		$('.accept input').val('');
+	},'json');
+}
+$('#custom').change(function(){
+	 var custom=$(this).val();
+	 
+	 if(custom==0){ 
+		 $('.accept select').val(0);
+		 $('#custom_link').attr('href',url_custom+custom);
+		 return false;
+	 } 
+	  $('#custom_link').attr('href',url_custom+custom);
+	 $.post(url_custom_info,{'uid':custom,'type':1},function(data){
+			if(data.code!=1){
+				return false;
+			}  
+			var info=data.data;
+			var list=info.tels;
+			var selected=''; 
+			 
+			var options='<option value="0">选择收货人</option>'; 
+			//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
+			for(var i in list){
+				if(info.receiver==i){
+					selected='selected';  
+				}else{
+					selected=''; 
+				} 
+				options+='<option value="'+list[i]['id']+'" city="'+list[i]['city']+'" '+selected+' >'+
+				list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
+				list[i]['province_name']+list[i]['city_name']+list[i]['area_name']+list[i]['street']+','+list[i]['postcode']+'</option>'; 
+			}
+			 $('#accept').html(options); 
+			 $('#freight').val(info.freight);
+			 accept_change(); 
+			 list=info.accounts;
+			  options='<option value="0">选择付款账号</option>'; 
+			 for(var j in list){
+				if(info.payer==j){
+					selected='selected';  
+				}else{
+					selected=''; 
+				} 
+				options+='<option value="'+list[j]['id']+
+				'" bank1="'+list[j]['bank1']+
+				'" bank2="'+list[j]['bank2']+
+				'" name2="'+list[j]['name2']+
+				'" num2="'+list[j]['num2']+
+				'" location2="'+list[j]['location2']+ 
+				'" name1="'+list[j]['name1']+
+				'" num1="'+list[j]['num1']+
+				'" location1="'+list[j]['location1']+ 
+				'" selected >'+
+				list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
+			}
+			 $('#account').html(options); 
+			 account_change(); 
+			 $('#announcement').val(info.announcement);
+			 $('#invoice_type').val(info.invoice_type); 
+			 invoice_type_change();
+			 $('#tax_point').val(info.tax_point); 
+			
+			 $('#paytype').val(info.paytype); 
+			 paytype_change();
+		},'json'); 
+	 
+});
+
+ 
+var url_accept_change="{:url('order/Orderajax/accept_change')}";
+$('#accept').change(function(){
+	accept_change(); 
+});
+function accept_change(){
+	var freight= $('#freight').val(); 
+	var accept=parseInt( $('#accept').val()); 
+	if(!(accept>0)){
+		return false;
+	}
+	$.ajax({
+        type: 'POST',
+        url: url_accept_change,
+        dataType: 'json', 
+        data:{'freight':freight,'accept':accept},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	    
+     	    var info=data.data;
+     	   $('#freight').val(info.freight);
+     	   $('#store').val(info.store);
+     	   var freights=info.freights;
+     	 
+     	  $('#freight option').removeClass('red');
+     	  for( var i in freights){ 
+     		 $('#freight'+freights[i]).addClass('red');
+     	  }
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    });
+}
+$('#account').change(function(){
+	account_change(); 
+});
+function account_change(){
+	 var account=$('#account').val();
+	 if(account==0){
+		 return false;
+	 }
+	 var selected=$('#account option:selected');
+	 $('#account-bank1').val(selected.attr('bank1'));
+	 $('#account-bank2').val(selected.attr('bank2'));
+	 $('#account-num2').val(selected.attr('num2'));
+	 $('#account-name2').val(selected.attr('name2'));
+	 $('#account-location2').val(selected.attr('location2'));
+	 $('#account-num1').val(selected.attr('num1'));
+	 $('#account-name1').val(selected.attr('name1'));
+	 $('#account-location1').val(selected.attr('location1'));
+	 
+	 
+}
+var goods=0;
+var url_goods_add="{:url('order/Orderajax/goods_add')}";
+var href_goods="{:url('goods/AdminGoods/edit','',false,false)}";
+var image_url="{:cmf_get_image_url('')}";
+$('#goods_add').click(function(){
+	 
+	goods=parseInt($(this).siblings('.goods').val());
+	store=$('#store').val();
+	if(!(goods>0)){
+		return false;
+	}
+	$('#goods-list tr').each(function(){
+		if($(this).attr('id')==('goods'+goods)){
+			goods=0;
+			$(this).find('.num').focus();
+			return false;
+		}
+	});
+	if(goods==0){ 
+		return false;
+	} 	
+	$.ajax({
+        type: 'POST',
+        url: url_goods_add,
+        dataType: 'json', 
+        data:{'id':goods},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	  
+     	    var info=data.data;
+     	    var tr='';
+     	    var div_pic='<div class="listposi">'+
+     	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
+		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
+		    var pics=info.pics;
+		    var nums=info.nums;
+		    for(var i in pics){
+		    	div_pic+='<li><img src="'+image_url+'/'+pics[i]['file1']+'" alt="">'+
+		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file1']+'"></li>'; 
+		    }
+		    div_pic+='</ul><span class="prev"><i class="left"></i></span>'+
+		    '<span class="next"><i class="right"></i></span></div></div>';
+		    var div_num='<td class="clickInfo"><div style="position:relative;" class="goInfo" data-width="0">'+nums[0]['num']+'('+nums[0]['num1']+')--';
+		   
+		    if(nums.hasOwnProperty(store)){
+		    	div_num+=nums[store]['num']+'('+nums[store]['num1']+')';
+		    }else{
+		    	div_num+='0(0)';
+		    }
+		    div_num+=num_table;
+		    for(var i in stores){
+		    	if(nums.hasOwnProperty(i)){
+			    	div_num+='<td>'+nums[i]['num']+'('+nums[i]['num1']+')</td>';
+			    }else{
+			    	div_num+='<td>0(0)</td>';
+			    }
+		    }
+		    div_num+='</tr></tbody></table>	</div></td>';	 
+     	    tr+='<tr id="goods'+info['id']+'"><td>'+
+     	    '<a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td><td>'+
+     	    info['code']+'</td><td ><div class="tdImg">'+
+     	   '<image src="'+image_url+'/'+info['pic']+'"  /></div>'+div_pic+'</td>'+
+     	    div_num+'<td>'+
+     	    '<input type="text" name="prices['+info['id']+']" class="form-control price_sale " value="'+info['price_sale']+'"/></td><td>'+
+     	    '<input type="number" name="nums['+info['id']+']" class="form-control input-order num" value="1"/></td><td>'+
+     	    '<input type="text" name="price_counts['+info['id']+']" class="form-control price_count" value="'+info['price_sale']+'" /></td><td>'+ 
+     	    '<input type="text"  name="weight1s['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
+     	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td><td>'+
+     	   '<input type="text"  name="size1s['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
+    	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td><td>'+
+     	   '<input type="text" name="dscs['+info['id']+']" class="form-control" value=""/></td></tr>';
+     	    $('#goods-list').append(tr);
+     	   money_change($('#goods'+info['id']),'num');
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
+$(document).on('change','.price_sale',function(){
+	money_change($(this).parents('tr'),'price');
+}); 
+$(document).on('change','.num',function(){ 
+	money_change($(this).parents('tr'),'num'); 
+});
+function money_change($tr,type='price'){  
+	var num=parseInt($tr.find('.num').val()); 
+	var price_sale=parseFloat($tr.find('.price_sale').val());
+	if(!(num>0)){
+		msg('产品数量错误');
+		$tr.find('.num').focus();
+	}
+	$tr.find('.num').val(num);
+	if(!(price_sale>=0)){
+		msg('产品价格错误');
+		$tr.find('.price_sale').focus();
+	}
+	price_sale=price_sale.toFixed(2);
+	$tr.find('.price_sale').val(price_sale);
+	var price_count1=(num*price_sale).toFixed(2);
+	$tr.find('.price_count').val(price_count1); 
+	//重量体积改变
+	if(type=='num'){
+		var weight0=$tr.find('.weight0').val();
+		var size0=$tr.find('.size0').val(); 
+		$tr.find('.weight1').val((num*weight0).toFixed(2));
+		$tr.find('.size1').val((num*size0).toFixed(2)); 
+	}  
+	 
+	var price_count=0;
+	var num_count=0;  
+	$('.price_count').each(function(){
+		$tr=$(this).parents('tr'); 
+		num=parseInt($tr.find('.num').val()); 
+		if(!(num>0)){
+			num=1; 
+			$(this).val($tr.find('.price_sale').val());
+		}
+		$tr.find('.num').val(num);
+		num_count+=num;
+		
+		price_count1=parseFloat($(this).val());
+		if(!(price_count1>=0)){
+			price_count1=0;
+			$(this).val(price_count1);
+		}
+		price_count+=price_count1; 
+	});
+	$('#goods_money').val(price_count.toFixed(2));
+	$('#num').val(num_count);
+	//重量体积改变
+	if(type=='num'){ 
+		weight_change();
+	}  
+	order_account();
+}
+function weight_change(){
+	var weight_count=0;
+	var size_count=0;
+	var weight1=0;
+	var size1=0;
+	var $tr;
+	 
+	$('#size').val('weight_change');
+	$('.weight1').each(function(){
+		$tr=$(this).parents('tr'); 
+		//重量体积改变
+		weight1=parseFloat($tr.find('.weight1').val());
+		if(!(weight1>0)){
+			weight1=0.01;
+			$tr.find('.weight1').val(weight1); 
+		}
+		weight_count+=weight1;
+		size1=parseFloat($tr.find('.size1').val());
+		if(!(size1>0)){
+			size1=0.01;
+			$tr.find('.size1').val(size1); 
+		}
+		size_count+=size1; 
+		console.log(size_count);
+	}); 
+	$('#size').val(size_count);
+	$('#weight').val(weight_count);
+} 
+var url_freight_count="{:url('order/Orderajax/freight_count')}";
+$('#freight_count').click(function(){
+	var freight=$('#freight').val();
+	if(!(freight>0)){
+		msg('先选择合作快递公司');
+		return false;
+	}
+	if(!($('#accept').val()>0)){
+		msg('先选择收货人');
+		return false;
+	}
+	 
+	var city=$('#accept option:selected').attr('city');
+	var size=$('#size').val();
+	var weight=$('#weight').val();
+	$.ajax({
+        type: 'POST',
+        url: url_freight_count,
+        dataType: 'json', 
+        data:{'freight':freight,'city':city,'size':size,'weight':weight},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	    
+     	    $('#pay_freight').val(data.data);
+     	    $('#real_freight').val(data.data);
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
+$('#paytype').change(function(){
+	paytype_change();
+	 
+});
+function paytype_change(){
+	if(($('#paytype').val())==0){  
+		return false;
+	} 
+	$('#pay_type').val($('#paytype option:selected').attr('type0'));
+}
+$('#invoice_type').change(function(){
+	invoice_type_change();
+	 
+});
+function invoice_type_change(){
+	if(($('#invoice_type').val())==0){  
+		return false;
+	} 
+	$('#invoice_point').val($('#invoice_type option:selected').attr('point'));
+}
+$('#invoice_count').click(function(){
+	var invoice_type=$('#invoice_type').val();
+	if(invoice_type==0){ 
+		$('#invoice_type').focus();
+		return false;
+	}
+	 
+	var invoice_point=parseFloat($('#invoice_point').val());
+	if(!(invoice_point>0)){
+		invoice_point=0;
+		$('#invoice_point').val(0);
+		$('#invoice_point').focus();
+		return false;
+	}
+	var invoice_invoice_money=parseFloat($('#invoice_invoice_money').val());
+	if(!(invoice_invoice_money>0)){
+		var goods_money=parseFloat($('#goods_money').val());
+		var discount_money=parseFloat($('#discount_money').val());
+		var other_money=parseFloat($('#other_money').val());
+		var pay_freight=parseFloat($('#pay_freight').val());
+		if(!(goods_money>0)){
+			goods_money=0;
+			$('#goods_money').val(0);
+		}
+		if(!(discount_money>0)){
+			discount_money=0;
+			$('#discount_money').val(0);
+		}
+		if(!(other_money>0)){
+			other_money=0;
+			$('#other_money').val(0);
+		}
+		if(!(pay_freight>0)){
+			pay_freight=0;
+			$('#pay_freight').val(0);
+		}
+		invoice_invoice_money=(goods_money-discount_money+other_money+pay_freight)*(1+invoice_point/100);
+		 
+	}
+	$('#invoice_invoice_money').val(invoice_invoice_money.toFixed(2));
+	var invoice_tax_money=(invoice_invoice_money*invoice_point/100/(1+invoice_point)).toFixed(2);
+	$('#invoice_tax_money').val(invoice_tax_money); 
+	$('#tax_money').val(invoice_tax_money); 
+	order_account();
+});
+$('#discount_money,#other_money,#pay_freight,#tax_money').change(function(){
+	order_account();
+});
+function order_account(){
+	var goods_money=parseFloat($('#goods_money').val());
+	var discount_money=parseFloat($('#discount_money').val());
+	var other_money=parseFloat($('#other_money').val());
+	var pay_freight=parseFloat($('#pay_freight').val());
+	var tax_money=parseFloat($('#tax_money').val()); 
+	if(!(goods_money>0)){
+		goods_money=0;
+		$('#goods_money').val(0);
+	}
+	if(!(discount_money>0)){
+		discount_money=0;
+		$('#discount_money').val(0);
+	}
+	if(!(other_money>0)){
+		other_money=0;
+		$('#other_money').val(0);
+	}
+	if(!(pay_freight>0)){
+		pay_freight=0;
+		$('#pay_freight').val(0);
+	}
+	if(!(tax_money>0)){
+		tax_money=0;
+		$('#tax_money').val(0);
+	}
+	order_amount=goods_money-discount_money+other_money+pay_freight+tax_money;
+	$('#order_amount').val(order_amount.toFixed(2));
+}
+</script>	 
+

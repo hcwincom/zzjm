@@ -1,0 +1,398 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
+			 
+			 <include file="order@admin_order:base" />
+		 <div style="clear:both"></div>
+ 
+			 
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
+					 <p class="notice">添加订单后需管理员审核后才能生效</p>
+					 <p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
+<script>
+$('form').submit(function(){
+	if($('#order_company').val()=='0'){
+		$('#order_company').focus();
+		return false;
+	}
+	if($('#paytype').val()=='0'){
+		$('#paytype').focus();
+		return false;
+	}
+	
+	return true;
+});
+//城市选择js初始化 
+get_citys($('#province'),1,0);
+var company=0;
+var cid=0;
+var province=0;
+var city=0;
+ 
+var url_custom_get="{:url('order/Orderajax/get_customs')}";
+var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
+var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
+var arr;
+var store=0; 
+ 
+
+$('#order_pay').show();
+custom_change("{$custom.id|default=0}");
+$('#invoice_type').val(2);
+$('#province').change(function(){
+	province=$('#province').val();
+	get_citys($('#city'),province,0);
+	
+	company=$('#company').val();
+	cid=$('#custom_cate').val(); 
+	city=0;
+	custom_get(company,cid,province,city);
+});
+$('#company,#custom_cate,#city').change(function(){
+	company=$('#company').val();
+	cid=$('#custom_cate').val();
+	province=$('#province').val();
+	city=$('#city').val();
+	custom_get(company,cid,province,city); 
+});
+function custom_get(company,cid,province,city){
+	if(province==0){
+		return false;
+	}
+	$.post(url_custom_get,{'company':company,'cid':cid,'type':1,'province':province,'city':city},function(data){
+		if(data.code!=1){
+			return false;
+		} 
+		var list=data.data;
+		var options='<option value="0">请选择客户</option>';
+		for(var i in list){
+			options+='<option value="'+i+'" >'+list[i]+'</option>';
+		}
+		$('#custom').html(options); 
+		$('.accept input').val('');
+	},'json');
+}
+$('#custom').change(function(){
+	 var custom=$(this).val();
+	 custom_change(custom);
+});
+function custom_change(custom){ 
+	 
+	 if(custom==0){ 
+		 $('.accept select').val(0);
+		 $('#custom_link').attr('href',url_custom+custom);
+		 return false;
+	 } 
+	  $('#custom_link').attr('href',url_custom+custom);
+	 $.post(url_custom_info,{'uid':custom,'type':1},function(data){
+			if(data.code!=1){
+				return false;
+			}  
+			var info=data.data;
+			var list=info.tels;
+			var selected=''; 
+			 
+			var options='<option value="0">选择收货人</option>'; 
+			//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
+			for(var i in list){
+				if(info.receiver==i){
+					selected='selected';  
+				}else{
+					selected=''; 
+				} 
+				options+='<option value="'+list[i]['id']+'" city="'+list[i]['city']+'" '+selected+' >'+
+				list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
+				list[i]['province_name']+list[i]['city_name']+list[i]['area_name']+list[i]['street']+','+list[i]['postcode']+'</option>'; 
+			}
+			 $('#accept').html(options); 
+			 $('#freight').val(info.freight);
+			 accept_change(); 
+			 list=info.accounts;
+			  options='<option value="0">选择付款账号</option>'; 
+			 for(var j in list){
+				if(info.payer==j){
+					selected='selected';  
+				}else{
+					selected=''; 
+				} 
+				options+='<option value="'+list[j]['id']+
+				'" bank1="'+list[j]['bank1']+
+				'" bank2="'+list[j]['bank2']+
+				'" name2="'+list[j]['name2']+
+				'" num2="'+list[j]['num2']+
+				'" location2="'+list[j]['location2']+ 
+				'" name1="'+list[j]['name1']+
+				'" num1="'+list[j]['num1']+
+				'" location1="'+list[j]['location1']+ 
+				'" selected >'+
+				list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
+			}
+			 $('#account').html(options); 
+			 account_change(); 
+			 $('#dsc').val(info.announcement);
+			 $('#invoice_type').val(info.invoice_type); 
+			 invoice_type_change();
+			 $('#tax_point').val(info.tax_point); 
+			
+			 $('#paytype').val(info.paytype); 
+			 $('#pay_type').val(info.pay_type); 
+			 
+		},'json'); 
+	 
+}
+
+ 
+var url_accept_change="{:url('order/Orderajax/accept_change')}";
+$('#accept').change(function(){
+	accept_change(); 
+});
+function accept_change(){
+	var freight= $('#freight').val(); 
+	var accept=parseInt( $('#accept').val()); 
+	if(!(accept>0)){
+		return false;
+	}
+	$.ajax({
+        type: 'POST',
+        url: url_accept_change,
+        dataType: 'json', 
+        data:{'freight':freight,'accept':accept},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	    
+     	    var info=data.data;
+     	   $('#freight').val(info.freight);
+     	   $('#store').val(info.store);
+     	   var freights=info.freights;
+     	 
+     	  $('#freight option').removeClass('red');
+     	  for( var i in freights){ 
+     		 $('#freight'+freights[i]).addClass('red');
+     	  }
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    });
+}
+
+ 
+$(document).on('change','.price_sale',function(){
+	money_change($(this).parents('tr'),'price');
+}); 
+$(document).on('change','.pay_discount',function(){
+	money_change($(this).parents('tr'),'price');
+});
+$(document).on('change','.num',function(){ 
+	money_change($(this).parents('tr'),'num'); 
+});
+function order_change(){  
+	var num=0; 
+	var price_count1=0;
+	 
+	var price_count=0;
+	var num_count=0;  
+	$('.price_count').each(function(){
+		$tr=$(this).parents('tr'); 
+		num=parseInt($tr.find('.num').val()); 
+		if(!(num>0)){
+			num=1; 
+			$(this).val($tr.find('.price_sale').val());
+		}
+		$tr.find('.num').val(num);
+		num_count+=num;
+		
+		price_count1=parseFloat($(this).val());
+		if(!(price_count1>=0)){
+			price_count1=0;
+			$(this).val(price_count1);
+		}
+		price_count+=price_count1; 
+	});
+	$('#goods_money').val(price_count.toFixed(2));
+	$('#goods_num').val(num_count);
+	//重量体积改变
+	if(type=='num'){ 
+		weight_change();
+	}  
+	order_account();
+}
+function money_change($tr,type='price'){  
+	var num=parseInt($tr.find('.num').val()); 
+	var price_sale=parseFloat($tr.find('.price_sale').val());
+	var pay_discount=parseFloat($tr.find('.pay_discount').val());
+	if(!(num>0)){
+		msg('产品数量错误');
+		$tr.find('.num').focus();
+		return false;
+	}
+	$tr.find('.num').val(num);
+	if(!(price_sale>=0)){
+		msg('产品价格错误');
+		$tr.find('.price_sale').focus();
+		return false;
+	}
+	if(!(pay_discount>=0)){
+	 
+		$tr.find('.pay_discount').val(0);
+		pay_discount=0;
+	}
+	price_sale=price_sale.toFixed(2);
+	$tr.find('.price_sale').val(price_sale);
+	pay_discount=pay_discount.toFixed(2);
+	$tr.find('.pay_discount').val(pay_discount);
+	
+	var price_count1=(num*price_sale-pay_discount).toFixed(2);
+	$tr.find('.price_count').val(price_count1); 
+	//重量体积改变
+	if(type=='num'){
+		var weight0=$tr.find('.weight0').val();
+		var size0=$tr.find('.size0').val(); 
+		$tr.find('.weight1').val((num*weight0).toFixed(2));
+		$tr.find('.size1').val((num*size0).toFixed(2)); 
+	}  
+	 
+	var price_count=0;
+	var num_count=0;  
+	$('.price_count').each(function(){
+		$tr=$(this).parents('tr'); 
+		num=parseInt($tr.find('.num').val()); 
+		if(!(num>0)){
+			num=1; 
+			$(this).val($tr.find('.price_sale').val());
+		}
+		$tr.find('.num').val(num);
+		num_count+=num;
+		
+		price_count1=parseFloat($(this).val());
+		if(!(price_count1>=0)){
+			price_count1=0;
+			$(this).val(price_count1);
+		}
+		price_count+=price_count1; 
+	});
+	$('#goods_money').val(price_count.toFixed(2));
+	$('#goods_num').val(num_count);
+	//重量体积改变
+	if(type=='num'){ 
+		weight_change();
+	}  
+	order_account();
+}
+function weight_change(){
+	var weight_count=0;
+	var size_count=0;
+	var weight1=0;
+	var size1=0;
+	var $tr;
+	 
+	$('.weight1').each(function(){
+		$tr=$(this).parents('tr'); 
+		//重量体积改变
+		weight1=parseFloat($tr.find('.weight1').val());
+		if(!(weight1>0)){
+			weight1=0.01;
+			$tr.find('.weight1').val(weight1); 
+		}
+		weight_count+=weight1;
+		size1=parseFloat($tr.find('.size1').val());
+		if(!(size1>0)){
+			size1=0.01;
+			$tr.find('.size1').val(size1); 
+		}
+		size_count+=size1; 
+		 
+	}); 
+	$('#size').val(size_count.toFixed(2));
+	$('#weight').val(weight_count.toFixed(2));
+} 
+var url_freight_count="{:url('order/Orderajax/freight_count')}";
+$('#freight_count').click(function(){
+	var freight=$('#freight').val();
+	if(!(freight>0)){
+		msg('先选择合作快递公司');
+		return false;
+	}
+	if(!($('#accept').val()>0)){
+		msg('先选择收货人');
+		return false;
+	}
+	 
+	var city=$('#accept option:selected').attr('city');
+	var size=$('#size').val();
+	var weight=$('#weight').val();
+	$.ajax({
+        type: 'POST',
+        url: url_freight_count,
+        dataType: 'json', 
+        data:{'freight':freight,'city':city,'size':size,'weight':weight},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	    
+     	    $('#real_freight').val(data.data);
+     	    if(($.trim($('#pay_freight').val()))==''){
+    	    	$('#pay_freight').val(data.data);
+    	    }
+     	    
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
+ 
+
+$('#discount_money,#other_money,#pay_freight,#tax_money').change(function(){
+	order_account();
+});
+function order_account(){
+	var goods_money=parseFloat($('#goods_money').val());
+	var discount_money=parseFloat($('#discount_money').val());
+	var other_money=parseFloat($('#other_money').val());
+	var pay_freight=parseFloat($('#pay_freight').val());
+	var tax_money=parseFloat($('#tax_money').val()); 
+	if(!(goods_money>0)){
+		goods_money=0;
+		$('#goods_money').val(0);
+	}
+	if(!(discount_money>0)){
+		discount_money=0;
+		$('#discount_money').val(0);
+	}
+	if(!(other_money>0)){
+		other_money=0;
+		$('#other_money').val(0);
+	}
+	if(!(pay_freight>0)){
+		pay_freight=0;
+		$('#pay_freight').val(0);
+	}
+	if(!(tax_money>0)){
+		tax_money=0;
+		$('#tax_money').val(0);
+	}
+	order_amount=goods_money-discount_money+other_money+pay_freight+tax_money;
+	$('#order_amount').val(order_amount.toFixed(2));
+}
+</script>	 
+

@@ -39,6 +39,7 @@
 		  <td >单位</td>  
 		 <td >包装说明/备注</td>  
 		  <td >起订量</td>
+		  <td >产品链接</td>
 		 <td >排序</td> 
 		 <td width="100">操作</td> 
 	</tr> 
@@ -114,6 +115,12 @@
 		 	<input type="text" class="form-control input-order red"  value="{$change['edit'][$key]['num']}"/>
 		 </present>
 		 </td>  
+		 <td >
+		 	<input type="text" class="form-control" name="url[{$key}]" value="{$vo.url}"/> 
+		 <present name="change['edit'][$key]['url']">
+		    <input type="text" class="form-control red"  value="{$change['edit'][$key]['url']}"/> 
+		 </present>
+		  </td>
 		 <td>
 		 	<input type="text"  class="input-order" name="sort[{$key}]" value="{$vo.sort}"/>
 		 <present name="change['edit'][$key]['sort']">
@@ -196,6 +203,7 @@
 		 	<input type="text"  class="input-order" name="num[{$key}]" value="{$vo.num}"/>
 		 
 		 </td>  
+		 <td> <input type="text" class="form-control" name="url[{$key}]" value="{$vo.url}"/> </td>
 		 <td>
 		 	<input type="text"  class="input-order" name="sort[{$key}]" value="{$vo.sort}"/>
 		 
@@ -269,6 +277,10 @@
 		 	<input type="text"  class="input-order" name="num[{$key}]" value="{$vo.num}"/>
 		 
 		 </td> 
+		  <td >
+		 	<input type="text" class="form-control" name="url[{$key}]" value="{$vo.url}"/>
+		 
+		 </td>  
 		  <td>
 		 	<input type="text"  class="input-order" name="sort[{$key}]" value="{$vo.sort}"/>
 		 

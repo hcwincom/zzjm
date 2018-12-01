@@ -1,39 +1,17 @@
+ <include file="public@cate" />  
 
-<select class="goods_cate0 "  >
-	<option value='0'>全部</option> 
-	 <foreach name="cates0" item="vo" >
-	<option value="{$key}"  > 
-	 {$vo.name} 
-	</option>
-	</foreach>
-</select> &nbsp;&nbsp; 
-<select class="goods_cate"  >
-	<option class="cate230" value='0'>全部</option> 
-	 <foreach name="cates" item="vo" >
-	<option class="cate20 cate21{$vo.fid} cate23{$key}" value="{$key}"  > 
-	 {$vo.name} 
-	</option>
-	</foreach>
-</select> &nbsp;&nbsp; 
- <select class="goods"  >
-	  
+ <select class=" goods form-control short-auto" >
+	 <option value="0"> 产品编码,名称</option>
 </select> &nbsp;&nbsp; 
 <script>
  
 $(function(){ 
- 	var cid0=0;
- 	var cid=0;
+ 	 
  	var url="{:url('goods/Goodsajax/goods')}";
-	cate(cid0,$('body'),0);
-	$('.goods_cate0').change(function(){
-		cid0=$(this).val(); 
-		cate(cid0,$(this).parent(),0);
-		 $('.goods').html('');
-	});
-	$('.goods_cate').change(function(){
-		cid=parseInt($(this).val()); 
-		 if(cid<=0){
-			 $('.goods').html('');
+	 
+	$('#cate2').change(function(){
+		var cid=parseInt($(this).val()); 
+		 if(cid<=0){ 
 			 return false;
 		 }
 		 $.post(url,{'cid':cid},function(data){
@@ -44,16 +22,11 @@ $(function(){
 			 var list=data.data;
 			 var options='';
 			 for(var i in list){
-				 options+='<option value="'+i+'">'+list[i]+'</option>';
+				 options+='<option value="'+i+'">'+list[i]['code']+','+list[i]['name']+'</option>';
 			 }
 			 $('.goods').html(options);
 		 },'json');
 	});
-	function cate(cid0,$dir,cid){
-		$dir.find('.goods_cate .cate20').hide();
-		$dir.find('.goods_cate .cate21'+cid0).show();
-		$dir.find('.goods_cate .cate23'+cid).prop('selected','selected');
-	}
 	 
 });
 

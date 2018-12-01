@@ -24,6 +24,19 @@
 </body>
 </html>
 <script>
+ 
+$('form').submit(function(){
+	if($('#order_company').val()=='0'){
+		$('#order_company').focus();
+		return false;
+	}
+	if($('#paytype').val()=='0'){
+		$('#paytype').focus();
+		return false;
+	}
+	
+	return true;
+});
 //城市选择js初始化 
 get_citys($('#province'),1,0);
 var company=0;
@@ -36,12 +49,10 @@ var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
 var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
 var arr;
 var store=0; 
-//仓库
-var stores={$stores_json};
-var stores_tr="{$stores_tr}";
+ 
 
 $('#order_pay').show();
-  
+custom_change("{$custom.id|default=0}");
 $('#invoice_type').val(2);
 $('#province').change(function(){
 	province=$('#province').val();
@@ -78,6 +89,9 @@ function custom_get(company,cid,province,city){
 }
 $('#custom').change(function(){
 	 var custom=$(this).val();
+	 custom_change(custom);
+});
+function custom_change(custom){ 
 	 
 	 if(custom==0){ 
 		 $('.accept select').val(0);
@@ -136,10 +150,11 @@ $('#custom').change(function(){
 			 $('#tax_point').val(info.tax_point); 
 			
 			 $('#paytype').val(info.paytype); 
-			 paytype_change();
+			 $('#pay_type').val(info.pay_type); 
+			 
 		},'json'); 
 	 
-});
+}
 
  
 var url_accept_change="{:url('order/Orderajax/accept_change')}";
@@ -178,163 +193,12 @@ function accept_change(){
         }
     });
 }
-$('#account').change(function(){
-	account_change(); 
-});
-function account_change(){
-	 var account=$('#account').val();
-	 if(account==0){
-		 return false;
-	 }
-	 var selected=$('#account option:selected');
-	 $('#account-bank1').val(selected.attr('bank1'));
-	 $('#account-bank2').val(selected.attr('bank2'));
-	 $('#account-num2').val(selected.attr('num2'));
-	 $('#account-name2').val(selected.attr('name2'));
-	 $('#account-location2').val(selected.attr('location2'));
-	 $('#account-num1').val(selected.attr('num1'));
-	 $('#account-name1').val(selected.attr('name1'));
-	 $('#account-location1').val(selected.attr('location1'));
-	 
-	 
-}
-var goods=0;
-var url_goods_add="{:url('order/Orderajax/goods_add')}";
-var href_goods="{:url('goods/AdminGoods/edit','',false,false)}";
-var image_url="{$image_url}";
-$('#goods_add').click(function(){
-	 var custom=$('#custom').val();
-	 if(!(custom>0)){
-		 $('#custom').focus();
-		 return false;
-	 }
-	goods=parseInt($(this).siblings('.goods').val());
-	store=$('#store').val();
-	if(!(goods>0)){
-		return false;
-	}
-	$('#goods-list tr').each(function(){
-		if($(this).attr('id')==('goods'+goods)){
-			goods=0;
-			$(this).find('.num').focus();
-			return false;
-		}
-	});
-	if(goods==0){ 
-		return false;
-	} 	
-	$.ajax({
-        type: 'POST',
-        url: url_goods_add,
-        dataType: 'json', 
-        data:{'id':goods,'uid':custom},
-        success: function (data) {
-     	    if(data.code!=1){
-     	    	msg(data.msg);
-     	    	return false;
-     	    } 
-     	  
-     	    var info=data.data;
-     	    var tr='';
-     	    var div_pic='<div class="listposi">'+
-     	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
-		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
-		    var pics=info.pics;
-		    var nums=info.nums;
-		    for(var i in pics){
-		    	div_pic+='<li style="background-size: contain;background-image:url('+image_url+'/'+pics[i]['file1']+');">'+
-		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file3']+'"></li>'; 
-		    }
-		    div_pic+='</ul><span class="prev"><i class="left"></i></span>'+
-		    '<span class="next"><i class="right"></i></span></div></div>';
-		    var div_num='<td class="clickInfo"><div style="position:relative;" class="goInfo" data-width="0">';
-		    
-		    if(nums.hasOwnProperty(0)){
-		    	div_num+=nums[0]['num']+'('+nums[0]['num1']+')';
-		    }else{
-		    	div_num+='--';
-		    }
-		    div_num+='</div><div class="goodsInfo"><table class="table table-hover table-bordered">'+stores_tr+'<tbody><tr>';
-		    
-		    for(var i in stores){
-		    	if(nums.hasOwnProperty(i)){
-			    	div_num+='<td>'+nums[i]['num']+'('+nums[i]['num1']+')</td>';
-			    }else{
-			    	div_num+='<td>--</td>';
-			    }
-		    }
-		    div_num+='</tr></tbody></table>	</div></td>';	 
-     	    tr+='<tr id="goods'+info['id']+'">'+
-     	    '<td><a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td>'+
-     	    '<td>'+info['code']+'</td>'+  
-     	   '<td class="tableImg"><div class="tdImg" style="background-size: 100% 100%;background-image:url('+image_url+'/'+info['pic']+');"></div>'+div_pic+'</td>'+
-     	    div_num+
-     	   '<td>'+info['goods_uname']+'</td>'+ 
-     	   '<td>'+info['goods_ucate']+'</td>'+ 
-     	   '<td>'+info['price_in']+'</td>'+ 
-     	   '<td>'+info['price_sale']+'</td>'+ 
-     	    '<td><input type="text" name="prices['+info['id']+']" class="form-control price_sale " value="'+info['price_pay']+'"/></td>'+
-     	    '<td><input type="number" name="nums['+info['id']+']" class="form-control input-order num" value="1"/></td>'+
-     	    '<td><input type="text" name="price_counts['+info['id']+']" class="form-control price_count" value="'+info['price_sale']+'" /></td>'+ 
-     	    '<td><input type="text"  name="weights['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
-     	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td>'+
-     	   '<td><input type="text"  name="sizes['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
-    	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td>'+
-    	   '<td><input type="text"  name="dscs['+info['id']+']" class="form-control dsc" value=""/></td>'+ 
-    	   '<td><button type="button" class="goods_del">删除</td></tr>';
-     	    $('#goods-list').append(tr);
-     	   money_change($('#goods'+info['id']),'num');
-        }, 
-        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-            msg(event.responseText,1);
-        }
-    }); 
-});
-$(document).on('click','.goods_del',function(){
-	$(this).parents('tr').remove();
-	order_change();
-	
-}); 
-$(document).on('change','.price_sale',function(){
-	money_change($(this).parents('tr'),'price');
-}); 
-$(document).on('change','.num',function(){ 
-	money_change($(this).parents('tr'),'num'); 
-});
-function order_change(){  
-	var num=0; 
-	var price_count1=0;
-	 
-	var price_count=0;
-	var num_count=0;  
-	$('.price_count').each(function(){
-		$tr=$(this).parents('tr'); 
-		num=parseInt($tr.find('.num').val()); 
-		if(!(num>0)){
-			num=1; 
-			$(this).val($tr.find('.price_sale').val());
-		}
-		$tr.find('.num').val(num);
-		num_count+=num;
-		
-		price_count1=parseFloat($(this).val());
-		if(!(price_count1>=0)){
-			price_count1=0;
-			$(this).val(price_count1);
-		}
-		price_count+=price_count1; 
-	});
-	$('#goods_money').val(price_count.toFixed(2));
-	$('#goods_num').val(num_count);
-	//重量体积改变
-	if(type=='num'){ 
-		weight_change();
-	}  
-	order_account();
-}
-function money_change($tr,type='price'){  
+
+ 
+function money_change1111($tr,type='price'){  
 	var num=parseInt($tr.find('.num').val()); 
 	var price_sale=parseFloat($tr.find('.price_sale').val());
+	var pay_discount=parseFloat($tr.find('.pay_discount').val());
 	if(!(num>0)){
 		msg('产品数量错误');
 		$tr.find('.num').focus();
@@ -346,9 +210,17 @@ function money_change($tr,type='price'){
 		$tr.find('.price_sale').focus();
 		return false;
 	}
+	if(!(pay_discount>=0)){
+	 
+		$tr.find('.pay_discount').val(0);
+		pay_discount=0;
+	}
 	price_sale=price_sale.toFixed(2);
 	$tr.find('.price_sale').val(price_sale);
-	var price_count1=(num*price_sale).toFixed(2);
+	pay_discount=pay_discount.toFixed(2);
+	$tr.find('.pay_discount').val(pay_discount);
+	
+	var price_count1=(num*price_sale-pay_discount).toFixed(2);
 	$tr.find('.price_count').val(price_count1); 
 	//重量体积改变
 	if(type=='num'){
@@ -385,34 +257,7 @@ function money_change($tr,type='price'){
 	}  
 	order_account();
 }
-function weight_change(){
-	var weight_count=0;
-	var size_count=0;
-	var weight1=0;
-	var size1=0;
-	var $tr;
-	 
-	$('#size').val('weight_change');
-	$('.weight1').each(function(){
-		$tr=$(this).parents('tr'); 
-		//重量体积改变
-		weight1=parseFloat($tr.find('.weight1').val());
-		if(!(weight1>0)){
-			weight1=0.01;
-			$tr.find('.weight1').val(weight1); 
-		}
-		weight_count+=weight1;
-		size1=parseFloat($tr.find('.size1').val());
-		if(!(size1>0)){
-			size1=0.01;
-			$tr.find('.size1').val(size1); 
-		}
-		size_count+=size1; 
-		console.log(size_count);
-	}); 
-	$('#size').val(size_count);
-	$('#weight').val(weight_count);
-} 
+ 
 var url_freight_count="{:url('order/Orderajax/freight_count')}";
 $('#freight_count').click(function(){
 	var freight=$('#freight').val();
@@ -450,16 +295,7 @@ $('#freight_count').click(function(){
         }
     }); 
 });
-$('#paytype').change(function(){
-	paytype_change();
-	 
-});
-function paytype_change(){
-	if(($('#paytype').val())==0){  
-		return false;
-	} 
-	$('#pay_type').val($('#paytype option:selected').attr('type0'));
-}
+ 
 
 $('#discount_money,#other_money,#pay_freight,#tax_money').change(function(){
 	order_account();

@@ -1,0 +1,224 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="store@admin_storein:nav" />
+			 
+		 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
+			 
+			<div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">入库类型</label>
+				<div class="col-md-6 col-sm-10">  
+					<select  class="form-control" name="type" id="type">
+					<foreach name="types" item="vo">
+						<option value="{$key}" >{$vo[0]}</option>
+					</foreach> 
+					</select> 
+				</div>
+			</div> 
+			<div class="form-group fleft">
+				<label for=" " class="col-sm-2 control-label">关联id</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" name="about" value=""  /> 
+				</div>
+			</div> 
+			 
+			<div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">料位选择</label>
+				<div class="col-md-6 col-sm-10"> 
+				  	<label class="input-inline"> 
+				  	仓库
+						<select  class="form-control short-auto" name="store" id="store" required>
+						<foreach name="stores" item="vo">
+							<option value="{$key}" >{$vo.name}</option>
+						</foreach> 
+						</select>
+					</label>
+					<label class="input-inline"> 
+				  	货架
+						<select  class="form-control short-auto"  id="shelf" required>
+							<option value="0">请选择</option>
+						<foreach name="shelfs" item="vo">
+							<option class="shelf store{$vo.store}" value="{$key}" >{$vo.name}</option>
+						</foreach> 
+						</select>
+					</label>
+					<label class="input-inline"> 
+				  	货架层
+						<select  class="form-control short-auto" id="floor">
+							<option value="0">请选择</option>
+						<foreach name="floors" item="vo">
+							<option class="floor shelf{$vo.shelf} " value="{$key}" >{$vo.floor}</option>
+						</foreach> 
+						</select>
+					</label>
+					<label class="input-inline"> 
+				  	料位
+						<select  class="form-control short-auto" name="box" id="box" required>
+						 	<option value="0" goods="0">料位号,产品名称,产品编码,数量</option>
+						</select>
+						 
+					</label>
+					<label class="input-inline"> 
+				  	数量<input  class="form-control short" type="number" name="num" id="num" value="0" required/>
+						 
+					</label>
+				</div>
+			</div> 
+			 
+			<div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">库存情况(现有库存-未审核库存-安全库存)</label>
+				<div class="col-md-6 col-sm-10">  
+					 <table class="table table-hover table-bordered table-list">
+					 	<tr> 
+					 	<foreach name="stores" item="vo">
+					 		<td>{$vo.name}</td>
+					 	</foreach>
+					 	<td>总库存</td>
+					 	</tr> 
+					 	<tr class=""> 
+					 	<foreach name="stores" item="vo"> 
+					 		<td id="store{$key}"> 
+					 		  	-- 
+					 		 </td>
+					 	</foreach>
+					 		<td id="store0">--</td>
+					 	</tr> 
+		 			</table>
+				</div>
+			</div> 
+			 
+	 
+		 <div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" name="adsc" value="" />
+				</div>
+			</div> 
+	  
+		 <div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+			 
+					<button type="submit" class="save btn btn-primary js-ajax-submit" >确认保存</button>
+				 
+				</div>
+				
+			</div>
+		</form>
+		
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+ <script>
+ $('.save').click(function(){
+	 var goods=$('#goods').val();
+	 if(goods==0){ 
+		 $('#box').focus();
+		 return false;
+	 } 
+	 var box=$('#box').val();
+	 if(box==0){ 
+		 $('#box').focus();
+		 return false;
+	 } 
+	 var num=parseInt($('#num').val());
+	 if(num==0){ 
+		 $('#num').focus();
+		 return false;
+	 } 
+	 $(this).parents('form').attr('action',"{:url('add_do')}");
+ });
+ $('#type').val(31);
+ store_change($('#store').val());
+ $('#store').change(function(){
+	 store_change(this.value);
+ });
+ function store_change(store){ 
+	 $('.shelf').hide(); 
+	 $('.store'+store).show(); 
+	 $('#shelf').val(0);
+	 shelf_change(0);
+ }
+ function shelf_change(shelf){ 
+	 $('.floor').hide();
+	 $('.shelf'+shelf).show();
+	 $('#floor').val(0);
+	 floor_change(0);
+ }
+ $('#shelf').change(function(){
+	 shelf_change(this.value);
+ });
+ $('#floor').change(function(){
+	 floor_change(this.value);
+ });
+ var url_get_boxes="{:url('store/Storeajax/get_boxes')}";
+ function floor_change(floor){ 
+	 var options='<option value="0" goods="0">料位号,产品名称,产品编码,数量</option>';
+	if(floor==0){ 
+		$('#box').html(options);
+	 
+		return false;
+	}
+	$.ajax({
+        type: 'POST',
+        url: url_get_boxes,
+        dataType: 'json', 
+        data:{'floor':floor},
+        success: function (data) {
+     	    var list=data.data;  
+     	    for(var i in list){
+     	    	options+='<option value="'+i+'" goods="'+list[i]['goods']+'">'+list[i]['code']+','+list[i]['goods_name']+','+list[i]['goods_code']+','+list[i]['num']+'</option>';
+     	    } 
+   			$('#box').html(options); 
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    });
+ } 
+ $('#box').change(function(){
+	 var goods=$(this).find('option:selected').attr('goods'); 
+	 box_change(goods);
+ });
+ var url_get_goods_info="{:url('goods/Goodsajax/get_goods_info')}";
+ function box_change(goods){ 
+	 $('#goods').val(goods);
+	if(goods==0){  
+		return false;
+	}
+	$.ajax({
+        type: 'POST',
+        url: url_get_goods_info,
+        dataType: 'json', 
+        data:{'id':goods},
+        success: function (data) {
+        	
+     	    var nums=data.data.nums; 
+     	   	var i=0;
+	    	if(nums.hasOwnProperty(i)){
+	    		$('#store'+i).html(nums[i]['num']+'-'+nums[i]['num1']+'-'+nums[i]['safe']);
+	    	}else{
+	    		$('#store'+i).html('--');
+	    	}
+	     
+     	    $('#store option').each(function(){
+     	    	i=this.value; 
+     	    	if(nums.hasOwnProperty(i)){
+     	    		$('#store'+i).html(nums[i]['num']+'-'+nums[i]['num1']+'-'+nums[i]['safe']);
+     	    	}else{
+     	    		$('#store'+i).html('--');
+     	    	}
+     	    });
+     	  
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    });
+ }
+ </script>
+ 

@@ -17,15 +17,17 @@
 			<div class="form-group fleft">
 				<label for=" " class="col-sm-2 control-label">入库类型</label>
 				<div class="col-md-6 col-sm-10">  
-					<input type="text" class="form-control"  value="{$about_type[$info['type']]|default='未知'}"  />
+					<input type="text" class="form-control"  value="{$about_type[$info['type']][0]}"  />
 				</div>
 			</div> 
 			<div class="form-group fleft">
 				<label for=" " class="col-sm-2 control-label">关联id</label>
 				<div class="col-md-6 col-sm-10">  
 					<input type="text" class="form-control"  value="{$info.about}"  />
+					<a href="{$about_type[$info['type']][1]}/id/{$info.about}" target="{$zztarget.other}">{$info.about_name}</a>
 				</div>
 			</div> 
+			 
 			<div class="form-group fleft">
 				<label for=" " class="col-sm-2 control-label">仓库</label>
 				<div class="col-md-6 col-sm-10">  
@@ -33,12 +35,11 @@
 				</div>
 			</div> 
 			<div class="form-group fleft-all">
-				<label for=" " class="col-sm-2 control-label">入库货架</label>
+				<label for=" " class="col-sm-2 control-label">入库料位</label>
 				<div class="col-md-6 col-sm-10">  
-					<select name="box" class="form-control">
-					<option value="0">未选择</option>
+					<select name="box" class="form-control"> 
 					<foreach name="boxes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.box">selected</if>>{$vo.name}--{$vo.code}</option>
+						<option value="{$key}" <if condition="$key eq $info.box">selected</if>>{$vo.code},{$vo.name},{$vo.num}</option>
 					</foreach>
 					</select>
 				</div>
@@ -73,8 +74,16 @@
 		 			</table>
 				</div>
 			</div> 
-		 <div style="clear:both;"></div>
-		 <div class="form-group fleft-all">
+		 	<div style="clear:both;"></div>
+		 <eq name="info.sn_type" value="3">
+		 	<div class="form-group fleft-all">
+				<label for=" " class="col-sm-2 control-label">一货一码，用,分隔录入</label>
+				<div class="col-md-6 col-sm-10">  
+					<input type="text" class="form-control" name="sns" value="{$info.sns}" />
+				</div>
+			</div> 
+		 </eq>
+		 	<div class="form-group fleft-all">
 				<label for=" " class="col-sm-2 control-label">备注</label>
 				<div class="col-md-6 col-sm-10">  
 					<input type="text" class="form-control" value="{$info.adsc}" />
@@ -124,9 +133,14 @@
 			</div> 
 		 <div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10"> 
-				 <eq name="info.rstatus" value="1">
+				<eq name="info.rstatus" value="1">
 					<button type="submit" class="review btn btn-primary js-ajax-submit" >确认保存</button>
+				<else/>
+					<lt name="info.rstatus" value="4">
+					<button type="submit" class="review_back btn btn-primary js-ajax-submit" >还原已审核数据</button>
+					</lt>
 				</eq> 
+				<p class="notice">一货一码的产品可以输入条码，多个条码用,分隔。修改后即时生效，新数据会覆盖旧数据</p>
 				</div>
 				
 			</div>
@@ -140,9 +154,14 @@
  $('.review').click(function(){
 	 var status=$('.rstatus input:checked').val();
 	 if(status=='1'){ 
+		 $('.rstatus input').eq(0).focus();
 		 return false;
 	 } 
 	 $(this).parents('form').attr('action',"{:url('review')}");
+ });
+ $('.review_back').click(function(){
+	 
+	 $(this).parents('form').attr('action',"{:url('review_back')}");
  });
  </script>
  

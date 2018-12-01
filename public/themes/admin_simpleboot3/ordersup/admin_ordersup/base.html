@@ -1,0 +1,1163 @@
+ 		<notempty name="info1.id">
+ 			 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">编辑id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info1.id}" readonly/> 
+					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a> 
+				</div>
+			</div>
+ 		</notempty>
+ 		
+ 		<notempty name="info.id">
+			  <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">采购单id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info.id}" readonly/>
+				 
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">编辑记录</a>
+			 
+				<neq name="info.fid" value="0">
+					&nbsp;&nbsp;<a href="{:url('edit',['id'=>$info.fid])}" target="{$zztarget['edit']}">主采购单</a>
+				</neq>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">采购单编号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info.name}" readonly/> 
+				</div>
+			</div>
+			 
+		</notempty>
+		    
+	   		 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">采购公司</label>
+				<div class="col-md-6 col-sm-10">
+					<select  class="form-control"  name="company" id="order_company" required >
+						<option value="0">采购公司</option>
+					<foreach name="companys" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.company" >selected</if>>{$vo}</option>
+					</foreach>
+					</select>  
+				</div>
+			</div>
+	 	<empty name="info.id">
+			 <div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">供货商筛选</label>
+				<div class="col-md-6 col-sm-10">
+			 		<select  class="form-control  short-auto" id="company"   >
+						<option value="0">供货商来源</option>
+					<foreach name="companys" item="vo">
+						<option value="{$key}" <if condition="$key eq $supplier.company" >selected</if>>{$vo}</option>
+					</foreach>
+					</select>  
+					 
+					<select  class="form-control short-auto" id="supplier_cate"  > 
+						<option value="0">供货商分类</option>
+					<foreach name="supplier_cates" item="vo">
+						<option value="{$key}" <if condition="$key eq $supplier.cid"></if>>{$vo}</option>
+					</foreach>
+					</select>
+					<select  class="form-control short-auto" id="province"  > 
+						<option value="0">供货商所在省</option> 
+					</select>
+					<select  class="form-control short-auto" id="city"  > 
+						<option value="0">供货商所在市</option> 
+					</select> 
+					<p class="notice">供货商所在省为必选项</p>
+				</div>
+			</div>
+			 <div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">供货商</label>
+				<div class="col-md-6 col-sm-10"> 
+					 
+					<select  class="form-control " name="uid" id="supplier"   >
+						<option value="{$supplier.id}" >{$supplier.name|default="请选择供货商"}</option>
+					</select>
+					<a href="{:url('custom/AdminSupplier/edit',['id'=>$supplier.id])}" target="{$zztarget['other']}" id="supplier_link">供货商详情</a>
+				</div>
+			</div>
+		<else/>
+		 	<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">供货商</label>
+				<div class="col-md-6 col-sm-10"> 
+					 <select  class="form-control  short-auto" id="company"   >
+						<option value="0">供货商来源</option>
+					<foreach name="companys" item="vo">
+						<option value="{$key}" <if condition="$key eq $supplier.company" >selected</if>>{$vo}</option>
+					</foreach>
+					</select>  
+					 
+					<select  class="form-control short-auto" id="supplier_cate"  > 
+						<option value="0">供货商分类</option>
+					<foreach name="supplier_cates" item="vo">
+						<option value="{$key}" <if condition="$key eq $supplier.cid"></if>>{$vo}</option>
+					</foreach>
+					</select>
+					<select  class="form-control " id="supplier"   >
+						<option value="{$supplier.id}" >{$supplier.name}</option>
+					</select>
+					<a href="{:url('custom/AdminSupplier/edit',['id'=>$supplier.id])}" target="{$zztarget['other']}" id="supplier_link">供货商详情</a>
+				</div>
+			</div>
+		
+		</empty>
+			 
+			 <div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">收货人</label>
+				<div class="col-md-6 col-sm-10">
+				  	<input type="hidden" c name="accept" value="1"/>
+					 <label class="input-inline"> 
+					 	收货人：
+					 	<input type="text" class="form-control short2" name="accept_name" value="{$info.accept_name}"/>
+				 	<present name="change.accept_name">
+				 		<input type="text" class="form-control short2 red"  value="{$change.accept_name}"/>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	收货手机：
+					 	<input type="text" class="form-control short2" name="mobile" value="{$info.mobile}"/>
+					<present name="change.mobile">
+				 		<input type="text" class="form-control short2 red"  value="{$change.mobile}"/>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	收货电话：
+					 	<input type="text" class="form-control short2" name="phone" value="{$info.phone}"/>
+					<present name="change.phone">
+				 		<input type="text" class="form-control short2 red"  value="{$change.phone}"/>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	省：
+					 	<select  class="form-control short2" name="province" id="province"  > 
+							<option value="0">所在省</option> 
+						</select>
+					<present name="change.province">
+				 		<select  class="form-control short2 red"  id="province1"  > 
+							<option value="0">所在省</option> 
+						</select>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	市：
+					 	<select  class="form-control short2" id="city" name="city" > 
+							<option value="0">所在市</option> 
+						</select>
+					<present name="change.city">
+				 		<select  class="form-control short2 red"  id="city1"  > 
+							<option value="0">所在市</option> 
+						</select>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	县：
+					 	<select  class="form-control short2" id="area" name="area" > 
+							<option value="0">所在县</option> 
+						</select>
+					<present name="change.area">
+				 		<select  class="form-control short2 red"  id="area1"  > 
+							<option value="0">所在县</option> 
+						</select>
+				 	</present>
+					</label> 
+					<label class="input-inline"> 
+					 	邮编：
+					 	<input type="text" class="form-control short" name="postcode" value="{$info.postcode}"/>
+					<present name="change.postcode">
+				 		<input type="text" class="form-control short2 red"  value="{$change.postcode}"/>
+				 	</present>
+					</label>
+					 
+				 	详细地址：
+				 	<input type="text" class="form-control " name="address" value="{$info.address}"/>
+					 <present name="change.address">
+				 		<input type="text" class="form-control short2 red"  value="{$change.address}"/>
+				 	</present>
+				 
+				<p class="notice">收货人信息添加后可以再次修改，主采购单修改会同步到子采购单，子采购单可以能单独修改。
+				在主采购单页面拆分采购单和计算运费以主采购单收货地址为准，子采购单若有收货地址改变请在子采购单页面计算运费。</p> 
+				</div> 
+			</div>
+		 
+			<div class="form-group fleft-all"  >
+				<label  class="col-sm-2 control-label">供货商留言</label>
+				<div class="col-md-6 col-sm-10" > 
+				  <input type="text" class="form-control" name="udsc" value="{$info.udsc}" />
+				<present name="change.udsc">
+					<input type="text" class="form-control red"  value="{$change.udsc}" />
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">采购单备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control " name="dsc" value="{$info.dsc}" id="dsc"/> 
+				<present name="change.dsc">
+					<input type="text" class="form-control red"  value="{$change.dsc}" />
+				</present>
+				</div>
+			</div>
+	  		 
+			<div style="clear:both"></div>
+			 
+	  		
+		<empty name="info.id">
+			<div class="form-group fleft-all order0"  >
+				<label class="col-sm-2 control-label">物流发货</label>
+				<div class="col-md-6 col-sm-10">
+			 
+				 	<label class="input-inline"> 
+						收货仓库： 
+					 	<select  class="form-control short-auto" name="store" id="store" required > 
+					    	<option value="0">选择仓库</option>
+						<foreach name="stores" item="vo">
+							<option value="{$key}"  >{$vo}</option>
+						</foreach>
+						</select> 
+					 </label>
+					 
+					 <label class="input-inline"> 
+						 物流：
+						 <select  class="form-control freight short-auto" name="freight" id="freight" required > 
+					    	<option value="0">选择物流</option>
+						<foreach name="freights" item="vo">
+							<option value="{$key}" class="freight{$vo.store}"  >{$vo.name}</option>
+						</foreach>
+						</select> 
+					 </label> 
+				</div>
+			</div>
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">添加产品</label>
+				<div class="col-md-6 col-sm-10">
+				   <select id="goods">
+				   
+				   </select>
+					 <button type="button" id="goods_add">确定</button>
+				 
+				</div>
+			</div>
+			<div class="order_add" > 
+			  <table class="table table-hover table-bordered table-list" id="goods-list"> 
+			 	<tr id="goods0">
+				 	 <td>产品名称</td>
+				 	 <td >产品编码</td> 
+				 	 <td  >产品图片</td>
+				 	 <td  >总库存</td> 
+				 	  <td >供货商用名</td>
+					 <td >供货商型号</td> 
+				 	 <td  >成本价</td>
+					 <td >零售价</td> 
+					 <td >供应价</td>
+					 <td >数量</td>
+					 <td >优惠金额</td>
+					 <td >应付金额</td>
+					 <td >毛重</td> 
+					 <td >体积</td> 
+					 <td >包装说明/备注</td> 
+					 <td width="100">操作</td> 
+			 	</tr> 
+			 
+	 		</table>
+	 		</div>
+	 		<div class="form-group fleft-all"></div>
+	 	<else/>
+		<div class="orders">
+		<foreach name="orders" item="vv" key="kk"> 
+			<div class="order order{$kk}" > 
+			<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
+			  <table class="table table-hover table-bordered table-list goods-list"  > 
+			 	<tr >
+				 	 <td class="order_name"><a href="{:url('edit',['id'=>$kk])}" target="{$zztarget.other}">采购单{$vv.name}</a></td>
+				 	 <td >产品编码</td> 
+				 	 <td  >产品图片</td> 
+				 	 <td  >总库存</td> 
+				 	 <td >供货商用名</td>
+					 <td >供货商型号</td> 
+				 	 <td  >成本价</td>
+					 <td >零售价</td> 
+					 <td >供应价</td>
+					 <td >数量</td>
+					 <td >优惠金额</td>
+					 <td >应付金额</td>
+					 <td >毛重</td> 
+					 <td >体积</td> 
+					 <td >包装说明/备注</td> 
+					 <td width="100">操作</td> 
+			 	</tr> 
+			 
+			  <foreach name="infos[$kk]" item="vo" key="key">
+			   
+     	     	<tr class="goods{$key}"> 
+     	     		<td>
+     	     			<a href="{$goods_url}/id/{$key}" target="{$zztarget.other}">{$vo.goods_name}</a> 
+     	     		</td> 
+     	    		<td>{$vo.goods_code}</td> 
+    	    		 
+     	   			<td class="tableImg">
+     	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vo.goods_pic});"></div>
+     	   				 <notempty name="goods[$key]['pics']">
+     	   				<div class="listposi"> 
+     	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+		    				<div class="imgGroup">
+		    				<ul class="imgList" class="imgList">
+		    				<foreach name="goods[$key]['pics']" item="pic" key="kpic">
+								<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
+		    					<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+		    				</foreach>
+		    				</ul>
+		    				<span class="prev"><i class="left"></i></span>
+		    				<span class="next"><i class="right"></i></span>
+		    				</div>
+		    			</div>
+		    			</notempty>
+					</td> 
+					 
+     	   			<td class="clickInfo">
+     	   				<div style="position:relative;" class="goInfo" data-width="0"> 
+     	   				<present name="goods[$key]['nums'][0]">
+     	   				{$goods[$key]['nums'][0]['num']}({$goods[$key]['nums'][0]['num1']})
+     	   				<else/>
+     	   				--
+     	   				</present> 
+     	   		 		</div>
+     	   		 		<div class="goodsInfo">
+	     	   		 		<table class="table table-hover table-bordered">
+		     	   		 		{$stores_tr}
+		     	   		 		<tbody>
+			     	   		 		<tr>
+			     	   		 		<foreach name="stores" item="svv" key="skk">
+			     	   		 			<td> 
+			     	   		 			<present name="goods[$key]['nums'][$skk]">
+			     	   		 			{$goods[$key]['nums'][$skk]['num']}({$goods[$key]['nums'][$skk]['num1']})
+			     	   		 			<else/>
+			     	   		 			--
+			     	   		 			</present>
+			     	   		 			
+			     	   		 			</td>
+			     	   		 		</foreach>
+			     	   		 		</tr>
+		     	   		 		</tbody>
+	     	   		 		 
+						   </table>
+					   </div>
+					</td>
+					<td class="">{$vo.goods_uname}</td> 
+     	   			<td class="">{$vo.goods_ucate}</td>
+     	   			<td class="price_in">{$vo.price_in}</td> 
+     	   			<td class="price_sale">{$vo.price_sale}</td>
+     	    		<td class="price_real">
+     	    			<input type="text" name="price_reals-{$kk}[{$key}]" class="form-control  " value="{$vo.price_real}"/>
+     	    		<present name="change['edit'][$kk]['goods'][$key]['price_real']">
+     	    			<input type="text"  class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['price_real']}"/>
+     	    		</present> 
+     	    		</td>
+     	    			
+     	    		<td class="num">
+     	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" readonly/>
+     	    		<present name="change['edit'][$kk]['goods'][$key]['num']">
+     	    		 	<input type="number" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['num']}" readonly/> 
+     	    		</present> 
+     	    		</td>
+     	    		<td class="pay_discount">
+     	    			<input type="text" name="pay_discounts-{$kk}[{$key}]" class="form-control " value="{$vo.pay_discount}" />
+     	    		<present name="change['edit'][$kk]['goods'][$key]['pay_discount']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['pay_discount']}" readonly/> 
+     	    		</present> 
+     	    		</td>
+     	    		<td class="pay">
+     	    			<input type="text" name="pays-{$kk}[{$key}]" class="form-control " value="{$vo.pay}" readonly/>
+     	    		<present name="change['edit'][$kk]['goods'][$key]['pay']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['pay']}" readonly/> 
+     	    		</present> 
+     	    		</td>
+     	    		<td class="">
+     	    			<input type="text"  name="weights-{$kk}[{$key}]" class="form-control weight1" value="{$vo.weight}"/>
+     	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/>
+     	   			<present name="change['edit'][$kk]['goods'][$key]['weight']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['weight']}" readonly/> 
+     	    		</present> 	
+     	   			</td>
+     	   			<td class="">
+     	   				<input type="text"  name="sizes-{$kk}[{$key}]" class="form-control size1" value="{$vo.size}"/>
+    	   				<input type="hidden" class="size0" value="{$vo.size1}"/>
+    	   			<present name="change['edit'][$kk]['goods'][$key]['size']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['size']}" readonly/> 
+     	    		</present> 
+    	   			</td>
+    	   			<td class="dsc">
+    	   				<input type="text"  name="dscs-{$kk}[{$key}]" class="form-control dsc" value="{$vo.dsc}"/>
+    	   			<present name="change['edit'][$kk]['goods'][$key]['dsc']">
+     	    		 	<input type="text" class="form-control  red" value="{$change['edit'][$kk]['goods'][$key]['dsc']}" readonly/> 
+     	    		</present> 	
+    	   			</td>
+    	   			<td class="">
+    	   			<present name="change['edit'][$kk][$key]['del']">
+    	   				<span class="red">删除</span>
+    	   			<else/> 
+    	   			<if condition="empty($info1) && $info.fid eq 0 && $info.status lt 26">
+    	   				<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
+    	   			 	<input type="number" class="form-control break" value="0"/>
+    	   				<button class="order_break" type="button">拆分</button> 
+    	   			 
+    	   			</if>
+    	   			</present> 
+    	   			</td>
+    	   		</tr>
+			  
+			  </foreach> 
+	 		</table> 
+		 
+			 <div class="form-group fleft-all order_pay"  >  
+				<label class="col-sm-2 control-label">采购单小计</label>
+				<div class="col-md-6 col-sm-10">
+					 <label class="input-inline"> 
+						 收货仓库：
+						 <select  class="form-control store short-auto" name="store0[{$kk}]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="stores" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.store">selected</if>>{$vo}</option>
+						</foreach>
+						</select>
+						 
+						<present name="change['edit'][$kk]['store']">
+						 <select  class="form-control short-auto red"  >
+					    	<option value="0">请选择</option>
+						<foreach name="stores" item="vo">
+							<option value="{$key}" <if condition="$key eq $change['edit'][$kk]['store']">selected</if>>{$vo}</option>
+						</foreach>
+						</select>
+						</present>
+					 </label>
+					 
+					 <label class="input-inline"> 
+						 发货物流：
+						 <select  class="form-control freight short-auto" name="freight0[{$kk}]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="freights" item="vo">
+							<option value="{$key}" class="store{$vo.store}" <if condition="$key eq $vv.freight">selected</if>>{$vo.name}</option>
+						</foreach>
+						</select>
+						 
+						 <present name="change['edit'][$kk]['freight']">
+						 <select  class="form-control short-auto red"  >
+					    	<option value="0">请选择</option>
+						<foreach name="freights" item="vo">
+							<option value="{$key}" <if condition="$key eq $change['edit'][$kk]['freight']">selected</if>>{$vo.name}</option>
+						</foreach>
+						</select>
+						</present>
+					 </label>
+					   <label class="input-inline"> 
+						 采购单类型：
+						 <select  class="form-control order_type short-auto" name="order_type0[{$kk}]"  >
+					    	 
+						<foreach name="order_types" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.order_type">selected</if>>{$vo}</option>
+						</foreach>
+						</select> 
+						
+						 <present name="change['edit'][$kk]['order_type']">
+						 <select  class="form-control short-auto red"  > 
+						<foreach name="order_types" item="vo">
+							<option value="{$key}" <if condition="$key eq $change['edit'][$kk]['order_type']">selected</if>>{$vo}</option>
+						</foreach>
+						</select>
+						</present>
+						
+					 </label>
+				    <label class="input-inline"> 
+					 包装总重：<input type="text" class="form-control short order_weight" name="weight0[{$kk}]" value="{$vv.weight}" required/> 
+					 <present name="change['edit'][$kk]['weight']" >
+					 	<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['weight']}"  />  
+					 </present>
+					 </label>
+				 	 <label class="input-inline"> 
+					 包装总体积：<input type="text" class="form-control short order_size" name="size0[{$kk}]" value="{$vv.size}" required/> 
+					 <present name="change['edit'][$kk]['size']">
+					 	<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['size']}"  />  
+					 </present>
+					</label>
+				 	 <label class="input-inline"> 
+					 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" /> 
+					 <present name="change['edit'][$kk]['pay_freight']">
+					 	<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['pay_freight']}"  />  
+					 </present>
+					</label>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight0[{$kk}]" value="{$vv.real_freight}" /> 
+					 <present name="change['edit'][$kk]['real_freight']">
+					 	<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['real_freight']}"  />  
+					 </present>
+					 
+					 </label>
+					 <label class="input-inline">
+					 产品总数量：<input type="text" class="form-control short goods_num"  name="goods_num0[{$kk}]" value="{$vv.goods_num}" readonly/> 
+					<present name="change['edit'][$kk]['goods_num']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['goods_num']}" />
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 产品总金额：<input type="text" class="form-control short goods_money"  name="goods_money0[{$kk}]" value="{$vv.goods_money}" readonly/> 
+					<present name="change['edit'][$kk]['goods_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['goods_money']}" />
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 优惠金额：<input type="text" class="form-control short discount_money"  name="discount_money0[{$kk}]" value="{$vv.discount_money}" /> 
+					<present name="change['edit'][$kk]['discount_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['discount_money']}" />
+					</present>
+					</label>
+					 <label class="input-inline">
+					 税费：<input type="text" class="form-control short tax_money"  name="tax_money0[{$kk}]" value="{$vv.tax_money}" /> 
+					<present name="change['edit'][$kk]['tax_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['tax_money']}" />
+					</present>
+					</label>
+					 <label class="input-inline">
+					 其它费用：<input type="text" class="form-control short other_money"  name="other_money0[{$kk}]" value="{$vv.other_money}" /> 
+					<present name="change['edit'][$kk]['other_money']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['other_money']}" />
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
+					 <present name="change['edit'][$kk]['order_amount']">
+						<input type="text" class="form-control short red"  value="{$change['edit'][$kk]['order_amount']}" />
+					</present> 
+				 	</label>
+				 	 <label class="input-inline">
+					 付款状态：
+					 <input type="text" class="form-control short" value=" {$pay_status[$vv.pay_status]|default='未知'}" readonly/> 
+					 
+				 	</label>
+				 	 <label class="input-inline">
+				 	   采购单状态：<input type="text" class="form-control short" value="{$statuss[$vv.status]|default='未知'}" readonly/> 
+					  
+				 	</label>
+				 	<label class="input-inline">
+						   快递单号： 
+						<input type="text" class="form-control short2 express_no" name="express_no0[{$kk}]" value="{$vv.express_no}" /> 
+					<present name="change['edit'][$kk]['express_no']">
+						<input type="text" class="form-control short2 red"  value="{$change['edit'][$kk]['express_no']}" />
+					</present> 
+					</label>
+					<a href="{:url('express/AdminFreight/express_query',['freight'=>$vv.freight,'no'=>$vv.express_no])}" target="{$zztarget.other}">查快递</a> 
+				 	&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="{:url('store/AdminStorein/index',['type'=>1,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
+				   	采购单备注： 
+					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
+				<present name="change['edit'][$kk]['dsc']">
+					<input type="text" class="form-control fleft-all red"  value="{$change['edit'][$kk]['dsc']}" />
+				</present> 
+				 
+				</div>
+			</div>  
+			<div style="clear:both"></div>
+			</div>
+			
+		</foreach>
+		<present name="change.add">
+		<foreach name="change.add" item="vv" key="kk"> 
+			<div class="order order{$kk} red" > 
+			<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
+			  <table class="table table-hover table-bordered table-list goods-list"  > 
+			 	<tr >
+				 	 <td>新拆分采购单</td>
+				 	 <td >产品编码</td> 
+				 	 <td  >产品图片</td> 
+				 	 <td  >总库存</td> 
+				 	 <td  >成本价</td>
+				 	 <td >供货商用名</td>
+					 <td >供货商型号</td> 
+					 <td >零售价</td> 
+					 <td >供应价</td>
+					 <td >数量</td>
+					 <td >优惠金额</td>
+					 <td >应付金额</td>
+					 <td >毛重</td> 
+					 <td >体积</td> 
+					 <td >包装说明/备注</td> 
+					 <td width="100">操作</td> 
+			 	</tr> 
+			 
+			  <foreach name="vv['goods']" item="vo" key="key">
+			   
+     	     	<tr class="goods{$key}"> 
+     	     		<td>
+     	     			<a href="{$goods_url}/id/{$key}" target="{$zztarget.other}">{$vo.goods_name}</a> 
+     	     		</td> 
+     	    		<td>{$vo.goods_code}</td> 
+    	    		 
+     	   			<td class="tableImg">
+     	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({$image_url}/{$vo.goods_pic});"></div>
+     	   				 <notempty name="goods[$key]['pics']">
+     	   				<div class="listposi"> 
+     	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+		    				<div class="imgGroup">
+		    				<ul class="imgList" class="imgList">
+		    				<foreach name="goods[$key]['pics']" item="pic" key="kpic">
+								<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
+		    					<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+		    				</foreach>
+		    				</ul>
+		    				<span class="prev"><i class="left"></i></span>
+		    				<span class="next"><i class="right"></i></span>
+		    				</div>
+		    			</div>
+		    			</notempty>
+					</td> 
+					 
+     	   			<td class="clickInfo">
+     	   				<div style="position:relative;" class="goInfo" data-width="0"> 
+     	   				<present name="goods[$key]['nums'][0]">
+     	   				{$goods[$key]['nums'][0]['num']}({$goods[$key]['nums'][0]['num1']})
+     	   				<else/>
+     	   				--
+     	   				</present> 
+     	   		 		</div>
+     	   		 		<div class="goodsInfo">
+	     	   		 		<table class="table table-hover table-bordered">
+		     	   		 		{$stores_tr}
+		     	   		 		<tbody>
+			     	   		 		<tr>
+			     	   		 		<foreach name="stores" item="svv" key="skk">
+			     	   		 			<td> 
+			     	   		 			<present name="goods[$key]['nums'][$skk]">
+			     	   		 			{$goods[$key]['nums'][$skk]['num']}({$goods[$key]['nums'][$skk]['num1']})
+			     	   		 			<else/>
+			     	   		 			--
+			     	   		 			</present>
+			     	   		 			
+			     	   		 			</td>
+			     	   		 		</foreach>
+			     	   		 		</tr>
+		     	   		 		</tbody>
+	     	   		 		 
+						   </table>
+					   </div>
+					</td>
+					<td class="">{$vo.goods_uname}</td> 
+     	   			<td class="">{$vo.goods_ucate}</td>
+     	   			<td class="price_in">{$vo.price_in}</td> 
+     	   			<td class="price_sale">{$vo.price_sale}</td>
+     	    		<td class="price_real">
+     	    			<input type="text" name="price_reals-{$kk}[{$key}]" class="form-control  " value="{$vo.price_real}"/>
+     	    		 
+     	    		</td>
+     	    			<input type="hidden" class="goods_id" value="{$key}" name="goods_ids-{$kk}[{$key}]"/>
+     	    		<td class="num">
+     	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" readonly/>
+     	    		 
+     	    		</td>
+     	    		<td class="pay_discount">
+     	    			<input type="text" name="pay_discounts-{$kk}[{$key}]" class="form-control " value="{$vo.pay_discount}" />
+     	    	 
+     	    		</td>
+     	    		<td class="pay">
+     	    			<input type="text" name="pays-{$kk}[{$key}]" class="form-control " value="{$vo.pay}" readonly/>
+     	    	 
+     	    		</td>
+     	    		<td class="">
+     	    			<input type="text"  name="weights-{$kk}[{$key}]" class="form-control weight1" value="{$vo.weight}"/>
+     	   				<input type="hidden" class="weight0" value="{$vo.weight1}"/>
+     	   		 
+     	   			</td>
+     	   			<td class="">
+     	   				<input type="text"  name="sizes-{$kk}[{$key}]" class="form-control size1" value="{$vo.size}"/>
+    	   				<input type="hidden" class="size0" value="{$vo.size1}"/>
+    	   			 
+    	   			</td>
+    	   			<td class="dsc">
+    	   				<input type="text"  name="dscs-{$kk}[{$key}]" class="form-control dsc" value="{$vo.dsc}"/>
+    	   		 
+    	   			</td>
+    	   			<td class="break">
+    	   		 
+    	   				<span class="red">新增</span>
+    	   			 
+    	   			</td>
+    	   		</tr>
+			  
+			  </foreach> 
+	 		</table> 
+		 
+			 <div class="form-group fleft-all order_pay"  >  
+				<label class="col-sm-2 control-label">采购单小计</label>
+				<div class="col-md-6 col-sm-10">
+					 <label class="input-inline"> 
+						 发货仓库：
+						 <select  class="form-control store short-auto" name="store0[{$kk}]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="stores" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.store">selected</if>>{$vo}</option>
+						</foreach>
+						</select>
+						 
+					 
+					 </label>
+					 
+					 <label class="input-inline"> 
+						 发货物流：
+						 <select  class="form-control freight short-auto" name="freight0[{$kk}]"  >
+					    	<option value="0">请选择</option>
+						<foreach name="freights" item="vo">
+							<option value="{$key}" class="freight{$vo.store}" <if condition="$key eq $vv.store">selected</if>>{$vo.name}</option>
+						</foreach>
+						</select> 
+					 </label>
+					  <label class="input-inline"> 
+						 采购单类型：
+						 <select  class="form-control freight short-auto" name="order_type0[{$kk}]"  >
+					    	 
+						<foreach name="order_types" item="vo">
+							<option value="{$key}" <if condition="$key eq $vv.order_type">selected</if>>{$vo}</option>
+						</foreach>
+						</select> 
+					 </label>
+					 
+				    <label class="input-inline"> 
+					 包装总重：<input type="text" class="form-control short order_weight" name="weight0[{$kk}]" value="{$vv.weight}" required/> 
+					 
+					 </label>
+				 	 <label class="input-inline"> 
+					 包装总体积：<input type="text" class="form-control short order_size" name="size0[{$kk}]" value="{$vv.size}" required/> 
+					 
+					</label>
+				 	 <label class="input-inline"> 
+					 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight0[{$kk}]" value="{$vv.pay_freight}" /> 
+					 
+					</label>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight0[{$kk}]" value="{$vv.real_freight}" /> 
+					 
+					 
+					 </label>
+					 <label class="input-inline">
+					 产品总数量：<input type="text" class="form-control short goods_num"  name="goods_num0[{$kk}]" value="{$vv.goods_num}" readonly/> 
+					</label>
+				 	 <label class="input-inline">
+					 产品总金额：<input type="text" class="form-control short goods_money"  name="goods_money0[{$kk}]" value="{$vv.goods_money}" readonly/> 
+					</label>
+				 	 <label class="input-inline">
+					 优惠金额：<input type="text" class="form-control short discount_money"  name="discount_money0[{$kk}]" value="{$vv.discount_money}" /> 
+					</label>
+					 <label class="input-inline">
+					 税费：<input type="text" class="form-control short tax_money"  name="tax_money0[{$kk}]" value="{$vv.tax_money}" /> 
+					</label>
+					 <label class="input-inline">
+					 其它费用：<input type="text" class="form-control short other_money"  name="other_money0[{$kk}]" value="{$vv.other_money}" /> 
+					</label>
+				 	 <label class="input-inline">
+					 付款：<input type="text" class="form-control short order_amount"  name="order_amount0[{$kk}]" value="{$vv.order_amount}" readonly/> 
+					  
+				 	</label>
+					 
+					   采购单备注： 
+					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
+				 
+				</div>
+			</div>  
+			<div style="clear:both"></div>
+			</div>
+			 
+		</foreach>
+		</present>
+		
+		</div>	 
+	 </empty>
+	 	<div class="form-group fleft-all "  >
+			<label class="col-sm-2 control-label">费用计算说明</label>
+			<div class="col-md-6 col-sm-10">
+			    
+			   <p class="notice">付款=产品总金额+支付运费-优惠金额+税费+其它费用。
+			   	计算税费后付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后付款金额也会改变
+				  采购单付款或发货后则不能修改付款</p> 
+			</div>
+		</div>
+ 
+    <if condition="empty($info1) && !empty($info) && ($info.fid eq 0)">  
+	  <div class="form-group fleft-all "  >
+			<label class="col-sm-2 control-label">采购单拆分确认</label>
+			<div class="col-md-6 col-sm-10">
+				<button id="break_ok" type="button">采购单确认</button>
+			    <p class="notice">采购单拆分后点击确认，继续拆分则会产生新采购单 </p> 
+			   <p class="notice">采购单生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
+			</div>
+		</div>
+	</if>	 
+	  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">供货商付款和发票</label>
+				<div class="col-md-6 col-sm-10">
+				        付款方式：
+				   <select  class="form-control short-auto" name="paytype" id="paytype"  required >
+				   		<option value="0">请选择</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
+					</foreach>
+					</select> 
+					  
+				 <present name="change.paytype">
+				 	 <select  class="form-control short-auto red" >
+				   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option> 
+					</select>   
+				 </present>
+				   货款结算方式：
+				   <select  class="form-control short-auto" name="pay_type" id="pay_type"   > 
+					<foreach name="pay_types" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.pay_type">selected</if>>{$vo}</option>
+					</foreach>
+					</select>  
+				  
+				 <present name="change.pay_type">
+				 	 <select  class="form-control short-auto red" >
+				   		<option value="{$change.pay_type}">{$pay_types[$change.pay_type]|default='未知'}</option>
+					 
+					</select>   
+				 </present>
+					开票类型：
+					 <select  class="form-control short-auto" name="invoice_type" id="invoice_type">
+					<foreach name="invoice_types" item="vo">
+					<option value="{$key}" point="{$vo[1]}" >{$vo[0]}</option>
+					</foreach>
+					</select>
+				 <present name="change.invoice_type">
+				 	 <select  class="form-control short-auto red" >
+				   		<option value="{$change.invoice_type}">{$invoice_types[$change.invoice_type][0]|default='未知'}</option> 
+					</select>   
+				 </present>	 
+				</div>
+			</div>
+			
+			 <div class="form-group fleft-all" id="invoice_info">
+				<label class="col-sm-2 control-label">发票信息</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="hidden"  name="invoice_id" value="{$invoice.id}"/>
+					 <label class="input-inline"> 
+					发票抬头：<input type="text" class="form-control short-auto" name="invoice_title" value="{$invoice.title}"/>
+					<present name="change.invoice.title">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.title}"/> 
+					</present> 
+					</label>
+				 	 <label class="input-inline"> 
+					税号：<input type="text" class="form-control short-auto" name="invoice_ucode" value="{$invoice.ucode}"/>
+					<present name="change.invoice.ucode">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.ucode}"/> 
+					</present>
+					</label>
+				 	 <label class="input-inline"> 
+					税点%：<input type="text" class="form-control short" id="invoice_point" name="invoice_point" value="{$invoice.point}"/>
+					<present name="change.invoice.point">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.point}"/> 
+					</present>
+					</label>
+				 	 <label class="input-inline"> 
+					开票金额：<input type="text" class="form-control short" id="invoice_invoice_money" name="invoice_invoice_money" value="{$invoice.invoice_money}"/>
+					<present name="change.invoice.invoice_money">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.invoice_money}"/> 
+					</present>
+					 </label>
+					  <label class="input-inline"> 
+					税费：<input type="text" class="form-control short" id="invoice_tax_money" name="invoice_tax_money" value="{$invoice.invoice_money}"/>
+					<present name="change.invoice.tax_money">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.tax_money}"/> 
+					</present>
+					<empty name="info1">
+					 	<button id="invoice_count" type="button">税费计算</button>
+					 </empty>
+					 </label>
+					  
+					 <br/> 
+					开票说明：<input type="text" class="form-control" name="invoice_dsc" value="{$invoice.dsc}"/>
+					<present name="change.invoice.dsc">
+						<input type="text" class="form-control red"  value="{$change.invoice.dsc}"/> 
+					</present>
+					   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息；
+					   开票金额为空则自动计算开票金额，(产品总金额-优惠金额+其他费用+支付运费)*(1+税点/100)；
+					   开票税费为开票金额*	(税点/100)/(1+税点/100)													
+					   </p>  
+				</div>
+			</div>
+		</if>
+		 
+			<div class="form-group fleft-all order_pay" id="order_pay" >
+		 
+				<label class="col-sm-2 control-label">采购单总计</label>
+				<div class="col-md-6 col-sm-10">
+				 <empty name="info">
+					<label class="input-inline"> 
+					 总重：<input type="text" class="form-control short weight" name="weight" id="weight" value="{$info.weight}" required/> 
+					 <present name="change.weight">
+					 	<input type="text" class="form-control short red"  value="{$change.weight}"  />  
+					 </present>
+					</label>
+				 	 <label class="input-inline"> 
+					 总体积：<input type="text" class="form-control short size" name="size" id="size" value="{$info.size}" required/> 
+					 <present name="change.size">
+					 	<input type="text" class="form-control short red"  value="{$change.size}"  />  
+					 </present> 
+					 
+					 </label>
+				 </empty>
+					<label class="input-inline"> 
+					 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight" id="pay_freight" value="{$info.pay_freight}" /> 
+					 <present name="change.pay_freight">
+					 	<input type="text" class="form-control short red"  value="{$change.pay_freight}"  />  
+					 </present>
+					</label>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" id="real_freight" value="{$info.real_freight}" /> 
+					 <present name="change.real_freight">
+					 	<input type="text" class="form-control short red"  value="{$change.real_freight}"  />  
+					 </present> 
+					 </label>
+				 	<label class="input-inline">
+					 产品总数量：<input type="text" class="form-control short goods_num" id="goods_num" name="goods_num" value="{$info.goods_num}" readonly/> 
+					<present name="change.goods_num">
+						<input type="text" class="form-control short red"  value="{$change.goods_num}"/> 
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 产品总金额：<input type="text" class="form-control short goods_money" id="goods_money" name="goods_money" value="{$info.goods_money}" readonly/> 
+					<present name="change.goods_money">
+						<input type="text" class="form-control short red"  value="{$change.goods_money}"/> 
+					</present>
+					</label>
+				 	 <label class="input-inline">
+					 优惠金额：<input type="text" class="form-control short discount_money" id="discount_money" name="discount_money" value="{$info.discount_money}" /> 
+					<present name="change.discount_money">
+						<input type="text" class="form-control short red"  value="{$change.discount_money}"/> 
+					</present>
+					</label>
+					 <label class="input-inline">
+					 税费：<input type="text" class="form-control short tax_money" id="tax_money" name="tax_money" value="{$info.tax_money}" /> 
+					<present name="change.tax_money">
+						<input type="text" class="form-control short red"  value="{$change.tax_money}"/> 
+					</present>
+					</label>
+					 <label class="input-inline">
+					 其它费用：<input type="text" class="form-control short other_money" id="other_money" name="other_money" value="{$info.other_money}" /> 
+					<present name="change.other_money">
+						<input type="text" class="form-control short red"  value="{$change.other_money}"/> 
+					</present>
+					</label>
+					 
+				 	 <label class="input-inline"> 
+					 总付款：<input type="text" class="form-control short order_amount" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
+					 
+					  <present name="change.order_amount">
+						<input type="text" class="form-control short red"  value="{$change.order_amount}"/> 
+					</present>
+				 	</label> 
+				</div>
+			 
+			</div> 
+	 
+		  <if condition="!isset($info.fid) || ($info.fid eq 0)">	
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">付款</label>
+				<div class="col-md-6 col-sm-10">
+				付款账号：
+					<select  class="form-control" id="account">
+				    	<option value="0">请选择</option> 
+				    <foreach name="accounts" item="vo">
+				    	<option value="{$vo.id}" bank1="{$vo.bank1}" bank2="{$vo.bank2}" name2="{$vo.name2}" 
+				    	num2="{$vo.num2}" location2="{$vo.location2}" name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
+				    </foreach>
+					</select> 
+					<input type="hidden" name="account_id" value="{$pay.id}"/>
+					 
+					付款银行：
+					<select  class="form-control" name="account_bank1" id="account_bank1">
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $pay.bank1">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				<present name="change.pay.bank1">
+					<select  class="form-control red" >
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $change.pay.bank1">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				</present>
+				 
+				   付款 账户名：<input type="text"  class="form-control" name="account_name1" id="account_name1" value="{$pay.name1}"/>
+				   	<present name="change.pay.name1"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.name1}"/>
+				   	</present>
+				    <p class="notice">付款账户名为空则不保存付款信息</p>  
+				   付款账号：<input type="text"  class="form-control" name="account_num1" id="account_num1"  value="{$pay.num1}"/>
+				 	<present name="change.pay.num1"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.num1}"/>
+				   	</present> 
+				   付款开户行：<input type="text"  class="form-control" name="account_location1" id="account_location1"  value="{$pay.location1}"/>
+				 	<present name="change.pay.location1"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.location1}"/>
+				   	</present>  
+				   收款银行：
+					<select  class="form-control" name="account_bank2" id="account_bank2">
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $pay.bank2">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				<present name="change.pay.bank2">
+					<select  class="form-control red"  >
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $change.pay.bank2">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				</present>
+				   收款 账户名：<input type="text"  class="form-control" name="account_name2" id="account_name2"  value="{$pay.name2}"/>
+				 	<present name="change.pay.name2"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.name2}"/>
+				   	</present>  
+				   收款账号：<input type="text"  class="form-control" name="account_num2" id="account_num2"  value="{$pay.num2}"/>
+				 	<present name="change.pay.num2"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.num2}"/>
+				   	</present>    
+				   收款开户行：<input type="text"  class="form-control" name="account_location2" id="account_location2"  value="{$pay.location2}"/>
+					<present name="change.pay.location2"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.location2}"/>
+				   	</present>  
+				</div>
+			</div>
+		</if>
+		
+	<notempty name="info">
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">支付状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="pay_status" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}" name="pay_status" <if condition="$key eq $info.pay_status">checked</if>/>{$vo}
+			 		<if condition="isset($change.pay_status) && ($key eq $change.pay_status)">
+			 		<span class="red">新状态</span>
+			 		</if>
+			 	</label>
+			 </foreach>
+			</div>
+		</div>
+		 
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">采购单状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="statuss" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+			 		<if condition="isset($change.status) && ($key eq $change.status)">
+			 		<span class="red">新状态</span>
+			 		</if>
+			 	</label>
+			 </foreach>
+			</div>
+		</div>
+		 <include file="public@adsc_fleft" /> 
+	</notempty> 
+<script>
+//采购单是否拆分,不拆分就隐藏总计
+var is_real="{$info.is_real|default=1}";
+<present name="change.add">
+is_real=2;
+</present>
+if(is_real==1){
+	  $('#order_pay').hide();
+}
+$('#invoice_type').change(function(){
+	invoice_type_change(); 
+});
+function invoice_type_change(){
+	if(($('#invoice_type').val())==0){  
+		return false;
+	} 
+	$('#invoice_point').val($('#invoice_type option:selected').attr('point'));
+}
+$('#invoice_count').click(function(){
+	var invoice_type=$('#invoice_type').val();
+	if(invoice_type==0){ 
+		$('#invoice_type').focus();
+		return false;
+	}
+	 var $order_div;
+	var invoice_point=parseFloat($('#invoice_point').val());
+	if(!(invoice_point>0)){
+		invoice_point=0;
+		$('#invoice_point').val(0);
+		$('#invoice_point').focus();
+		return false;
+	}
+	var invoice_invoice_money=parseFloat($('#invoice_invoice_money').val());
+	if(!(invoice_invoice_money>0)){
+		if(is_real==1){
+			$order_div= $('.order_pay');
+		}else{
+			$order_div= $('#order_pay');
+		}
+		var goods_money=parseFloat($order_div.find('.goods_money').val());
+		var discount_money=parseFloat($order_div.find('.discount_money').val());
+		var other_money=parseFloat($order_div.find('.other_money').val());
+		var pay_freight=parseFloat($order_div.find('.pay_freight').val());
+		if(!(goods_money>0)){
+			goods_money=0; 
+		}
+		$order_div.find('.goods_money').val(goods_money.toFixed(2));
+		if(!(discount_money>0)){
+			discount_money=0; 
+		}
+		$order_div.find('.discount_money').val(discount_money.toFixed(2));
+		if(!(other_money>0)){
+			other_money=0; 
+		}
+		$order_div.find('.other_money').val(other_money.toFixed(2));
+		if(!(pay_freight>0)){
+			pay_freight=0; 
+		}
+		$order_div.find('.pay_freight').val(pay_freight.toFixed(2));
+		invoice_invoice_money=(goods_money-discount_money+other_money+pay_freight)*(1+invoice_point/100);
+		 
+	}
+	$('#invoice_invoice_money').val(invoice_invoice_money.toFixed(2));
+	var invoice_tax_money=(invoice_invoice_money*invoice_point/100/(1+invoice_point/100)).toFixed(2);
+	$('#invoice_tax_money').val(invoice_tax_money); 
+	$order_div.find('.tax_money').val(invoice_tax_money); 
+	money_count($order_div);
+});
+//采购单费用计算
+function money_count($div){
+	var goods_money=parseFloat($div.find('.goods_money').val());
+	var discount_money=parseFloat($div.find('.discount_money').val());
+	var other_money=parseFloat($div.find('.other_money').val());
+	var pay_freight=parseFloat($div.find('.pay_freight').val());
+	var tax_money=parseFloat($div.find('.tax_money').val()); 
+	if(!(goods_money>0)){
+		goods_money=0; 
+	}
+	$div.find('.goods_money').val(goods_money.toFixed(2));
+	if(!(discount_money>0)){
+		discount_money=0; 
+	}
+	$div.find('.discount_money').val(discount_money.toFixed(2));
+	if(!(other_money>0)){
+		other_money=0; 
+	}
+	$div.find('.other_money').val(other_money.toFixed(2));
+	if(!(pay_freight>0)){
+		pay_freight=0; 
+	}
+	$div.find('.pay_freight').val(pay_freight.toFixed(2));
+	if(!(tax_money>0)){
+		tax_money=0; 
+	}
+	$div.find('.tax_money').val(tax_money.toFixed(2));
+	var order_amount=goods_money-discount_money+other_money+pay_freight+tax_money; 
+	$div.find('.order_amount').val(order_amount.toFixed(2));
+}
+</script>

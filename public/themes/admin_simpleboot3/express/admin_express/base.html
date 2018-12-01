@@ -13,7 +13,7 @@
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">编码</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control"  value="{$info.code}" />
+        <input type="text" class="form-control" name="code" value="{$info.code}" />
         <p>编码为快递接口查询代码，不需要查询的请输入0</p>
         <present name='change.code'>
             <input type="text" class="red form-control" value="{$change.code}" />
@@ -25,7 +25,7 @@
 <div class="form-group">
     <label class="col-sm-2 control-label">简介</label>
     <div class="col-md-6 col-sm-10">
-        <textarea class="form-control"  rows="5" >{$info.dsc}</textarea>
+        <textarea class="form-control" name="dsc"  rows="5" >{$info.dsc}</textarea>
         <present name='change.dsc'>
             <textarea class="red form-control" rows="5" >{$change.dsc}</textarea>
         </present>
@@ -34,7 +34,7 @@
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">排序</label>
     <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="sort" value="{$info.sort}" />
+        <input type="text" class="form-control" name="sort" value="{$info.sort|default=1000}" />
         <present name='change.sort'>
             <input type="text" class="red form-control" name="sort" value="{$change.sort}" />
         </present>

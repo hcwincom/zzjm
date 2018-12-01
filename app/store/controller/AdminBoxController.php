@@ -6,6 +6,7 @@ namespace app\store\controller;
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
 use app\store\model\StoreGoodsModel;
+use app\store\model\StoreBoxModel;
 class AdminBoxController extends AdminInfo0Controller
 {
     
@@ -112,10 +113,22 @@ class AdminBoxController extends AdminInfo0Controller
          
         //查询字段
         $types=$this->search;
-        
+        $this->search=[
+            'code'=>'料位号',
+            'name'=>'名称',
+            'id'=>'ID'
+        ];
+        $types=[
+            1=>['p.code','料位号'],
+            2=>['p.name','料位名'],
+            3=>['p.id','料位id'],
+            4=>['goods.name','产品名'],
+            5=>['goods.code','产品编号'],
+            5=>['p.goods','产品id'],
+        ];
         //选择查询字段
         if(empty($data['type1'])){
-            $data['type1']=key($types);
+            $data['type1']=1;
         }
         //搜索类型
         $search_types=config('search_types');
@@ -125,7 +138,7 @@ class AdminBoxController extends AdminInfo0Controller
         if(!isset($data['name']) || $data['name']==''){
             $data['name']='';
         }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+            $where[$types[$data['type1']][0]]=zz_search($data['type2'],$data['name']);
         }
         
         //时间类别
@@ -249,29 +262,35 @@ class AdminBoxController extends AdminInfo0Controller
         $data_add['time']=$time;
         $data_add['num']=0;
         $m->startTrans();
+       
         $id=$m->insertGetId($data_add);
         //是否初次审核,添加入库
         if(!empty($data_add['goods'])){
-             
+            
             $data_instore=[
                 'store'=>$data_add['store'],
                 'goods'=>$data_add['goods'],
-                'box'=>$id, 
-                'shop'=>$data_add['shop'], 
+                'box'=>$id,
+                'shop'=>$data_add['shop'],
                 'num'=>$data['num'],
                 'box'=>$id,
                 'type'=>30,
                 'about'=>$id,
+                'about_name'=> $data_add['name'],
                 'aid'=>$data_add['aid'],
                 'atime'=>$data_add['time'],
-                'adsc'=>'管理员添加料位入库',
+                'adsc'=>'管理员添加料位'.$data_add['name'].'入库',
+                'rstatus'=>4,
             ];
             $m_store_goods=new StoreGoodsModel();
-            $tmp=$m_store_goods->instore0($data_instore);
-            if($tmp!==1){
-                $m->rollback();
-                $this->error($tmp);
+            $res=$m_store_goods->instore0($data_instore);
+            if(!($res>0)){
+                $id=$res;
             }
+        }
+        if($id<=0){
+            $m->rollback();
+            $this->error($id);
         }
         //记录操作记录
         $data_action=[
@@ -289,6 +308,13 @@ class AdminBoxController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
        
         $m->commit();
+        //直接审核
+        $rule='review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$id,'status'=>2]);
+        }
+        
         $this->success('添加成功',$url);
         
     }
@@ -373,8 +399,27 @@ class AdminBoxController extends AdminInfo0Controller
             'status'=>$status,
             'time'=>$time,
         ];
-        
+        $m->startTrans();
         $row=$m->where('id',$id)->update($update);
+        //更新入库记录   
+        $where=[
+            'type'=>30,
+            'about'=>$id,
+            'rstatus'=>4,
+        ]; 
+        $m_store_in=Db::name('store_in');
+        $tmp=$m_store_in->where($where)->find();
+        if(!empty($tmp)){
+            if($status==2){
+                $rstatus=1;
+            }else{
+                $rstatus=5;
+                //废弃
+                $m_store_goods=new StoreGoodsModel();
+                $m_store_goods->instore5($tmp);
+            }
+            $m_store_in->where('id',$tmp['id'])->setField('rstatus',$rstatus);
+        }
         
         if($row!==1){
             $m->rollback();
@@ -416,7 +461,72 @@ class AdminBoxController extends AdminInfo0Controller
      */
     public function review_all()
     {
-        parent::review_all();
+        if(empty($_POST['ids'])){
+            $this->error('未选中信息');
+        }
+        $ids=$_POST['ids'];
+        $m=$this->m;
+        $admin=$this->admin;
+        $time=time();
+        $where=[
+            'id'=>['in',$ids],
+            'status'=>['eq',1],
+        ];
+        //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
+        if($admin['shop']!=1){
+            if($this->isshop){
+                $where['shop']=['eq',$admin['shop']];
+            }else{
+                $this->error('店铺操作系统数据');
+            }
+        }
+        
+        $update=[
+            'status'=>2,
+            'time'=>$time,
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+        ];
+        //得到要更改的数据
+        $list=$m->where($where)->column('id');
+        if(empty($list)){
+            $this->error('没有可以批量审核的数据');
+        }
+        
+        $ids=implode(',',$list);
+        
+        //审核成功，记录操作记录,发送审核信息
+        $flag=$this->flag;
+        
+        $table=$this->table;
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'批量同意'.$flag.'('.$ids.')',
+            'table'=>$table,
+            'type'=>'review_all',
+            'link'=>'',
+            'shop'=>$admin['shop'],
+        ];
+        $m->startTrans();
+        
+        zz_action($data_action,['pids'=>$ids]);
+        $rows=$m->where('id','in',$list)->update($update);
+        if($rows<=0){
+            $m->rollback();
+            $this->error('没有数据审核成功，批量审核只能把未审核的数据审核为正常');
+        }
+        //出入库更新
+        $where=[
+            'type'=>30,
+            'about'=>['in',$list],
+            'rstatus'=>4,
+        ];
+        Db::name('store_in')->where($where)->setField('rstatus',1);
+        $m->commit();
+        $this->success('审核成功'.$rows.'条数据');
     }
     /**
      * 料位禁用
@@ -525,7 +635,31 @@ class AdminBoxController extends AdminInfo0Controller
             $content['box_goods']=$info['goods'];
             
         }
-        
+        //新添加了产品
+        if(empty($info['goods']) && !empty($data['goods'])){
+            $content['goods']=$data['goods'];
+            $data_instore=[
+                'store'=>$info['store'],
+                'goods'=>$data['goods'],
+                'shop'=>$info['shop'], 
+                'num'=>$data['num'],
+                'box'=>$info['id'],
+                'type'=>30,
+                'about'=>$info['id'],
+                'about_name'=>$data['name'],
+                'aid'=>$admin['id'],
+                'atime'=>$time,
+                'rstatus'=>4,
+                'adsc'=>'管理员为料位'.$info['id'].'-'.$data['name'].'设置产品',
+            ];
+            $m_store_goods=new StoreGoodsModel();
+            $res=$m_store_goods->instore0($data_instore);
+            if(!($res>0)){
+                $m->rollback();
+                $this->error($res);
+            }
+            
+        }
         
         if(empty($content)){
             $this->error('未修改');
@@ -559,30 +693,14 @@ class AdminBoxController extends AdminInfo0Controller
         ];
         
         zz_action($data_action,['department'=>$admin['department']]);
-        if(!empty($content['goods'])){
-            if(!empty($data_add['goods'])){
-                $data_instore=[
-                    'store'=>$data_add['store'],
-                    'goods'=>$data_add['goods'],
-                    'shop'=>$data_add['shop'],
-                    'time'=>$data_add['time'],
-                    'num'=>$data_add['num'],
-                    'box'=>$id,
-                    'type'=>30,
-                    'about'=>$id,
-                    'aid'=>$data_add['aid'],
-                    'atime'=>$data_add['time'],
-                    'adsc'=>'管理员添加料位入库',
-                ];
-                $m_store_goods=new StoreGoodsModel();
-                $tmp=$m_store_goods->instore0($data_instore);
-                if($tmp!==1){
-                    $m->rollback();
-                    $this->error($tmp);
-                }
-            }
-        }
+         
         $m_edit->commit();
+        //判断是否直接审核
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
         
     }
@@ -669,6 +787,18 @@ class AdminBoxController extends AdminInfo0Controller
             ->join('cmf_cate cate1','cate1.id=goods.cid0')
             ->find();
             $change['box_goods_name']=$tmp['cname1'].'-'.$tmp['cname2'].'-'.$tmp['gname'];
+        }
+        //料位调整
+        if(isset($change['goods'])){
+            
+            $tmp=Db::name('goods')
+            ->alias('goods')
+            ->field('goods.name as gname,cate1.name as cname1,cate2.name as cname2')
+            ->where('goods.id',$change['goods'])
+            ->join('cmf_cate cate2','cate2.id=goods.cid')
+            ->join('cmf_cate cate1','cate1.id=goods.cid0')
+            ->find();
+            $change['goods_name']=$tmp['cname1'].'-'.$tmp['cname2'].'-'.$tmp['gname'];
         }
         
         $this->assign('info',$info);
@@ -806,13 +936,39 @@ class AdminBoxController extends AdminInfo0Controller
                 unset($update_info['box']);
                 unset($update_info['box_goods']);
             } 
+             
             $row=$m->where('id',$info['pid'])->update($update_info);
             if($row!==1){
                 $m->rollback();
                 $this->error('信息更新失败，请刷新后重试');
             }
         }
-        
+        //更新入库记录
+        if(isset($change['goods'])){
+            if($info['num'] != 0){
+                $m->rollback();
+                $this->error('料位号已有产品，此次编辑失效');
+            }
+            $where=[
+                'type'=>30,
+                'about'=>$info['pid'],
+                'rstatus'=>4,
+            ];
+            $m_store_in=Db::name('store_in');
+            $tmp=$m_store_in->where($where)->find();
+            if(!empty($tmp)){
+                if($status==2){
+                    $rstatus=1;
+                }else{
+                    $rstatus=5;
+                    //废弃
+                    $m_store_goods=new StoreGoodsModel();
+                    $m_store_goods->instore5($tmp);
+                }
+                $m_store_in->where('id',$tmp['id'])->setField('rstatus',$rstatus);
+            } 
+        }
+         
         //审核成功，记录操作记录,发送审核信息
         
         $data_action=[

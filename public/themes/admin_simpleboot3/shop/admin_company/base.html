@@ -13,6 +13,15 @@
     </div>
 </div>
 <div class="form-group">
+    <label for="" class="col-sm-2 control-label">公司名称</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" class="form-control" name="name" value="{$info.name}" /> 
+        <present name='change.name'>
+            <input type="text" class="red form-control" name="name" value="{$change.name}" />
+        </present> 
+    </div>
+</div>
+<div class="form-group">
     <label for="" class="col-sm-2 control-label">公司全称</label>
     <div class="col-md-6 col-sm-10">
         <input type="text" class="form-control" name="allname" value="{$info.allname}" />
@@ -20,6 +29,61 @@
         <present name='change.allname'>
             <input type="text" class="red form-control" name="allname" value="{$change.allname}" />
         </present>
+
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">公司类型</label>
+    <div class="col-md-6 col-sm-10">
+     
+    	<foreach name="company_type" item="vo">
+    	 <label class="radio-inline"> 
+			<input type="radio" name="type" value="{$key}" <if condition="$key eq $info.type">checked</if>/>{$vo}  
+		</label> 
+    	</foreach>
+    	  
+        <present name='change.type'>
+           <span class="red">新选{$company_type[$change['type']]}</span> 
+        </present> 
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">公司接口账号</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" class="form-control" name="key_account" value="{$info.key_account}" />
+
+        <present name='change.key_account'>
+            <input type="text" class="red form-control" name="key_account" value="{$change.key_account}" />
+        </present>
+
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">公司接口密钥</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" class="form-control" name="key_key" value="{$info.key_key}" />
+
+        <present name='change.key_key'>
+            <input type="text" class="red form-control" name="key_key" value="{$change.key_key}" />
+        </present>
+
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">默认仓库</label>
+    <div class="col-md-6 col-sm-10">
+    	<select  class="form-control" name="store" id="">
+    	<foreach name="stores" item="vo">
+    		<option value="{$key}" <if condition="$info.store eq $key">selected</if>>{$vo}</option>
+    	</foreach>
+    	</select> 
+      <present name='change.store'>
+        <select  class="form-control red" >
+    	<foreach name="stores" item="vo">
+    		<option value="{$key}" <if condition="$change.store eq $key">selected</if>>{$vo}</option>
+    	</foreach>
+    	</select>
+      </present>
 
     </div>
 </div>

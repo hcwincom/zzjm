@@ -136,6 +136,7 @@ class StoreajaxController extends AdminBaseController
         $list=Db::name('store_box')->where($where)->column('id,name');
         $this->success('ok','',$list);
     }
+    
     //料位编码
     public function box_code_add(){
        
@@ -170,4 +171,20 @@ class StoreajaxController extends AdminBaseController
             $this->error('该编号已被占用'); 
         } 
     }
+    //根据层号获取有产品料位
+    public function get_boxes(){
+        $floor=$this->request->param('floor',0,'intval');
+        $where=[
+            'box.floor'=>$floor,
+            'box.status'=>2,
+            'box.goods'=>['gt',0],
+        ];
+        $list=Db::name('store_box')
+        ->alias('box')
+        ->join('cmf_goods goods','goods.id=box.goods')
+        ->where($where)
+        ->column('box.id,box.name,box.code,box.goods,goods.code as goods_code,goods.name as goods_name,box.num');
+        $this->success('ok','',$list);
+    }
+    
 }

@@ -5,6 +5,7 @@ namespace app\goods\controller;
  
 use app\common\controller\AdminBase0Controller; 
 use think\Db; 
+use app\goods\model\GoodsModel;
 /*
  * 产品页面的ajax  */ 
 class GoodsajaxController extends AdminBase0Controller
@@ -247,7 +248,7 @@ class GoodsajaxController extends AdminBase0Controller
         $admin=$this->admin; 
         $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         
-        $goods=Db::name('goods')->where($where)->column('id,name');
+        $goods=Db::name('goods')->where($where)->column('id,name,code');
         $this->success('ok','',$goods);
     }
     //获取产品的参数值
@@ -264,16 +265,21 @@ class GoodsajaxController extends AdminBase0Controller
         $this->success('ok','',['goods'=>$goods,'param'=>$param]);
     }
     /*
-     * 根据fid获取分类 */
+     * 获取分类 */
     public function get_cates()
     {
-        $fid=$this->request->param('fid',0,'intval'); 
-        $where=[
+        
+        $where1=[
+            'status'=>2, 
+            'fid'=>0,
+        ]; 
+        $list1=Db::name('cate')->where($where1)->order('code_num asc')->column('id,name,code,type,fid','code_num');
+        $where2=[
             'status'=>2,
-            'fid'=>$fid,
+            'fid'=>['gt',0],
         ];
-        $list=Db::name('cate')->where($where)->order('sort asc,code_num asc')->column('id,name');
-        $this->success('ok','',$list);
+        $list2=Db::name('cate')->where($where2)->order('code asc')->column('id,name,code,type,fid','code');
+        $this->success('ok','',['list1'=>$list1,'list2'=>$list2]);
     }
     /*
      * 根据cid获取产品 */
@@ -287,6 +293,21 @@ class GoodsajaxController extends AdminBase0Controller
         $admin=$this->admin;
         $where['shop']=($admin['shop']==1)?2:$admin['shop']; 
         $goods=Db::name('goods')->where($where)->column('id,name');
+        $this->success('ok','',$goods);
+    }
+    /*
+     * 根据id获取产品 */
+    public function get_goods_info()
+    {
+        $id=$this->request->param('id');
+        $shop=$this->request->param('shop');
+        if(empty($shop)){
+            $admin=$this->admin;
+            $shop=($admin['shop']==1)?2:$admin['shop'];
+        }
+        
+        $m_goods=new GoodsModel();
+        $goods=$m_goods->goods_info($id,$shop);
         $this->success('ok','',$goods);
     }
     

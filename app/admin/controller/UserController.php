@@ -130,10 +130,10 @@ class UserController extends AdminBaseController
             $where['list_order']=['egt',$roles['list_order']];
         }
         $roles = Db::name('role')->where($where)->order("list_order asc,id asc")->select();
-        //商家
-        $m_shop=Db::name('shop');
-        $where_shop=['status'=>2];
+        //商家 
         if($admin['shop']==1){ 
+            $m_shop=Db::name('shop');
+            $where_shop=['status'=>2];
             $shops=$m_shop->where($where_shop)->column('id,name'); 
         }else{
             $shops=[];
@@ -163,6 +163,9 @@ class UserController extends AdminBaseController
      */
     public function addPost()
     {
+        if(empty($_POST['role_id'])){
+            $this->error('管理员角色未选择');
+        }
         //zz添加验证添加角色权限小于自己
         $where=[
             'status'=>['eq',1], 
@@ -216,7 +219,7 @@ class UserController extends AdminBaseController
                         'user_pass'=>cmf_password($data['user_pass']),
                         'mobile'=>$data['mobile'],
                         //判断是总站添加还是分站添加
-                        'shop'=>((empty($data['shop']))?$admin['shop']:$data['shop']),
+                        'shop'=>(($admin['shop']==1)?$data['shop']:$admin['shop']),
                         'department'=>$data['department'],
                     ];
                     
