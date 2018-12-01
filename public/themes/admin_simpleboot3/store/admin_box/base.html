@@ -89,19 +89,13 @@
 				<label for="length" class="col-sm-2 control-label">存放产品</label>
 				<div class="col-md-6 col-sm-10">
 				<empty name="info.goods">
-					  <select  id="cate1" class="form-control  short2"  > 
-					 	<option value="0" >一级分类</option> 
-					 </select> 
-					 
-					  <select  id="cate2" class="form-control short2"  >  
-					 	<option value="0" >二级分类</option> 
-					 </select> 
-					 
-					  <select  id="goods" name="goods" class="form-control short2"  > 
-					 	<option value="0" >产品</option> 
-					 </select> 
+				 	<include file="public@cate_goods" />
+					<label class="input-inline"> 
 					 库存数量
 					 <input type="number" name="num" class="form-control short"  value="0" />
+					 </label>
+					 <span id="goods_msg"></span>
+					 
 				<else/> 
 					<input type="hidden" name="num" class="form-control short"  value="{$info.num}" />
 					<input type="text" class="form-control" value="{$info.cate1_name}-{$info.cate2_name}-{$info.goods_name}*{$info.num}"/>
@@ -224,7 +218,43 @@ if(id==0){
  	}); 
 } 
  if(goods==0){
-	 cate_js($('#cate1'),0,$('#cate2'),0,$('#goods'),0);
+	 var url_get_box_by_goods="{:url('store/Storeajax/get_box_by_goods')}";
+	 $('.goods').change(function(){ 
+		store=$('#store').val(); 
+		goods=$(this).val();  
+ 		if(store==0 || goods==0){
+ 			$('#goods_msg').html('');
+ 			return false;
+ 		}
+ 		$.ajax({
+ 	        type: 'POST',
+ 	        url: url_get_box_by_goods,
+ 	        dataType: 'json', 
+ 	        data:{'store':store,'goods':goods},
+ 	        success: function (data) { 
+ 	     	    if(data.code!=1){
+ 	     	    	msg(data.msg);
+ 	     	    	return false;
+ 	     	    } 
+ 	     	   var list=data.data.box;
+ 	     	   var span='';
+ 	     	   if(list==''){
+ 	     	   		span='此仓库此产品暂无料位;';
+ 	     	   }else{
+ 	     		 	span='此仓库此产品有料位:';
+ 	     		 	for(var i in list){
+ 	 	     		 span+=list[i]['code']+','+list[i]['name']+','+list[i]['num']+';';
+ 	 	     	 	} 
+ 	     	   } 
+ 	     	   $('#goods_msg').html(span+data.data.store);
+ 	     	   
+ 	        }, 
+ 	        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+ 	            msg(event.responseText,1);
+ 	        }
+ 	    });
+	 });
+	 
  }else{
 	 store="{$info.store}";
 	 store_change(store);
@@ -255,6 +285,7 @@ if(id==0){
 	 	}); 
  }
 function store_change(store){
+	$('#goods_msg').html(''); 
 	var options='<option value="0">请选择货架</option>';
 	var options0='<option value="0">请选择层号</option>';
 	if(store==0){

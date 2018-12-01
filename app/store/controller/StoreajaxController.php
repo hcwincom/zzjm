@@ -1,23 +1,24 @@
 <?php
  
 namespace app\store\controller;
-
-
-use cmf\controller\AdminBaseController; 
+ 
 use think\Db; 
-  
-class StoreajaxController extends AdminBaseController
+
+use app\common\controller\AdminBase0Controller;
+ 
+class StoreajaxController extends AdminBase0Controller
 {
     private $m;
     public function _initialize()
     {
-       
+       parent::_initialize();
         $this->m=Db::name('store');
     }
-     
-   
-    
-   //仓库编码
+      
+  
+   /**
+    * 获取仓库编码
+    */
    public function code_add(){
        
        $id=$this->request->param('id',0,'intval');
@@ -49,7 +50,9 @@ class StoreajaxController extends AdminBaseController
      
        $this->success('ok','',['city_code'=>$city_code,'code_num'=>$code_num]);
    }
-   //客户编码检查
+   /**
+    * 仓库编码检查
+    */
    public function code_check(){
        $id=$this->request->param('id',0,'intval');
        $city=$this->request->param('city',0,'intval'); 
@@ -76,7 +79,10 @@ class StoreajaxController extends AdminBaseController
        }
        
    }
-    //根据仓库获取货架号
+   
+    /**
+     * 根据仓库获取货架号
+     */
     public function shelf_add(){
         $store=$this->request->param('store',0,'intval');
         $m=$this->m;
@@ -185,6 +191,38 @@ class StoreajaxController extends AdminBaseController
         ->where($where)
         ->column('box.id,box.name,box.code,box.goods,goods.code as goods_code,goods.name as goods_name,box.num');
         $this->success('ok','',$list);
+    }
+    //根据仓库和产品获取料位和库存
+    public function get_box_by_goods(){
+        $store=$this->request->param('store',0,'intval');
+        $goods=$this->request->param('goods',0,'intval');
+        if($store<=0 || $goods<=0){
+            $this->error('先选择产品和仓库');
+        }
+       //得到所有料位
+        $where=[
+            'store'=>$store,
+            'goods'=>$goods,
+            'status'=>2, 
+        ];
+        $list=Db::name('store_box') 
+        ->where($where)
+        ->column('id,name,code,num');
+        if(empty($list)){
+            $list='';
+        }
+        //检查库存
+        $where=[
+            'store'=>$store,
+            'goods'=>$goods, 
+        ];
+        $store=Db::name('store_goods')->where($where)->find('id,num,num1');
+        if(empty($store)){
+            $store='没有库存';
+        }else{
+            $store='库存为'.$store['num'].'('.$store['num1'].')';
+        }
+        $this->success('ok','',['box'=>$list,'store'=>$store]);
     }
     
 }

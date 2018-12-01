@@ -1,6 +1,6 @@
  <include file="public@cate" />  
 
- <select class=" goods form-control short-auto" >
+ <select class="goods form-control short-auto" name="goods">
 	 <option value="0"> 产品编码,名称</option>
 </select> &nbsp;&nbsp; 
 <script>
@@ -20,7 +20,7 @@ $(function(){
 				 return false;
 			 }
 			 var list=data.data;
-			 var options='';
+			 var options='<option value="0"> 产品编码,名称</option>';
 			 for(var i in list){
 				 options+='<option value="'+i+'">'+list[i]['code']+','+list[i]['name']+'</option>';
 			 }
