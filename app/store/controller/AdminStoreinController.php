@@ -665,5 +665,81 @@ class AdminStoreinController extends AdminBaseController
         $this->assign('floors',$floors);
        
     }
-    
+    /**
+     * 出入库批量审核
+     * @adminMenu(
+     *     'name'   => '出入库批量审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '出入库批量审核',
+     *     'param'  => ''
+     * )
+     */
+    public function review_all(){
+        if(empty($_POST['ids'])){
+            $this->error('没有选中信息');
+        }
+        $status=$this->request->param('rstatus',1,'intval');
+        if($status!=2 && $status!=3){
+            $this->error('错误操作');
+        }
+        $m=$this->m;
+        //要获取允许修改的信息
+        $where=[
+            'rstatus'=>1,
+            'id'=>['in',$_POST['ids']]
+        ];
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            $where['shop']=$admin['shop'];
+        }
+        $list=$m->where($where)->column('');
+        if(empty($list)){
+            $this->error('没有可审核的信息');
+        }
+        $ids=array_keys($list);
+        //是否更新,2同意，3不同意
+        $m_store_goods=new StoreGoodsModel(); 
+        if($status==2){
+            $rdsc='批量审核通过';
+            foreach($list as $k=>$v){ 
+                //更新仓库和总库存
+                $res=$m_store_goods->instore2($v);
+                //返回更新真正入库的料位 
+                if(!($res>0)){
+                    $m->rollback();
+                    $this->error($res);
+                }
+                $update=[
+                    'box'=>$res,
+                    'rstatus'=>2, 
+                    'rdsc'=>$rdsc,
+                ];
+                $m->where('id',$k)->update($update);
+            } 
+        }else{ 
+            $rdsc='批量驳回';
+            foreach($list as $k=>$v){ 
+                //更新仓库和总库存
+                $res=$m_store_goods->instore3($v);
+                //返回更新真正入库的料位
+                if(!($res>0)){
+                    $m->rollback();
+                    $this->error($res);
+                } 
+            } 
+            $update=[
+                'rstatus'=>3,
+                'rdsc'=>$rdsc,
+            ];
+            $m->where('id','in',$ids)->update($update);
+        }  
+        
+        $m->commit();
+        $this->success('审核成功'.count($list).'条数据');
+        
+    }
 }
