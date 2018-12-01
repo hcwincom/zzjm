@@ -949,45 +949,10 @@ class AdminOrderController extends AdminInfo0Controller
             $m->order_sort($order['id']);
             //判断是否需要出库
             if(isset($change['status'])){
-                switch ($change['status']){
-                    case 10:
-                    case 20:
-                        //确认订单后添加出库记录
-                        if($order['status']<10){
-                            $row=$m->order_storein0($order['id']);
-                        }
-                        break;
-                    case 22:
-                        //准备发货后更新出库未待审核
-                        if($order['status']==20){
-                            $row=$m->order_storein1($order['id']);
-                        }
-                        
-                        break;
-                    case 24:
-                        //仓库发货要检查出库记录是否都已审核
-                        if($order['status']==22){
-                            $row=$m->order_storein_check($order['id']);
-                        }
-                        if($row!==1 && empty($order['express_no']) && empty($change['edit'][$order['id']]['express_no'])){
-                            $row='快递单号未填写';
-                        }
-                        
-                        break;
-                    case 81:
-                        //废弃
-                        if($order['pay_status']>2 || $order['status']>22){
-                            $row='订单状态错误';
-                        }else{
-                            $row=$m->order_storein5($order['id']);
-                        }
-                        
-                        break;
-                        
-                }
-                if($row!==1){
+                $res=$m->status_change($order['id'],$order['status']);
+                if(!($res>0)){
                     $m->rollback();
-                    $this->error($row);
+                    $this->error($res);
                 }
             }
             

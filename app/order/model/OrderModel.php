@@ -279,9 +279,9 @@ class OrderModel extends Model
          $goods_info=[];
         
          foreach($order_goods as $k=>$v){
-             if($v['goods']<=0){
+            /*  if($v['goods']<=0){
                  return '产品'.$v['goods_code'].$v['goods_uname'].'不存在，要调整';
-             }
+             } */
              $infos[$v['oid']][$v['goods']]=$v;
              $goods_info[$v['goods']]=$v;
          }
@@ -326,6 +326,9 @@ class OrderModel extends Model
                          $content['edit'][$void]['goods_del'][$kgoodsid]=$kv;
                          continue;
                      } 
+                     if($kgoodsid<=0){
+                         return '产品不存在，请重新选择产品';
+                     }
                      //循环商品信息
                      foreach($edit_goods as $vv){
                          if($data[$vv.'s-'.$void][$kgoodsid] !=  $kv[$vv]){
@@ -336,6 +339,9 @@ class OrderModel extends Model
                  if(isset($data['nums-'.$void])){
                      //再用data数据循环，检查是否有新增，没有继续向下
                      foreach ($data['nums-'.$void] as $kgoodsid=>$kv){
+                         if($kgoodsid<=0){
+                             return '产品不存在，请重新选择产品';
+                         }
                          if(isset($infos[$void][$kgoodsid])){
                              continue;
                          }
@@ -660,7 +666,7 @@ class OrderModel extends Model
          }else{
              $order=$this->where('id',$id)->find();
              //淘宝订单检查是否有产品未设置
-             if($order['type']==3){
+             if($order['order_type']==3){
                  $goods_ids=Db::name('order_goods')->where('oid',$id)->column('id');
              }
              //   sort专门排序，待发货10，准备发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
@@ -762,6 +768,10 @@ class OrderModel extends Model
              if($order['store']==0){
                  return '没有选择仓库';
              }
+             //没有产品的不出库
+             if($v['goods']<=0){
+                 continue;
+             }
              $data=[
                  'shop'=>$order['shop'],
                  'store'=>$order['store'],
@@ -810,7 +820,7 @@ class OrderModel extends Model
       *  * @param number $num_ok是否检查库存，1严格2不检查
       * @return string|number 
       */
-     public function order_storein2($id,$num_ok=1){
+     public function order_storein2($id,$num_ok=1,$dsc='订单统一出库'){
           
          //出入库记录要变为已同意
          $where=[
@@ -819,6 +829,7 @@ class OrderModel extends Model
              'rstatus'=>1,
          ]; 
          $list=Db::name('store_in')->where($where)->column('');
+        
          $m_store_goods=new StoreGoodsModel();
          foreach($list as $k=>$v){
              $res=$m_store_goods->instore2($v,0,'',$num_ok);
@@ -826,7 +837,14 @@ class OrderModel extends Model
                  return $res;
              }
          }
-       
+         $in_ids=array_keys($list); 
+         $update_info=[
+             'rstatus'=>2,
+             'rtime'=>time(),
+             'rdsc'=>$dsc,
+             'rid'=>empty(session('ADMIN_ID'))?1:session('ADMIN_ID'),
+         ];
+         Db::name('store_in')->where('id','in',$in_ids)->update($update_info);
          return 1;
      }
      
@@ -878,11 +896,11 @@ class OrderModel extends Model
              $where_about['about']=['in',$order_ids];
          }
          //获取所有出入库记录
-         $instores=Db::name('store_in')->where($where_about)->column('id,store,shop,goods,num');
+         $instores=Db::name('store_in')->where($where_about)->column('');
          if(empty($instores)){
              return 1;
          }
-         $in_ids=array_keys($instores);
+       
          $m_store_goods=new StoreGoodsModel();
          //一个个地废弃
          foreach($instores as $k=>$v){
@@ -891,9 +909,10 @@ class OrderModel extends Model
                  return $res;
              }
          } 
+         $in_ids=array_keys($instores);
          $update_info=[
              'rstatus'=>5,
-             'time'=>time(),
+             'rtime'=>time(),
              'rdsc'=>$dsc,
              'rid'=>session('ADMIN_ID'),
          ];
@@ -1053,7 +1072,9 @@ class OrderModel extends Model
          //状态判断
          if($order['status']<22 || $order['status']>=80){
              //不应该发货的,统一废弃 
-             $res=$this->order_storein5($order['id']); 
+             if($old_status>=22 && $old_status<=30){
+                 $res=$this->order_storein5($order['id']); 
+             } 
          }elseif($order['status']==22){
              if($old_status>22 && $old_status<80){
                  //已发货的，废弃 
@@ -1065,7 +1086,7 @@ class OrderModel extends Model
              //应该准备发货的 
              $res=$this->order_storein0($order['id'],$num_ok); 
          }elseif($order['status']<=30){
-             //已收货
+             //已发货
              if($old_status<22){
                  //没准备发货的先添加出库记录 
                  $res=$this->order_storein0($order['id'],$num_ok); 

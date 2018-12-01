@@ -56,19 +56,15 @@ class AdminTaobaoController extends AdminBaseController
             'status'=>2,
         ];
         $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key,store');
-        $order_type=$this->order_type;
-      
-       
-        $log='taobao.log';
-      
-        $m_store_goods=new StoreGoodsModel();
-//      
+        $order_type=$this->order_type; 
+        $log='taobao.log'; 
+        $m_store_goods=new StoreGoodsModel(); 
         $fields = 'tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time,'.
             'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
           
         $time=time();
-        $time_start=$time-3600*24;
-        $time_end=$time;
+        $time_start=$time-3600*24*10;
+        $time_end=$time-3600*24*10;
         $date_start=date('Y-m-d',$time_start);
         $date_end=date('Y-m-d',$time_end);
         $start_created = $date_start."%2000:00:00";
@@ -209,12 +205,7 @@ class AdminTaobaoController extends AdminBaseController
                 $update_order['pay_time']=strtotime($taobao['pay_time']);
             }
             $m->where('id',$order['id'])->update($update_order); 
-            if(isset($update_order['status']) && $update_order['status']>80){
-                $res=$m->order_storein5($order['id'],'淘宝同步，取消订单');
-                if(!($res>0)){ 
-                    return ('淘宝同步，取消订单'.$order['name'].'失败,'.$res);
-                }
-             }
+            
         } 
         return 1;
     }
@@ -238,7 +229,7 @@ class AdminTaobaoController extends AdminBaseController
             'shop'=>$shop,
             'order_amount'=>$taobao['payment'],
             'pay_freight'=>$taobao['post_fee'], 
-            'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.$taobao['receiver_district'],
+            'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.(isset($taobao['receiver_district'])?$taobao['receiver_district']:''),
             'address'=>$taobao['receiver_address'],
             'accept_name'=>$taobao['receiver_name'],
             'mobile'=>isset($taobao['receiver_mobile'])?$taobao['receiver_mobile']:'',

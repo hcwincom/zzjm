@@ -216,7 +216,7 @@ class StoreajaxController extends AdminBase0Controller
             'store'=>$store,
             'goods'=>$goods, 
         ];
-        $store=Db::name('store_goods')->where($where)->find('id,num,num1');
+        $store=Db::name('store_goods')->field('id,num,num1')->where($where)->find();
         if(empty($store)){
             $store='没有库存';
         }else{
