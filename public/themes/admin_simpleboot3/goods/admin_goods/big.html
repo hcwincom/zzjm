@@ -19,10 +19,14 @@ $(function(){
 
 	var img_url="{:cmf_get_image_url('')}"+'/';
 	var zj_li_index;
+	var picLen = $("#pic_jm li").length;
+	console.log(picLen);
+	var zj_li = $("#pic_jm").eq(0);
 	$(document).on("click",'.pic1',function () {
 	 	zj_li_index = $(this).parents('li').index();
-		console.log(zj_li_index);
 
+		zj_li = $(this).parents("#pic_jm");
+	
 		var backgroundImg=$(this).parents('li').find('.file0').val();	
 		$(".srcImg").attr("src",img_url+backgroundImg);
 
@@ -44,7 +48,58 @@ $(function(){
 		$("#clickImg").fadeOut();
 	});
 
+
+
+	//上一张
+	$("#clickImg #btnPrev span").click(function () {
+		if (zj_li_index != 0) {
+			zj_li_index--;
+			console.log(zj_li_index);
+			var inputImg = zj_li.find("li").eq(zj_li_index).find('.file0').val();
+
+			$(".srcImg").attr("src", img_url +inputImg);
+
+			$("<img />").attr("src", img_url + inputImg).load(function () {
+				var imgWidth = this.width,
+					imgHeight = this.height;
+				$("#bigImg").css({
+					"width": imgWidth,
+					"height": imgHeight,
+					"background-image": "url(" + img_url + inputImg + ")"
+				});
+			});
+		}
+	});
+
+	// 下一张
+	$("#clickImg #btnNext span").click(function () {
+		if (zj_li_index < picLen-1) {
+			zj_li_index++;
+			console.log(zj_li_index);
+			var inputImg = zj_li.find("li").eq(zj_li_index).find('.file0').val();
+			$(".srcImg").attr("src", img_url + inputImg);
+
+			$("<img />").attr("src", img_url + inputImg).load(function () {
+				var imgWidth = this.width,
+					imgHeight = this.height;
+				$("#bigImg").css({
+					"width": imgWidth,
+					"height": imgHeight,
+					"background-image": "url(" + img_url + inputImg + ")"
+				});
+			});
+		}else{
+			return false;
+		}
+	});
+
+
+
 });
+
+
+
+
 </script>
 	
 	

@@ -57,5 +57,8 @@
 #clickImg .btnImg{text-align: right;padding: 5px 2%;}
 #clickImg .glyphicon-remove-circle{font-size: 50px;color: #fff;cursor: pointer;}
 #clickImg  #bigImg{margin: 0 auto;background-repeat: no-repeat;background-position: center center;max-width: 90%;max-height: 80%;} 
+#btnPrev,#btnNext{position: absolute;right: 5%;top:30%;z-index: 200;}
+#btnNext{top:50%;}
+#btnPrev span.glyphicon,#btnNext span.glyphicon{font-size: 80px;color: #fff;cursor: pointer;}
 
  

@@ -68,7 +68,7 @@ $(function () {
     });
 
     $("#innerdiv #imgNext span").click(function () {
-        if (zj_pic_index <= divLen) {
+        if (zj_pic_index < divLen-1) {
             zj_pic_index++;
 
             var inputImg = zj_pic.find('input').eq(zj_pic_index).val();
