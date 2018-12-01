@@ -218,6 +218,8 @@ if(id==0){
  	}); 
 } 
  if(goods==0){
+	 $('.cate').attr('name','');
+	 $('.cate0').attr('name','');
 	 var url_get_box_by_goods="{:url('store/Storeajax/get_box_by_goods')}";
 	 $('.goods').change(function(){ 
 		store=$('#store').val(); 

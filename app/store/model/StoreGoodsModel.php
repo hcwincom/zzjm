@@ -38,6 +38,11 @@ class StoreGoodsModel extends Model
     function instore0($data,$num_ok=1){
         //统一默认为待审核
         $data['rstatus']=1;
+        //名称暂时不要，不要结果通知
+       /*  if(empty($data['name'])){
+            $types=config('store_in_type');
+            $data['name']=$types[$data['type']][0].$data['about_name'];
+        } */
        /*  if(!isset($data['rstatus'])){
             $data['rstatus']=1;
         } */

@@ -91,7 +91,10 @@
 		 
 		<form method="post" class=" margin-top-20" action="">
 			<div class="table-actions">
-				 
+				 <input type="hidden" name="rstatus" id="rstatus" value="1"/>
+			 	<button type="submit" class="review_all1 btn-sm btn-primary  js-ajax-submit">批量同意</button>
+			 	<button type="submit" class="review_all2 btn-sm btn-primary  js-ajax-submit" >批量驳回</button>
+			 	 
 			 	<p class='error'></p>
 			</div>
 
@@ -168,7 +171,16 @@
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
-  
+$('.review_all1').click(function(){
+	$('#rstatus').val(2);
+    $(this).parents('form').attr('action',"{:url('review_all')}");
+    return is_check('批量同意');
+});
+$('.review_all2').click(function(){
+	$('#rstatus').val(3);
+    $(this).parents('form').attr('action',"{:url('review_all')}");
+    return is_check('批量驳回');
+});
 $('#shop').change(function(){
 	var shop=$(this).val();  
 	if(shop==0){
