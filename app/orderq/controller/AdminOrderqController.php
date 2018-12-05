@@ -81,8 +81,7 @@ class AdminOrderqController extends AdminInfo0Controller
          
         //查询字段
         $types=[
-            'p.name'=>'询盘编号',
-            
+            'p.name'=>'询盘编号', 
             'custom.uname'=>'客户名称',
             'custom.ucode'=>'客户编号',
             'custom.name'=>'客户联系人',

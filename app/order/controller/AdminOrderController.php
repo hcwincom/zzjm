@@ -1724,9 +1724,34 @@ class AdminOrderController extends AdminInfo0Controller
         if($info['is_real']!=1){
             $this->error('已拆分订单请单独打印');
         }
+        if($info['status']<22){
+            $this->error('请先准备发货');
+        }
         
-        $goods=Db::name('order_goods')->where('oid',$id)->column('');
+        $goods=Db::name('order_goods')->where('oid',$id)->column('*','goods');
+        $where=[
+            'type'=>10,
+            'about'=>$id,
+            'rstatus'=>['in',[1,2]]
+        ];
+        $goods_instore=Db::name('store_in')
+        ->where($where)
+        ->column('goods,box');
+        if(empty($goods_instore)){
+            $boxes=[];
+        }else{
+            $boxes=Db::name('store_box')->where('id','in',$goods_instore)->column('id,code');
+        }
+        
+        foreach($goods as $k=>$v){
+            if(empty($goods_instore[$k]) || empty($boxes[$goods_instore[$k]])){
+                $goods[$k]['box']='--';
+            }else{
+                $goods[$k]['box']=$boxes[$goods_instore[$k]];
+            }
+        }
         $this->assign('info',$info);
+       
         $this->assign('goods',$goods);
         $this->assign('date',date('Y-m-d'));
         return $this->fetch();
