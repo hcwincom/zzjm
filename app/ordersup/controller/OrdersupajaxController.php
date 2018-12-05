@@ -99,9 +99,7 @@ class OrdersupajaxController extends AdminBase0Controller
             'province'=>$province,
             'status'=>2,
         ];
-        if($admin['shop']>1){
-            $where['shop']=$admin['shop'];
-        }
+        $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         if($cid>0){
             $where['cid']=$cid;
         }

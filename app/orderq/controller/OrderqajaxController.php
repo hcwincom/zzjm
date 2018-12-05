@@ -1,78 +1,69 @@
 <?php
- 
-namespace app\order\controller;
 
-use app\common\controller\AdminBase0Controller;  
-use think\Db; 
-use app\order\model\OrderModel;
-  
-class OrderajaxController extends AdminBase0Controller
+namespace app\orderq\controller;
+
+use app\common\controller\AdminBase0Controller;
+use think\Db;
+use app\orderq\model\OrderqModel;
+
+class OrderqajaxController extends AdminBase0Controller
 {
-     
-     
+    
+    
     /*
      *添加产品
      *  */
     public function goods_add()
     {
         $id=$this->request->param('id');
-        $uid=$this->request->param('uid');
+       
         $where=[
-            'id'=>$id,
+            'p.id'=>$id,
         ];
         
         $admin=$this->admin;
         
-        $where['shop']=($admin['shop']==1)?2:$admin['shop'];
+        $where['p.shop']=($admin['shop']==1)?2:$admin['shop'];
         //检查用户权限
-        $authObj = new \cmf\lib\Auth(); 
-        $name       = strtolower('goods/AdminGoodsauth/price_in_get'); 
+        $authObj = new \cmf\lib\Auth();
+        $name       = strtolower('goods/AdminGoodsauth/price_in_get');
         $is_auth=$authObj->check($admin['id'], $name);
         
-        $goods=Db::name('goods')->field('id,name,code,pic,price_in,price_sale,type,weight1,size1')->where($where)->find();
+        $goods=Db::name('goods')
+        ->alias('p')
+        ->field('p.id,p.name,p.code,p.pic,p.price_in,p.price_sale,p.code_name,cate1.name as cname1,cate2.name as cname2')
+        ->join('cmf_cate cate1','cate1.id=p.cid0','left')
+        ->join('cmf_cate cate2','cate2.id=p.cid','left')
+        ->where($where)
+        ->find();
         if($is_auth==false){
             $goods['price_in']='--';
         }
-        //判断产品重量体积单位,统一转化为kg,cm3 
-        $m=new OrderModel();
-        $goods=$m->unit_change($goods); 
+      
         //产品库存
-        $where['goods']=$id;
-        unset($where['id']); 
+        $where=[
+            'goods'=>$id,
+            'shop'=> $where['p.shop']
+        ];
+       
         $nums=Db::name('store_goods')->where($where)->column('store,num,num1');
         $goods['nums']=$nums;
-         
-         //产品图片
-         $where=[
-             'pid'=>$id,
-             'type'=>1,
-         ];
-         
-         $goods['pics']=Db::name('goods_file')->where($where)->column('id,file,pid');
-         $path='upload/';
-         foreach($goods['pics'] as $k=>$v){
-             $goods['pics'][$k]=[
-                 'file1'=>$v['file'].'1.jpg',
-                 'file3'=>$v['file'].'3.jpg',
-             ]; 
-         }
-         //添加客户用名
-        if(empty($uid)){
-            $tmp=null;
-        }else{
-            $where=['uid'=>$uid,'goods'=>$id];
-            $tmp=Db::name('custom_goods')->where($where)->find();
-        } 
-        if(empty($tmp)){
-            $goods['goods_uname']='';
-            $goods['goods_ucate']=''; 
-            $goods['price_pay']=$goods['price_sale'];
-        }else{
-            $goods['goods_uname']=$tmp['name'];
-            $goods['goods_ucate']=$tmp['cate'];
-            $goods['price_pay']=$tmp['price'];
-            $goods['dsc']=$tmp['dsc'];
+        
+        //产品图片
+        $where=[
+            'pid'=>$id,
+            'type'=>1,
+        ];
+        
+        $goods['pics']=Db::name('goods_file')->where($where)->column('id,file,pid');
+        $path='upload/';
+        foreach($goods['pics'] as $k=>$v){
+            $goods['pics'][$k]=[
+                'file1'=>$v['file'].'1.jpg',
+                'file3'=>$v['file'].'3.jpg',
+            ];
         }
+        
         $this->success('ok','',$goods);
     }
     //根据所属公司和客户分类,客户所在地得到客户
@@ -92,6 +83,7 @@ class OrderajaxController extends AdminBase0Controller
             'province'=>$province,
             'status'=>2,
         ];
+        
         $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         if($cid>0){
             $where['cid']=$cid;
@@ -102,54 +94,44 @@ class OrderajaxController extends AdminBase0Controller
         if($city>0){
             $where['city']=$city;
         }
-        $field='id,name';
+        $field='id,name,code';
         $list=$m->where($where)->order('sort asc,code asc')->column($field);
         $this->success('ok','',$list);
     }
     //根据客户得到联系人
     public function get_custom_info(){
         $admin=$this->admin;
-        $uid=$this->request->param('uid',0,'intval');
-        $type=$this->request->param('type',1,'intval');
-        
+        $uid=$this->request->param('uid',0,'intval'); 
         $where_custom=['id'=>$uid];
         $where=[
             'p.uid'=>$uid,
-            'p.type'=>$type,
+            'p.type'=>1,
             'p.status'=>1,
         ];
+       
         if($admin['shop']>1){
             $where['p.shop']=$admin['shop'];
             $where_custom['shop']=$admin['shop'];
         }
-        //付款方式,发票信息
-        if($type==1){
-            $m=Db::name('custom');
-        }else{
-            $m=Db::name('supplier');
-        }
-        $field='invoice_type,tax_point,freight,announcement,paytype,pay_type,receiver,payer';
+        //得到名称，编码和默认联系人 
+        $m=Db::name('custom'); 
+        $field='id,name,code,contacter';
         $info=$m->field($field)->where($where_custom)->find();
-        //联系人 
-        $field='p.site,p.id,p.name,p.mobile,p.phone,p.street,p.postcode'.
-            ',p.province,p.city,p.area'.
-            ',province.name as province_name,city.name as city_name,area.name as area_name';
-        $info['tels']=Db::name('tel')
-        ->alias('p')
-        ->join('cmf_area province','province.type=1 and p.province=province.id','left')
-        ->join('cmf_area city','city.type=2 and p.city=city.id','left')
-        ->join('cmf_area area','area.type=3 and p.area=area.id','left')
-        ->where($where)
-        ->order('p.sort asc,p.site asc')
-        ->column($field);
-        //支付账号
-        unset($where['p.status']); 
-        $info['accounts']=Db::name('account')
+        //联系人
+        $field='p.*';
+        $tels=Db::name('tel')
         ->alias('p') 
         ->where($where)
-        ->order('p.site asc')
-        ->column('p.*','p.site');
-        
+        ->order('p.sort asc,p.site asc')
+        ->column($field,'p.site');
+        foreach($tels as $k=>$v){
+            foreach($v as $kk=>$vv){
+                if($vv!='0' && empty($vv)){
+                    $tels[$k][$kk]='';
+                }
+            }
+        }
+        $info['tels']=$tels;
         $this->success('ok','',$info);
     }
     
@@ -159,10 +141,10 @@ class OrderajaxController extends AdminBase0Controller
     public function accept_change()
     {
         $tel_id=$this->request->param('accept',0,'intval');
-       
+        
         $freight=$this->request->param('freight',0,'intval');
         $admin=$this->admin;
-         
+        
         $city=Db::name('tel')->where('id',$tel_id)->value('city');
         //如果存在已选物流，则比较已选物流是否能到达，如果不能则重新选择
         //先根据收货地址选出可选的物流
@@ -205,12 +187,12 @@ class OrderajaxController extends AdminBase0Controller
         if(empty($fees)){
             $this->error($freight.'没有计算规则,请手动填写'.$city);
         }
-       
+        
         $weight=bcmul($weight,1000);
         if(!empty($fees['size'])){
             //体积和重量换算比
             $weight1=bcdiv($size,$fees['size']);
-            $weight=($weight>$weight1)?$weight:$weight1; 
+            $weight=($weight>$weight1)?$weight:$weight1;
         }
         //首重计算和判断
         $weight1=bcsub($weight, $fees['weight0']);

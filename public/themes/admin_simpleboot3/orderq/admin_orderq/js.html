@@ -1,0 +1,351 @@
+ 
+<script>
+//城市选择js初始化 
+get_citys($('#province'),1,0);
+  
+var url_custom_get="{:url('orderq/Orderqajax/get_customs')}";
+var url_custom_info="{:url('orderq/Orderqajax/get_custom_info')}";
+var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
+ <empty name="info.id">
+ custom_change("{$custom.id|default=0}");
+ </empty>
+
+city_js($('#custom_province'),"{$custom.province|default=0}",$('#custom_city'),"{$custom.city|default=0}",$('#custom_area'),"{$custom.area|default=0}");
+
+
+$('#province').change(function(){
+	var province=$('#province').val();
+	get_citys($('#city'),province,0);
+	
+	var company=$('#company').val();
+	var cid=$('#custom_cate').val(); 
+	var city=0;
+	custom_get(company,cid,province,city);
+});
+$('#company,#custom_cate,#city').change(function(){
+	var company=$('#company').val();
+	var cid=$('#custom_cate').val();
+	var province=$('#province').val();
+	var city=$('#city').val();
+	custom_get(company,cid,province,city); 
+});
+function custom_get(company,cid,province,city){
+	if(province==0){
+		return false;
+	}
+	$.post(url_custom_get,{'company':company,'cid':cid,'type':1,'province':province,'city':city},function(data){
+		if(data.code!=1){
+			return false;
+		} 
+		var list=data.data;
+		var options='<option value="0">请选择客户</option>';
+		for(var i in list){
+			options+='<option value="'+i+'" >'+list[i]['code']+','+list[i]['name']+'</option>';
+		}
+		$('#custom').html(options); 
+		$('.accept input').val('');
+	},'json');
+}
+$('#custom').change(function(){
+	 var custom=$(this).val();
+	 custom_change(custom);
+});
+function custom_change(custom){ 
+	 
+	 if(custom==0){ 
+		 $('.accept select').val(0);
+		 $('#custom_link').attr('href',url_custom+custom);
+		 return false;
+	 } 
+	  $('#custom_link').attr('href',url_custom+custom);
+	 $.post(url_custom_info,{'uid':custom},function(data){
+			if(data.code!=1){
+				return false;
+			}  
+			var info=data.data;
+			console.log(info);
+			$('#custom_code').val(info.code);
+			$('#custom_uname').val(info.name);
+		    var list=info.tels;
+			var selected=''; 
+			 
+			var options='<option value="0" >选择联系人</option>'; 
+			//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
+			for(var i in list){
+				if(info.contacter==i){
+					selected='selected';  
+				}else{
+					selected=''; 
+				}  
+			    options=options+'<option value="'+list[i]['id']+'" city="'+list[i]['city']+
+				'" province="'+list[i]['province']+'" area="'+list[i]['area']+ 
+				'" position="'+list[i]['position']+ 
+				'" sex="'+list[i]['sex']+'" area="'+list[i]['mobile']+ 
+				'" fax="'+list[i]['fax']+ 
+				'" qq="'+list[i]['qq']+'" wechat="'+list[i]['wechat']+ 
+				'" email="'+list[i]['email']+'" aliid="'+list[i]['aliid']+ 
+				'" wechatphone="'+list[i]['wechatphone']+'" wechatname="'+list[i]['wechatname']+
+				'" taobaoid="'+list[i]['taobaoid']+'" street="'+list[i]['street']+'" '+selected+' >'+
+				list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
+				list[i]['postcode']+'</option>'; 
+			}
+			 $('#accept').html(options);  
+			 accept_change();  
+		},'json');  
+}
+
+ 
+$('#accept').change(function(){
+	accept_change(); 
+});
+function accept_change(){
+	if($('#accept').val()=='0'){
+		return 0;
+	}
+	 $option=$('#accept option:selected').eq(0);
+	 var strs=$.trim($option.text());
+	 var arrs=strs.split(','); 
+	 var name=arrs[0];
+	 var mobile=arrs[1];
+	 var phone=arrs[2]; 
+	 var postcode=arrs[3]; 
+	 var province=$option.attr('province');
+	 var city=$option.attr('city');
+	 var position=$option.attr('position');
+	 var area=$option.attr('area');
+	 var sex=$option.attr('sex');
+	 var fax=$option.attr('fax');
+	 var qq=$option.attr('qq');
+	 var wechat=$option.attr('wechat');
+	 var email=$option.attr('email');
+	 var aliid=$option.attr('aliid');
+	 var wechatphone=$option.attr('wechatphone');
+	 var wechatname=$option.attr('wechatname');
+	 var taobaoid=$option.attr('taobaoid');
+	 var street=$option.attr('street');
+	 if(sex==2){
+		 sex=2;
+	 }else{
+		 sex=1;
+	 }
+	 $('#custom_sex').val(sex);
+	 $('#custom_name').val(name);
+	 $('#custom_mobile').val(mobile);
+	 $('#custom_phone').val(phone);
+	 $('#custom_postcode').val(postcode);
+	 $('#custom_position').val(position);
+	 $('#custom_fax').val(fax);
+	 $('#custom_qq').val(qq);
+	 $('#custom_wechat').val(wechat);
+	 $('#custom_email').val(email);
+	 $('#custom_aliid').val(aliid);
+	 $('#custom_wechatphone').val(wechatphone);
+	 $('#custom_wechatname').val(wechatname);
+	 $('#custom_taobaoid').val(taobaoid);
+	 $('#custom_street').val(street);
+	 
+	 $('#custom_aliid').val(aliid);
+	 $('#custom_wechatphone').val(wechatphone);
+	 
+	 get_citys($('#custom_province'),1,$option.attr('province'));
+	 get_citys($('#custom_city'),$option.attr('province'),$option.attr('city'));
+	 get_citys($('#custom_area'),$option.attr('city'),area);
+}
+ 
+var ok_add="{$ok_add|default=2}";
+ 
+//仓库
+var stores={$stores_json};
+var stores_tr="{$stores_tr}";
+var url_goods_add="{:url('orderq/Orderqajax/goods_add')}";
+var href_goods="{:url('goods/AdminGoods/edit','',false,false)}";
+var image_url="{$image_url}";
+/* 标记未知产品 */
+var goods_flag="{$goods_flag|default=-1}";
+var $check=$('.check').eq(0);
+$check.click();
+ 
+var option_issup='';
+<foreach name="is_sups" item="sup" key="ksup">
+option_issup+='<option value="{$ksup}"  >{$sup}</option>';
+</foreach> 
+var option_sup='';
+<foreach name="sups" item="sup" key="ksup">
+option_sup+='<option value="{$ksup}"  >{$sup.code},{$sup.name}</option>';
+</foreach> 
+ 
+var tr0='<tr class="goods_tr " id="goods-1">'+
+ '<td><label class="radio-inline">'+
+ '<input type="radio" name="check" class="check" />产品替换</label></td>'+
+  '<td class="code"> </td>'+
+  '<td class="cname1"><span></span><input type="hidden"/> </td>'+ 
+ '<td class="cname2"><span></span><input type="hidden"/>  </td>'+ 
+ '<td class="code_name"><input type="text"  class="form-control  " value=" "/></td>'+
+   '<td  class="name"><input type="text"  class="form-control" value=" "/></td>'+ 
+ '<td class="tableImg"></td>'+
+ '<td class="store_num clickInfo"></td>'+ 
+ '<td class="price_sale"><input type="text" class="form-control  " /></td>'+
+  '<td class="price_real"><input type="text"  class="form-control  " /></td>'+
+  '<td  class="num"><input type="text" class="form-control input-order" value="1"/></td>'+
+ '<td class="dsc"><input type="text"  class="form-control " value=""/></td>'+ 
+ '<td class="send_dsc"><input type="text"  class="form-control " value=""/></td>'+ 
+ '<td class="is_sup"><select class="form-control short">'+option_issup+'</select></td>'+
+ '<td class="sup"><select class="form-control short">'+option_sup+'</select></td>'+ 
+  '<td class="price_in"><input type="text" class="form-control  " /></td>'+
+  '<td> <input type="hidden" class="goods_id" />'+
+'<button type="button" class="goods_del">删除</button></td></tr>';
+$(document).on('click','.check',function(){
+	$check=$(this);
+});
+$('#goods_add').click(function(){
+	if($('.cate').val()=='0'){
+		$('.cate').focus();
+		return false;
+	}
+	goods_flag--;
+ 
+	var goods=parseInt($(this).siblings('.goods').val());
+	 /* 不能重复添加产品 */
+	if(goods>0){
+		$('.goods_id').each(function(){
+			if($(this).val()==goods){ 
+				$(this).parents('tr').find('.num input').focus();
+				goods=0;
+				return false;
+			}
+		});
+		if(goods==0){
+			return false;
+		}
+	}else{
+		goods=goods_flag;
+	}
+	 
+	var $goods_tr= $check.parents('tr');
+	/* 新增 */
+	if($goods_tr.attr('id')=='goods0'){
+	   $('.goods-list').append(tr0);
+	  
+   	   $('#goods-1').attr('id','goods'+goods);
+   	   $goods_tr=$('#goods'+goods);
+	   $goods_tr.find('.code_name input').attr('name','code_names['+goods_flag+']');
+	   $goods_tr.find('.name input').attr('name','names['+goods_flag+']');
+	   $goods_tr.find('.price_sale input').attr('name','price_sales['+goods_flag+']');
+	   $goods_tr.find('.price_real input').attr('name','price_reals['+goods_flag+']');
+	   $goods_tr.find('.num input').attr('name','nums['+goods_flag+']');
+	   $goods_tr.find('.dsc input').attr('name','dscs['+goods_flag+']');
+	   $goods_tr.find('.send_dsc input').attr('name','send_dscs['+goods_flag+']');
+	   $goods_tr.find('.is_sup select').attr('name','is_sups['+goods_flag+']');
+	   $goods_tr.find('.sup select').attr('name','sups['+goods_flag+']');
+	   
+	   $goods_tr.find('.price_in input').attr('name','price_ins['+goods_flag+']');
+	   $goods_tr.find('.goods_id').attr('name','goods_ids['+goods_flag+']');
+	   $goods_tr.find('.cname1 input').attr('name','cid0s['+goods_flag+']');
+	   $goods_tr.find('.cname2 input').attr('name','cids['+goods_flag+']');
+	}else{
+		/* 编辑产品 */ 
+		$goods_tr.attr('id','goods'+goods);
+	}
+	 
+	$goods_tr.find('.goods_id').val(goods);
+	if(goods<0){  
+		 $goods_tr.find('.cname1 input').val($('.cate0').val());
+		 $goods_tr.find('.cname1 span').text($('.cate0 option:selected').eq(0).text());
+		 $goods_tr.find('.cname2 input').val($('.cate').val());
+		 $goods_tr.find('.cname2 span').text($('.cate option:selected').eq(0).text());
+		 return 0;
+	}
+	 
+	$.ajax({
+        type: 'POST',
+        url: url_goods_add,
+        dataType: 'json', 
+        data:{'id':goods},
+        success: function (data) {
+        	 
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	  
+     	    var info=data.data;
+     	    var tr='';
+     	    var div_pic='<div class="tdImg" style="background-size: 100% 100%;background-image:url('+
+     	    		image_url+'/'+info['pic']+');"></div>'+
+     	    '<div class="listposi">'+
+     	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
+		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
+		    var pics=info.pics;
+		    var nums=info.nums;
+		    for(var i in pics){
+		    	div_pic+='<li style="background-size: contain;background-image:url('+image_url+'/'+pics[i]['file1']+');">'+
+		    	'<input type="hidden" value="'+image_url+'/'+pics[i]['file3']+'"></li>'; 
+		    }
+		    div_pic+='</ul><span class="prev"><i class="left"></i></span>'+
+		    '<span class="next"><i class="right"></i></span></div></div>';
+		    var div_num='<div style="position:relative;" class="goInfo" data-width="0">';
+		    
+		    if(nums.hasOwnProperty(0)){
+		    	div_num+=nums[0]['num']+'('+nums[0]['num1']+')';
+		    }else{
+		    	div_num+='--';
+		    }
+		    div_num+='</div><div class="goodsInfo"><table class="table table-hover table-bordered">'+stores_tr+'<tbody><tr>';
+		    
+		    for(var i in stores){
+		    	if(nums.hasOwnProperty(i)){
+			    	div_num+='<td>'+nums[i]['num']+'('+nums[i]['num1']+')</td>';
+			    }else{
+			    	div_num+='<td>--</td>';
+			    }
+		    }
+		    div_num+='</tr></tbody></table>	</div>';
+		    $goods_tr.find('.tableImg').html(div_pic);
+		    $goods_tr.find('.store_num').html(div_num);
+		    $goods_tr.find('.code').html('<a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['code']+'</a>');
+		    $goods_tr.find('.cname1 span').html(info['cname1']);
+		    $goods_tr.find('.cname2 span').html(info['cname2']);
+		    $goods_tr.find('.cname1 input').val(info['cid0']);
+		    $goods_tr.find('.cname2 input').html(info['cid']);
+		    $goods_tr.find('.code_name input').val(info['code_name']);
+		    $goods_tr.find('.name input').val(info['name']);
+		    $goods_tr.find('.price_sale input').val(info['price_sale']); 
+		    $goods_tr.find('.price_in input').val(info['price_in']);
+		    
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
+$(document).on('click','.goods_del',function(){
+	$(this).parents('tr').remove(); 
+}); 
+ 
+ 
+</script>
+<script type="text/html" id="photos-item-pic1"> 
+<li id="saved-imagepic1{id}">
+    <input class="file0" id="photo-pic1{id}" type="hidden" name="pic1_urls[]" value="{filepath}">
+    <input class="form-control" id="photo-pic1{id}-name" type="text" name="pic1_names[]" value="{name}"
+           style="width: 200px;" title="图片名称">
+   
+	<div class="pic1" style="background-size:contain;background-image:url({url});"></div>
+   
+&nbsp;&nbsp;&nbsp;
+    <a href="javascript:(function(){$('#saved-image{pic1{id}').remove();})();">移除</a>
+</li>
+</script>
+
+<script type="text/html" id="photos-item-pic2"> 
+<li id="saved-imagepic2{id}">
+    <input class="file0" id="photo-pic2{id}" type="hidden" name="pic2_urls[]" value="{filepath}">
+    <input class="form-control" id="photo-pic2{id}-name" type="text" name="pic2_names[]" value="{name}"
+           style="width: 200px;" title="图片名称">
+   
+	<div class="pic1" style="background-size:contain;background-image:url({url});"></div>
+   
+&nbsp;&nbsp;&nbsp;
+    <a href="javascript:(function(){$('#saved-image{pic2{id}').remove();})();">移除</a>
+</li>
+</script>

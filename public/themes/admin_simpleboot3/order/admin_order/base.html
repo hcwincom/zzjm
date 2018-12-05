@@ -60,7 +60,7 @@
 					<select  class="form-control short-auto" id="custom_cate"  > 
 						<option value="0">客户分类</option>
 					<foreach name="custom_cates" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.cid"></if>>{$vo}</option>
+						<option value="{$key}" <if condition="$key eq $custom.cid">selected</if>>{$vo}</option>
 					</foreach>
 					</select>
 					<select  class="form-control short-auto" id="province"  > 

@@ -1,0 +1,45 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+		 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}" id="form-edit">
+			 
+			 <include file="orderq@admin_orderq:base" />
+			
+		 
+			<div class="form-group fleft-all">
+				<div class="col-sm-offset-2 col-sm-10"> 
+				 <p>
+				 <input type="hidden"  name="id" value="{$info.id}" />
+				 
+					<button type="submit" action="{:url('edit_do')}" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
+					<eq name="info.status" value="2">
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					 <button type="submit" action="{:url('order_do')}" class="order_do btn btn-primary js-ajax-submit" >转化订单</button>
+					</eq>  
+				</p>
+				 
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+<script>
+
+$('.order_do').click(function(){
+	$(this).parents('form').attr('action',$(this).attr('action'));
+});  
+ 
+$('.save').click(function(){
+	$(this).parents('form').attr('action',$(this).attr('action'));
+});
+</script>

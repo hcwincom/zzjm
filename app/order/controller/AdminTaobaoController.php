@@ -63,8 +63,8 @@ class AdminTaobaoController extends AdminBaseController
             'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
           
         $time=time();
-        $time_start=$time-3600*24*10;
-        $time_end=$time-3600*24*10;
+        $time_start=$time-2400*24;
+        $time_end=$time;
         $date_start=date('Y-m-d',$time_start);
         $date_end=date('Y-m-d',$time_end);
         $start_created = $date_start."%2000:00:00";
@@ -86,7 +86,7 @@ class AdminTaobaoController extends AdminBaseController
             $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
             
             $order = $client->getContent(); 
-          
+            zz_log($order);
             $state=intval($client->status);
            
             //返回状态失败

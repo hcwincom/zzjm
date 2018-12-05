@@ -348,7 +348,7 @@ class AdminOrdersupController extends AdminInfo0Controller
         $data_ordersup['postcode']=$data['postcode'];
         
         //单号 
-        $data_ordersup['name']=date('Ymd').substr($time,-8);
+        $data_ordersup['name']=date('Ymd').substr($time,-6).$admin['id'];;
         $m=$this->m;
         $m_info=Db::name('ordersup_goods');
         $m->startTrans();

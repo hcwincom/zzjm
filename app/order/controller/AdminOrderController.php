@@ -368,7 +368,7 @@ class AdminOrderController extends AdminInfo0Controller
         if($company['shop']!=$data_order['shop']){
             $this->error('订单来源错误');
         } 
-        $data_order['name']=$company['code'].date('Ymd').substr($time,-8);
+        $data_order['name']=$company['code'].date('Ymd').substr($time,-6).$admin['id'];
         $m=$this->m;
         $m_info=Db::name('order_goods');
         $m->startTrans();

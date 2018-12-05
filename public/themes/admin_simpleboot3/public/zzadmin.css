@@ -27,7 +27,22 @@
 	display:inline-block;
 	width: 150px;  
 }
-
+.short100{ 
+	display:inline-block;
+	width: 100px; 
+}
+.short150{ 
+	display:inline-block;
+	width: 100px; 
+}
+.short200{
+	display:inline-block;
+	width: 200px;  
+}
+.short300{
+	display:inline-block;
+	width: 300px;  
+}
 .short-auto{
 	display:inline-block;
 	width: auto;  
