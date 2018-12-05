@@ -1713,13 +1713,14 @@ class AdminOrderController extends AdminInfo0Controller
      * )
      */
     public function print_order(){
-        $id=$this->request->param('id');
+        $id=$this->request->param('id',0,'intval');
         $m=$this->m; 
         $info=$m
-        ->field('p.*,custom.name as uname,custom.mobile sa umobile')
         ->alias('p')
-        ->join('cmf_custom custom','custom.id=p.uid')
+        ->field('p.*,custom.name as uname,custom.mobile as umobile') 
+        ->join('cmf_custom custom','custom.id=p.uid','left')
         ->where('p.id',$id)->find();
+       
         if($info['is_real']!=1){
             $this->error('已拆分订单请单独打印');
         }

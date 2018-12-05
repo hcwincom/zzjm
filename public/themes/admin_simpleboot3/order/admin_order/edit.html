@@ -280,6 +280,15 @@ $(document).on('click','.order_break',function(){
 	 
 });
 $('.save').click(function(){
+	//addressinfo
+	if($('#area').val()=='0'){
+		$('#area').focus();
+		return false;
+	}
+	var c1=$.trim($('#province option:selected').text());
+	var c2=$.trim($('#city option:selected').text());
+	var c3=$.trim($('#area option:selected').text());
+	$('#addressinfo').val(c1+'-'+c2+'-'+c3);
 	$(this).parents('form').attr('action',$(this).attr('action'));
 });
 </script>

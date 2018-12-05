@@ -168,7 +168,7 @@ class OrderModel extends Model
              
          ];
          //收货信息，子订单可以单独修改，总订单修改后同步到子订单
-         $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode'];
+         $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','addressinfo'];
           
          //总订单信息系
          $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','ok_break'];
@@ -188,6 +188,7 @@ class OrderModel extends Model
                  $content[$v]=$data[$v];
              }
          }
+        
          //主订单才有发票和付款信息
          if($info['fid']==0){
              //发票信息

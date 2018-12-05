@@ -112,8 +112,20 @@
                 <p>配货清单</p>
             </div>
             <div>
-                <span>客户:{$info.uname|default=$info.accept_name}</span>
-                <span>电话：{$info.umobile|default=$info.mobile}</span>
+                <span>客户
+                <empty name="info.uname">
+                	{$info.accept_name}
+                <else/>
+                	{$info.uname}
+                </empty> 
+                </span>
+                <span>电话：
+                <empty name="info.umobile">
+                	{$info.mobile}
+                <else/>
+               	 	{$info.umobile}
+                </empty> 
+                </span>
             </div>
         </div>
         <table class="table table-hover table-bordered tableBorder">
@@ -129,27 +141,24 @@
             <tbody>
             <foreach name="goods" item="vo">
                 <tr>
-                    <td>{$vo.goods_name}</td>   
-                    <td>{$info.goodsStyle}</td>  
-                    <td>￥<span>{$info.goodsPrice}</span></td>
-                    <td>{$info.goodsNum}</td>
-                    <td>￥<span>{$info.subtotal}</span></td>
+                    <td>
+                    <empty name="vo.goods_uname">
+                    	<empty name="vo.print_name">
+                    	 {$vo.goods_name}
+                    	<else/>
+                    	 {$vo.print_name}
+                    	</empty>
+                    <else/>
+                    	{$vo.goods_uname}
+                    </empty>
+                   </td>   
+                    <td>{$vo.goods_code}</td>  
+                    <td>￥<span>{$vo.price_real}</span></td>
+                    <td>{$vo.num}</td>
+                    <td>￥<span>{$vo.pay}</span></td>
                 </tr>
              </foreach>
-                <tr>
-                    <td>{$info.goodsName}</td>
-                    <td>{$info.goodsStyle}</td>
-                    <td>￥<span>{$info.goodsPrice}</span></td>
-                    <td>{$info.goodsNum}</td>
-                    <td>￥<span>{$info.subtotal}</span></td>
-                </tr>
-                <tr>
-                    <td>{$info.goodsName}</td>
-                    <td>{$info.goodsStyle}</td>
-                    <td>￥<span>{$info.goodsPrice}</span></td>
-                    <td>{$info.goodsNum}</td>
-                    <td>￥<span>{$info.subtotal}</span></td>
-                </tr>
+                
             
             </tbody>
         </table>
@@ -161,16 +170,16 @@
                 <col width="50%"><col>            
             </colgroup>
             <tr>
-                <td>订单附言：{$info.postscript}</td>
+                <td>订单附言：{$info.udsc}</td>
                 <td>配送：先收款后发货</td>
             </tr>
             <tr>
-                <td>地址：{$info.rece_address}</td>
-                <td>收货人：{$info.customer}</td>
+                <td>地址：{$info.addressinfo}{$info.address}</td>
+                <td>收货人：{$info.accept_name}</td>
             </tr>
             <tr>
-                <td>手机：{$info.cusTele}</td>
-                <td>电话：{$info.cusPhone}</td>
+                <td>手机：{$info.mobile}</td>
+                <td>电话：{$info.phone}</td>
             </tr>
     
         </tbody>
