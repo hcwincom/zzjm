@@ -443,6 +443,7 @@ class AdminGoodsController extends AdminBaseController
     }
     public function print1(){
         $info=[
+            'oid'=>'1',
             'orderNum'=>'12365478965412',
             'orderDate'=>'2018-10-20',
             'customer'=>'测试',
@@ -450,7 +451,7 @@ class AdminGoodsController extends AdminBaseController
             'cusTele'=>'',
             'goodsName'=>'测试商品名称',
             'goodsStyle'=>'10-14-52',
-            'goodsPrice'=>'55.00',
+            'goodsPrice'=>'111111111',
             'goodsNum'=>'66',
             'subtotal'=>"3630",
             'rece_address'=>'安徽省 合肥市',
