@@ -5,11 +5,13 @@ namespace app\order\controller;
  
 use think\Db; 
 use app\order\model\OrderModel;
-use cmf\controller\AdminBaseController;
+use cmf\controller\HomeBaseController;
 use taobao\Taobao;
 use app\store\model\StoreGoodsModel;
-
-class AdminTaobaoController extends AdminBaseController
+/**
+ * 定时任务 
+ */
+class TaskController extends HomeBaseController
 {
     private $m;
     private $flag;
@@ -19,8 +21,7 @@ class AdminTaobaoController extends AdminBaseController
    
     public function _initialize()
     {
-        parent::_initialize();
-       
+        
         $this->flag='订单';
         $this->table='order';
         $this->m=new OrderModel();
@@ -30,37 +31,31 @@ class AdminTaobaoController extends AdminBaseController
          
     }
     /**
-     * 淘宝订单导入
-     * @adminMenu(
-     *     'name'   => '淘宝订单导入',
-     *     'parent' => 'order/AdminIndex/default',
-     *     'display'=> false,
-     *     'hasView'=> true,
-     *     'order'  => 2,
-     *     'icon'   => '',
-     *     'remark' => '淘宝订单导入',
-     *     'param'  => ''
-     * )
+     * 淘宝订单同步，30分钟一次
      */
-    public function index()
+    public function tabao_get()
     {
         set_time_limit(300);
+        $log='taobao_get.txt'; 
         //统一文件锁
         $file = "log/taobao_lock.txt";  
         $fp = fopen($file, "r"); 
         if (flock($fp, LOCK_EX )){ 
             
             header("Content-type: text/html; charset=utf-8");
-            $admin=$this->admin;
-            $shop=($admin['shop']==1)?2:$admin['shop'];
+              
             $where=[
-                'shop'=>$shop,
+                
                 'type'=>2,
                 'status'=>2,
             ];
-            $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key,store');
+            $companys0=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key,store,shop');
+            if(empty($companys0)){
+                zz_log('没有需要查询的数据',$log);
+                exit;
+            }
             $order_type=$this->order_type; 
-            $log='taobao.log'; 
+           
             $m_store_goods=new StoreGoodsModel(); 
             $fields = 'tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time,'.
                 'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
@@ -72,84 +67,82 @@ class AdminTaobaoController extends AdminBaseController
             $date_end=date('Y-m-d',$time_end);
             $start_created = $date_start."%2000:00:00";
             $end_created = $date_end."%2023:59:59";
+            $companys=[];
+            foreach($companys0 as $k=>$v){
+                $companys[$v['shop']][]=$v;
+            }
+            $shops=array_keys($companys);
             //获取近期的所有的淘宝id，比较是否需要更换
             $where=[
-                'shop'=>['eq',$shop],
+                'shop'=>['in',$shops],
                 'order_type'=>['eq',$order_type],
                 'create_time'=>['egt',$time_start],
             ];
             $m=$this->m;
-            $m_store_goods=
-            $oids=$m->where($where)->column('name,id,status,pay_status,paytype,pay_type,order_amount,pay_time','name');
+            $m_store_goods=new StoreGoodsModel();
+            $oids0=$m->where($where)->column('id,name,status,pay_status,paytype,pay_type,order_amount,pay_time,shop');
+            $oids=[];
+            foreach($oids0 as $k=>$v){
+                $oids[$v['shop']][$v['name']]=$v;
+            }
             $m->startTrans();
-            foreach($companys as $k=>$v){
-               
-                $client = new Taobao($v['key_account'], $v['key_key']); 
-                $status = ""; 
-                $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
-                
-                $order = $client->getContent(); 
-                zz_log($order);
-                $state=intval($client->status);
-               
-                //返回状态失败
-                if($state!=200){
-                    echo '<h2>分公司'.$v['name'].'淘宝同步失败</h2>'; 
-                    continue;
-                }  
-                $json=json_decode($order,true);
-                if(empty($json['trades_sold_get_response'])){
-                    echo '<h2>分公司'.$v['name'].'淘宝同步失败'.$order.'</h2>';
-                    echo '<h2>'.$order.'</h2>';
-                    continue;
-                } 
-                //所有的订单
-                $trades=$json['trades_sold_get_response']['trades']['trade'];
-               
-                foreach($trades as $kk=>$vv){
+            //淘宝店铺循环查询
+            foreach($companys as $shop=>$vcompanys){
+                foreach($vcompanys as $k=>$v){
+                    $client = new Taobao($v['key_account'], $v['key_key']);
+                    $status = "";
+                    $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
                     
-                    //订单已存在
-                    $update_order=[];
-                    $old_status=1;
-                    if(isset($oids[$vv['tid']])){
-                        $oid=$oids[$vv['tid']]['id'];
-                        $old_status=$oids[$vv['tid']]['status'];
-                        //要比较订单状态和产品
-                        //根据订单状态比较
-                        $res=$this->order_update($vv,$oids[$vv['tid']],$v);
-                        if(!($res>0)){
-                            $m->rollback();
-                            flock($fp,LOCK_UN);
-                            fclose($fp);
-                            exit('分公司'.$v['name'].'淘宝更新订单'.$vv['tid'].'失败,'.$res);
-                        }  
-                        //已存在订单可能有修改价格,暂时不管
-                    }else{ 
-                         //新增 
-                        $oid=$this->order_add($vv,$v,$shop,$admin['id']); 
-                        if(!($oid>0)){
-                            $m->rollback();
-                            flock($fp,LOCK_UN);
-                            fclose($fp);
-                            exit('分公司'.$v['name'].'淘宝增加订单'.$vv['tid'].'失败,'.$oid);
-                        }  
+                    $order = $client->getContent(); 
+                    $state=intval($client->status); 
+                    //返回状态失败
+                    if($state!=200){ 
+                        zz_log('分公司'.$v['name'].'淘宝同步失败',$log);
+                        continue;
+                    }
+                    $json=json_decode($order,true);
+                    if(empty($json['trades_sold_get_response'])){ 
+                        zz_log('分公司'.$v['name'].'淘宝同步失败'.$order,$log);
+                        continue;
+                    }
+                    //所有的订单
+                    $trades=$json['trades_sold_get_response']['trades']['trade'];
+                    foreach($trades as $kk=>$vv){ 
+                        //订单已存在
+                        $update_order=[];
+                        $old_status=1;
+                        if(isset($oids[$vv['tid']])){
+                            $oid=$oids[$vv['tid']]['id'];
+                            $old_status=$oids[$vv['tid']]['status'];
+                            //要比较订单状态和产品
+                            //根据订单状态比较
+                            $res=$this->order_update($vv,$oids[$vv['tid']],$v);
+                            if(!($res>0)){ 
+                                zz_log('分公司'.$v['name'].'淘宝更新订单'.$vv['tid'].'失败,'.$res,$log);
+                                continue;
+                            }
+                            //已存在订单可能有修改价格,暂时不管
+                        }else{
+                            //新增
+                            $oid=$this->order_add($vv,$v,$shop);
+                            if(!($oid>0)){
+                                zz_log('分公司'.$v['name'].'淘宝添加订单'.$vv['tid'].'失败,'.$res,$log);
+                                continue; 
+                            }
+                        }
+                        $res=$m->status_change($oid,$old_status,2);
+                        if(!($res>0)){ 
+                            zz_log('分公司'.$v['name'].'淘宝订单'.$vv['tid'].'库存更新失败,'.$res,$log);
+                            continue; 
+                        }
                     } 
-                    $res=$m->status_change($oid,$old_status,2);
-                    if(!($res>0)){
-                        $m->rollback();
-                        flock($fp,LOCK_UN);
-                        fclose($fp);
-                        exit('分公司'.$v['name'].'淘宝订单'.$vv['tid'].'库存更新失败,'.$res);
-                    }  
-                }
-                echo '<h2>分公司'.$v['name'].'淘宝同步完成</h2>'; 
-               
+                } 
             }
             $m->commit();
         }  
         flock($fp,LOCK_UN);
         fclose($fp);
-      
+        zz_log('淘宝同步结束',$log);
         exit();
     }   
     /**
@@ -294,16 +287,11 @@ class AdminTaobaoController extends AdminBaseController
         $ogs=$taobao['orders']['order'];
         //用于没查找到数据的产品的goods-id
         $flag=0;
+        //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
         foreach($ogs as $k=>$v){
             
             $rows=['oid'=>$oid];
-           
-            //outer_sku_id	String	81893848	外部网店自己定义的Sku编号
-            //outer_sku_id
-            //$tmp_goods['goods_code'] = $v['outer_sku_id'];//产品编码
-            //outer_iid	String	152e442aefe88dd41cb0879232c0dcb0
-            //商家外部编码(可与商家外部系统对接)。外部商家自己定义的商品Item的id，可以通过taobao.items.custom.get获取商品的Item的信息
-            //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
+            
             if(empty($v['outer_sku_id'])){
                 if(empty($v['outer_iid'])){
                     //标记排序，如果产品没有编码,没找到产品 

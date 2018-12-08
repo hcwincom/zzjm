@@ -1,0 +1,560 @@
+ 		<notempty name="info1.id">
+ 			 <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">编辑id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info1.id}" readonly/> 
+					<a href="{:url('edit',['id'=>$info.id])}" target="{$zztarget['edit']}">编辑</a> 
+				</div>
+			</div>
+ 		</notempty>
+ 		
+ 		<notempty name="info.id">
+			  <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">售后id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info.id}" readonly/>
+				 
+					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">编辑记录</a>
+			  
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">售后编号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control"  value="{$info.name}" readonly/> 
+				</div>
+			</div>
+			 
+		</notempty> 
+			  
+	   		 <div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">售后单关联</label>
+				<div class="col-md-6 col-sm-10">
+					
+				 	<label class="input-inline">  
+				 	关联订单类型
+				 	<select  class="form-control short-auto"  name="order_type" required >
+						<option value="1">客户订单</option>
+					 	<option value="2" <eq name="order_type" value="2">selected</eq>>采购订单</option>
+					</select> 
+				 	</label>
+				 	<label class="input-inline">  
+				 	订单所属公司
+				 	<select class="form-control short-auto" name="company" id="company">
+						<option value='0'>所属公司</option> 
+						 <foreach name="companys" item="vo" k="key">
+						<option value="{$key}" <if condition="$key eq $order.company">selected</if>>{$vo}
+						</option>
+						</foreach>
+					</select> 
+				 	</label>
+				 	<label class="input-inline">  
+				 	关联id 
+				 	 <input type="text" class="form-control short" name="about" value="{$info.about|default=$order.id}"/>
+				 	</label>
+				 	<label class="input-inline">  
+				 	关联单号
+				 	 <input type="text" class="form-control short200" name="about_name" value="{$info.about_name|default=$order.name}"/>
+				 	</label> 
+				 	<a href="{$typeinfo['order_url'][$order_type]}/id/{$order.id}" target="{$zztarget['other']}">查{$typeinfo['order_type'][$order_type]}</a>
+				 	<p class="notice">id和单号至少填一个，以关联id为主</p>
+				</div>
+			</div>
+	   		 
+			 <div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">{$typeinfo['uflag'][$order_type]}信息</label>
+				<div class="col-md-6 col-sm-10">
+				 
+					 <label class="input-inline"> 
+					 	{$typeinfo['uflag'][$order_type]}名：
+					 	<input type="text" class="form-control short300" name="uname" value="{$info.uname|default=$order.uname}"/>
+				  		<a href="{$typeinfo['custom_url'][$order_type]}id/{$order.uid}" target="{$zztarget['other']}">查{$typeinfo['uflag'][$order_type]}</a>
+					</label>
+					 
+					<label class="input-inline"> 
+					 	联系人：
+					 	<input type="text" class="form-control short2" id="accept_name" name="accept_name" value="{$info.accept_name|default=$order.accept_name}"/>
+				 	<present name="change.accept_name">
+				 		<input type="text" class="form-control short2 red"  value="{$change.accept_name}"/>
+				 	</present>
+					</label>
+					 
+					<label class="input-inline"> 
+					 	手机：
+					 	<input type="text" class="form-control short2" name="mobile" id="mobile" value="{$info.mobile|default=$order.mobile}"/>
+					<present name="change.mobile">
+				 		<input type="text" class="form-control short2 red"  value="{$change.mobile}"/>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	电话：
+					 	<input type="text" class="form-control short2" name="phone" id="phone" value="{$info.phone|default=$order.phone}"/>
+					<present name="change.phone">
+				 		<input type="text" class="form-control short2 red"  value="{$change.phone}"/>
+				 	</present>
+					</label>
+					 
+					<label class="input-inline"> 
+					 	省：
+					 	<select  class="form-control short2" name="province" id="province"  > 
+							<option value="0">所在省</option> 
+						</select>
+					<present name="change.province">
+				 		<select  class="form-control short2 red"  id="province1"  > 
+							<option value="0">所在省</option> 
+						</select>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	市：
+					 	<select  class="form-control short2" id="city" name="city" > 
+							<option value="0">所在市</option> 
+						</select>
+					<present name="change.city">
+				 		<select  class="form-control short2 red"  id="city1"  > 
+							<option value="0">所在市</option> 
+						</select>
+				 	</present>
+					</label>
+					<label class="input-inline"> 
+					 	县：
+					 	<select  class="form-control short2" id="area" name="area" > 
+							<option value="0">所在县</option> 
+						</select>
+					<present name="change.area">
+				 		<select  class="form-control short2 red"  id="area1"  > 
+							<option value="0">所在县</option> 
+						</select>
+				 	</present>
+					</label> 
+					<label class="input-inline"> 
+					 	邮编：
+					 	<input type="text" class="form-control short" name="postcode" id="postcode" value="{$order.postcode}"/>
+					<present name="change.postcode">
+				 		<input type="text" class="form-control short2 red"  value="{$change.postcode}"/>
+				 	</present>
+					</label>
+					<label class="input-inline">  
+				 	城市地址：
+				 	<input type="text" class="form-control short300" name="addressinfo" id="addressinfo" value="{$order.addressinfo}" readonly/>
+					 <present name="change.addressinfo">
+				 		<input type="text" class="form-control short300 red"  value="{$change.addressinfo}"/>
+				 	</present>
+				 	</label> 
+					<label class="input-inline">  
+				 	详细地址：
+				 	<input type="text" class="form-control short300" name="address" id="address" value="{$order.address}"/>
+					 <present name="change.address">
+				 		<input type="text" class="form-control short300 red"  value="{$change.address}"/>
+				 	</present>
+				 	</label>
+			 		<div style="clear:both;"></div>
+			 		 
+				</div> 
+			</div>
+		 
+		  <table class="table table-hover table-bordered table-list goods-list"  > 
+		  	<tr class="goods0" id="goods0">
+			 	  
+			 	 <td >产品编码</td>  
+				 <td >产品名称</td>  
+				 <td >{$typeinfo['uflag'][$order_type]}名称</td>  
+				 <td >{$typeinfo['uflag'][$order_type]}型号</td>  
+				  <td >图片</td>
+				 <td >库存数</td>  
+				 <td >零售价</td>  
+				 <td >供应价</td>
+				 <td >数量</td>
+				 <td >支付金额</td> 
+				 <td >备注</td> 
+				 
+				 <td width="120">操作</td> 
+		 	</tr> 
+		 
+			  <foreach name="infos" item="vo" key="key">
+			    
+			   	<present name="change['goods'][$key]">
+			   		<assign name="vchange" value="$change['goods'][$key]"/>
+			   	</present> 
+     	     	<tr id="goods{$vo.goods}" class="goods_tr"> 
+     	     		  
+     	    		<td class="code"><a href="{$goods_url}/id/{$vo.goods}" target="{$zztarget.other}">{$vo.goods_code}</a>
+     	    		 
+     	    		</td>  
+     	   			<td >
+     	   				<input type="text" class="form-control  " value="{$vo.goods_name}"/> 
+     	   			</td>
+     	   			<td >
+     	   				<input type="text" class="form-control  " value="{$vo.goods_uname}"/> 
+     	   			</td>
+     	   			<td >
+     	   				<input type="text" class="form-control  " value="{$vo.goods_ucate}"/> 
+     	   			</td>
+     	   			<td class="tableImg">
+     	   			 
+     	   				<div class="tdImg" style="background-size: 100% 100%;background-image:url({:cmf_get_image_url($vo['goods_pic'])});"></div>
+     	   				 <notempty name="vo['pics']">
+     	   				<div class="listposi"> 
+     	     				<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>
+		    				<div class="imgGroup">
+		    				<ul class="imgList" class="imgList">
+		    				<foreach name="vo['pics']" item="pic" key="kpic">
+								<li  style="background-size: contain;background-image:url({$image_url}/{$pic.file1});"> 
+		    					<input type="hidden" value="{$image_url}/{$pic.file3}"></li>
+		    				</foreach>
+		    				</ul>
+		    				<span class="prev"><i class="left"></i></span>
+		    				<span class="next"><i class="right"></i></span>
+		    				</div>
+		    			</div>
+		    			</notempty>
+					</td> 
+					 
+     	   			<td class="store_num clickInfo">
+     	   				<div style="position:relative;" class="goInfo" data-width="0"> 
+     	   				<present name="vo['nums'][0]">
+     	   				{$vo['nums'][0]['num']}({$vo['nums'][0]['num1']})
+     	   				<else/>
+     	   				--
+     	   				</present> 
+     	   		 		</div>
+     	   		 		<div class="goodsInfo">
+	     	   		 		<table class="table table-hover table-bordered">
+		     	   		 		{$stores_tr}
+		     	   		 		<tbody>
+			     	   		 		<tr>
+			     	   		 		<foreach name="stores" item="svv" key="skk">
+			     	   		 			<td> 
+			     	   		 			<present name="goods[$vo['goods']]['nums'][$skk]">
+			     	   		 			{$vo['nums'][$skk]['num']}({$vo['nums'][$skk]['num1']})
+			     	   		 			<else/>
+			     	   		 			--
+			     	   		 			</present>
+			     	   		 			
+			     	   		 			</td>
+			     	   		 		</foreach>
+			     	   		 		</tr>
+		     	   		 		</tbody>
+	     	   		 		 
+						   </table>
+					   </div>
+					</td>
+					 
+     	   			 <td class="price_sale">
+     	    			<input type="text"  class="form-control  " value="{$vo.price_sale}" readonly/>
+     	    		 
+     	    		</td>
+     	    		<td class="price_real">
+     	    			<input type="text" name="price_reals[{$key}]" class="form-control  " value="{$vo.price_real}" readonly/>
+     	    		 
+     	    		</td>
+     	    			
+     	    		<td class="num">
+     	    			<input type="number" name="nums[{$key}]" class="form-control  " value="{$vo.num}"  />
+     	    		<present name="vchange['num']">
+     	    		 	<input type="number" class="form-control  red" value="{$vchange['num']}" readonly/> 
+     	    		</present> 
+     	    		</td> 
+     	    		<td class="pay">
+     	    			<input type="number" name="pays[{$key}]" class="form-control  " value="{$vo.pay}"  readonly/>
+     	    		<present name="vchange['pay']">
+     	    		 	<input type="number" class="form-control  red" value="{$vchange['pay']}" readonly/> 
+     	    		</present> 
+     	    		</td> 
+    	   			<td class="dsc">
+    	   				<input type="text"  name="dscs[{$key}]" class="form-control" value="{$vo.dsc}"/>
+    	   			<present name="vchange['dsc']">
+     	    		 	<input type="text" class="form-control  red" value="{$vchange['dsc']}" readonly/> 
+     	    		</present> 	
+    	   			</td>
+    	   			 
+    	   			<td class="">
+    	   			<present name="change['goods_del'][$key]">
+    	   				<span class="red">删除</span>
+    	   			<else/> 
+    	   			 	<input type="hidden" class="goods_id" value="{$vo['goods']}" name="goods_ids[{$key}]"/> 
+    	   			 	<button type="button" class="goods_del">删除</td> 
+    	   			</present> 
+    	   			</td>
+    	   		</tr>  
+			  </foreach> 
+		</foreach> 
+	 </empty>
+	 </table>
+	  <div class="form-group fleft-all"  ></div>
+		 <div style="clear:both"></div>	
+		 <div class="form-group fleft-all"  >
+			<label  class="col-sm-2 control-label">{$typeinfo['udo1'][$order_type]}备注</label>
+			<div class="col-md-6 col-sm-10" > 
+			  <input type="text" class="form-control" name="dsc1" value="{$info.dsc1}" />
+			<present name="change.dsc1">
+				<input type="text" class="form-control red"  value="{$change.dsc1}" />
+			</present>
+			</div>
+		</div>
+		
+		
+		
+		 <div class="form-group fleft-all"  >
+			<label  class="col-sm-2 control-label">{$typeinfo['udo1'][$order_type]}仓库和快递</label>
+			<div class="col-md-6 col-sm-10" > 
+				<label class="input-inline">
+				  仓库
+				   <select name="store1"  class="form-control short-auto" id="">
+				   	<foreach name="stores" item="vo">
+				   		<option value="{$key}"  <if condition="$key eq $info.store1">selected</if>>{$vo}</option>
+				   	</foreach>
+				   </select>
+			   </label>
+			 <eq name="order_type" value="2">
+			    <label class="input-inline">
+				   合作快递
+				   <select name="freight"  class="form-control short-auto freight" id="freight">
+				   		 
+				   	<foreach name="freights" item="vo">
+				   		<option value="{$key}" express="{$vo.express}" <if condition="$key eq $info.freight">selected</if>>{$vo.name}</option>
+				   	</foreach>
+				   </select>
+			   </label>
+			 </eq>
+			   <label class="input-inline">
+				   快递公司
+				   <select name="express1"  class="form-control short-auto express" id="express1">
+				   	<foreach name="expresses" item="vo">
+				   		<option value="{$key}" code="{$vo.code}" <if condition="$key eq $info.express1">selected</if>>{$vo.name}</option>
+				   	</foreach>
+				   </select>
+			   </label>
+			   
+			    <label class="input-inline">
+			    快递单号
+			    <input type="text"  name="express_no1"  class="form-control express_no short200" /> 
+			    
+			   </label>
+			    <a class="express_no_href">查快递</a>
+			</div>
+		</div>
+		<div class="form-group fleft-all ">
+			<label  class="col-sm-2 control-label">原订单付款信息</label>
+			<div class="col-md-6 col-sm-10"> 
+				 <label class="input-inline"> 
+					 支付运费：<input type="text" class="form-control short  " value="{$order.pay_freight}" readonly/> 
+					 
+					</label>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short  "  value="{$order.real_freight}" readonly/> 
+					 
+					 </label>
+				 	<label class="input-inline">
+					 产品总数量：<input type="text" class="form-control short  "  value="{$order.goods_num}" readonly/> 
+					 
+					</label>
+				 	 <label class="input-inline">
+					 产品总金额：<input type="text" class="form-control short  " value="{$order.goods_money}" readonly/> 
+				 
+					</label>
+				 	 <label class="input-inline">
+					 优惠金额：<input type="text" class="form-control short  " value="{$order.discount_money}" readonly/> 
+					 
+					</label>
+					 <label class="input-inline">
+					 税费：<input type="text" class="form-control short  " value="{$order.tax_money}" readonly/> 
+					 
+					</label>
+					 <label class="input-inline">
+					 其它费用：<input type="text" class="form-control short  "  value="{$order.other_money}" readonly/> 
+					 
+					</label>
+					 
+				 	 <label class="input-inline"> 
+					 总付款：<input type="text" class="form-control short  " value="{$order.order_amount}" readonly/> 
+					 
+				 	</label> 
+			</div>
+		</div>
+		<div class="form-group fleft-all ">
+			<label  class="col-sm-2 control-label">售后类型和退款</label>
+			<div class="col-md-6 col-sm-10"> 
+				 <label class="input-inline">  
+				 	售后类型
+				 	<select  class="form-control short-auto"  name="type" required >
+				 	<foreach name="orderback_types" item="vo"> 
+						<option value="{$key}" <if condition="$key eq $info.type">selected</if>>{$vo}</option>
+					</foreach> 
+					</select> 
+				</label>
+				<label class="input-inline">  
+				 	售后产品总金额
+				 	 <input type="text"  class="form-control short goods_money" name="goods_money" value="{$info.goods_money|default=$order.goods_money}" readonly/>
+				</label>
+				<label class="input-inline">  
+				 	付款/退款金额
+				 	 <input type="text"  class="form-control short back_money" name="back_money" value="{$info.back_money}" />
+				<present name="change.back_money">
+					 <input type="text"  class="form-control short red" name="back_money"  value="{$change.back_money}"/>
+				</present>
+				</label>
+			</div>
+		</div>
+		
+		<div class="form-group fleft-all ">
+			<label  class="col-sm-2 control-label">{$typeinfo['udo2'][$order_type]}备注</label>
+			<div class="col-md-6 col-sm-10"> 
+				<input type="text" class="form-control " name="dsc2" value="{$info.dsc2}" id="dsc2"/> 
+			<present name="change.dsc2">
+				<input type="text" class="form-control red"  value="{$change.dsc2}" />
+			</present>
+			</div>
+		</div>
+		  <div class="form-group fleft-all"  >
+			<label  class="col-sm-2 control-label">{$typeinfo['udo2'][$order_type]}快递</label>
+			<div class="col-md-6 col-sm-10" > 
+				<label class="input-inline">
+				  	仓库
+				   <select name="store2"  class="form-control short-auto" id="">
+				   	<foreach name="stores" item="vo">
+				   		<option value="{$key}"  <if condition="$key eq $info.store2">selected</if>>{$vo}</option>
+				   	</foreach>
+				   </select>
+			   </label>
+			   <eq name="order_type" value="1">
+			    <label class="input-inline">
+				   合作快递
+				   <select name="freight"  class="form-control short-auto freight" id="freight">
+				   	<foreach name="freights" item="vo">
+				   		<option value="{$key}" express="{$vo.express}" <if condition="$key eq $info.freight">selected</if>>{$vo.name}</option>
+				   	</foreach>
+				   </select>
+			   </label>
+			 </eq>
+			   <label class="input-inline">
+			   快递公司
+			   <select name="express2"  class="express form-control short-auto" id="express2">
+			   	<foreach name="expresses" item="vo">
+			   		<option value="{$key}" code="{$vo.code}" <if condition="$key eq $info.express2">selected</if>>{$vo.name}</option>
+			   	</foreach>
+			   </select>
+			   </label>
+			   
+			    <label class="input-inline">
+			    快递单号
+			    <input type="text"  name="express_no2" class="express_no form-control short200" /> 
+			   </label>
+			    <a class="express_no_href">查快递</a>
+			</div>
+		</div>
+	    <div class="form-group fleft-all ">
+			<label for="" class="col-sm-2 control-label">{$typeinfo['udo1'][$order_type]}上传图片</label>
+				<div class="col-md-6 col-sm-10">
+				  <ul id="pics" class="pic-list list-unstyled form-inline">
+				 
+			<notempty name="info.pics"> 
+				<foreach name="info.pics" item="vo"> 
+				   <li id="saved-imagepics{$key}">
+				    <input class="form-control" id="photo-pics{$key}-name" type="text" name="pics_names[]" value="{$vo.name}"
+				               style="width: 200px;" title="图片名称"> 
+				        
+				       <input class="file0" id="photo-pics{$key}" type="hidden" name="pics_urls[]" value="{$vo.url}">
+				       
+						<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.url)});"></div>
+				       <a href="{:url('orderback_pic_load',['id'=>$info.id,'sort'=>$key])}">下载</a>
+				     	&nbsp;&nbsp;&nbsp; 
+				        <a href="javascript:(function(){$('#saved-imagepics{$key}').remove();})();">移除</a> 
+				    </li>
+				 </foreach>   
+			</notempty>
+					</ul> 
+			    	<a href="javascript:uploadMultiImage('图片上传','#pics','photos-item-pics');"
+                              class="btn btn-default btn-sm">选择图片</a> 
+			</div>
+		</div>	
+	<present name="change.pics">
+	 <div class="form-group fleft-all red">
+			<label for="" class="col-sm-2 control-label">上传图片</label>
+				<div class="col-md-6 col-sm-10">
+				  <ul id="pics" class="pic-list list-unstyled form-inline">
+			 
+				<foreach name="change.pics" item="vo"> 
+				   <li id="saved-imagepics{$key}">
+				    <input class="form-control" id="photo-pics{$key}-name" type="text" name="pics_names[]" value="{$vo.name}"
+				               style="width: 200px;" title="图片名称"> 
+				        
+				       <input class="file0" id="photo-pics{$key}" type="hidden" name="pics_urls[]" value="{$vo.url}">
+				       
+						<div class="pics" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.url)});"></div>
+				       
+				    </li>
+				 </foreach>  
+					</ul> 
+			     
+			</div>
+		</div>	
+	</present>
+	  
+	<notempty name="info">
+		 
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">售后状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="statuss" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}"  <if condition="$key eq $info.status">checked</if>/>{$vo}
+			 		<if condition="isset($change.status) && ($key eq $change.status)">
+			 		<span class="red">新状态</span>
+			 		</if>
+			 	</label>
+			 </foreach>
+			 <p class="notice"> 重新下单发货的意思是重新添加客户订单或采购单</p>
+			</div>
+		</div>
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">{$typeinfo['udo1'][$order_type]}状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="status1" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}"   <if condition="$key eq $info.status1">checked</if>/>{$vo}
+			 		 
+			 	</label>
+			 </foreach> 
+			  <present name="change.status1">
+			 	<span class="red">{$status1[$change.status1]}</span>
+			 </present>
+			</div>
+		</div>
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">{$typeinfo['udo2'][$order_type]}状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="status2" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}"  <if condition="$key eq $info.status2">checked</if>/>{$vo}
+			 		 
+			 	</label> 
+			 </foreach>
+			  <present name="change.status2">
+			 	<span class="red">{$status2[$change.status2]}</span>
+			 </present> 
+			</div>
+		</div>
+		<div class="form-group fleft-all">
+			<label   class="col-sm-2 control-label">货款状态</label>
+			<div class="col-md-6 col-sm-10">
+			 
+			 <foreach name="pay_status" item="vo">
+			  	<label class="radio-inline">
+			 		<input type="radio" value="{$key}"  <if condition="$key eq $info.pay_status">checked</if>/>{$vo}
+			 		 
+			 	</label> 
+			 </foreach>
+			  <present name="change.pay_status">
+			 	<span class="red">{$pay_status[$change.pay_status]}</span>
+			 </present> 
+			</div>
+		</div>
+		 <include file="public@adsc_fleft" /> 
+	</notempty> 
+ 
+   <include file="orderback@admin_orderback:js" />  
+      <include file="goods@admin_goods/big" />

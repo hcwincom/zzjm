@@ -19,6 +19,12 @@
 				<neq name="info.fid" value="0">
 					&nbsp;&nbsp;<a href="{:url('edit',['id'=>$info.fid])}" target="{$zztarget['edit']}">主订单</a>
 				</neq>
+				<if condition="$info.status elt 30 && $info.status egt 26"> 
+				&nbsp;&nbsp;<a href="{:url('orderback/AdminOrderback/add',['oid'=>$info.id,'order_type'=>1])}" target="{$zztarget['edit']}">申请售后</a>
+				</if>
+				<eq name="info.is_back" value="1">
+				&nbsp;&nbsp;<a href="{:url('orderback/AdminOrderback/index',['type1'=>'p.about','name'=>$info.id])}" target="{$zztarget['edit']}">售后记录</a>
+				</eq>
 				</div>
 			</div>
 			<div class="form-group fleft">

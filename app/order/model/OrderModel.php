@@ -733,7 +733,7 @@ class OrderModel extends Model
          }
          return 1;
      }
-     /* 订单确认后，产品出库未提交 */
+     
      /**
       * 订单提交配货申请,只能是实际单号提交
       * @param number $id

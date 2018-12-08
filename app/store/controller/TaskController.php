@@ -16,7 +16,10 @@ class TaskController extends HomeBaseController
     {
          
     }
-     //每天3点,历史库存
+    
+     /**
+      * 每天3点,历史库存
+      */
      public function store_history(){
          set_time_limit(300);
          $time=time();
@@ -43,10 +46,14 @@ class TaskController extends HomeBaseController
              }
              $m_history->insertAll($tmp);
          }
+         $m_new->commit();
          dump($count);
      }
      
-     //每天2点,空间占用
+     
+     /**
+      * 每天2点,空间占用
+      */
      public function space_count(){
          set_time_limit(300);
          $time=time();

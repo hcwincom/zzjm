@@ -58,6 +58,7 @@ class OldController extends AdminBaseController
             '供货商(同步分类和主体，关联联系人和付款账号)'=>url('supplier'),   
             '订单'=>url('order'), 
             '发货记录'=>url('freight_doc'),
+            '清空库存，出入库记录，料位，编辑记录,采购单，售后单'=>url('store_clear'),
            
         ];
         $this->assign('list',$list);
@@ -1089,6 +1090,30 @@ class OldController extends AdminBaseController
             $row_mew=$m_new->insertAll($data);
         } 
         $m_new->commit();
+        
+        echo ('end');
+    }
+    //发货记录
+    public function store_clear(){
+        set_time_limit(300);
+       
+        //订单主体
+        $m_new=Db::name('store_goods');
+       
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_store_goods');
+        $m_new->execute('truncate table cmf_store_in');
+        $m_new->execute('truncate table cmf_store_box'); 
+        $m_new->execute('truncate table cmf_edit'); 
+        $m_new->execute('truncate table cmf_edit_info'); 
+        $m_new->execute('truncate table cmf_msg'); 
+        $m_new->execute('truncate table cmf_msg_txt'); 
+        $m_new->execute('truncate table cmf_ordersup'); 
+        $m_new->execute('truncate table cmf_ordersup_goods'); 
+        $m_new->execute('truncate table cmf_orderback'); 
+        $m_new->execute('truncate table cmf_orderback_goods'); 
+        $m_new->execute('truncate table cmf_action'); 
+         
         
         echo ('end');
     }

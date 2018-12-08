@@ -1,0 +1,107 @@
+ 
+<script>
+//城市选择js初始化 
+city_js($('#province'),"{$info.province|default=$order.province}",$('#city'),"{$info.city|default=$order.city}",$('#area'),"{$info.area|default=$order.area}");
+
+$('#area').change(function(){
+	var province_name=$.trim($('#province option:selected').text());
+	var city_name=$.trim($('#city option:selected').text());
+	var area_name=$.trim($('#area option:selected').text());
+	$('#addressinfo').val(province_name+'-'+city_name+'-'+area_name);
+});
+$('.express_no_href').click(function(){
+	var $div=$(this).parents('div').eq(0);
+	var express_no=$div.find('.express_no').val(); 
+	if(express_no=='' || express_no==undefined){
+		$div.find('.express_no').focus();
+		return false;
+	}
+	var code=$div.find('.express option:selected').attr('code'); 
+	location.href='https://www.kuaidi100.com/chaxun?com='+code+'&nu='.express_no; 
+	 
+});
+ $('.num input').change(function(){
+	 var num=parseInt($(this).val());
+	 var $tr=$(this).parents('tr').eq(0);
+	 var pay=0;
+	 var price=$tr.find('.price_real input').val();
+	 if(num>0){ 
+		 pay=num*price;
+	 }else{
+		 num=0; 
+	 }
+	 $tr.find('.num input').val(num);
+	 $tr.find('.pay input').val(pay.toFixed(2));
+	 tr_change();
+ });
+ function tr_change(){
+	 var goods_money=0; 
+	 $('.pay input').each(function(){ 
+		 goods_money+=parseFloat($(this).val());
+	 });
+	 $('.goods_money').eq(0).val(goods_money.toFixed(2));
+ }
+$('#accept').change(function(){
+	accept_change(); 
+});
+function accept_change(){
+	if($('#accept').val()=='0'){
+		return 0;
+	}
+	 $option=$('#accept option:selected').eq(0);
+	 var strs=$.trim($option.text());
+	 var arrs=strs.split(','); 
+	 var name=arrs[0];
+	 var mobile=arrs[1];
+	 var phone=arrs[2]; 
+	 var postcode=arrs[3]; 
+	 var province=$option.attr('province');
+	 var city=$option.attr('city');
+	 var position=$option.attr('position');
+	 var area=$option.attr('area');
+	 var sex=$option.attr('sex');
+	 var fax=$option.attr('fax');
+	 var qq=$option.attr('qq');
+	 var wechat=$option.attr('wechat');
+	 var email=$option.attr('email');
+	 var aliid=$option.attr('aliid');
+	 var wechatphone=$option.attr('wechatphone');
+	 var wechatname=$option.attr('wechatname');
+	 var taobaoid=$option.attr('taobaoid');
+	 var street=$option.attr('street');
+	 if(sex==2){
+		 sex=2;
+	 }else{
+		 sex=1;
+	 }
+	 $('#custom_sex').val(sex);
+	 $('#custom_name').val(name);
+	 $('#custom_mobile').val(mobile);
+	 $('#custom_phone').val(phone);
+	 $('#custom_postcode').val(postcode);
+	  
+	 $('#custom_street').val(street);
+	  
+	 get_citys($('#province'),1,$option.attr('province'));
+	 get_citys($('#city'),$option.attr('province'),$option.attr('city'));
+	 get_citys($('#area'),$option.attr('city'),area);
+}
+ 
+$(document).on('click','.goods_del',function(){
+	$(this).parents('tr').remove(); 
+	tr_change();
+});  
+</script>
+<script type="text/html" id="photos-item-pics"> 
+<li id="saved-imagepics{id}">
+    <input class="file0" id="photo-pics{id}" type="hidden" name="pics_urls[]" value="{filepath}">
+    <input class="form-control" id="photo-pics{id}-name" type="text" name="pics_names[]" value="{name}"
+           style="width: 200px;" title="图片名称">
+   
+	<div class="pic1" style="background-size:contain;background-image:url({url});"></div>
+   
+&nbsp;&nbsp;&nbsp;
+    <a href="javascript:(function(){$('#saved-image{pics{id}').remove();})();">移除</a>
+</li>
+</script>
+ 
