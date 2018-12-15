@@ -611,7 +611,10 @@ class AdminOrderController extends AdminInfo0Controller
         ];
         $m_invoice=new OrdersInvoiceModel();
         $invoice=$m_invoice->where($where)->find();
-        $invoice=$invoice->getData();
+        if(!empty($invoice)){
+            $invoice=$invoice->getData();
+        }
+      
         
         //订单产品
         $res=$m->order_goods($info,$admin['id']);
@@ -969,20 +972,24 @@ class AdminOrderController extends AdminInfo0Controller
                 $m->rollback();
                 $this->error($row);
             }
-           
-            zz_log('ccc'.json_encode($change));
+            
             //排序
             $m->order_sort($order['id']);
             //判断是否需要出库
             if(isset($change['status'])){
-                zz_log('ddd'.json_encode($order));
+               
                 $res=$m->status_change($order['id'],$order['status']);
                 if(!($res>0)){
                     $m->rollback();
                     $this->error($res);
                 }
             }
-            
+            //判断是否需要付款
+            if(isset($change['pay_status'])){ 
+                $m_invoice=new OrdersInvoiceModel();
+                $m_invoice->pay_change($order['id'],1,$change['pay_status']);
+            }
+           
         }
         
         //审核成功，记录操作记录,发送审核信息
@@ -1525,6 +1532,7 @@ class AdminOrderController extends AdminInfo0Controller
                 }elseif($info['status']==26){
                     $content['status']=30;
                 }
+              
                 break;
             
             case 0:

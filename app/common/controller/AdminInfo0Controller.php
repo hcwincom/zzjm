@@ -52,6 +52,7 @@ class AdminInfo0Controller extends AdminBaseController
         $table=$this->table;
         $m=$this->m;
         $admin=$this->admin;
+        
         $data=$this->request->param();
         $where=[];
         //判断是否有店铺
@@ -69,13 +70,16 @@ class AdminInfo0Controller extends AdminBaseController
             if($admin['shop']==1){
                 if(empty($data['shop'])){
                     $data['shop']=0;
+                    $this->where_shop=2;
                 }else{
                     $where['p.shop']=['eq',$data['shop']];
+                    $this->where_shop=$data['shop'];
                 }
             }else{
                 $where['p.shop']=['eq',$admin['shop']];
+                $this->where_shop=$admin['shop'];
             }
-        }
+        } 
       
         
          
@@ -1009,20 +1013,28 @@ class AdminInfo0Controller extends AdminBaseController
         $admin=$this->admin;
          
         if($type<3){
+            $shop=$this->where_shop;
+            if(empty($shop)){
+                $where_shop=['eq',1];
+            }elseif($admin['shop']==1){
+                $where_shop=['in',[1,$shop]];
+            }else{
+                $where_shop=['eq',$shop];
+            }
             //显示编辑人和审核人
             $m_user=Db::name('user');
             //可以加权限判断，目前未加
             //创建人
             $where_aid=[
                 'user_type'=>1,
-                'shop'=>['in',[1,$admin['shop']]],
+                'shop'=>$where_shop,
             ];
             
             $aids=$m_user->where($where_aid)->column('id,user_nickname');
             //审核人
             $where_rid=[
                 'user_type'=>1,
-                'shop'=>['in',[1,$admin['shop']]],
+                'shop'=>$where_shop,
             ];
             $rids=$m_user->where($where_rid)->column('id,user_nickname');
             $this->assign('aids',$aids);

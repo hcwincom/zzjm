@@ -86,14 +86,11 @@ function account_change(){
 	 }
 	 var selected=$('#account option:selected');
 	 
-	 $('#account_bank1').val(selected.attr('bank1'));
-	 $('#account_bank2').val(selected.attr('bank2'));
-	 $('#account_num2').val(selected.attr('num2'));
-	 $('#account_name2').val(selected.attr('name2'));
-	 $('#account_location2').val(selected.attr('location2'));
+	 $('#account_bank1').val(selected.attr('bank1')); 
 	 $('#account_num1').val(selected.attr('num1'));
 	 $('#account_name1').val(selected.attr('name1'));
 	 $('#account_location1').val(selected.attr('location1'));
+	 $('#paytype').val(selected.attr('paytype2'));
 	  
 }
 
@@ -365,37 +362,7 @@ function order_change($div,type='price'){
 	money_count($div);
 	orders_account();
 }
-function order_change11111111(type){  
-	var num=0; 
-	var price_count1=0;
-	 
-	var price_count=0;
-	var num_count=0;  
-	$('.price_count').each(function(){
-		$tr=$(this).parents('tr'); 
-		num=parseInt($tr.find('.num').val()); 
-		if(!(num>0)){
-			num=1; 
-			$(this).val($tr.find('.price_sale').val());
-		}
-		$tr.find('.num').val(num);
-		num_count+=num;
-		
-		price_count1=parseFloat($(this).val());
-		if(!(price_count1>=0)){
-			price_count1=0;
-			$(this).val(price_count1);
-		}
-		price_count+=price_count1; 
-	});
-	$('#goods_money').val(price_count.toFixed(2));
-	$('#goods_num').val(num_count);
-	//重量体积改变
-	if(type=='num'){ 
-		weight_change();
-	}  
-	order_account();
-}
+ 
 //订单费用计算
 function money_count($div){
 	var goods_money=parseFloat($div.find('.goods_money').val());

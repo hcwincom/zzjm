@@ -58,8 +58,10 @@ class CustomBaseController extends AdminInfo0Controller
         if($admin['shop']==1){
             if(empty($data['shop'])){
                 $data['shop']=0;
+                $this->where_shop=2;
             }else{
                 $where['p.shop']=['eq',$data['shop']];
+                $this->where_shop=$data['shop'];
             }
         }else{
             $where['p.shop']=['eq',$admin['shop']];
@@ -317,10 +319,8 @@ class CustomBaseController extends AdminInfo0Controller
                 'name1'=>$data['name1'][1],
                 'num1'=>$data['num1'][1],
                 'location1'=>$data['location1'][1],
-                'bank2'=>$data['bank2'][1],
-                'name2'=>$data['name2'][1],
-                'num2'=>$data['num2'][1],
-                'location2'=>$data['location2'][1],
+                'paytype2'=>$data['paytype2'][1],
+               
             ]; 
         }
         if(!empty($data['name1'][2])){
@@ -332,10 +332,8 @@ class CustomBaseController extends AdminInfo0Controller
                 'name1'=>$data['name1'][2],
                 'num1'=>$data['num1'][2],
                 'location1'=>$data['location1'][2],
-                'bank2'=>$data['bank2'][2],
-                'name2'=>$data['name2'][2],
-                'num2'=>$data['num2'][2],
-                'location2'=>$data['location2'][2],
+                'paytype2'=>$data['paytype2'][2],
+                 
             ];
         }
         if(!empty($data['name1'][3])){
@@ -347,10 +345,8 @@ class CustomBaseController extends AdminInfo0Controller
                 'name1'=>$data['name1'][3],
                 'num1'=>$data['num1'][3],
                 'location1'=>$data['location1'][3],
-                'bank2'=>$data['bank2'][3],
-                'name2'=>$data['name2'][3],
-                'num2'=>$data['num2'][3],
-                'location2'=>$data['location2'][3],
+                'paytype2'=>$data['paytype2'][3],
+               
             ];
         }
         if(!empty($data_account)){
@@ -410,7 +406,7 @@ class CustomBaseController extends AdminInfo0Controller
             'uid'=>$id,
             'type'=>$tel_type, 
         ];
-        $accounts=Db::name('account')->where($where)->column('site,id,bank1,name1,num1,location1,bank2,name2,num2,location2');
+        $accounts=Db::name('account')->where($where)->column('site,id,bank1,name1,num1,location1,paytype2');
         $account1=(isset($accounts[1]))?$accounts[1]:null;
         $account2=(isset($accounts[2]))?$accounts[2]:null;
         $account3=(isset($accounts[3]))?$accounts[3]:null;
@@ -504,7 +500,7 @@ class CustomBaseController extends AdminInfo0Controller
             'uid'=>$info['id'],
             'type'=>$tel_type,
         ];
-        $accounts=Db::name('account')->where($where)->column('site,bank1,name1,num1,location1,bank2,name2,num2,location2');
+        $accounts=Db::name('account')->where($where)->column('site,bank1,name1,num1,location1,paytype2');
         
         $account1=(isset($accounts[1]))?$accounts[1]:null;
         $account2=(isset($accounts[2]))?$accounts[2]:null;
@@ -525,18 +521,10 @@ class CustomBaseController extends AdminInfo0Controller
             if($data['location1'][1]!=$account1['location1']){
                 $content['account1']['location1']=$data['location1'][1];
             }
-            if($data['bank2'][1]!=$account1['bank2']){
-                $content['account1']['bank2']=$data['bank2'][1];
+            if($data['paytype2'][1]!=$account1['paytype2']){
+                $content['account1']['paytype2']=$data['paytype2'][1];
             }
-            if($data['name2'][1]!=$account1['name2']){
-                $content['account1']['name2']=$data['name2'][1];
-            }
-            if($data['num2'][1]!=$account1['num2']){
-                $content['account1']['num2']=$data['num2'][1];
-            }
-            if($data['location2'][1]!=$account1['location2']){
-                $content['account1']['location2']=$data['location2'][1];
-            }
+           
         }
         
         //比较账号2 
@@ -554,18 +542,10 @@ class CustomBaseController extends AdminInfo0Controller
             if($data['location1'][2]!=$account2['location1']){
                 $content['account2']['location1']=$data['location1'][2];
             }
-            if($data['bank2'][2]!=$account2['bank2']){
-                $content['account2']['bank2']=$data['bank2'][2];
+            if($data['paytype2'][2]!=$account2['paytype2']){
+                $content['account2']['paytype2']=$data['paytype2'][2];
             }
-            if($data['name2'][2]!=$account2['name2']){
-                $content['account2']['name2']=$data['name2'][2];
-            }
-            if($data['num2'][2]!=$account2['num2']){
-                $content['account2']['num2']=$data['num2'][2];
-            }
-            if($data['location2'][2]!=$account2['location2']){
-                $content['account2']['location2']=$data['location2'][2];
-            }
+          
         }
         
         //比较账号3
@@ -582,18 +562,10 @@ class CustomBaseController extends AdminInfo0Controller
             if($data['location1'][3]!=$account3['location1']){
                 $content['account3']['location1']=$data['location1'][3];
             }
-            if($data['bank2'][3]!=$account3['bank2']){
-                $content['account3']['bank2']=$data['bank2'][3];
+            if($data['paytype2'][3]!=$account3['paytype2']){
+                $content['account3']['paytype2']=$data['paytype2'][3];
             }
-            if($data['name2'][3]!=$account3['name2']){
-                $content['account3']['name2']=$data['name2'][3];
-            }
-            if($data['num2'][3]!=$account3['num2']){
-                $content['account3']['num2']=$data['num2'][3];
-            }
-            if($data['location2'][3]!=$account3['location2']){
-                $content['account3']['location2']=$data['location2'][3];
-            }
+            
         }
           
         if(empty($content)){
@@ -691,7 +663,7 @@ class CustomBaseController extends AdminInfo0Controller
             'uid'=>$info['id'],
             'type'=>$tel_type,
         ];
-        $accounts=Db::name('account')->where($where)->column('site,bank1,name1,num1,location1,bank2,name2,num2,location2');
+        $accounts=Db::name('account')->where($where)->column('site,bank1,name1,num1,location1,paytype2');
         
         $account1=(isset($accounts[1]))?$accounts[1]:null;
         $account2=(isset($accounts[2]))?$accounts[2]:null;
@@ -904,17 +876,11 @@ class CustomBaseController extends AdminInfo0Controller
         $where=[
             'status'=>2, 
         ];
-        if($admin['shop']!=1){
-            $where['shop']=$admin['shop'];
-        }
-       
-        if($type==1){
-            $field='id,name,shop'; 
-        }else{
-            $field='id,name';
-            if(empty($this->where_shop)){
-                $where['shop']=($admin['shop']==1)?2:$admin['shop'];
-            }
+        
+        $field='id,name'; 
+        $where['shop']=$this->where_shop;
+         
+        if($type==3){  
             //可选物流
             $freights=Db::name('freight')->where($where)->order('shop asc,sort asc')->column($field);
             
@@ -932,8 +898,7 @@ class CustomBaseController extends AdminInfo0Controller
         }
         $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field);
         
-        //付款类型 
-        $field.=',bank,location,account,num';
+        //付款类型  
         $paytypes=Db::name('paytype')->where($where)->order('shop asc,sort asc')->column($field);
         
         $this->assign('companys',$companys);

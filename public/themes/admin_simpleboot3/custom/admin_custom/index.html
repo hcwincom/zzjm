@@ -55,7 +55,7 @@
 			<select class="form-control" name="company" id="company">
 				<option value='0'>所属公司</option> 
 				 <foreach name="companys" item="vo" k="key">
-				<option class="shop shop{$vo.shop}" value="{$key}" <if condition="$key eq $data.company">selected</if>>{$vo.name}
+				<option value="{$key}" <if condition="$key eq $data.company">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -63,7 +63,7 @@
 			<select class="form-control" name="paytype" id="paytype">
 				<option value='0'>付款类型</option> 
 				 <foreach name="paytypes" item="vo" k="key">
-				<option class="shop shop{$vo.shop}" value="{$key} " <if condition="$key eq $data.paytype">selected</if>>{$vo.name}
+				<option value="{$key} " <if condition="$key eq $data.paytype">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -190,15 +190,7 @@
 city_js($('#province'),"{$data.province|default=0}",$('#city'),"{$data.city|default=0}");
 
 $('#shop').change(function(){
-	var shop=$(this).val();  
-	if(shop==0){
-		$('.shop').show();
-	}else{
-		$('.shop').hide();
-		$('.shop'+shop).show();
-	}
-	$('#company').val(0);
-	$('#paytype').val(0);
+	$(this).parents('form').eq(0).submit();
    
 });
 $('.ban').click(function(){

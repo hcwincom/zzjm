@@ -131,14 +131,11 @@ function custom_change(custom){
 					selected=''; 
 				} 
 				options+='<option value="'+list[j]['id']+
-				'" bank1="'+list[j]['bank1']+
-				'" bank2="'+list[j]['bank2']+
-				'" name2="'+list[j]['name2']+
-				'" num2="'+list[j]['num2']+
-				'" location2="'+list[j]['location2']+ 
+				'" bank1="'+list[j]['bank1']+ 
 				'" name1="'+list[j]['name1']+
 				'" num1="'+list[j]['num1']+
 				'" location1="'+list[j]['location1']+ 
+				'" paytype2="'+list[j]['paytype2']+  
 				'" selected >'+
 				list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
 			}
@@ -148,7 +145,7 @@ function custom_change(custom){
 			 $('#invoice_type').val(info.invoice_type); 
 			 invoice_type_change();
 			 $('#tax_point').val(info.tax_point); 
-			
+			/* 旧系统paytype和custom绑定，所以暂时还用info.paytype,否则应用付款账号绑定的paytype2 */
 			 $('#paytype').val(info.paytype); 
 			 $('#pay_type').val(info.pay_type); 
 			 
