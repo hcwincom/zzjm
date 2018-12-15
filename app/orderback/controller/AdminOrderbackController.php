@@ -746,7 +746,7 @@ class AdminOrderbackController extends AdminInfo0Controller
         }
         //是否更新,2同意，3不同意
         if($status==2){
-            dump($orderback);
+           
             //得到修改的字段
             $change=Db::name('edit_info')->where('eid',$id)->value('content');
             $change=json_decode($change,true);
@@ -847,7 +847,7 @@ class AdminOrderbackController extends AdminInfo0Controller
         if(!is_array($content)){
             $this->error($content);
         }
-        $content['status']=1;
+        $content['status']=2;
         //保存更改
         $m_edit=Db::name('edit');
         $m_edit->startTrans();
@@ -1146,7 +1146,298 @@ class AdminOrderbackController extends AdminInfo0Controller
         }
         $content['status2']=1;
         $content['status1']=1;
-        $content['status']=2;
+        $content['status']=1;
+        
+        
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
+    }
+    /**
+     *付款
+     * @adminMenu(
+     *     'name'   => '付款',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '付款',
+     *     'param'  => ''
+     * )
+     */
+    public function pay_do1(){
+        
+        $flag='售后单付款';
+        $data=$this->request->param();
+        
+        $m=$this->m;
+        $table=$this->table;
+        
+        $id=intval($data['id']);
+        
+        $info=$m->where('id',$id)->find();
+        if(empty($info) ){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能编辑其他店铺的信息');
+        }
+        //是否有权查看
+        $res=$m->orderback_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res);
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
+        
+        $content=$m->orderback_edit($info, $data);
+        if(!is_array($content)){
+            $this->error($content);
+        }
+      
+        $content['pay_status']=2;
+        
+        
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
+    }
+    /**
+     *付款确认
+     * @adminMenu(
+     *     'name'   => '付款确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '付款确认',
+     *     'param'  => ''
+     * )
+     */
+    public function pay_do2(){
+        
+        $flag='售后单付款确认';
+        $data=$this->request->param();
+        
+        $m=$this->m;
+        $table=$this->table;
+        
+        $id=intval($data['id']);
+        
+        $info=$m->where('id',$id)->find();
+        if(empty($info) ){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能编辑其他店铺的信息');
+        }
+        //是否有权查看
+        $res=$m->orderback_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res);
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
+        
+        $content=$m->orderback_edit($info, $data);
+        if(!is_array($content)){
+            $this->error($content);
+        }
+        
+        $content['pay_status']=3;
+        
+        
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
+    }
+    /**
+     *付款还原
+     * @adminMenu(
+     *     'name'   => '付款还原',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '付款还原',
+     *     'param'  => ''
+     * )
+     */
+    public function pay_do0(){
+        
+        $flag='售后单付款还原';
+        $data=$this->request->param();
+        
+        $m=$this->m;
+        $table=$this->table;
+        
+        $id=intval($data['id']);
+        
+        $info=$m->where('id',$id)->find();
+        if(empty($info) ){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能编辑其他店铺的信息');
+        }
+        //是否有权查看
+        $res=$m->orderback_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res);
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
+        
+        $content=$m->orderback_edit($info, $data);
+        if(!is_array($content)){
+            $this->error($content);
+        }
+        
+        $content['pay_status']=1;
         
         
         //保存更改

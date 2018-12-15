@@ -19,7 +19,7 @@
 				<neq name="info.fid" value="0">
 					&nbsp;&nbsp;<a href="{:url('edit',['id'=>$info.fid])}" target="{$zztarget['edit']}">主订单</a>
 				</neq>
-				<if condition="$info.status elt 30 && $info.status egt 26"> 
+				<if condition="$info.status eq 30 ||  $info.status eq 26"> 
 				&nbsp;&nbsp;<a href="{:url('orderback/AdminOrderback/add',['oid'=>$info.id,'order_type'=>1])}" target="{$zztarget['edit']}">申请售后</a>
 				</if>
 				<eq name="info.is_back" value="1">
@@ -1056,7 +1056,7 @@
 			<div class="form-group fleft-all">
 				<label  class="col-sm-2 control-label">客户付款和发票</label>
 				<div class="col-md-6 col-sm-10">
-				        付款方式：
+				        付款账号：
 				   <select  class="form-control short-auto" name="paytype" id="paytype"  required >
 				   		<option value="0">请选择</option>
 					<foreach name="paytypes" item="vo">
@@ -1103,9 +1103,9 @@
 				<div class="col-md-6 col-sm-10">
 					<input type="hidden"  name="invoice_id" value="{$invoice.id}"/>
 					 <label class="input-inline"> 
-					发票抬头：<input type="text" class="form-control short-auto" name="invoice_title" value="{$invoice.title}"/>
-					<present name="change.invoice.title">
-						<input type="text" class="form-control short-auto red"  value="{$change.invoice.title}"/> 
+					发票抬头：<input type="text" class="form-control short-auto" name="invoice_uname" value="{$invoice.uname}"/>
+					<present name="change.invoice.uname">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.uname}"/> 
 					</present> 
 					</label>
 				 	 <label class="input-inline"> 
@@ -1135,7 +1135,24 @@
 					 	<button id="invoice_count" type="button">税费计算</button>
 					 </empty>
 					 </label>
-					  
+					 <notempty name="invoice.id">
+					  <label class="input-inline"> 
+					发票状态： {$invoice_status[$invoice.status]}
+					 <a href="{:url('money/AdminInvoice/edit',['id'=>$invoice.id])}" target="{$zztarget.other}">发票详情</a>
+					 </label>
+					 </notempty>
+					   <label class="input-inline"> 
+					地址：<input type="text" class="form-control short" id="invoice_address" name="invoice_address" value="{$invoice.address}"/>
+					<present name="change.invoice.address">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.address}"/> 
+					</present>
+					 </label> 
+					  <label class="input-inline"> 
+					电话：<input type="text" class="form-control short" id="invoice_tel" name="invoice_tel" value="{$invoice.tel}"/>
+					<present name="change.invoice.tel">
+						<input type="text" class="form-control short-auto red"  value="{$change.invoice.tel}"/> 
+					</present>
+					 </label> 
 					 <br/> 
 					开票说明：<input type="text" class="form-control" name="invoice_dsc" value="{$invoice.dsc}"/>
 					<present name="change.invoice.dsc">

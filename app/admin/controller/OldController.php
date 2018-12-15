@@ -59,6 +59,7 @@ class OldController extends AdminBaseController
             '订单'=>url('order'), 
             '发货记录'=>url('freight_doc'),
             '清空库存，出入库记录，料位，编辑记录,采购单，售后单'=>url('store_clear'),
+            '清空菜单和权限'=>url('menu_clear'),
            
         ];
         $this->assign('list',$list);
@@ -1114,6 +1115,22 @@ class OldController extends AdminBaseController
         $m_new->execute('truncate table cmf_orderback_goods'); 
         $m_new->execute('truncate table cmf_action'); 
          
+        
+        echo ('end');
+    }
+    /**
+     * 清空菜单和权限
+     */
+    public function menu_clear(){
+        set_time_limit(300);
+        
+        //订单主体
+        $m_new=Db::name('admin_menu');
+        
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_admin_menu');
+        $m_new->execute('truncate table cmf_auth_access');
+        $m_new->execute('truncate table cmf_auth_rule');
         
         echo ('end');
     }

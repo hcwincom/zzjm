@@ -13,10 +13,10 @@ class AdminPaytypeController extends AdminInfo0Controller
     {
         parent::_initialize();
        
-        $this->flag='付款类型';
+        $this->flag='收付款账号';
         $this->table='paytype';
         $this->m=Db::name('paytype');
-        $this->edit=['name','sort','dsc','bank','location','num','account'];
+        $this->edit=['name','sort','dsc','bank','location','num','account','adress','tel','company_name','feenum'];
          
         //pay_type
         //没有店铺区分
@@ -26,15 +26,15 @@ class AdminPaytypeController extends AdminInfo0Controller
        
     }
     /**
-     * 付款类型列表
+     * 收付款账号列表
      * @adminMenu(
-     *     'name'   => '付款类型列表',
+     *     'name'   => '收付款账号列表',
      *     'parent' => 'shop/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
      *     'icon'   => '',
-     *     'remark' => '付款类型列表',
+     *     'remark' => '收付款账号列表',
      *     'param'  => ''
      * )
      */
@@ -46,15 +46,15 @@ class AdminPaytypeController extends AdminInfo0Controller
      
    
     /**
-     * 付款类型添加
+     * 收付款账号添加
      * @adminMenu(
-     *     'name'   => '付款类型添加',
+     *     'name'   => '收付款账号添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型添加',
+     *     'remark' => '收付款账号添加',
      *     'param'  => ''
      * )
      */
@@ -65,15 +65,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         
     }
     /**
-     * 付款类型添加do
+     * 收付款账号添加do
      * @adminMenu(
-     *     'name'   => '付款类型添加do',
+     *     'name'   => '收付款账号添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型添加do',
+     *     'remark' => '收付款账号添加do',
      *     'param'  => ''
      * )
      */
@@ -83,15 +83,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         
     }
     /**
-     * 付款类型详情
+     * 收付款账号详情
      * @adminMenu(
-     *     'name'   => '付款类型详情',
+     *     'name'   => '收付款账号详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型详情',
+     *     'remark' => '收付款账号详情',
      *     'param'  => ''
      * )
      */
@@ -101,15 +101,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 付款类型状态审核
+     * 收付款账号状态审核
      * @adminMenu(
-     *     'name'   => '付款类型状态审核',
+     *     'name'   => '收付款账号状态审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型状态审核',
+     *     'remark' => '收付款账号状态审核',
      *     'param'  => ''
      * )
      */
@@ -118,15 +118,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::review();
     }
     /**
-     * 付款类型状态批量同意
+     * 收付款账号状态批量同意
      * @adminMenu(
-     *     'name'   => '付款类型状态批量同意',
+     *     'name'   => '收付款账号状态批量同意',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型状态批量同意',
+     *     'remark' => '收付款账号状态批量同意',
      *     'param'  => ''
      * )
      */
@@ -135,7 +135,7 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::review_all();
     }
     /**
-     * 付款类型禁用
+     * 收付款账号禁用
      * @adminMenu(
      *     'name'   => '信息状态禁用',
      *     'parent' => 'index',
@@ -152,15 +152,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::ban();
     }
     /**
-     * 付款类型信息状态恢复
+     * 收付款账号信息状态恢复
      * @adminMenu(
-     *     'name'   => '付款类型信息状态恢复',
+     *     'name'   => '收付款账号信息状态恢复',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型信息状态恢复',
+     *     'remark' => '收付款账号信息状态恢复',
      *     'param'  => ''
      * )
      */
@@ -169,15 +169,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::cancel_ban();
     }
     /**
-     * 付款类型编辑提交
+     * 收付款账号编辑提交
      * @adminMenu(
-     *     'name'   => '付款类型编辑提交',
+     *     'name'   => '收付款账号编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型编辑提交',
+     *     'remark' => '收付款账号编辑提交',
      *     'param'  => ''
      * )
      */
@@ -186,15 +186,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::edit_do();
     }
     /**
-     * 付款类型编辑列表
+     * 收付款账号编辑列表
      * @adminMenu(
-     *     'name'   => '付款类型编辑列表',
+     *     'name'   => '收付款账号编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型编辑列表',
+     *     'remark' => '收付款账号编辑列表',
      *     'param'  => ''
      * )
      */
@@ -204,15 +204,15 @@ class AdminPaytypeController extends AdminInfo0Controller
     }
     
     /**
-     * 付款类型审核详情
+     * 收付款账号审核详情
      * @adminMenu(
-     *     'name'   => '付款类型审核详情',
+     *     'name'   => '收付款账号审核详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型审核详情',
+     *     'remark' => '收付款账号审核详情',
      *     'param'  => ''
      * )
      */
@@ -222,15 +222,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 付款类型信息编辑审核
+     * 收付款账号信息编辑审核
      * @adminMenu(
-     *     'name'   => '付款类型编辑审核',
+     *     'name'   => '收付款账号编辑审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型编辑审核',
+     *     'remark' => '收付款账号编辑审核',
      *     'param'  => ''
      * )
      */
@@ -239,15 +239,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::edit_review();
     }
     /**
-     * 付款类型编辑记录批量删除
+     * 收付款账号编辑记录批量删除
      * @adminMenu(
-     *     'name'   => '付款类型编辑记录批量删除',
+     *     'name'   => '收付款账号编辑记录批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型编辑记录批量删除',
+     *     'remark' => '收付款账号编辑记录批量删除',
      *     'param'  => ''
      * )
      */
@@ -257,15 +257,15 @@ class AdminPaytypeController extends AdminInfo0Controller
     }
     
     /**
-     * 付款类型批量删除
+     * 收付款账号批量删除
      * @adminMenu(
-     *     'name'   => '付款类型批量删除',
+     *     'name'   => '收付款账号批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '付款类型批量删除',
+     *     'remark' => '收付款账号批量删除',
      *     'param'  => ''
      * )
      */

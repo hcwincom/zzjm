@@ -5,8 +5,20 @@ namespace app\order\model;
 use think\Model;
 use think\Db;
 use app\store\model\StoreGoodsModel;
+use app\money\model\OrdersInvoiceModel;
 class OrderModel extends Model
 {
+    /**
+     * 获取单条数据，主要是为了返回data，去除对象影响
+     * @param $where 查询条件
+     * @param $field 字段
+     * @param data
+     */
+    public function get_one($where,$field='*'){
+         
+        $order=$this->field($field)->where($where)->find();
+        return $order->data;
+    }
     /**
      * 下单时为仓库排序，按首重价格计算
      * @param $city收货地
@@ -196,11 +208,17 @@ class OrderModel extends Model
              //已有发票或写了发票抬头的要判断发票信息
              if(!empty($data['invoice_id']) || (!empty($data['invoice_title']) && !empty($data['invoice_type']))){
                  $data['invoice_id']=intval($data['invoice_id']);
-                 if(empty($data['invoice_id'])){
-                     $invoice=null;
-                 }else{
-                     $invoice=Db::name('order_invoice')->where('id',$data['invoice_id'])->find();
-                 }
+                 //发票
+                 $where=[
+                     'oid'=>$info['id'],
+                     'oid_type'=>1,
+                 ];
+                 $m_invoice=new OrdersInvoiceModel();
+                 $invoice=$m_invoice->where($where)->find();
+                 
+                 if(!empty($invoice)){
+                     $data['invoice_id']=$invoice['id'];
+                 } 
                  $content['invoice']=[];
                  foreach($edit_invoice as $k=>$v){
                      $field_tmp='invoice_'.$v;
@@ -544,10 +562,12 @@ class OrderModel extends Model
          }
          //支付账号信息
          if(isset($change['invoice'])){
+             $m_invoice=new OrdersInvoiceModel();
              if(empty($change['invoice']['id'])){
-                 Db::name('order_invoice')->insert($change['invoice']);
+                 $m_invoice->invoice_add($change['invoice']);  
              }else{
-                 Db::name('order_invoice')->where('id',$change['invoice']['id'])->update($change['invoice']);
+                 $m_invoice->invoice_update($change['invoice']); 
+                
              }
              unset($change['invoice']);
          }
@@ -556,7 +576,19 @@ class OrderModel extends Model
          foreach($change as $k=>$v){
              $update_info[$k]=$v;
          }
-         
+         if(isset($change['is_real'])){
+             $order['is_real']=$change['is_real'];
+         }
+         if(isset($change['status'])){
+             $order['status']=$change['status'];
+         }
+         if(isset($change['pay_status'])){
+             $order['pay_status']=$change['pay_status'];
+         }
+         if($order['status']==26 && $order['pay_status']==3){
+             $update_info['status']=30;
+         }
+        
          $this->where('id',$order['id'])->update($update_info);
          //有子订单,同步
          if($order['is_real']==2 || isset($change['add']) ){
@@ -595,6 +627,10 @@ class OrderModel extends Model
                  }
              } 
          } 
+        
+         ///$order
+         //更新用户数据 
+         $this->custom_update($order['uid']);
          return 1; 
      }
      /* 订单是否可以编辑 */
@@ -1029,6 +1065,7 @@ class OrderModel extends Model
                  'num1'=>$v['num1'],
              ];
          } 
+        
          return ['orders'=>$orders,'goods'=>$goods,'infos'=>$infos]; 
      }
      /**
@@ -1066,7 +1103,7 @@ class OrderModel extends Model
          $res=1;
          $order=$this->where('id',$oid)->find();
          $order=$order->data;
-        
+         zz_log($order['status'].'==='.$old_status);
          if($order['status']==$old_status){
              return 1;
          } 
@@ -1097,10 +1134,74 @@ class OrderModel extends Model
              }
              //审核出库 
              $res=$this->order_storein2($order['id'],$num_ok); 
-         }else{
-             //退货问题先不管
-         }
-         
+         } 
+         //已发货的跟新is_pay_freight,已结算的不能动，已发货的统一改为2，其他为1 
+         if($order['is_freight_pay']<3){
+             $update_info=['is_freight_pay'=>1];
+             if($order['is_real']==1){
+                 if($order['status']>=24 && $order['status']<80 && !empty($order['express_no'])){
+                     //定期结账的是2，如果不是就是3
+                     $freight=Db::name('freight')->where('id',$order['freight'])->value('pay_type');
+                     switch($freight){
+                         case 1:
+                             //先付款
+                             $update_info['is_freight_pay']=3;
+                             break;
+                         case 2:
+                             //货到付款
+                             if($order['status']>=26){
+                                 $update_info['is_freight_pay']=3;
+                             }else{
+                                 $update_info['is_freight_pay']=1;
+                             } 
+                             break;
+                         default:
+                             $update_info['is_freight_pay']=2;
+                             break; 
+                     } 
+                 }else{
+                     $update_info['is_freight_pay']=1;
+                 }
+             }else{
+                 $update_info['is_freight_pay']=1;
+             }
+           
+            zz_log(json_encode($update_info));
+             //有变化修改
+             if($update_info['is_freight_pay']!=$order['is_freight_pay']){
+                 $update_info['time']=time();
+                 $this->where('id',$oid)->update($update_info);
+             }
+         } 
+         zz_log(json_encode($order));
          return $res;
      }
+     /**
+      * 更新用户的订购数和金额
+      * $uid用户
+      */
+     public function custom_update($uid){
+         $where=[
+             'uid'=>$uid,
+             'status'=>30
+         ];
+         //已完成订单
+         $order_do1=$this->where($where)->field('count(id) as nums,sum(order_amount) as moneys')->find();
+         //已收货未付款订单
+         $where=[
+             'uid'=>$uid,
+             'status'=>26
+         ]; 
+         $order_do0=$this->where($where)->field('count(id) as nums,sum(order_amount) as moneys')->find();
+         $update=[
+             'order_num'=>$order_do1['nums'],
+             'order_money'=>empty($order_do1['moneys'])?0:$order_do1['moneys'],
+             'order_num0'=>$order_do0['nums'],
+             'order_money0'=>empty($order_do0['moneys'])?0:$order_do0['moneys'],
+             'time'=>time(),
+         ];
+       
+         Db::name('custom')->where('id',$uid)->update($update);
+     }
+      
 }

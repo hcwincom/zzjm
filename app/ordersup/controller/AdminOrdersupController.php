@@ -797,7 +797,7 @@ class AdminOrdersupController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('无效信息');
         }
-        $ordersup=$m->where('id',$info['pid'])->find();
+        $ordersup=$m->get_one(['id'=>$info['pid']]); 
         
         if($info['rstatus']!=1){
             $this->error('编辑信息已被审核！不能重复审核');

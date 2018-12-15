@@ -7,7 +7,17 @@ use think\Db;
 use app\store\model\StoreGoodsModel;
 class OrdersupModel extends Model
 {
-      
+    /**
+     * 获取单条数据，主要是为了返回data，去除对象影响
+     * @param $where 查询条件
+     * @param $field 字段
+     * @param data
+     */
+    public function get_one($where,$field='*'){
+        
+        $order=$this->field($field)->where($where)->find();
+        return $order->data;
+    }
      /* 采购单编辑 */
      public function ordersup_edit($info,$data,$is_do=0)
      {
@@ -718,5 +728,33 @@ class OrdersupModel extends Model
              ];
          } 
          return ['orders'=>$orders,'goods'=>$goods,'infos'=>$infos]; 
+     }
+     
+     /**
+      * 更新供应商的订购数和金额
+      * $uid用户
+      */
+     public function custom_update($uid){
+         $where=[
+             'uid'=>$uid,
+             'status'=>30
+         ];
+         //已完成订单
+         $order_do1=$this->where($where)->field('count(id) as nums,sum(order_amount) as moneys')->find();
+         //已收货未付款订单
+         $where=[
+             'uid'=>$uid,
+             'status'=>26
+         ];
+         $order_do0=$this->where($where)->field('count(id) as nums,sum(order_amount) as moneys')->find();
+         $update=[
+             'order_num'=>$order_do1['nums'],
+             'order_money'=>empty($order_do1['moneys'])?0:$order_do1['moneys'],
+             'order_num0'=>$order_do0['nums'],
+             'order_money0'=>empty($order_do0['moneys'])?0:$order_do0['moneys'],
+             'time'=>time(),
+         ];
+         
+         Db::name('supplier')->where('id',$uid)->update($update);
      }
 }

@@ -17,7 +17,7 @@ class AdminCompanyController extends AdminInfo0Controller
         $this->table='company';
         $this->m=Db::name('company');
         $this->edit=['name','sort','dsc','code','allname','account_name','account_bank','account_num',
-            'feenum','contact','address','type','key_account','key_key','store',
+             'contact','address','type','key_account','key_key','store','paytype'
         ];
         $this->search=[
             'name' => '公司名称',
@@ -298,6 +298,8 @@ class AdminCompanyController extends AdminInfo0Controller
             ];
             $stores=Db::name('store')->where($where)->order('sort asc')->column('id,name');
             $this->assign('stores',$stores);
+            $paytypes=Db::name('paytype')->where($where)->order('sort asc')->column('id,name');
+            $this->assign('paytypes',$paytypes);
         } 
     }
      

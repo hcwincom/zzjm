@@ -7,6 +7,9 @@
 	display:inline-block;
 	width:80px ;
 }
+.save{
+	margin:10px;
+}
 .fleft {
 	float: left;
 	width: 400px;

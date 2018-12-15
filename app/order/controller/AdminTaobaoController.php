@@ -62,9 +62,55 @@ class AdminTaobaoController extends AdminBaseController
             $order_type=$this->order_type; 
             $log='taobao.log'; 
             $m_store_goods=new StoreGoodsModel(); 
+          /*   payment	String	200.07	实付金额。精确到2位小数;单位:元。如:200.07，表示:200元7分
+            seller_rate	Boolean	true	卖家是否已评价。可选值:true(已评价),false(未评价)
+            post_fee	String	200.07	邮费。精确到2位小数;单位:元。如:200.07，表示:200元7分
+            receiver_name	String	东方不败	收货人的姓名
+            receiver_state	String	浙江省	收货人的所在省份
+            receiver_address	String	淘宝城911号	收货人的详细地址
+            receiver_zip	String	223700	收货人的邮编
+            receiver_mobile	String	13512501826	收货人的手机号码
+            receiver_phone	String	13819175372	收货人的电话号码
+            consign_time	Date	2000-01-01 00:00:00	卖家发货时间。格式:yyyy-MM-dd HH:mm:ss
+            received_payment	String	200.07	卖家实际收到的支付宝打款金额（由于子订单可以部分确认收货，这个金额会随着子订单的
+            确认收货而不断增加，交易成功后等于买家实付款减去退款金额）。精确到2位小数;单位:元。如:200.07，表示:200元7分
+            status	String	TRADE_NO_CREATE_PAY	交易状态。可选值:  
+            TRADE_NO_CREATE_PAY(没有创建支付宝交易) * WAIT_BUYER_PAY(等待买家付款) * SELLER_CONSIGNED_PART(卖家部分发货) 
+            * WAIT_SELLER_SEND_GOODS(等待卖家发货,即:买家已付款) * WAIT_BUYER_CONFIRM_GOODS(等待买家确认收货,即:卖家已发货) 
+            * * TRADE_BUYER_SIGNED(买家已签收,货到付款专用) * TRADE_FINISHED(交易成功) 
+            * * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭) 
+            * * TRADE_CLOSED_BY_TAOBAO(付款以前，卖家或买家主动关闭交易) * PAY_PENDING(国际信用卡支付付款确认中)
+             * WAIT_PRE_AUTH_CONFIRM(0元购合约中)	* PAID_FORBID_CONSIGN(拼团中订单或者发货强管控的订单，已付款但禁止发货)
+             *price	String	200.07	商品价格。精确到2位小数；单位：元。如：200.07，表示：200元7分
+discount_fee	String	200.07	可以使用trade.promotion_details查询系统优惠系统优惠金额（如打折，VIP，满就送等），精确到2位小数，单位：元。如：200.07，表示：200元7分
+total_fee	String	200.07	商品金额（商品价格乘以数量的总金额）。精确到2位小数;单位:元。如:200.07，表示:200元7分
+created	Date	2000-01-01 00:00:00	交易创建时间。格式:yyyy-MM-dd HH:mm:ss
+pay_time	Date	2000-01-01 00:00:00	付款时间。格式:yyyy-MM-dd HH:mm:ss。订单的付款时间即为物流订单的创建时间。
+modified	Date	2000-01-01 00:00:00	交易修改时间(用户对订单的任何修改都会更新此字段)。格式:yyyy-MM-dd HH:mm:ss
+end_time	Date	2000-01-01 00:00:00	交易结束时间。交易成功时间(更新交易状态为成功的同时更新)/确认收货时间或者交易关闭时间 。格式:yyyy-MM-dd HH:mm:ss
+             buyer_nick	String	我在测试	买家昵称
+has_buyer_message	Boolean	true	判断订单是否有买家留言，有买家留言返回true，否则返回false
+*
+             */
             $fields = 'tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time,'.
-                'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
-              
+                'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile';
+//             'discount_fee,created,total_fee,end_time,has_buyer_message'; 
+            /* 
+             * buyer_message	String	要送的礼物的，不要忘记的哦	买家留言
+buyer_memo	String	上衣要大一号	买家备注（与淘宝网上订单的买家备注对应，只有买家才能查看该字段）
+buyer_flag	Number	1	买家备注旗帜（与淘宝网上订单的买家备注旗帜对应，只有买家才能查看该字段）红、黄、绿、蓝、紫 分别对应 1、2、3、4、5
+seller_memo	String	好的	卖家备注（与淘宝网上订单的卖家备注对应，只有卖家才能查看该字段）
+seller_flag	Number	1	卖家备注旗帜（与淘宝网上订单的卖家备注旗帜对应，只有卖家才能查看该字段）红、黄、绿、蓝、紫 分别对应 1、2、3、4、5
+invoice_name	String	淘宝	发票抬头
+invoice_type	String	水果，图书	发票类型
+buyer_nick	String	我在测试	买家昵称
+             *  */
+          /*   $fields_full = 'tid,type,status,payment,orders,receiver_name,receiver_state,receiver_city,'.
+                'receiver_district,receiver_address,receiver_mobile,receiver_phone,'.
+            'receiver_zip,consign_time,received_payment,invoice_kind,buyer_message,buyer_memo,seller_memo,invoice_name,'.
+            'invoice_type,buyer_nick,buyer_cod_fee'; */
+            
+            //"logistics_company":"中通快递"
             $time=time();
             $time_start=$time-2400*24;
             $time_end=$time;
@@ -89,7 +135,7 @@ class AdminTaobaoController extends AdminBaseController
                 $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
                 
                 $order = $client->getContent(); 
-                zz_log($order);
+//                 zz_log($order);
                 $state=intval($client->status);
                
                 //返回状态失败
@@ -107,7 +153,12 @@ class AdminTaobaoController extends AdminBaseController
                 $trades=$json['trades_sold_get_response']['trades']['trade'];
                
                 foreach($trades as $kk=>$vv){
-                    
+                    //"buyer_message":"麻烦不要放价格清单","buyer_nick":"tb913800314",
+                    //order--"logistics_company":"中通快递",
+                  /*   $client->get('/JSB/rest/trade/TradeFullinfoGetRequest?fields='.$fields_full.'&tid='.$vv['tid']);
+                    $order_full = $client->getContent();
+                    zz_log($order_full);
+                    continue; */
                     //订单已存在
                     $update_order=[];
                     $old_status=1;

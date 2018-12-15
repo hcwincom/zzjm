@@ -51,6 +51,15 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
+			订单类型: 
+			<select class="form-control" name="order_type" >
+				<option value='0'>全部</option> 
+				 <foreach name="order_types" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.order_type">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;  
 		   <notempty name="shops"> 
 	  	店铺:<select class="form-control" id="shop" name="shop" >
 				<option value='0'>全部</option> 
@@ -167,8 +176,10 @@
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						{$vo.id}-{$vo.sort}
+						{$vo.id} 
+						<if condition="$vo.status eq 30 ||  $vo.status eq 26"> 
 						<a href="{:url('orderback/AdminOrderback/add',['oid'=>$vo.id,'order_type'=>1])}">申请售后</a>
+						</if>
 						</td>
 						<td > 
 						{$order_types[$vo.order_type]}

@@ -12,7 +12,7 @@ use think\Db;
  *     'action' =>'default',
  *     'parent' =>'',
  *     'display'=> true,
- *     'order'  => 41,
+ *     'order'  => 43,
  *     'icon'   =>'',
  *     'remark' =>'供货商管理'
  * )

@@ -101,5 +101,30 @@
 				 </present>
 				</div>
 			</div>
-
+<notempty name="info.id">
+    <div class="form-group  ">
+        <label  class="col-sm-2 control-label">结算金额</label>
+        <div class="col-md-6 col-sm-10">
+         <label class="input-inline"> 
+            	已结算运单数：
+            <input type="text" class="form-control short"  value="{$info.order_num}" readonly/>
+          </label>
+      
+           <label class="input-inline"> 
+         	已结算运单费用：
+            <input type="text" class="form-control short"  value="{$info.order_money}" readonly/>
+          </label>	
+		  <label class="input-inline"> 
+            	未结算运单数：
+            <input type="text" class="form-control short"  value="{$info.order_num0}" readonly/>
+          </label>
+      
+           <label class="input-inline"> 
+         	未结算运单费用：
+            <input type="text" class="form-control short"  value="{$info.order_money0}" readonly/>
+          </label>	
+		  
+        </div>
+    </div>
+</notempty>
 <include file="public@adsc" />

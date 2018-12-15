@@ -36,6 +36,11 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('statuss',$this->statuss);
         $this->assign('review_status',$this->review_status);
         $this->assign('html',$this->request->action());
+        $this->assign('search_types',[ 4 => '模糊搜索',
+            1 => '精准搜索',
+            2 => '头部搜索',
+            3 => '尾部搜索',]);
+        
         //计算小数位
         bcscale(2); 
     }
@@ -177,7 +182,7 @@ class AdminInfo0Controller extends AdminBaseController
         $this->assign('types',$types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
-      
+        
         $this->cates(1);
        
     } 

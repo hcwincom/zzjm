@@ -524,6 +524,13 @@ class AdminFreightController extends AdminInfo0Controller
         
         zz_action($data_action,['department'=>$admin['department']]);
         $m_edit->commit();
+        
+        //直接审核
+        $rule='tel_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
     }
     /**
@@ -826,19 +833,27 @@ class AdminFreightController extends AdminInfo0Controller
      * )
      */
     public function express_query(){
-        $freight=$this->request->param('freight',0,'intval');
+       
+        $express=$this->request->param('express',0,'intval');
+        $m=$this->m;
+        if(empty($express)){
+            $freight=$this->request->param('freight',0,'intval');
+            $express=$m
+            ->where('id',$freight)
+            ->value('express'); 
+            if(empty($express)){
+                $this->error('未选择快递公司');
+            }
+        } 
+        
+        $code=Db::name('express')->where('id',$express)->value('code');
+        if(empty($code)){
+            $this->error('没有快递类型编码');
+        }
         $no=$this->request->param('no');
         if(empty($no)){
             $this->error('没有单号');
-        }
-        
-        $m=$this->m;
-        $code=$m
-        ->alias('freight')
-        ->join('cmf_express express','express.id=freight.express')
-        ->where('freight.id',$freight)
-        ->value('express.code');
-        
+        } 
         $url='https://www.kuaidi100.com/chaxun?';
         header('location:'.$url.'com='.$code.'&nu='.$no);
     }

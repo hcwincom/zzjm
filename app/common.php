@@ -7,62 +7,15 @@ use think\Db;
 use think\Url;
  
 // 应用公共文件
-/* 申请入库,已废弃，使用StoreGoodsModel */
-function zz_instore_xxx($data){
-    $m_store_goods=Db::name('store_goods');
-    $where=[
-        'store'=>['eq',$data['store']],
-        'goods'=>['eq',$data['goods']], 
-        'shop'=>['eq',$data['shop']], 
-    ];
-    $tmp=$m_store_goods->where($where)->find();
-    if(empty($tmp)){
-        if($data['num']<0 ){
-            return '没有库存，请选择其他产品或仓库';
-        }
-       
-        //不存在，要添加.总库存也要添加
-       $data_store=[
-           [
-               'store'=>$data['store'],
-               'goods'=>$data['goods'], 
-               'shop'=>$data['shop'],
-               'time'=>$data['atime'],
-               'num1'=>$data['num'],  
-           ], 
-       ];
-       //总库存是否添加
-       $where=[
-           'store'=>['eq',0],
-           'goods'=>['eq',$data['goods']],
-           'shop'=>['eq',$data['shop']], 
-       ];
-       $tmp=$m_store_goods->where($where)->find();
-       if(empty($tmp)){
-           $data_store[]=[
-                   'store'=>0,
-                   'goods'=>$data['goods'],
-                   'shop'=>$data['shop'],
-                   'time'=>$data['atime'],
-                   'num1'=>$data['num'], 
-               ];
-       }
-       $m_store_goods->insertAll($data_store);
-       
-    }
-    if($data['num']!=0){  
-        $tmp_num=abs($data['num']);
-        //冻结库存,如果num<0是出库，要检查库存是否足够
-        if($data['num']<0 && abs($data['num'])>$tmp['num']){
-            return '库存不足';
-        }
-        $num1=$m_store_goods->where('id',$tmp['id'])->inc('num1',$data['num'])->setField('time',$data['atime']);
-        //入库
-        Db::name('store_in')->insert($data); 
-    } 
-     
-    return true;
-}
+/**
+ * 生成订单号
+ * @param number $aid
+ * @param string $str
+ * @return string
+ */
+ function order_sn($aid=1,$str=''){
+     return $str.date('YmdHis').$aid;
+ }
 
 /**
  * 操作后记录和通知
@@ -297,6 +250,104 @@ function zz_search($type,$name)
         default:
             return ['like','%'.$name.'%']; 
     }
+}
+/**
+ * 根据查询时间
+ * @param array $types 查询参数
+ * @param array $search_types 查询类型
+ * @param array $data 查询数据
+ * @param array $where 查询条件
+ * @param string $name_type1 查询字段的name值
+ * @param string $name_type2 查询方式的name
+ * @param string $name_name 查询值的name 
+ * @return array 返回data和where
+ */ 
+function zz_search_param($types,$search_types,$data,$where,$name_type1='type1',$name_type2='type2',$name_name='name'){
+    
+    //选择查询字段
+    if(empty($data[$name_type1])){
+        $data[$name_type1]=key($types);
+    }
+    //搜索类型  
+    if(empty($data[$name_type2])){
+        $data[$name_type2]=key($search_types);
+    }
+    if(!isset($data[$name_name]) || $data[$name_name]==''){
+        $data[$name_name]='';
+    }else{
+        switch ($data[$name_type2]){
+            case 1:
+                $res=['eq',$data[$name_name]];
+                break;
+            case 2:
+                $res=['like',$data[$name_name].'%'];
+                break;
+            case 3:
+                $res=['like','%'.$data[$name_name]];
+                break;
+            default:
+                $res=['like','%'.$data[$name_name].'%'];
+                break;
+        }
+        $where[$types[$data[$name_type1]][0]]=$res;
+    }
+    
+    return ['data'=>$data,'where'=>$where];
+}
+ 
+/**
+ * 根据查询时间
+ * @param $times 时间查询
+ * @param $data 查询数据
+ * @param $where 查询条件
+ * @param number $day1 开始时间默认提前天数
+ * @param number $day2 结束时间默认提前天数
+ * @param string $name_type 时间类型的name
+ * @param string $name_time1 开始时间的name
+ * @param string $name_time2 结束时间的name
+ * @return string|array 错误返回说明|正常返回data和where
+ */
+function zz_search_time($times,$data,$where,$day1=31,$day2=0,$name_time='time',$name_time1='datetime1',$name_time2='datetime2')
+{
+     
+    if(empty($data[$name_time])){
+        $data[$name_time]=key($times);
+        $time1=time()-24*3600*$day1;
+        $time2=time()-24*3600*$day2;
+        $data[$name_time1]=date('Y-m-d H:i',$time1);
+        $data[$name_time2]=date('Y-m-d H:i',$time2);
+        $where[$times[$data[$name_time]][0]]=['between',[$time1,$time2]];
+    }else{
+        //时间处理
+        if(empty($data[$name_time1])){
+            $data[$name_time1]='';
+            $time1=0;
+            if(empty($data[$name_time2])){
+                $data[$name_time2]='';
+                $time2=0;
+            }else{
+                //只有结束时间
+                $time2=strtotime($data['datetime2']);
+                $where[$times[$data[$name_time]][0]]=['elt',$time2];
+            }
+        }else{
+            //有开始时间
+            $time1=strtotime($data[$name_time1]);
+            if(empty($data[$name_time2])){
+                $data[$name_time2]='';
+                $where[$times[$data[$name_time]][0]]=['egt',$time1];
+            }else{
+                //有结束时间有开始时间between
+                $time2=strtotime($data[$name_time2]);
+                if($time2<=$time1){
+                    return ('结束时间必须大于起始时间');
+                }
+                $where[$times[$data[$name_time]][0]]=['between',[$time1,$time2]];
+            }
+        }
+    }
+    return ['data'=>$data,'where'=>$where];
+    
 }
 /**
  * 根据目录删除文件和目录,

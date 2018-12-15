@@ -11,7 +11,7 @@ use cmf\controller\AdminBaseController;
  *     'action' =>'default',
  *     'parent' =>'',
  *     'display'=> true,
- *     'order'  => 40,
+ *     'order'  => 42,
  *     'icon'   =>'',
  *     'remark' =>'订单管理'
  * )

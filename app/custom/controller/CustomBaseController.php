@@ -48,8 +48,10 @@ class CustomBaseController extends AdminInfo0Controller
         //客户还是供货商
           if($table=='custom'){
               $tel_type=1; 
+              $m_order=Db::name('order');
          }else{
              $tel_type=2;
+             $m_order=Db::name('ordersup');
          } 
         
         //店铺,分店只能看到自己的数据，总店可以选择店铺
@@ -182,12 +184,19 @@ class CustomBaseController extends AdminInfo0Controller
         }
  
         //先查询得到id再关联得到数据，否则sql查询太慢
-        $ids=$m
+        $list0=$m
         ->alias('p') 
+        ->field('p.id')
         ->join('cmf_tel tels','p.id=tels.uid and tels.type='.$tel_type,'left')
         ->where($where)  
         ->order('p.status asc,p.sort asc,p.time desc')
-        ->column('p.id');
+        ->paginate();
+        $page = $list0->appends($data)->render();
+        $ids=[];
+       
+        foreach($list0 as $k=>$v){
+            $ids[]=$v['id'];
+        }
         
         if(empty($ids)){
             $list=[];
@@ -195,13 +204,13 @@ class CustomBaseController extends AdminInfo0Controller
         }else{
             //关联表
             $join=[
-                ['cmf_user a','a.id=p.aid','left'],
-                ['cmf_user r','r.id=p.rid','left'],
-                ['cmf_shop shop','p.shop=shop.id','left'], 
+//                 ['cmf_user a','a.id=p.aid','left'],
+//                 ['cmf_user r','r.id=p.rid','left'],
+//                 ['cmf_shop shop','p.shop=shop.id','left'], 
                 ['cmf_tel tel','p.id=tel.uid and tel.site=p.contacter and tel.type='.$tel_type,'left'], 
             ];
-            $field='p.*,a.user_nickname as aname,r.user_nickname as rname,shop.name as sname'.
-                ',tel.name as tel_name,tel.mobile as tel_mobile,tel.qq as tel_qq,tel.wechat as tel_wechat'.
+            //a.user_nickname as aname,r.user_nickname as rname,shop.name as sname
+            $field='p.*,tel.name as tel_name,tel.mobile as tel_mobile,tel.qq as tel_qq,tel.wechat as tel_wechat'.
                 ',tel.taobaoid as tel_taobaoid,tel.aliid as tel_aliid';
             $list=$m
             ->alias('p')
@@ -209,10 +218,10 @@ class CustomBaseController extends AdminInfo0Controller
             ->join($join)
             ->where('p.id','in',$ids)
             ->order('p.status asc,p.sort asc,p.id desc')
-            ->paginate();
-            $page = $list->appends($data)->render();
+            ->column($field);
+            
         }
-       
+      
         $this->assign('page',$page);
         $this->assign('list',$list);
         
@@ -363,6 +372,12 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m->commit();
+        //直接审核
+        $rule='review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$id,'status'=>2]);
+        } 
         $this->success('添加成功',$url);
         
     }
@@ -615,6 +630,12 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        //直接审核
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
     }
      
@@ -791,12 +812,13 @@ class CustomBaseController extends AdminInfo0Controller
             ];
             $m_account=Db::name('account');
             $accounts=$m_account->where($where)->column('site,id');
-            
+       
             if(isset($change['account1'])){
                 $data_account=$where;
                 foreach($change['account1'] as $k=>$v){
                     $data_account[$k]=$v;
                 }
+              
                 //存在更新，不存在添加
                 if(empty($accounts[1])){
                     $m_account->insert($data_account);
@@ -1074,6 +1096,13 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        
+        //直接审核
+        $rule='tel_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改'); 
     }
     /**
@@ -1479,6 +1508,13 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        
+        //直接审核
+        $rule='goods_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
         $this->success('已提交修改');
     }
     /**
@@ -1683,6 +1719,9 @@ class CustomBaseController extends AdminInfo0Controller
                 $m->rollback();
                 $this->error('信息更新失败，请刷新后重试');
             }
+            //更新客户，供应商关联产品数
+            $goods_num=$m_ugoods->where('uid',$info['pid'])->count('id');
+            $m->where('id',$info['pid'])->update(['goods_num'=>$goods_num]);
         }
         
         //审核成功，记录操作记录,发送审核信息

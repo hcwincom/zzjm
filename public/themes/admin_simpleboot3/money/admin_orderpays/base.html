@@ -1,0 +1,216 @@
+ 	 
+ 		
+ 		<notempty name="info.id">
+			  <div class="form-group fleft">
+				<label  class="col-sm-2 control-label">{$flag}id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info.id}" readonly/>
+				  
+				</div>
+			</div>
+		 
+		</notempty>
+		 
+		 	<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">{$uflag}</label>
+				<div class="col-md-6 col-sm-10"> 
+					 <input type="text" class="form-control " value="{$custom.code},{$custom.name}"/>
+					 <input type="hidden" name="uid" value="{$custom.id} "/>
+					<a href="{$uurl}/id/{$custom.id}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
+				</div>
+			</div>
+		 
+			
+	  		 
+			<div style="clear:both"></div>
+			 
+	  		
+		 
+		<div class="orders"> 
+			<div class="order " > 
+			 
+			  <table class="table table-hover table-bordered table-list goods-list"  > 
+			  	<tr >
+				 	 <td class="order_name">
+				 	 	订单号
+				 	 </td>
+				 	 <td >产品金额</td> 
+				 	 <td >订单金额</td> 
+				 	 <td>结算金额</td>
+				 	 <td >支付状态</td> 
+				 	 <td >下单时间</td> 
+				 	 <td >收货时间</td>
+					 
+				</tr>
+				<foreach name="orders" item="vv" key="kk"> 
+				<tr >
+				 	 <td class="order_name">
+				 	 	<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
+				 	 	<a href="{$ourl}/id/{$kk}" target="{$zztarget.other}">{$vv.name}</a>
+				 		
+				 	 </td>
+				 	 <td class="clickInfo">
+				 	 	<div style="position:relative;" class="goInfo" data-width="0"> 
+     	   				{$vv.goods_money}-点击详情
+     	   		 		</div>
+				 	 	<div class="goodsInfo">
+	     	   		 		<table class="table table-hover table-bordered">
+		     	   		 		 <tr>
+		     	   		 		    <td >产品名称</td> 
+							 	 	<td >产品编码</td> 
+							 	 	<td >供应名称</td> 
+							 	 	<td >数量</td> 
+							 	 	<td >金额</td>
+							 	 </tr>
+		     	   		 		<tbody> 
+			     	   		 		<foreach name="vv.goods" item="vgoods" key="kgoods">
+			     	   		 		<tr>
+			     	   		 			<td >{$vgoods.goods_name}</td> 
+								 	 	<td >{$vgoods.goods_code}</td> 
+								 	 	<td >{$vgoods.goods_uname}</td> 
+								 	 	<td >{$vgoods.num}</td> 
+								 	 	<td >{$vgoods.pay}</td>
+			     	   		 		</tr>
+			     	   		 		</foreach> 
+		     	   		 		</tbody> 
+						   </table>
+					   </div>
+				 	 </td>
+				  
+				 	 <td  >{$vv.order_amount}</td> 
+				 	 <td  >{$vv.money}</td> 
+				 	 <td  >{$pay_status[$vv.pay_status]}</td> 
+				 	 <td >{$vv.create_time|date='Y-m-d H:i',###}</td>
+					 <td >{$vv.accept_time|date='Y-m-d H:i',###}</td>
+				</tr>	
+				</foreach>
+			 </table> 
+			</div> 
+		</div> 
+		<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">结算总计</label>
+				<div class="col-md-6 col-sm-10">
+				 	<label class="input-inline"> 
+				      	订单数量：
+				   		<input type="text" class="form-control short-auto" name="num" value="{$info.num|default=$count}" readonly/>
+				    </label>
+				     <label class="input-inline"> 
+				      	应结算金额：
+				   		<input type="text" class="form-control short-auto" name="money0" value="{$info.money0|default=$money}" readonly/>
+				    </label>
+				    <label class="input-inline"> 
+				      	实际结算金额：
+				   		<input type="text" class="form-control short-auto" name="money" value="{$info.money|default=$money}"/>
+				    </label>
+		  		</div>
+		  </div>
+	   
+			<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">付款/收款账号</label>
+				<div class="col-md-6 col-sm-10">
+				{$uflag}付款/收款账号：
+					<select  class="form-control" id="account">
+				    	<option value="0">请选择</option> 
+				    <foreach name="accounts" item="vo">
+				    	<option value="{$vo.id}" bank1="{$vo.bank1}" bank2="{$vo.bank2}" name2="{$vo.name2}" 
+				    	num2="{$vo.num2}" location2="{$vo.location2}" name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
+				    	{$vo.location1}-{$vo.name1}-{$vo.num1}
+				    	</option>
+				    </foreach>
+					</select> 
+					<input type="hidden" name="account_id" value="{$pay.id}"/>
+					 
+					银行：
+					<select  class="form-control" name="account_bank1" id="account_bank1">
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $pay.bank1">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				<present name="change.pay.bank1">
+					<select  class="form-control red" >
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $change.pay.bank1">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				</present>
+				 
+				  账户名：<input type="text"  class="form-control" name="account_name1" id="account_name1" value="{$pay.name1}" required/>
+				   	<present name="change.pay.name1"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.name1}"/>
+				   	</present>
+				    <p class="notice">{$uflag}账户名不可为空</p>  
+				   账号：<input type="text"  class="form-control" name="account_num1" id="account_num1"  value="{$pay.num1}"/>
+				 	<present name="change.pay.num1"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.num1}"/>
+				   	</present> 
+				   开户行：<input type="text"  class="form-control" name="account_location1" id="account_location1"  value="{$pay.location1}"/>
+				 	<present name="change.pay.location1"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.location1}"/>
+				   	</present>  
+				   店铺账号银行：
+					<select  class="form-control" name="account_bank2" id="account_bank2">
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $pay.bank2">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				<present name="change.pay.bank2">
+					<select  class="form-control red"  >
+				    	<option value="0">请选择</option>
+					<foreach name="banks" item="vo">
+						<option value="{$key}" <if condition="$key eq $change.pay.bank2">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				</present>
+				   收款 账户名：<input type="text"  class="form-control" name="account_name2" id="account_name2"  value="{$pay.name2}"/>
+				 	<present name="change.pay.name2"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.name2}"/>
+				   	</present>  
+				   收款账号：<input type="text"  class="form-control" name="account_num2" id="account_num2"  value="{$pay.num2}"/>
+				 	<present name="change.pay.num2"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.num2}"/>
+				   	</present>    
+				   收款开户行：<input type="text"  class="form-control" name="account_location2" id="account_location2"  value="{$pay.location2}"/>
+					<present name="change.pay.location2"> 
+				   		<input type="text"  class="form-control red"  value="{$change.pay.location2}"/>
+				   	</present>  
+				</div>
+			</div>
+	   		<div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">{$flag}备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control " name="adsc" value="{$info.adsc}" id="adsc"/> 
+				<present name="change.adsc">
+					<input type="text" class="form-control red"  value="{$change.adsc}" />
+				</present>
+				</div>
+			</div>
+		 
+ 
+<script>
+ 
+$('#account').change(function(){
+	account_change(); 
+});
+function account_change(){
+	 var account=$('#account').val();
+	 
+	 if(account==0){
+		 return false;
+	 }
+	 var selected=$('#account option:selected');
+	 
+	 $('#account_bank1').val(selected.attr('bank1'));
+	 $('#account_bank2').val(selected.attr('bank2'));
+	 $('#account_num2').val(selected.attr('num2'));
+	 $('#account_name2').val(selected.attr('name2'));
+	 $('#account_location2').val(selected.attr('location2'));
+	 $('#account_num1').val(selected.attr('num1'));
+	 $('#account_name1').val(selected.attr('name1'));
+	 $('#account_location1').val(selected.attr('location1'));
+	  
+}
+</script>
+  
