@@ -191,13 +191,13 @@ $('#goods_add').click(function(){
      	   '<td class="goods_ucate"><input type="text" name="goods_ucates-'+oid+'['+info['id']+']" class="form-control  " value="'+info['goods_ucate']+'"/></td>'+
    	       '<td>'+info['price_in']+'</td>'+ 
      	   '<td>'+info['price_sale']+'</td>'+
-     	    '<td class="price_real"><input type="text" name="price_reals-'+oid+'['+info['id']+']" class="form-control  " value="'+info['price_pay']+'"/></td>'+
-     	    '<td  class="num"><input type="text" name="nums-'+oid+'['+info['id']+']" class="form-control input-order" value="1"/></td>'+
-     	    '<td class="pay_discount"><input type="text" name="pay_discounts-'+oid+'['+info['id']+']" class="form-control " value="0"/></td>'+
-     	    '<td class="pay"><input type="text" name="pays-'+oid+'['+info['id']+']" class="form-control" value="'+info['price_pay']+'" /></td>'+ 
-     	    '<td class=""><input type="text"  name="weights-'+oid+'['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
+     	    '<td class="price_real"><input  type="number" step="0.01" name="price_reals-'+oid+'['+info['id']+']" class="form-control  " value="'+info['price_pay']+'"/></td>'+
+     	    '<td  class="num"><input  type="number" name="nums-'+oid+'['+info['id']+']" class="form-control input-order" value="1"/></td>'+
+     	    '<td class="pay_discount"><input type="number" step="0.01" name="pay_discounts-'+oid+'['+info['id']+']" class="form-control " value="0"/></td>'+
+     	    '<td class="pay"><input type="number" step="0.01" name="pays-'+oid+'['+info['id']+']" class="form-control" value="'+info['price_pay']+'" /></td>'+ 
+     	    '<td class=""><input  type="number" step="0.01"  name="weights-'+oid+'['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
      	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td>'+
-     	   '<td><input type="text"  name="sizes-'+oid+'['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
+     	   '<td><input  type="number" step="0.01" name="sizes-'+oid+'['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
     	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td>'+
     	   '<td class="dsc"><input type="text"  name="dscs-'+oid+'['+info['id']+']" class="form-control " value=""/></td>'+ 
     	   '<td> <input type="hidden" class="goods_id" value="'+info['id']+'" name="goods_ids['+info['id']+']"/>'+

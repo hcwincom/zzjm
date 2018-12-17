@@ -14,7 +14,7 @@
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-					 <p class="notice">添加订单后需管理员审核后才能生效</p>
+					 <p class="notice">添加{$flag}后需管理员审核后才能生效</p>
 					 <p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
 				</div>
 			</div>
@@ -44,9 +44,9 @@ var cid=0;
 var province=0;
 var city=0;
  
-var url_custom_get="{:url('order/Orderajax/get_customs')}";
-var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
-var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
+var url_custom_get="{$url_custom_get}";
+var url_custom_info="{$url_custom_info}";
+var url_custom="{$url_custom}";
 var arr;
 var store=0; 
  
@@ -190,70 +190,7 @@ function accept_change(){
         }
     });
 }
-
  
-function money_change1111($tr,type='price'){  
-	var num=parseInt($tr.find('.num').val()); 
-	var price_sale=parseFloat($tr.find('.price_sale').val());
-	var pay_discount=parseFloat($tr.find('.pay_discount').val());
-	if(!(num>0)){
-		msg('产品数量错误');
-		$tr.find('.num').focus();
-		return false;
-	}
-	$tr.find('.num').val(num);
-	if(!(price_sale>=0)){
-		msg('产品价格错误');
-		$tr.find('.price_sale').focus();
-		return false;
-	}
-	if(!(pay_discount>=0)){
-	 
-		$tr.find('.pay_discount').val(0);
-		pay_discount=0;
-	}
-	price_sale=price_sale.toFixed(2);
-	$tr.find('.price_sale').val(price_sale);
-	pay_discount=pay_discount.toFixed(2);
-	$tr.find('.pay_discount').val(pay_discount);
-	
-	var price_count1=(num*price_sale-pay_discount).toFixed(2);
-	$tr.find('.price_count').val(price_count1); 
-	//重量体积改变
-	if(type=='num'){
-		var weight0=$tr.find('.weight0').val();
-		var size0=$tr.find('.size0').val(); 
-		$tr.find('.weight1').val((num*weight0).toFixed(2));
-		$tr.find('.size1').val((num*size0).toFixed(2)); 
-	}  
-	 
-	var price_count=0;
-	var num_count=0;  
-	$('.price_count').each(function(){
-		$tr=$(this).parents('tr'); 
-		num=parseInt($tr.find('.num').val()); 
-		if(!(num>0)){
-			num=1; 
-			$(this).val($tr.find('.price_sale').val());
-		}
-		$tr.find('.num').val(num);
-		num_count+=num;
-		
-		price_count1=parseFloat($(this).val());
-		if(!(price_count1>=0)){
-			price_count1=0;
-			$(this).val(price_count1);
-		}
-		price_count+=price_count1; 
-	});
-	$('#goods_money').val(price_count.toFixed(2));
-	$('#goods_num').val(num_count);
-	//重量体积改变
-	if(type=='num'){ 
-		weight_change();
-	}  
-	order_account();
-}
  
 var url_freight_count="{:url('order/Orderajax/freight_count')}";
 $('#freight_count').click(function(){
