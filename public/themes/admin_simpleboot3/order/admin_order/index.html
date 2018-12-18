@@ -259,7 +259,15 @@
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
 city_js($('#province'),"{$data.province|default=0}",$('#city'),"{$data.city|default=0}");
- 
+$('#taobao').click(function(){
+	 
+	if(($(this).attr('id'))!='taobao'){
+		return false;
+	} 
+	$(this).html('淘宝订单正在同步，请等待...');
+	$(this).attr('id','taobao_old');
+	location.href="{:url('order/AdminTaobao/index')}";
+});
 </script>
 </body>
 </html>
