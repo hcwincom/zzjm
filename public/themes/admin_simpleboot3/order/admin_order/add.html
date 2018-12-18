@@ -14,7 +14,7 @@
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-					 <p class="notice">添加{$flag}后需管理员审核后才能生效</p>
+					 <p class="notice">添加订单后需管理员审核后才能生效</p>
 					 <p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
 				</div>
 			</div>
@@ -44,9 +44,9 @@ var cid=0;
 var province=0;
 var city=0;
  
-var url_custom_get="{$url_custom_get}";
-var url_custom_info="{$url_custom_info}";
-var url_custom="{$url_custom}";
+var url_custom_get="{:url('order/Orderajax/get_customs')}";
+var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
+var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
 var arr;
 var store=0; 
  
@@ -74,7 +74,7 @@ function custom_get(company,cid,province,city){
 	if(province==0){
 		return false;
 	}
-	$.post(url_custom_get,{'company':company,'cid':cid,'type':1,'province':province,'city':city},function(data){
+	$.post(url_custom_get,{'company':company,'cid':cid,'type':utype,'province':province,'city':city},function(data){
 		if(data.code!=1){
 			return false;
 		} 
@@ -99,7 +99,7 @@ function custom_change(custom){
 		 return false;
 	 } 
 	  $('#custom_link').attr('href',url_custom+custom);
-	 $.post(url_custom_info,{'uid':custom,'type':1},function(data){
+	 $.post(url_custom_info,{'uid':custom,'type':utype},function(data){
 			if(data.code!=1){
 				return false;
 			}  

@@ -17,6 +17,7 @@ class OrderajaxController extends AdminBase0Controller
     {
         $id=$this->request->param('id');
         $uid=$this->request->param('uid');
+        $type=$this->request->param('type',1,'intval');
         $where=[
             'id'=>$id,
         ];
@@ -56,23 +57,26 @@ class OrderajaxController extends AdminBase0Controller
                  'file3'=>$v['file'].'3.jpg',
              ]; 
          }
-         //添加客户用名
-        if(empty($uid)){
-            $tmp=null;
-        }else{
-            $where=['uid'=>$uid,'goods'=>$id];
-            $tmp=Db::name('custom_goods')->where($where)->find();
-        } 
-        if(empty($tmp)){
-            $goods['goods_uname']='';
-            $goods['goods_ucate']=''; 
-            $goods['price_pay']=$goods['price_sale'];
-        }else{
-            $goods['goods_uname']=$tmp['name'];
-            $goods['goods_ucate']=$tmp['cate'];
-            $goods['price_pay']=$tmp['price'];
-            $goods['dsc']=$tmp['dsc'];
-        }
+         if($type==1){
+             //添加客户用名
+             if(empty($uid)){
+                 $tmp=null;
+             }else{
+                 $where=['uid'=>$uid,'goods'=>$id];
+                 $tmp=Db::name('custom_goods')->where($where)->find();
+             }
+             if(empty($tmp)){
+                 $goods['goods_uname']='';
+                 $goods['goods_ucate']='';
+                 $goods['price_pay']=$goods['price_sale'];
+             }else{
+                 $goods['goods_uname']=$tmp['name'];
+                 $goods['goods_ucate']=$tmp['cate'];
+                 $goods['price_pay']=$tmp['price'];
+                 $goods['dsc']=$tmp['dsc'];
+             }
+         }
+         
         $this->success('ok','',$goods);
     }
     //根据所属公司和客户分类,客户所在地得到客户
@@ -149,7 +153,12 @@ class OrderajaxController extends AdminBase0Controller
         ->where($where)
         ->order('p.site asc')
         ->column('p.*','p.site');
-        
+        //供应产品
+        if($type==2){
+            $info['ugoods']=Db::name('supplier_goods')->where('uid',$uid)->column('goods,name,cate,num,price');
+            
+        }
+       
         $this->success('ok','',$info);
     }
     

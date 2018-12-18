@@ -1,5 +1,4 @@
 <include file="public@header" />
-
 </head>
 <body>
 	<div class="wrap">
@@ -10,15 +9,17 @@
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('edit_do')}" id="form-edit">
 			 
-			  <include file="ordersup@admin_ordersup:base" />
-			 <div class="form-group fleft-all">
+			 <include file="ordersup@admin_ordersup:base" />
+			
+		 
+			<div class="form-group fleft-all">
 				<div class="col-sm-offset-2 col-sm-10"> 
-				 <p>  
+				 <p>  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 				 <input type="hidden"  name="id" value="{$info.id}" />
 					<button type="submit" action="{:url('edit_do')}" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
 					
 					 <if condition="$info.pay_status eq 1 && $info.status elt 10">
-					 
+					   &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					 	 <button type="submit" action="{:url('order_abandon')}" class="save btn btn-primary js-ajax-submit" >废弃采购单</button>
 					 </if>
 				</p>
@@ -26,11 +27,9 @@
 					<p> 
 					<eq name="info.is_real" value="1">
 					<eq name="info.order_type" value="1">
-				 
+					 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					   <switch name="info.status">
-					    <case value="1">
-						 	<button type="submit" action="{:url('status_do1')}" class="save btn btn-primary js-ajax-submit" >提交下单</button>
-						 </case>
+					   
 						 <case value="2">
 						 	<button type="submit" action="{:url('status_do2')}" class="save btn btn-primary js-ajax-submit" >确认下单</button>
 						 </case>
@@ -50,42 +49,49 @@
 						 	<button type="submit" action="{:url('status_do24')}" class="save btn btn-primary js-ajax-submit" >确认收货</button>
 						 	 
 						 </case>
-						  
 						  <case value="26"> 
-						 	<button type="submit" action="{:url('status_do30')}" class="save btn btn-primary js-ajax-submit" >订单售后关闭</button>
+						 	<button type="submit" action="{:url('status_do30')}" class="save btn btn-primary js-ajax-submit" >退货中</button>
 						 	 
 						 </case>
 						  <case value="30"> 
-						 	<button type="submit" action="{:url('status_do30')}" class="save btn btn-primary js-ajax-submit" >订单售后关闭</button>
+						 	<button type="submit" action="{:url('status_do30')}" class="save btn btn-primary js-ajax-submit" >退货中</button>
+						 	 
+						 </case>
+						  <case value="40"> 
+						 	<button type="submit" action="{:url('status_do40')}" class="save btn btn-primary js-ajax-submit" >退货完成</button>
 						 	 
 						 </case>
 					 </switch> 
 					  
-					 <button type="submit" action="{:url('status_do0')}" class="save btn btn-primary js-ajax-submit" >超管还原采购单状态</button>
+					  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					 <button type="submit" action="{:url('status_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改采购单状态</button>
 					<else/>
 					 	<eq name="info.status" value="2"> 
-					  
+					 	 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 						 	<button type="submit" action="{:url('status_do2')}" class="save btn btn-primary js-ajax-submit" >确认下单</button>
 						 </eq>
 					</eq>
 					</eq>
 					</p>
-			 	<lt name="info.status" value="80">
-					<p>  
+			 			
+					<p>  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
 					  <switch name="info.pay_status">
 						 <case value="1">
 						 	<button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >付款提交</button> 
 						 </case>
 						 <case value="2">
-						 	<button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >确认付款</button>
+						 	<button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >财务确认付款</button>
 						 </case>
-						 
+						 <case value="3">
+						 	<button type="submit" action="{:url('pay_do3')}" class="save btn btn-primary js-ajax-submit" >发起退款</button>
+						 </case>
+						 <case value="4">
+						 	<button type="submit" action="{:url('pay_do4')}" class="save btn btn-primary js-ajax-submit" >退款完成</button>
+						 </case>
 					 </switch> 
-				 
-					 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管还原支付状态</button>
+					 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+					 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管修改支付状态</button>
 					</p>
-			 	</lt>	
-					 
 			 
 					 <p class="notice">不同仓库收货的必须拆分采购单。 已付款和已收货的采购单不能再修改，只能拆分采购单收货。
 					 <br/>用户在未收货前可以取消采购单，管理员在用户未付款且未收货前可以废弃采购单 。
@@ -99,12 +105,12 @@
 					 点击“发起退款”，采购单支付状态为退款中。<br/>
 					 点击“退款完成”，采购单支付状态为退款完成。<br/>
 					  点击“手动转为待收货”，可以强制将未付款的采购单改为待收货状态。<br/>
-					 点击“准备收货”，添加入库记录待审核。<br/>
+					 点击“仓库收货”，采购单状态为已收货。<br/>
 					 点击“确认收货”，采购单状态为已收货，若已支付，则采购单状态为已完成。<br/>
-				 
+					 点击“退货中”，采购单状态为退货中。<br/>
+					 点击“退货完成”，采购单状态为退货完成。<br/>
 					 点击“废弃采购单”，采购单状态为已废弃，不可修改。<br/>
-					  点击“订单售后关闭”表示该订单已退款或过保修期，不提供保修服务。<br/>
-					超管还原状态用于错误操作后将订单还原到初始状态，重新操作<br/>
+					超管修改状态可以自由选择要改变的状态，但是不会引发付款和出入库的变化，请注意！<br/>
 					 
 					 </p>
 					  
@@ -118,8 +124,151 @@
 </body>
 </html>
 <script>
- 
+
+var price_count=0;
+var num_count=0; 
+var price_real=0;
+var pay=0;
+var num=0; 
+var weight_count=0;
+var size_count=0;
+var weight1=0;
+var size1=0;
+var $tmp_tr;
+var weight0=0;
+var size0=0;
+var pay_discount=0;
+
 city_js($('#province'),'{$info.province}',$('#city'),'{$info.city}',$('#area'),'{$info.area}');
+
+$(document).on('change','.price_real input',function(){
+	tr_change($(this).parents('tr'),'price');
+});
+$(document).on('change','.pay_discount input',function(){
+	tr_change($(this).parents('tr'),'price');
+});
+$(document).on('change','.size1,.weight1',function(){ 
+	order_change($(this).parents('.order'),'num');
+});
+ 
+$(document).on('change','.discount_money,.other_money,.pay_freight,.tax_money',function(){ 
+	var $div=$(this).parents('.order_pay');
+	money_count($div);
+	 if(!(($div.attr('id'))=='order_pay')){ 
+		 orders_account();
+	 }
+	
+});
+ 
+ 
+ 
+//产品价格变化或重量变化,本行的变化
+function tr_change($tr,type='price'){  
+	num=parseInt($tr.find('.num input').val()); 
+	price_real=parseFloat($tr.find('.price_real input').val());
+	 
+	if(!(num>0)){
+		num=0;
+	} 
+	if(!(price_real>0)){
+		price_real=0;
+	}
+	if(!(pay_discount>0)){
+		pay_discount=0;
+	}
+	price_real=price_real.toFixed(2);
+	pay_discount=pay_discount.toFixed(2);
+	$tr.find('.price_real input').val(price_real);
+	$tr.find('.pay_discount input').val(pay_discount);
+	price_count=(num*price_real-pay_discount).toFixed(2);
+	 
+	$tr.find('.pay input').val(price_count); 
+	//重量体积改变
+	if(type=='num'){
+		weight0=$tr.find('.weight0').val();
+		size0=$tr.find('.size0').val(); 
+		$tr.find('.weight1').val((num*weight0).toFixed(2));
+		$tr.find('.size1').val((num*size0).toFixed(2));  
+	} 
+	order_change($tr.parents('.order'),type);
+	 
+}
+//一个采购单内的计算统计
+function order_change($div,type='price'){  
+	price_count=0;
+	num_count=0; 
+	//采购单div 
+	$div.find('.pay').each(function(){
+		$tmp_tr=$(this).parents('tr');  
+		num=parseInt($tmp_tr.find('.num input').val()); 
+		if(!(num>0)){
+			num=0; 
+			$tmp_tr.remove();
+			 return true;
+		} 
+		num_count+=num; 
+		pay=parseFloat($tmp_tr.find('.pay input').val()); 
+		if(!(pay>0)){ 
+			pay=0;
+		}
+		price_count+=pay; 
+		
+		//重量体积改变
+		if(type=='num'){
+			weight1=parseFloat($tmp_tr.find('.weight1').val());
+			if(!(weight1>0)){
+				weight1=0.01; 
+			}
+			$tmp_tr.find('.weight1').val(weight1.toFixed(2)); 
+			weight_count+=weight1;
+			size1=parseFloat($tmp_tr.find('.size1').val());
+			if(!(size1>0)){
+				size1=0.01; 
+			}
+			$tmp_tr.find('.size1').val(size1.toFixed(2));
+			size_count+=size1;
+		} 
+		 
+	});
+	
+	$div.find('.goods_money').val(price_count.toFixed(2));
+	$div.find('.goods_num').val(num_count);
+	if(type=='num'){
+		$div.find('.order_size').val(size_count.toFixed(2));
+		$div.find('.order_weight').val(weight_count.toFixed(2));
+	} 
+	money_count($div);
+	orders_account();
+}
+//子采购单变化触发总采购单
+function orders_account(){
+	if(is_real==1){
+		 
+		return 0;
+	}
+	price_count=0;
+	num_count=0; 
+ 
+	$('.order').each(function(){ 
+		pay=parseFloat($(this).find('.goods_money').val());
+		if(!(pay>0)){
+			pay=0; 
+		}
+		$(this).find('.goods_money').val(pay.toFixed(2)); 
+		price_count+=pay; 
+		
+		num=parseInt($(this).find('.goods_num').val());
+		if(!(num>0)){ 
+			num=0;
+		}
+		num_count+=num;
+	});
+	
+	$('#goods_money').val(price_count.toFixed(2));
+	$('#goods_num').val(num_count.toFixed(2)); 
+	
+	money_count($('#goods_money').parents('.order_pay'));
+} 
  
 var oid=0;
 var is_end=1;
@@ -127,13 +276,13 @@ var $order_new;
 $('#break_ok').click(function(){
 	is_end=1;
 });
-$(document).on('click','.order_break',function(){
+$('.order_break').click(function(){
 	var div=''; 
 	var num=0;
 	var goods_id; 
 	 
 	$tmp_tr=$(this).parents('tr');
-	
+ 
 	num=parseInt($tmp_tr.find('.break').val());
 	if(!(num>0)){ 
 		$tmp_tr.find('.break').val(0);
@@ -154,13 +303,11 @@ $(document).on('click','.order_break',function(){
 		oid=oid-1;
 		$('.order'+oid0).removeClass('order'+oid0).addClass('order'+oid);
 		$('.oid').val(oid);
-		$('.order_name').html('<label class="radio-inline">'+
- 	 	 '<input type="radio" name="check" class="check" />产品添加'+
-	 	 '</label> 拆分采购单'+oid); 
+		$('.order_name').html('拆分采购单'+oid);
 		$order_new=$('.order'+oid);
 		$order_new.find('.order_pay .store').attr('name','store0['+oid+']');
-		$order_new.find('.order_pay .order_type').attr('name','order_type0['+oid+']');
 		$order_new.find('.order_pay .freight').attr('name','freight0['+oid+']');
+		$order_new.find('.order_pay .order_type').attr('name','order_type0['+oid+']');
 		$order_new.find('.order_pay .order_weight').attr('name','weight0['+oid+']');
 		$order_new.find('.order_pay .order_size').attr('name','size0['+oid+']');
 		$order_new.find('.order_pay .pay_freight').attr('name','pay_freight0['+oid+']');
@@ -173,15 +320,14 @@ $(document).on('click','.order_break',function(){
 		$order_new.find('.order_pay .order_amount').attr('name','order_amount0['+oid+']');
 		$order_new.find('.order_pay .dsc').attr('name','dsc0['+oid+']');
 		$order_new.find('.order_pay .express_no').attr('name','express_no0['+oid+']');
-		
+	 
 		$('.price_real').each(function(){
 			goods_id=$(this).parents('tr').find('.goods_id').val(); 
 			 
+			$order_new.find('.goods'+goods_id+' .goods_id').attr('name','goods_ids-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .price_real input').attr('name','price_reals-'+oid+'['+goods_id+']');
-			$order_new.find('.goods'+goods_id+' .goods_uname input').attr('name','goods_unames-'+oid+'['+goods_id+']');
-			$order_new.find('.goods'+goods_id+' .goods_ucate input').attr('name','goods_ucates-'+oid+'['+goods_id+']');
-			$order_new.find('.goods'+goods_id+' .num input').attr('name','nums-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .pay_discount input').attr('name','pay_discounts-'+oid+'['+goods_id+']');
+			$order_new.find('.goods'+goods_id+' .num input').attr('name','nums-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .pay input').attr('name','pays-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .weight1').attr('name','weights-'+oid+'['+goods_id+']');
 			$order_new.find('.goods'+goods_id+' .size1').attr('name','sizes-'+oid+'['+goods_id+']');
@@ -191,19 +337,17 @@ $(document).on('click','.order_break',function(){
 	 
 	goods_id=$tmp_tr.find('.goods_id').val(); 
 	if(is_end==1){
-	 
+		 
 		oid=oid-1;
 		div='<div class="order order'+oid+'" >'+
 			'<input type="hidden" class="oid" value="'+oid+'" name="oids[]"/>'+
 			'<table class="table table-hover table-bordered table-list goods-list"  ><tr >'+ 
-		 	 '<td> <label class="radio-inline">'+
- 	 	 	 '<input type="radio" name="check" class="check" />产品添加'+
-		 	 '</label>新子采购单'+oid+'</td>'+
+		 	 '<td>新子采购单'+oid+'</td>'+
 		 	 '<td >产品编码</td>'+
 		 	 '<td >产品图片</td>'+
 		 	 '<td >总库存</td>'+
-		 	 '<td >供应商用名</td>'+
-		 	 '<td>供应商型号</td>'+
+		 	 '<td >供货商用名</td>'+
+		 	 '<td >供货商型号</td>'+ 
 		 	 '<td >成本价</td>'+
 			 '<td >零售价</td> '+
 			 '<td >供应价</td>'+
@@ -213,14 +357,16 @@ $(document).on('click','.order_break',function(){
 			 '<td >毛重</td>'+
 			 '<td >体积</td>'+
 			 '<td >包装说明/备注</td>'+
-			 '<td width="120">拆分</td></tr> </table></div>'; 
+			 '<td width="100">拆分</td></tr> </table></div>'; 
 		$('.orders').append(div);
 		$(this).parents('.order').find('.order_pay').clone(true).appendTo('.order'+oid);
 		$order_new=$('.order'+oid);
-	 	 
+	 	
+		
+		
 		$order_new.find('.order_pay .store').attr('name','store0['+oid+']');
-		$order_new.find('.order_pay .order_type').attr('name','order_type0['+oid+']');
 		$order_new.find('.order_pay .freight').attr('name','freight0['+oid+']');
+		$order_new.find('.order_pay .order_type').attr('name','order_type0['+oid+']');
 		$order_new.find('.order_pay .order_weight').attr('name','weight0['+oid+']');
 		$order_new.find('.order_pay .order_size').attr('name','size0['+oid+']');
 		$order_new.find('.order_pay .pay_freight').attr('name','pay_freight0['+oid+']');
@@ -237,6 +383,7 @@ $(document).on('click','.order_break',function(){
 		$order_new.find('.order_pay select').val(0);
 		$order_new.find('.order_pay input').val(0);
 		$order_new.find('.order_pay select').val(0);
+		$order_new.find('.order_pay order_type').val(2);
 		$order_new.find('.order_pay dsc').val('');
 		is_end=0;
 	} 
@@ -246,50 +393,40 @@ $(document).on('click','.order_break',function(){
 	}else{
 		$tmp_tr.clone().appendTo('.order'+oid+' .goods-list');
 		 
+		$order_new.find('.goods'+goods_id+' .goods_id').attr('name','goods_ids-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .price_real input').attr('name','price_reals-'+oid+'['+goods_id+']');
-		$order_new.find('.goods'+goods_id+' .goods_uname input').attr('name','goods_unames-'+oid+'['+goods_id+']');
-		$order_new.find('.goods'+goods_id+' .goods_ucate input').attr('name','goods_ucates-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .num input').attr('name','nums-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .pay_discount input').attr('name','pay_discounts-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .pay input').attr('name','pays-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .weight1').attr('name','weights-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .size1').attr('name','sizes-'+oid+'['+goods_id+']');
 		$order_new.find('.goods'+goods_id+' .dsc input').attr('name','dscs-'+oid+'['+goods_id+']');
-	
+	 
 		$order_new.find('.goods'+goods_id+' .num input').val(num);
 		$order_new.find('.goods'+goods_id+' .break').val(0);
 	}
 	 
 	$tmp_tr.find('.break').val(0);
-	 //折扣金额计算
+	 
+	//折扣金额计算
 	 var pay_discount0=	$tmp_tr.find('.pay_discount input').val();
 	 var pay_discount1=0;
 	 if(num0==num){
 		 pay_discount1=pay_discount0;
 		 pay_discount0=0;
 	 }else{
-		 pay_discount1=(pay_discount0/num0*num).toFixed(2);
-		 pay_discount0=(pay_discount0-pay_discount1).toFixed(2);
+		 pay_discount1=pay_discount0/num0*num;
+		 pay_discount0=pay_discount0-pay_discount1;
 	 } 
-	$order_new.find('.goods'+goods_id+' .pay_discount input').val(pay_discount1);
-	$tmp_tr.find('.pay_discount input').val(pay_discount0);
- 
+	$order_new.find('.goods'+goods_id+' .pay_discount input').val(pay_discount1.toFixed(2));
+	$tmp_tr.find('.pay_discount input').val(pay_discount0.toFixed(2));
+	
   	$tmp_tr.find('.num input').val(num0-num);
-   
   	tr_change($tmp_tr,'num');
 	tr_change($order_new.find('.goods'+goods_id),'num');
 	 
 });
 $('.save').click(function(){
-	//addressinfo
-	if($('#area').val()=='0'){
-		$('#area').focus();
-		return false;
-	}
-	var c1=$.trim($('#province option:selected').text());
-	var c2=$.trim($('#city option:selected').text());
-	var c3=$.trim($('#area option:selected').text());
-	$('#addressinfo').val(c1+'-'+c2+'-'+c3);
 	$(this).parents('form').attr('action',$(this).attr('action'));
 });
 </script>

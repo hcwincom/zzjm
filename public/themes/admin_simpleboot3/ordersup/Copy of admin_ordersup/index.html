@@ -36,10 +36,7 @@
 		<ul class="nav nav-tabs"> 
 		<include file="public@nav" />
 	 
-		<li id="taobao"><a >淘宝{$flag}导入</a></li>
-		 
 		</ul>
-		
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
 			状态: 
@@ -47,15 +44,6 @@
 				<option value='0'>全部</option> 
 				 <foreach name="statuss" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
-				 {$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp;  
-			{$flag}类型: 
-			<select class="form-control" name="order_type" >
-				<option value='0'>全部</option> 
-				 <foreach name="order_types" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.order_type">selected</if>> 
 				 {$vo}
 				</option>
 				</foreach>
@@ -100,12 +88,13 @@
 				  </select>
 			  市：<select  class="form-control" name="city" id="city"  style="width:100px;display:inline-block;"  >
 				  	<option value="0">请选择</option>
-				  </select>	 
+				  </select>	  
+			
 			<br/>
 			<select class="form-control" name="cid" >
-				<option value='0'>客户类型</option> 
-				 <foreach name="custom_cates" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.custom_cate">selected</if>>{$vo}
+				<option value='0'>供货商类型</option> 
+				 <foreach name="supplier_cates" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.supplier_cate">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -123,7 +112,7 @@
             <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
-	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo[1]}</option>
+	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
 	        </foreach> 
 	        </select>
 			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
@@ -150,20 +139,20 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th> 
-						<th>{$flag}类型</th>
-						<th>{$flag}号</th>  
-						<th>主{$flag}</th>
+						 
+						<th>订单号</th>  
+						<th>主订单</th>
 						 <th>物流号</th>
 						<th>下单人</th>
 						<th>所属公司</th>
 						<th>产品数量</th>
 						<th>付款类型</th>
-						<th>客户</th>
+						<th>供货商</th>
 						<th>总金额</th>
 						<th>支付状态</th>  
 					 
 					    <th>下单时间</th>
-					  <th>{$flag}状态</th>
+					  <th>订单状态</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -176,18 +165,13 @@
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						{$vo.id} 
-						<if condition="$vo.status eq 30 ||  $vo.status eq 26"> 
-						<a href="{:url('orderback/AdminOrderback/add',['oid'=>$vo.id,'order_type'=>1])}">申请售后</a>
-						</if>
+						{$vo.id}-{$vo.sort}
 						</td>
-						<td > 
-						{$order_types[$vo.order_type]}
-						</td>
+						 
 						<td><a href="{$order_url}/id/{$vo.id}" target="{$zztarget['list']}" >{$vo.name}</a></td>
 					 	<td>
 					 	<eq name="vo.fid" value="0">
-					 		<eq name="vo.is_real" value="2">已拆分</eq>
+					 		无
 					 	<else/> 
 					 		<a href="{$order_url}/id/{$vo.fid}" target="{$zztarget['other']}" >{$vo.fid}</a>
 					 	</eq>
@@ -233,14 +217,15 @@
 						</td>
 					  	<td>{$paytypes[$vo['paytype']]['name']|default=$vo['paytype']}</td>
 					   
-					  	<td><a href="{$order_user_url}/id/{$vo.uid}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
+					  	<td><a href="{$order_user_url}/id/{$vo.uid}" target="{$zztarget.other}">{$vo.supplier_name}</a></td>
 						<td>{$vo.order_amount}</td>
 						<td>{$pay_status[$vo.pay_status]}</td>
 					 
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
 					 
 						<td>{$statuss[$vo.status]}
-							<eq name="vo.is_real" value="2">-已拆分</eq> 
+						<eq name="vo.is_real" value="0">-已拆分</eq>
+						 
 						</td>
 						 
 					</tr>
@@ -253,12 +238,13 @@
 		</form>
 	 	<div class="pagination">{$page}</div>
 	 	<p class="notice">
-	 	 sort排序，待发货10，已准备发货9，管理员有改动8，员工有改动7，待确认货款5，待付款4，退货退款中3，提交待确认2，未提交1，其他0 
+	 	 sort排序，转运营11，已发货10，已准备收货9，管理员有改动8，员工有改动7，待发货6，待确认货款5，待付款4，退货退款中3，提交待确认2，未提交1，其他0 
 	 	</p>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
 city_js($('#province'),"{$data.province|default=0}",$('#city'),"{$data.city|default=0}");
+ 
  
 </script>
 </body>

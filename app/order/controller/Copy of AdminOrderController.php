@@ -25,7 +25,6 @@ class AdminOrderController extends OrderBaseController
         $this->utable='custom';
         $this->ogtable='order_goods';
         $this->utype=1;
-        $this->assign('utype',$this->utype);
         $this->oid_type=1;
         $this->search=[
             'p.name'=>'订单编号',
@@ -588,7 +587,86 @@ class AdminOrderController extends OrderBaseController
      */
     public function edit()
     {
-        parent::edit();
+        $admin=$this->admin;
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+       
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname')
+        ->join('cmf_user a','a.id=p.aid','left') 
+        ->where('p.id',$id)
+        ->find();
+        
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        
+     
+        $shop=$info['shop'];
+        if($admin['shop']>1 && $admin['shop']!=$shop){
+            $this->error('只能查看本店铺的数据');
+        }
+        $this->where_shop=$shop;
+        //获取客户信息
+        $custom=Db::name('custom')->where('id',$info['uid'])->find();
+        if(empty($custom)){
+            $accounts=null; 
+         }else{
+             //可选支付账号
+             $where=[
+                 'uid'=>$custom['id'],
+                 'type'=>1,
+             ];
+             $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1');
+             
+         }
+        //支付信息 
+        if(empty($info['pay_id'])){
+            $pay=null;
+        }else{
+            $pay=Db::name('orders_pay')->where('id',$info['pay_id'])->find();
+        }
+        
+        //发票
+        if(empty($info['invoice_id'])){
+            $invoice=null;
+        }else{
+            $invoice=Db::name('orders_invoice')->where('id',$info['invoice_id'])->find();
+        }
+        
+        
+        //订单产品
+        $res=$m->order_goods($info,$admin['id']);
+         
+        $this->cates();
+        //是否允许拆分
+        if($info['ok_break']!=1 || $info['fid']!=0){
+            $ok_break=2;
+        }else{
+            $ok_break=1;
+        }
+        $this->assign('ok_break',$ok_break); 
+        //是否允许添加，删除
+        if($info['fid']!=0){
+            $ok_add=2;
+        }else{
+            $ok_add=1;
+        }
+        $this->assign('ok_add',$ok_add); 
+        
+        $this->assign('infos',$res['infos']);
+        $this->assign('orders',$res['orders']);
+        $this->assign('goods',$res['goods']);
+        
+        $this->assign('info',$info); 
+        
+        $this->assign('accounts',$accounts);
+        $this->assign('custom',$custom);
+        $this->assign('pay',$pay);
+        
+        $this->assign('invoice',$invoice);
+        
         
         return $this->fetch();  
     }
@@ -607,7 +685,100 @@ class AdminOrderController extends OrderBaseController
      */
     public function edit_do()
     {
-         parent::edit_do();
+        $m=$this->m;
+        $table=$this->table;
+        $flag=$this->flag;
+        $data=$this->request->param();  
+       
+        $info=$m->get_one(['id'=>$data['id']]);
+      
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+           $this->error('不能编辑其他店铺的信息'); 
+        }
+         //是否有权查看
+        $res=$m->order_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res); 
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
+       
+        $content=$m->order_edit($info, $data);
+        if(!is_array($content)){
+            $this->error($content);
+        }  
+        if(empty($content)){
+            $this->error('未修改');
+        }
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        //未提交的直接修改
+        if($info['status']==1){
+            if($data['status']==2){
+                $content['status']=2;
+            }
+            $res=$m->order_edit_review($info,$content);
+            if(!($res>0)){
+                $m_edit->rollback();
+                $this->error($res);
+            }
+            $m_edit->commit();
+            $this->success('已修改',url('edit',['id'=>$info['id']]));
+        } 
+       
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        //订单排序
+        $m->order_sort($info['id']);
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'编辑了'.($this->flag).$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        //直接审核
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
     }
     
     /**
@@ -643,7 +814,93 @@ class AdminOrderController extends OrderBaseController
      */
     public function edit_info()
     {
-        parent::edit_info();
+        
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $table=$this->table;
+        //获取编辑信息
+        $m_edit=Db::name('edit');
+        $info1=$m_edit
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$id)
+        ->find();
+        
+        if(empty($info1)){
+            $this->error('编辑信息不存在');
+        }
+        //获取原信息
+        $info=$m
+        ->alias('p')
+        ->field('p.*,a.user_nickname as aname,r.user_nickname as rname')
+        ->join('cmf_user a','a.id=p.aid','left')
+        ->join('cmf_user r','r.id=p.rid','left')
+        ->where('p.id',$info1['pid'])
+        ->find();
+        if(empty($info)){
+            $this->error('编辑关联的信息不存在');
+        }
+        //获取改变的信息
+        $change=Db::name('edit_info')->where('eid',$id)->value('content');
+        $change=json_decode($change,true);
+       
+        if($this->isshop){
+            $this->where_shop=$info['shop'];
+        }
+        $id=$info['id'];
+        $shop=$info['shop'];
+        $admin=$this->admin;
+        if($admin['shop']>1 && $admin['shop']!=$shop){
+            $this->error('只能查看本店铺的数据');
+        }
+        $this->where_shop=$shop;
+        $accounts=null;
+        $pay=null;
+        $invoice=null;
+        //获取客户信息
+        $custom=Db::name('custom')->where('id',$info['uid'])->find();
+        if($info['fid']==0){  
+            if(!empty($custom)){ 
+                //可选支付账号
+                $where=[
+                    'uid'=>$custom['id'],
+                    'type'=>1,
+                ];
+                $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,bank2,name2,num2,location2');
+                
+            }
+            //支付信息
+            if(!empty($info['pay_id'])){
+                $pay=Db::name('orders_pay')->where('id',$info['pay_id'])->find();
+            }
+           
+            //发票
+            if(!empty($info['invoice_id'])){
+                $invoice=Db::name('orders_invoice')->where('id',$info['invoice_id'])->find();
+            } 
+         } 
+         
+        //订单产品
+         $res=$m->order_goods($info,$admin['id'],$change);
+        $this->cates(); 
+        $this->assign('infos',$res['infos']);
+        $this->assign('orders',$res['orders']);
+        $this->assign('goods',$res['goods']);
+ 
+        $this->assign('info',$info);
+        $this->assign('info1',$info1);
+        $this->assign('change',$change);
+       
+        $this->assign('accounts',$accounts);
+        $this->assign('custom',$custom);
+        $this->assign('pay',$pay);
+        
+        $this->assign('invoice',$invoice);
+        //是否允许拆分,添加，删除
+        $this->assign('ok_break',2); 
+        $this->assign('ok_add',2); 
         return $this->fetch();  
         
     }
@@ -662,7 +919,110 @@ class AdminOrderController extends OrderBaseController
      */
     public function edit_review()
     {
-         parent::edit_review();
+        //审核编辑的信息
+        $status=$this->request->param('rstatus',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        if(($status!=2 && $status!=3) || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        $table=$this->table;
+        $m_edit=Db::name('edit');
+        $info=$m_edit
+        ->field('e.*,a.user_nickname as aname')
+        ->alias('e') 
+        ->join('cmf_user a','a.id=e.aid')
+        ->where('e.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('无效信息');
+        }
+        $order=$m->get_one(['id'=>$info['pid']]);
+        
+        if($info['rstatus']!=1){
+            $this->error('编辑信息已被审核！不能重复审核');
+        }
+        
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能审核其他店铺的信息');
+        }
+        
+        $time=time();
+        
+        $m->startTrans();
+        
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+        ];
+        $review_status=$this->review_status;
+        $update['rdsc']=$this->request->param('rdsc','');
+        if(empty($update['rdsc'])){
+            $update['rdsc']=$review_status[$status];
+        }
+        
+        //只有未审核的才能更新
+        $where=[
+            'id'=>$id,
+            'rstatus'=>1,
+        ];
+        $row=$m_edit->where($where)->update($update);
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        //是否更新,2同意，3不同意
+        if($status==2){
+            
+            //得到修改的字段
+            $change=Db::name('edit_info')->where('eid',$id)->value('content');
+            $change=json_decode($change,true);
+            $row=$m->order_edit_review($order, $change);
+           
+            if($row!==1){
+                $m->rollback();
+                $this->error($row);
+            }
+            
+            //排序
+            $m->order_sort($order['id']);
+            //判断是否需要出库
+            if(isset($change['status'])){
+               
+                $res=$m->status_change($order['id'],$order['status']);
+                if(!($res>0)){
+                    $m->rollback();
+                    $this->error($res);
+                }
+            }
+            //判断是否需要付款
+            if(isset($change['pay_status'])){ 
+                $m_invoice=new OrdersInvoiceModel();
+                $m_invoice->pay_change($order['id'],1,$change['pay_status']);
+            }
+           
+        }
+        
+        //审核成功，记录操作记录,发送审核信息
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($this->flag).$info['pid'].'-'.$order['name'].'的编辑为'.$review_status[$status],
+            'table'=>$table,
+            'type'=>'edit_review',
+            'pid'=>$info['pid'],
+            'link'=>url('edit_info',['id'=>$info['id']]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['aid'=>$info['aid']]);
+        
+        $m->commit();
+        $this->success('审核成功');
     }
     
     //分类
@@ -1043,7 +1403,118 @@ class AdminOrderController extends OrderBaseController
         $this->pay_do($data,2,$flag);
         
     }
-      
+     
+     
+    /* 改变订单支付状态 */
+    public function pay_do($data,$pay_status,$flag){
+        
+        
+        $m=$this->m;
+        $table=$this->table;
+        
+        $id=intval($data['id']);
+        
+        
+        $info=$m->get_one(['id'=>$id]);
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+       
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能编辑其他店铺的信息');
+        }
+        //是否有权查看
+        $res=$m->order_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res);
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
+        
+        if($pay_status!=0 && $info['pay_status']!=$pay_status){
+            $this->error('状态信息错误');
+        }
+        $content=$m->order_edit($info, $data);
+        if(!is_array($content)){
+            $this->error($content);
+        }
+        switch ($pay_status){
+            case 1:
+                //用户付款提交
+                $content['pay_status']=2; 
+                break;
+            case 2:
+                //财务确认付款,未发货的可以发货了
+                $content['pay_status']=3;
+                if($info['status']<20){
+                    $content['status']=20;
+                }elseif($info['status']==26){
+                    $content['status']=30;
+                }
+              
+                break;
+            
+            case 0:
+                //超管编辑
+                $content['pay_status']=1;
+                break;
+            default:
+                $this->error('操作错误');
+        }
+        
+        
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
+    }
+    
     /**
      * 废弃
      * @adminMenu(
@@ -1059,7 +1530,85 @@ class AdminOrderController extends OrderBaseController
      */
     public function order_abandon(){
          
-         parent::order_abandon();
+        $flag='废弃订单';
+        $data=$this->request->param();
+        
+        $m=$this->m;
+        $table=$this->table;
+        
+        $id=intval($data['id']);
+        
+        $info=$m->get_one(['id'=>$id]);
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能编辑其他店铺的信息');
+        }
+        //是否有权查看
+        $res=$m->order_edit_auth($info,$admin);
+        if($res!==1){
+            $this->error($res);
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
+        //只有未发货且未付款的才能废弃
+        if($info['status']>22 || $info['pay_status']>2){
+            $this->error('只有未发货且未付款的才能废弃');
+        }
+        $content=[
+            'status'=>81, 
+        ];
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,['department'=>$admin['department']]);
+        
+        $m_edit->commit();
+        $rule='edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
     }
     /**
      * 配货单打印
@@ -1074,8 +1623,48 @@ class AdminOrderController extends OrderBaseController
      *     'param'  => ''
      * )
      */
-    public function print_order(){ 
-        parent::print_order(); 
+    public function print_order(){
+        $id=$this->request->param('id',0,'intval');
+        $m=$this->m; 
+        $info=$m
+        ->alias('p')
+        ->field('p.*,custom.name as uname,custom.mobile as umobile') 
+        ->join('cmf_custom custom','custom.id=p.uid','left')
+        ->where('p.id',$id)->find();
+       
+        if($info['is_real']!=1){
+            $this->error('已拆分订单请单独打印');
+        }
+        if($info['status']<22){
+            $this->error('请先准备发货');
+        }
+        
+        $goods=Db::name('order_goods')->where('oid',$id)->column('*','goods');
+        $where=[
+            'type'=>10,
+            'about'=>$id,
+            'rstatus'=>['in',[1,2]]
+        ];
+        $goods_instore=Db::name('store_in')
+        ->where($where)
+        ->column('goods,box');
+        if(empty($goods_instore)){
+            $boxes=[];
+        }else{
+            $boxes=Db::name('store_box')->where('id','in',$goods_instore)->column('id,code');
+        }
+        
+        foreach($goods as $k=>$v){
+            if(empty($goods_instore[$k]) || empty($boxes[$goods_instore[$k]])){
+                $goods[$k]['box']='--';
+            }else{
+                $goods[$k]['box']=$boxes[$goods_instore[$k]];
+            }
+        }
+        $this->assign('info',$info);
+       
+        $this->assign('goods',$goods);
+        $this->assign('date',date('Y-m-d'));
         return $this->fetch();
     }
     

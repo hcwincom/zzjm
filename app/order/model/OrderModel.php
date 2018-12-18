@@ -6,6 +6,7 @@ use think\Model;
 use think\Db;
 use app\store\model\StoreGoodsModel;
 use app\money\model\OrdersInvoiceModel;
+use app\money\model\OrdersPayModel;
 class OrderModel extends Model
 {
     /**
@@ -202,24 +203,31 @@ class OrderModel extends Model
          }
         
          //主订单才有发票和付款信息
-         if($info['fid']==0){
+         if($info['fid']==0 ){
              //发票信息
-             $edit_invoice=['title','ucode','point','invoice_money','tax_money','dsc'];
+             $edit_invoice=['uname','ucode','point','invoice_money','tax_money','dsc','address','tel'];
              //已有发票或写了发票抬头的要判断发票信息
-             if(!empty($data['invoice_id']) || (!empty($data['invoice_title']) && !empty($data['invoice_type']))){
-                 $data['invoice_id']=intval($data['invoice_id']);
-                 //发票
-                 $where=[
-                     'oid'=>$info['id'],
-                     'oid_type'=>1,
-                 ];
-                 $m_invoice=new OrdersInvoiceModel();
-                 $invoice=$m_invoice->where($where)->find();
-                 
-                 if(!empty($invoice)){
-                     $data['invoice_id']=$invoice['id'];
+             if(!empty($info['invoice_id']) || (!empty($data['invoice_uname']) && !empty($data['invoice_type']))){
+                 $data['invoice_id']=$info['invoice_id'];
+                 $data['invoice_point']=round( $data['invoice_point'],2); 
+                 $data['invoice_invoice_money']=round( $data['invoice_invoice_money'],2); 
+                 $data['invoice_tax_money']=round( $data['invoice_tax_money'],2);  
+                 if($data['invoice_id']==0){
+                     $invoice=null;
+                 }else{
+                     //发票
+                     $where=[
+                         'id'=>$info['invoice_id'], 
+                     ];
+                     $m_invoice=new OrdersInvoiceModel();
+                     $invoice=$m_invoice->where($where)->find();
+                     if(empty($invoice)){
+                         $data['invoice_id']=0;
+                     } 
                  } 
+                  
                  $content['invoice']=[];
+                 
                  foreach($edit_invoice as $k=>$v){
                      $field_tmp='invoice_'.$v;
                      //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
@@ -227,6 +235,11 @@ class OrderModel extends Model
                          $content['invoice'][$v]=$data[$field_tmp];
                      }
                  }
+                 //支付账号
+                 if($data['paytype'] != $invoice['paytype']){
+                     $content['invoice']['paytype']=$data['paytype'];
+                 }
+                  
                  //没有改变清除
                  if(empty($content['invoice'])){
                      unset($content['invoice']);
@@ -236,17 +249,26 @@ class OrderModel extends Model
                      $content['invoice']['oid_type']= 1;
                  }
              }
-             
+          
              //支付信息
-             $edit_account=['bank1','name1','num1','location1','bank2','name2','num2','location2'];
+             $edit_account=['bank','name','num','location'];
              //已有付款账号信息和付款账户名
-             if(!empty($data['account_id']) || !empty($data['account_name1']) ){
-                 $data['account_id']=intval($data['account_id']);
-                 if(empty($data['account_id'])){
+             if(!empty($info['pay_id']) || !empty($data['account_name']) ){
+                 $data['account_id']=$info['pay_id'];
+                 if($data['account_id']==0){
                      $pay=null;
                  }else{
-                     $pay=Db::name('order_pay')->where('id',$data['account_id'])->find();
-                 }
+                     //发票
+                     $where=[
+                         'id'=>$data['account_id'],
+                     ];
+                     $m_pay=new OrdersPayModel();
+                     $pay=$m_pay->where($where)->find();
+                     if(empty($pay)){
+                         $data['account_id']=0;
+                     }
+                 } 
+                  
                  $content['pay']=[];
                  foreach($edit_account as $k=>$v){
                      $field_tmp='account_'.$v;
@@ -254,6 +276,10 @@ class OrderModel extends Model
                      if(isset($data[$field_tmp]) && $pay[$v]!=$data[$field_tmp]){
                          $content['pay'][$v]=$data[$field_tmp];
                      }
+                 }
+                 //店铺支付账号
+                 if($pay['paytype']!=$data['paytype']){
+                     $content['pay']['paytype']=$data['paytype'];
                  }
                  //没有改变清除
                  if(empty($content['pay'])){
@@ -263,6 +289,7 @@ class OrderModel extends Model
                      $content['pay']['id']= $data['account_id'];
                      $content['pay']['oid']= $info['id'];
                      $content['pay']['oid_type']= 1;
+                     $content['pay']['ptype']= 1;
                      
                  }
              }
@@ -553,19 +580,23 @@ class OrderModel extends Model
          }
          //支付账号信息
          if(isset($change['pay'])){
-             if(empty($change['pay']['id'])){
-                 Db::name('order_pay')->insert($change['pay']);
+             $m_pay=new OrdersPayModel(); 
+             if(empty($order['pay_id'])){
+                 $change['pay_id']=$m_pay->pay_add($change['pay']);
              }else{
-                 Db::name('order_pay')->where('id',$change['pay']['id'])->update($change['pay']);
+                 $change['pay']['id']=$order['pay_id'];
+                 $m_pay->pay_update($change['pay']);
+                 
              }
              unset($change['pay']);
          }
-         //支付账号信息
+         //发票信息
          if(isset($change['invoice'])){
              $m_invoice=new OrdersInvoiceModel();
-             if(empty($change['invoice']['id'])){
-                 $m_invoice->invoice_add($change['invoice']);  
+             if(empty($order['invoice_id'])){
+                 $change['invoice_id']=$m_invoice->invoice_add($change['invoice']);  
              }else{
+                 $change['invoice']['id']=$order['invoice_id'];
                  $m_invoice->invoice_update($change['invoice']); 
                 
              }
@@ -606,10 +637,9 @@ class OrderModel extends Model
              
          }
          
-         
           
          //检查库存,删除旧出库，添加新出库
-         if(!empty($instore_oids)){
+          if(!empty($instore_oids) && $order['status']>20 ){
              //有产品数量变化的  
              $instore_oids=array_unique($instore_oids);
              foreach($instore_oids as $v){
@@ -780,7 +810,7 @@ class OrderModel extends Model
          //在store_goods表中num1数值减少
          $order=$this->where('id',$id)->find();
          $order=$order->data;
-         
+        
          //订单产品
          $where_goods=[];
          if($order['is_real']==1){
@@ -831,25 +861,7 @@ class OrderModel extends Model
          return 1;
      }
     
-     /**
-      *  订单准备发货后，出库记录可审核,现在省略该步骤，不用
-      * @param number $id
-      * @return number
-      */
-     public function order_storein1($id){
-          
-         //出入库记录要变为待审核
-         $where=[
-             'type'=>10,
-             'about'=>$id,
-             'rstatus'=>4,
-         ];
-         $update=[ 
-             'rstatus'=>1,
-         ];
-         Db::name('store_in')->where($where)->update($update);
-         return 1;
-     }
+     
     
      /**
       *  订单发货后，出库记录批量同意
@@ -1103,7 +1115,7 @@ class OrderModel extends Model
          $res=1;
          $order=$this->where('id',$oid)->find();
          $order=$order->data;
-         zz_log($order['status'].'==='.$old_status);
+        
          if($order['status']==$old_status){
              return 1;
          } 

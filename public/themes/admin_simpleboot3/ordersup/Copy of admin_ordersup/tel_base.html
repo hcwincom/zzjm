@@ -1,0 +1,216 @@
+ 		
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">订单号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info.name}" readonly/> 
+				</div>
+			</div>
+			<div style="clear:both"></div>
+			 
+	 
+	 
+		 
+			<div class="form-group fleft"  style="width:100%">
+				<label  class="col-sm-2 control-label">联系地址{$key}</label>
+				<div class="col-md-6 col-sm-10" >
+				<input type="hidden" id="province0_{$key}"   value="{$vo.province}"/>
+				<input type="hidden" id="city0_{$key}" value="{$vo.city}"/>
+				<input type="hidden" id="area0_{$key}" value="{$vo.area}"/>
+				  省：<select class="form-control province" name="province[{$key}]"   id="province{$key}"  style="width:100px;display:inline-block;"  >
+				  	<option value="0">请选择</option>
+				  </select>
+				  
+				<present name="cc.province">
+					<span class="red">{$change['citys'][$cc['province']]|default='不存在'}</span>
+				</present>
+				  市：<select  class="form-control city" name="city[{$key}]" id="city{$key}" style="width:100px;display:inline-block;"  >
+				  	<option value="0">请选择</option>
+				  </select>
+				 <present name="cc.city">
+					<span class="red">{$change['citys'][$cc['city']]|default='不存在'}</span>
+				</present>
+				 县：  <select class="form-control area" name="area[{$key}]" id="area{$key}" style="width:100px;display:inline-block;">
+				   	<option value="0">请选择</option>
+				   </select>
+				 <present name="cc.area">
+					<span class="red">{$change['citys'][$cc['area']]|default='不存在'}</span>
+				</present>
+				
+				邮编：
+				<input type="text" name="postcode[{$key}]" id="postcode{$key}" value="{$vo['postcode']}" style="width:100px;display:inline-block;">
+				 <present name="cc.postcode">
+					<span class="red">{$cc.postcode}</span>
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft" style="width:100%">
+				<label  class="col-sm-2 control-label">街道地址</label>
+				<div class="col-md-6 col-sm-10">
+				  <input type="text" id="street{$key}" class="form-control" name="street[{$key}]" value="{$vo.street}" />
+				<present name="cc.street">
+					<input type="text" class="form-control red"  value="{$cc.street}" />
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">联系人</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="name[{$key}]" value="{$vo.name}" />
+				<present name="cc.name">
+					<input type="text" class="form-control red"  value="{$cc.name}" />
+				</present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">职位</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="position[{$key}]"  value="{$vo.position}" />
+				 <present name="cc.position"> 
+				 	<input type="text" class="red form-control"  value="{$cc.position}" />
+				 </present>
+					
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">性别</label>
+				<div class="col-md-6 col-sm-10">
+					<select class="form-control" name="sex[{$key}]" id="">
+						<option value="1"  >男</option>
+						<option value="2" <eq name="vo.sex" value="2">selected</eq>>女</option>
+					</select>
+					 
+				 <present name="cc.sex"> 
+				 	<select class="form-control red"  >
+						<option value="1"  >男</option>
+						<option value="2" <eq name="cc.sex" value="2">selected</eq>>女</option>
+					</select>
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="phone[{$key}]" value="{$vo.phone}" />
+				<present name="cc.phone"> 
+				 	<input type="text" class="red form-control"  value="{$cc.phone}" />
+				 </present>
+				</div>
+			</div>
+		 
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="mobile[{$key}]" value="{$vo.mobile}" />
+				<present name="cc.mobile"> 
+				 	<input type="text" class="red form-control"  value="{$cc.mobile}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">手机1</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="mobile1[{$key}]" value="{$vo.mobile1}" />
+				<present name="cc.mobile1"> 
+				 	<input type="text" class="red form-control"  value="{$cc.mobile1}" />
+				 </present>
+				</div>
+			</div>
+			 
+			
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">邮件</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="email[{$key}]" value="{$vo.email}" />
+				<present name="cc.email"> 
+				 	<input type="text" class="red form-control"  value="{$cc.email}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">传真</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="fax[{$key}]" value="{$vo.fax}" />
+				<present name="cc.fax"> 
+				 	<input type="text" class="red form-control"  value="{$cc.fax}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">其他</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="other[{$key}]" value="{$vo.other}" />
+				<present name="cc.other"> 
+				 	<input type="text" class="red form-control"  value="{$cc.other}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">淘宝id</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="taobaoid[{$key}]" value="{$vo.taobaoid}" />
+				<present name="cc.taobaoid"> 
+				 	<input type="text" class="red form-control"  value="{$cc.taobaoid}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">阿里ID</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="aliid[{$key}]" value="{$vo.aliid}" />
+				<present name="cc.aliid"> 
+				 	<input type="text" class="red form-control"  value="{$cc.aliid}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">QQ</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="qq[{$key}]" value="{$vo.qq}" />
+				<present name="cc.qq"> 
+				 	<input type="text" class="red form-control"  value="{$cc.qq}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">微信</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="wechat[{$key}]" value="{$vo.wechat}" />
+				<present name="cc.wechat"> 
+				 	<input type="text" class="red form-control"  value="{$cc.wechat}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">微信绑定手机</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="wechatphone[{$key}]" value="{$vo.wechatphone}" />
+				<present name="cc.wechatphone"> 
+				 	<input type="text" class="red form-control"  value="{$cc.wechatphone}" />
+				 </present>
+				</div>
+			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">微信昵称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="wechatname[{$key}]" value="{$vo.wechatname}" />
+				<present name="cc.wechatname"> 
+				 	<input type="text" class="red form-control"  value="{$cc.wechatname}" />
+				 </present>
+				</div>
+			</div>
+			 
+			  	<div style="clear:both"></div>
+			 <div class="form-group fleft" style="width:100%">
+				<label class="col-sm-2 control-label">备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control" name="dsc[{$key}]" value="{$vo.dsc}" />
+				<present name="cc.dsc"> 
+				 	<input type="text" class="red form-control"  value="{$cc.dsc}" />
+				 </present>
+				</div>
+			</div>
+		 	<div style="clear:both"></div>
+		 </div>
+	 
+		 
+ 
