@@ -120,8 +120,8 @@
 					<select  class="form-control" id="account">
 				    	<option value="0">请选择</option> 
 				    <foreach name="accounts" item="vo">
-				    	<option value="{$vo.id}" bank1="{$vo.bank1}" bank2="{$vo.bank2}" name2="{$vo.name2}" 
-				    	num2="{$vo.num2}" location2="{$vo.location2}" name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
+				    	<option value="{$vo.id}" bank1="{$vo.bank1}" paytype2="{$vo.paytype2}" 
+				     name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
 				    	{$vo.location1}-{$vo.name1}-{$vo.num1}
 				    	</option>
 				    </foreach>
@@ -158,42 +158,16 @@
 				   		<input type="text"  class="form-control red"  value="{$change.pay.location1}"/>
 				   	</present>  
 				   	店铺账号：
-					<select  class="form-control" id="shop_paytype">
-				    	<option value="0">请选择</option> 
+					<select  class="form-control" id="shop_paytype" name="paytype2">
+				    	 
 				    <foreach name="paytypes" item="vo">
-				    	<option value="{$vo.id}" bank="{$vo.bank}" >
-				    	{$vo.name}-{$vo.num}-{$vo.location}
+				    	<option value="{$key}" <if condition="$key eq $pay.paytype2">selected</if>>
+				    	{$vo} 
 				    	</option>
 				    </foreach>
 					</select> 
 					
-				   银行：
-					<select  class="form-control" name="account_bank2" id="account_bank2">
-				    	<option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $pay.bank2">selected</if> >{$vo}</option>
-					</foreach>
-					</select>
-				<present name="change.pay.bank2">
-					<select  class="form-control red"  >
-				    	<option value="0">请选择</option>
-					<foreach name="banks" item="vo">
-						<option value="{$key}" <if condition="$key eq $change.pay.bank2">selected</if> >{$vo}</option>
-					</foreach>
-					</select>
-				</present>
-				   收款 账户名：<input type="text"  class="form-control" name="account_name2" id="account_name2"  value="{$pay.name2}"/>
-				 	<present name="change.pay.name2"> 
-				   		<input type="text"  class="form-control red"  value="{$change.pay.name2}"/>
-				   	</present>  
-				   收款账号：<input type="text"  class="form-control" name="account_num2" id="account_num2"  value="{$pay.num2}"/>
-				 	<present name="change.pay.num2"> 
-				   		<input type="text"  class="form-control red"  value="{$change.pay.num2}"/>
-				   	</present>    
-				   收款开户行：<input type="text"  class="form-control" name="account_location2" id="account_location2"  value="{$pay.location2}"/>
-					<present name="change.pay.location2"> 
-				   		<input type="text"  class="form-control red"  value="{$change.pay.location2}"/>
-				   	</present>  
+				 
 				</div>
 			</div>
 	   		<div class="form-group fleft-all accept">
@@ -225,7 +199,7 @@
 	 $location.val(location); 
  }
  $('#shop_paytype').change(function(){
-	 shop_paytype($(this),$('#account_bank2'),$('#account_name2'),$('#account_num2'),$('#account_location2'));
+	 //shop_paytype($(this),$('#account_bank2'),$('#account_name2'),$('#account_num2'),$('#account_location2'));
  });
 $('#account').change(function(){
 	account_change(); 
@@ -239,13 +213,11 @@ function account_change(){
 	 var selected=$('#account option:selected');
 	 
 	 $('#account_bank1').val(selected.attr('bank1'));
-	 $('#account_bank2').val(selected.attr('bank2'));
-	 $('#account_num2').val(selected.attr('num2'));
-	 $('#account_name2').val(selected.attr('name2'));
-	 $('#account_location2').val(selected.attr('location2'));
+	 
 	 $('#account_num1').val(selected.attr('num1'));
 	 $('#account_name1').val(selected.attr('name1'));
 	 $('#account_location1').val(selected.attr('location1'));
+	 $('#shop_paytype').val(selected.attr('paytype2'));
 	  
 }
 </script>

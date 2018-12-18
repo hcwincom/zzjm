@@ -323,23 +323,16 @@ class FreightpaysBaseController extends AdminBaseController
          if($count==0){ 
              $this->error('没有待结算订单');
          } 
-         //付款银行
-         $banks=Db::name('bank')->where('status',2)->column('id,name');
-         $where=[
-             'status'=>2,
-             'shop'=>$freight['shop'],
-         ];
+         $this->where_shop=$freight['shop'];
+         $this->cates();
          
-         $paytypes=Db::name('paytype')->where($where)->order('sort asc')->column('id,name,bank,location,num');
-         $this->assign('paytypes',$paytypes);
          
          $this->assign('money',$money);
          $this->assign('count',$count);
          $this->assign('orders',$orders);
          $this->assign('freight',$freight);
          $this->assign('accounts',$accounts);
-         $this->assign('banks',$banks);
-        
+         
          $this->assign('change',null);
          $this->assign('pay',null);
          $this->assign('info',null);
@@ -436,10 +429,8 @@ class FreightpaysBaseController extends AdminBaseController
             'name1'=>$data['account_name1'],
             'num1'=>$data['account_num1'],
             'location1'=>$data['account_location1'],
-            'bank2'=>$data['account_bank2'],
-            'name2'=>$data['account_name2'],
-            'num2'=>$data['account_num2'],
-            'location2'=>$data['account_location2'],
+            'paytype2'=>$data['paytype2'],
+           
         ]; 
         Db::name($table.'_pay')->insert($data_pay);
         
@@ -484,20 +475,15 @@ class FreightpaysBaseController extends AdminBaseController
         }else{
             $this->error($res);
         } 
-        
-        $banks=Db::name('bank')->where('status',2)->column('id,name');
-        $where=[
-            'shop'=>$freight['shop'],
-            'status'=>2,
-        ];
-        $paytypes=Db::name('paytype')->where($where)->order('sort asc')->column('id,name,bank,location,num');
-        $this->assign('paytypes',$paytypes);
+        $this->where_shop=$freight['shop'];
+        $this->cates();
+         
         $this->assign('orders',$orders);
         $this->assign('freight',$freight);
         $this->assign('accounts',$accounts);
         $this->assign('info',$info);
         $this->assign('pay',$pay);
-        $this->assign('banks',$banks);
+      
         $this->assign('change',null);  
     }
     /**
@@ -733,5 +719,17 @@ class FreightpaysBaseController extends AdminBaseController
         }
         $this->redirect(url('index'));
         
+    }
+    //
+    public function cates(){
+        $banks=Db::name('bank')->where('status',2)->column('id,name');
+        $this->assign('banks',$banks);
+        $shop=$this->where_shop;
+        $where=[
+            'shop'=>$shop,
+            'status'=>2,
+        ];
+        $paytypes=Db::name('paytype')->order('sort asc')->where($where)->column('id,name');
+        $this->assign('paytypes',$paytypes);
     }
 }

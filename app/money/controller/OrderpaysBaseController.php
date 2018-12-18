@@ -376,7 +376,7 @@ class OrderpaysBaseController extends AdminBaseController
         //统计订单结算数量和金额
          $money=0;
          $count=0;
-       
+         $this->where_shop=$custom['shop'];
          //不是此用户或不是已收货待收款的去掉
          foreach($orders as $k=>$v){
              if($v['uid']!=$uid || $v['pay_status']==3 || $v['status']!=26){
@@ -390,14 +390,12 @@ class OrderpaysBaseController extends AdminBaseController
          if($count==0){ 
              $this->error('没有待结算订单');
          } 
-         //付款银行
-         $banks=Db::name('bank')->where('status',2)->column('id,name');
+         $this->cates();
          $this->assign('money',$money); 
          $this->assign('count',$count);
          $this->assign('orders',$orders);
          $this->assign('custom',$custom);
-         $this->assign('accounts',$accounts);
-         $this->assign('banks',$banks);
+         $this->assign('accounts',$accounts); 
          $this->assign('change',null);
          $this->assign('pay',null);
          $this->assign('info',null);
@@ -492,10 +490,7 @@ class OrderpaysBaseController extends AdminBaseController
             'name1'=>$data['account_name1'],
             'num1'=>$data['account_num1'],
             'location1'=>$data['account_location1'],
-            'bank2'=>$data['account_bank2'],
-            'name2'=>$data['account_name2'],
-            'num2'=>$data['account_num2'],
-            'location2'=>$data['account_location2'],
+            'paytype2'=>$data['paytype2'], 
         ]; 
         Db::name('orderpays_pay')->insert($data_pay);
         
@@ -542,14 +537,14 @@ class OrderpaysBaseController extends AdminBaseController
             $this->error($res);
         } 
         
-        $banks=Db::name('bank')->where('status',2)->column('id,name');
-       
+        $this->where_shop=$custom['shop'];
+        $this->cates();
         $this->assign('orders',$orders);
         $this->assign('custom',$custom);
         $this->assign('accounts',$accounts);
         $this->assign('info',$info);
         $this->assign('pay',$pay);
-        $this->assign('banks',$banks);
+      
         $this->assign('change',null);  
     }
     /**
@@ -771,5 +766,16 @@ class OrderpaysBaseController extends AdminBaseController
             $this->assign('shops',$shops);
         }
     } 
-    
+    //
+    public function cates(){
+        $banks=Db::name('bank')->where('status',2)->column('id,name');
+        $this->assign('banks',$banks);
+        $shop=$this->where_shop;
+        $where=[
+            'shop'=>$shop,
+            'status'=>2,
+        ];
+        $paytypes=Db::name('paytype')->order('sort asc')->where($where)->column('id,name');
+        $this->assign('paytypes',$paytypes);
+    }
 }
