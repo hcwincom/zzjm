@@ -118,7 +118,7 @@
 				<div class="col-md-6 col-sm-10">
 				{$uflag}账号：
 					<select  class="form-control" id="account">
-				    	<option value="0">请选择</option> 
+				     
 				    <foreach name="accounts" item="vo">
 				    	<option value="{$vo.id}" bank1="{$vo.bank1}" paytype2="{$vo.paytype2}" 
 				     name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
@@ -158,7 +158,7 @@
 				   		<input type="text"  class="form-control red"  value="{$change.pay.location1}"/>
 				   	</present>  
 				   	店铺账号：
-					<select  class="form-control" id="shop_paytype" name="paytype2">
+					<select  class="form-control" id="paytype2" name="paytype2">
 				    	 
 				    <foreach name="paytypes" item="vo">
 				    	<option value="{$key}" <if condition="$key eq $pay.paytype2">selected</if>>
@@ -166,7 +166,14 @@
 				    	</option>
 				    </foreach>
 					</select> 
-					
+				<present name="change.pay.paytype2">
+					<select  class="form-control red" >
+				    	<option value="0">请选择</option>
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" <if condition="$key eq $change.pay.paytype2">selected</if> >{$vo}</option>
+					</foreach>
+					</select>
+				</present>
 				 
 				</div>
 			</div>
@@ -182,25 +189,7 @@
 		 
  
 <script>
- function shop_paytype($shop_paytype,$bank,$name,$num,$location){
-	 if($shop_paytype.val() == 0){
-		 return 0;
-	 }
-	 var $option=$shop_paytype.find('option:selected').eq(0);
-	 var bank=$option.attr('bank');
-	 var strs=$.trim($option.text());
-	 var arrs=strs.split(','); 
-	 var name=arrs[0];
-	 var num=arrs[1];
-	 var location=arrs[2]; 
-	 $bank.val(bank);
-	 $name.val(name);
-	 $num.val(num);
-	 $location.val(location); 
- }
- $('#shop_paytype').change(function(){
-	 //shop_paytype($(this),$('#account_bank2'),$('#account_name2'),$('#account_num2'),$('#account_location2'));
- });
+ 
 $('#account').change(function(){
 	account_change(); 
 });
@@ -210,14 +199,12 @@ function account_change(){
 	 if(account==0){
 		 return false;
 	 }
-	 var selected=$('#account option:selected');
-	 
-	 $('#account_bank1').val(selected.attr('bank1'));
-	 
+	 var selected=$('#account option:selected'); 
+	 $('#account_bank1').val(selected.attr('bank1')); 
 	 $('#account_num1').val(selected.attr('num1'));
 	 $('#account_name1').val(selected.attr('name1'));
 	 $('#account_location1').val(selected.attr('location1'));
-	 $('#shop_paytype').val(selected.attr('paytype2'));
+	 $('#paytype2').val(selected.attr('paytype2'));
 	  
 }
 </script>

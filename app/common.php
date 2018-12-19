@@ -257,12 +257,24 @@ function zz_search($type,$name)
  * @param array $search_types 查询类型
  * @param array $data 查询数据
  * @param array $where 查询条件
- * @param string $name_type1 查询字段的name值
- * @param string $name_type2 查询方式的name
- * @param string $name_name 查询值的name 
+ * @param array 查询参数 $param
+ *  name_type1 查询字段类型的name
+ *  name_type2 查询方式的name
+ *  name_name 查询值的name 
+ *  alias 表别名的追加
  * @return array 返回data和where
  */ 
-function zz_search_param($types,$search_types,$data,$where,$name_type1='type1',$name_type2='type2',$name_name='name'){
+function zz_search_param($types,$search_types,$data,$where,$param=[]){
+    //$name_type1='type1',$name_type2='type2',$name_name='name'
+    // 查询字段类型的name
+    $name_type1=(empty($param['name_type1']))?'type1':$param['name_type1'];
+    //查询方式的name
+    $name_type2=(empty($param['name_type2']))?'type2':$param['name_type2'];
+    //关键字的name
+    $name_name=(empty($param['name_name']))?'name':$param['name_name'];
+    
+    //表别名追加
+    $alias=(empty($param['alias']))?'':$param['alias'];
     
     //选择查询字段
     if(empty($data[$name_type1])){
@@ -289,7 +301,7 @@ function zz_search_param($types,$search_types,$data,$where,$name_type1='type1',$
                 $res=['like','%'.$data[$name_name].'%'];
                 break;
         }
-        $where[$types[$data[$name_type1]][0]]=$res;
+        $where[$alias.($types[$data[$name_type1]][0])]=$res;
     }
     
     return ['data'=>$data,'where'=>$where];
@@ -299,24 +311,33 @@ function zz_search_param($types,$search_types,$data,$where,$name_type1='type1',$
  * 根据查询时间
  * @param $times 时间查询
  * @param $data 查询数据
- * @param $where 查询条件
- * @param number $day1 开始时间默认提前天数
- * @param number $day2 结束时间默认提前天数
- * @param string $name_type 时间类型的name
- * @param string $name_time1 开始时间的name
- * @param string $name_time2 结束时间的name
+ * @param $where 查询条件 
+ * @param array $param 默认字段，包括day1 开始时间默认提前天数，day2 结束时间默认提前天数，
+ * name_time1 开始时间的name，name_time2 结束时间的name,name_time时间类型选择的name,alias表别名追加
  * @return string|array 错误返回说明|正常返回data和where
  */
-function zz_search_time($times,$data,$where,$day1=31,$day2=0,$name_time='time',$name_time1='datetime1',$name_time2='datetime2')
+function zz_search_time($times,$data,$where,$param=[])
 {
-     
+    //时间查询类型的name
+    $name_time=(empty($param['name_time']))?'time':$param['name_time'];
+   //起始时间的name
+    $name_time1=(empty($param['name_time1']))?'datetime1':$param['name_time1'];
+    //结束时间的name
+    $name_time2=(empty($param['name_time2']))?'datetime2':$param['name_time2'];
+    //默认显示的起始时间天数
+    $day1=(empty($param['day1']))?31:$param['day1'];
+    //默认显示的结束时间天数
+    $day2=(empty($param['day2']))?0:$param['day2'];
+    //表别名追加
+    $alias=(empty($param['alias']))?'':$param['alias'];
+    
     if(empty($data[$name_time])){
         $data[$name_time]=key($times);
         $time1=time()-24*3600*$day1;
         $time2=time()-24*3600*$day2;
         $data[$name_time1]=date('Y-m-d H:i',$time1);
         $data[$name_time2]=date('Y-m-d H:i',$time2);
-        $where[$times[$data[$name_time]][0]]=['between',[$time1,$time2]];
+        $where[$alias.($times[$data[$name_time]][0])]=['between',[$time1,$time2]];
     }else{
         //时间处理
         if(empty($data[$name_time1])){
@@ -328,21 +349,21 @@ function zz_search_time($times,$data,$where,$day1=31,$day2=0,$name_time='time',$
             }else{
                 //只有结束时间
                 $time2=strtotime($data['datetime2']);
-                $where[$times[$data[$name_time]][0]]=['elt',$time2];
+                $where[$alias.($times[$data[$name_time]][0])]=['elt',$time2];
             }
         }else{
             //有开始时间
             $time1=strtotime($data[$name_time1]);
             if(empty($data[$name_time2])){
                 $data[$name_time2]='';
-                $where[$times[$data[$name_time]][0]]=['egt',$time1];
+                $where[$alias.($times[$data[$name_time]][0])]=['egt',$time1];
             }else{
                 //有结束时间有开始时间between
                 $time2=strtotime($data[$name_time2]);
                 if($time2<=$time1){
                     return ('结束时间必须大于起始时间');
                 }
-                $where[$times[$data[$name_time]][0]]=['between',[$time1,$time2]];
+                $where[$alias.($times[$data[$name_time]][0])]=['between',[$time1,$time2]];
             }
         }
     }

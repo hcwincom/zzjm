@@ -36,7 +36,7 @@ class GoodsbaseController extends AdminInfo0Controller
         $data_add['time']=$time;
         
         switch ($table){
-            case 'fee':
+            case 'goods_fee':
                 if(empty($data['type'])){
                     $this->error('类型必须选择');
                 }
@@ -234,7 +234,7 @@ class GoodsbaseController extends AdminInfo0Controller
                     $content['content']=implode(',', $ids);
                 }
                 break;
-            case 'fee':
+            case 'goods_fee':
                 //过滤费用值
                 if(isset($content['fee'])){
                     $content['fee']=round($content['fee'],4);
@@ -488,7 +488,7 @@ class GoodsbaseController extends AdminInfo0Controller
        
         $cates=[];
         switch($table){
-            case 'fee':
+            case 'goods_fee':
             case 'custom':
                 
                 $cates=Db::name($table.'_cate')->where($where_cate)->column('id,name');

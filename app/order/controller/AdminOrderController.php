@@ -28,13 +28,13 @@ class AdminOrderController extends OrderBaseController
         $this->assign('utype',$this->utype);
         $this->oid_type=1;
         $this->search=[
-            'p.name'=>'订单编号',
-            'p.express_no'=>'物流编号',
-            'p.id'=>'订单id',
-            'custom.name'=>'客户名称',
-            'custom.code'=>'客户编号', 
-            'p.accept_name'=>'收货人',
-            'p.mobile|p.phone'=>'收货人电话',
+            1=>['p.name','订单编号'],
+            2=>['p.express_no','物流编号'],
+            3=>['p.id','订单id'],
+            4=>['custom.name','客户名称'],
+            5=>['custom.code','客户编号'], 
+            6=>['p.accept_name','收货人'],
+            7=>['p.mobile|p.phone','收货人电话'],
             
         ]; 
         $this->assign('order_types',[]);
@@ -147,14 +147,15 @@ class AdminOrderController extends OrderBaseController
             'p.express_no'=>'物流编号',
             'p.id'=>'订单id',
             'custom.name'=>'客户名称',
-            'custom.code'=>'客户编号',
-           
+            'custom.code'=>'客户编号', 
             'p.accept_name'=>'收货人',
-            'p.mobile|p.phone'=>'收货人电话',
-            
+            'p.mobile|p.phone'=>'收货人电话', 
         ];
-        
-        //选择查询字段
+        $res=zz_search_param($types, $data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
+        dump($res);
+       /*  //选择查询字段
         if(empty($data['type1'])){
             $data['type1']=key($types);
         }
@@ -167,44 +168,14 @@ class AdminOrderController extends OrderBaseController
             $data['name']='';
         }else{
             $where[$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
+        } */
         
         //时间类别
         $times=config('order_time');
-        
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where[$times[$data['time']][0]]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where[$times[$data['time']][0]]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where[$times[$data['time']][0]]=['between',[$time1,$time2]];
-                }
-            }
-        }
+        $res=zz_search_time($times, $data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
+         
         //客户类型
         if(empty($data['custom_cate'])){
             $data['custom_cate']=0;

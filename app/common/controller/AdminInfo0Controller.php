@@ -195,6 +195,12 @@ class AdminInfo0Controller extends AdminBaseController
      */
     public function add()
     {
+        $admin=$this->admin;
+       
+        if($this->isshop){
+            $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
+        } 
+       
         $this->cates();
         $this->assign("info", null);
     }

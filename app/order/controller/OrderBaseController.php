@@ -126,59 +126,18 @@ class OrderBaseController extends AdminBaseController
             $where['p.type']=['eq',$data['type']];
         }
         //查询字段
-        $types=$this->search;
-        
-        //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
+        $types=$this->search; 
         //搜索类型
-        $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(!isset($data['name']) || $data['name']==''){
-            $data['name']='';
-        }else{
-            $where[$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
+        $search_types=config('search_types'); 
+        $res=zz_search_param($types, $search_types,$data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
         
         //时间类别
         $times=config('order_time');
-        
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where[$times[$data['time']][0]]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where[$times[$data['time']][0]]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where[$times[$data['time']][0]]=['between',[$time1,$time2]];
-                }
-            }
-        }
+        $res=zz_search_time($times, $data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
         //客户类型
         if(empty($data['custom_cate'])){
             $data['custom_cate']=0;
@@ -800,57 +759,20 @@ class OrderBaseController extends AdminBaseController
         }
         //查询字段
         $types=$this->search;
-        //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
+        
         //搜索类型
         $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        //检查拼接搜索语句
-        if(empty($data['name'])){
-            $data['name']='';
-        }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
-        }
-        //时间类别
-        $times=config('time2_search');
-        if(empty($data['time'])){
-            $data['time']=key($times);
-            $data['datetime1']='';
-            $data['datetime2']='';
-        }else{
-            //时间处理
-            if(empty($data['datetime1'])){
-                $data['datetime1']='';
-                $time1=0;
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $time2=0;
-                }else{
-                    //只有结束时间
-                    $time2=strtotime($data['datetime2']);
-                    $where['e.'.$data['time']]=['elt',$time2];
-                }
-            }else{
-                //有开始时间
-                $time1=strtotime($data['datetime1']);
-                if(empty($data['datetime2'])){
-                    $data['datetime2']='';
-                    $where['e.'.$data['time']]=['egt',$time1];
-                }else{
-                    //有结束时间有开始时间between
-                    $time2=strtotime($data['datetime2']);
-                    if($time2<=$time1){
-                        $this->error('结束时间必须大于起始时间');
-                    }
-                    $where['e.'.$data['time']]=['between',[$time1,$time2]];
-                }
-            }
-        }
+         
+        $res=zz_search_param($types, $search_types,$data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
         
+        //时间类别
+        $times=config('edit_time_search');
+        $res=zz_search_time($times, $data, $where,['alias'=>'e.']);
+        $data=$res['data'];
+        $where=$res['where'];
+         
         
         $list=$m_edit
         ->alias('e')

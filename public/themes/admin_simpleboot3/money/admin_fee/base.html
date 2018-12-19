@@ -19,9 +19,6 @@
                 </option>
             </foreach>
         </select>
-         <present name='change.cid'>
-            <input type="text" class="red form-control" value="{$cates[$change.cid]|default=$change.cid}" />
-        </present>
     </div>
 </div>
 <div class="form-group">
@@ -32,18 +29,32 @@
                 <input type="radio" name="type" value="{$key}"  <if condition="$key eq $info.type">checked</if>  required/>{$vo}
             </label>
         </foreach>
-          <present name='change.type'>
-          <span class="red">{$param_types[$change.type]|default=$change.type}</span>
-        </present>
     </div>
 </div>
 <div class="form-group">
-    <label for="" class="col-sm-2 control-label">默认值(最多4位小数)</label>
+    <label for="" class="col-sm-2 control-label">定期费用时间</label>
     <div class="col-md-6 col-sm-10">
-        <input type="number" step="0.0001" class="form-control" name="fee" value="{$info.fee|default=0}" required/>
-          <present name='change.fee'>
-            <input type="text" class="red form-control" value="{$change.fee}" />
-        </present>
+    <label class="input-line">
+        月份<input type="number" class="form-control short" name="month" value="{$info.month|default=1}" />
+        
+    </label>
+    <label class="input-line">
+      
+        日期<input type="number" class="form-control short" name="day" value="{$info.day|default=1}" />
+        
+    </label>
+      <label class="input-line">
+      
+        最多延后天数<input type="number" class="form-control short" name="last_day" value="{$info.last_day|default=1}" />
+        
+    </label>
+    
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">默认费用</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="number" step="0.01" class="form-control" name="fee" value="{$info.fee|default=0}" required/>
     </div>
 </div>
 <div class="form-group">

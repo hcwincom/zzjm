@@ -27,8 +27,8 @@ class AdminFeeController extends GoodsBaseController
         parent::_initialize();
        
         $this->flag='价格参数';
-        $this->table='fee';
-        $this->m=Db::name('fee');
+        $this->table='goods_fee';
+        $this->m=Db::name('goods_fee');
           
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);

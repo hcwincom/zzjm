@@ -13,8 +13,8 @@ class AdminFeeCateController extends GoodsBaseController
         parent::_initialize();
         
         $this->flag='价格参数分类';
-        $this->table='fee_cate';
-        $this->m=Db::name('fee_cate');
+        $this->table='goods_fee_cate';
+        $this->m=Db::name('goods_fee_cate');
         $prices=config('prices');
         $this->assign('prices',$prices);
         $this->assign('flag',$this->flag);
@@ -273,7 +273,7 @@ class AdminFeeCateController extends GoodsBaseController
         }
         $ids=$_POST['ids']; 
         $where=['cid'=>['in',$ids]];
-        $tmp=Db::name('fee')->where($where)->find();
+        $tmp=Db::name('goods_fee')->where($where)->find();
         if(!empty($tmp)){
             $this->error('分类'.$tmp['cid'].'下有价格参数'.$tmp['name']);
         }

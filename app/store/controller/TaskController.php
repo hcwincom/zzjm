@@ -18,7 +18,7 @@ class TaskController extends HomeBaseController
     }
     
      /**
-      * 每天3点,历史库存
+      * 每天2点,历史库存
       */
      public function store_history(){
          set_time_limit(300);
@@ -52,7 +52,7 @@ class TaskController extends HomeBaseController
      
      
      /**
-      * 每天2点,空间占用
+      * 每天2点10,空间占用
       */
      public function space_count(){
          set_time_limit(300);
@@ -240,5 +240,46 @@ class TaskController extends HomeBaseController
          $m_action->insert($data_action);
          dump($count);
      }
-    
+     /**
+      * 每天2点30,仓库租金计算
+      */
+     public function store_fee(){
+         set_time_limit(300);
+         //先得到当天日期
+         $time=time();
+         $date=date('Y-m-d',$time);
+         $day=intval(substr($date,-2));
+         //查找需要累计费用的仓库
+         $where_store=[
+             'fee_day'=>$day,
+             'status'=>2,
+         ];
+         
+         
+         $time0=strtotime($date);
+         $m_new=Db::name('store_goods');
+         $m_history=Db::name('store_goods_history');
+         $m_new->startTrans();
+         $count=$m_new->count('id');
+         //1000个一组
+         $group=ceil($count/1000);
+         for($i=0;$i<$group;$i++){
+             $list=$m_new->limit($i*1000,($i+1)*1000)->column('store,goods,num,shop','id');
+             //如果直接在数据库查询中给定时间就不用循环了
+             $tmp=[];
+             foreach($list as $k=>$v){
+                 $tmp[]=[
+                     'store'=>$v['store'],
+                     'goods'=>$v['goods'],
+                     'num'=>$v['num'],
+                     'shop'=>$v['shop'],
+                     'time'=>$time0,
+                 ];
+             }
+             $m_history->insertAll($tmp);
+         }
+         $m_new->commit();
+         dump($count);
+     }
+     
 }

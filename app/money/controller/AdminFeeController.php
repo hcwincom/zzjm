@@ -1,40 +1,38 @@
 <?php
  
-namespace app\shop\controller;
-
+namespace app\money\controller;
  
-use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
-  
-class AdminPaytypeController extends AdminInfo0Controller
+use app\common\controller\AdminInfo0Controller;
+ 
+ 
+ 
+class AdminFeeController extends AdminInfo0Controller
 {
     
     public function _initialize()
     {
         parent::_initialize();
-       
-        $this->flag='收付款账号';
-        $this->table='paytype';
-        $this->m=Db::name('paytype');
-        $this->edit=['name','sort','dsc','bank','location','num','account','address','tel','company_name','feenum'];
-         
-        //pay_type
-        //没有店铺区分
         $this->isshop=1;
+        $this->flag='店铺费用';
+        $this->table='shop_fee';
+        $this->m=Db::name('shop_fee');
+          
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
-       
+        $this->assign('param_types',[1=>'每年缴纳',2=>'每月缴纳',3=>'不定期']);
+        $this->edit=['name','sort','dsc','cid','fee','type','month','day','last_day'];
     }
     /**
-     * 收付款账号列表
+     * 店铺费用列表
      * @adminMenu(
-     *     'name'   => '收付款账号列表',
-     *     'parent' => 'shop/AdminIndex/default',
+     *     'name'   => '店铺费用列表', 
+     *     'parent' => 'money/AdminIndex/default', 
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 21,
      *     'icon'   => '',
-     *     'remark' => '收付款账号列表',
+     *     'remark' => '店铺费用列表',
      *     'param'  => ''
      * )
      */
@@ -46,15 +44,15 @@ class AdminPaytypeController extends AdminInfo0Controller
      
    
     /**
-     * 收付款账号添加
+     * 店铺费用添加
      * @adminMenu(
-     *     'name'   => '收付款账号添加',
+     *     'name'   => '店铺费用添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号添加',
+     *     'remark' => '店铺费用添加',
      *     'param'  => ''
      * )
      */
@@ -65,33 +63,32 @@ class AdminPaytypeController extends AdminInfo0Controller
         
     }
     /**
-     * 收付款账号添加do
+     * 店铺费用添加do
      * @adminMenu(
-     *     'name'   => '收付款账号添加do',
+     *     'name'   => '店铺费用添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号添加do',
+     *     'remark' => '店铺费用添加do',
      *     'param'  => ''
      * )
      */
     public function add_do()
-    {
+    { 
         parent::add_do();
-        
     }
     /**
-     * 收付款账号详情
+     * 店铺费用详情
      * @adminMenu(
-     *     'name'   => '收付款账号详情',
+     *     'name'   => '店铺费用详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号详情',
+     *     'remark' => '店铺费用详情',
      *     'param'  => ''
      * )
      */
@@ -101,15 +98,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 收付款账号状态审核
+     * 店铺费用状态审核
      * @adminMenu(
-     *     'name'   => '收付款账号状态审核',
+     *     'name'   => '店铺费用状态审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号状态审核',
+     *     'remark' => '店铺费用状态审核',
      *     'param'  => ''
      * )
      */
@@ -118,15 +115,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::review();
     }
     /**
-     * 收付款账号状态批量同意
+     * 店铺费用状态批量同意
      * @adminMenu(
-     *     'name'   => '收付款账号状态批量同意',
+     *     'name'   => '店铺费用状态批量同意',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号状态批量同意',
+     *     'remark' => '店铺费用状态批量同意',
      *     'param'  => ''
      * )
      */
@@ -135,7 +132,7 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::review_all();
     }
     /**
-     * 收付款账号禁用
+     * 店铺费用禁用
      * @adminMenu(
      *     'name'   => '信息状态禁用',
      *     'parent' => 'index',
@@ -152,15 +149,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::ban();
     }
     /**
-     * 收付款账号信息状态恢复
+     * 店铺费用信息状态恢复
      * @adminMenu(
-     *     'name'   => '收付款账号信息状态恢复',
+     *     'name'   => '店铺费用信息状态恢复',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号信息状态恢复',
+     *     'remark' => '店铺费用信息状态恢复',
      *     'param'  => ''
      * )
      */
@@ -169,15 +166,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::cancel_ban();
     }
     /**
-     * 收付款账号编辑提交
+     * 店铺费用编辑提交
      * @adminMenu(
-     *     'name'   => '收付款账号编辑提交',
+     *     'name'   => '店铺费用编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号编辑提交',
+     *     'remark' => '店铺费用编辑提交',
      *     'param'  => ''
      * )
      */
@@ -186,15 +183,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::edit_do();
     }
     /**
-     * 收付款账号编辑列表
+     * 店铺费用编辑列表
      * @adminMenu(
-     *     'name'   => '收付款账号编辑列表',
+     *     'name'   => '店铺费用编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号编辑列表',
+     *     'remark' => '店铺费用编辑列表',
      *     'param'  => ''
      * )
      */
@@ -204,15 +201,15 @@ class AdminPaytypeController extends AdminInfo0Controller
     }
     
     /**
-     * 收付款账号审核详情
+     * 店铺费用审核详情
      * @adminMenu(
-     *     'name'   => '收付款账号审核详情',
+     *     'name'   => '店铺费用审核详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号审核详情',
+     *     'remark' => '店铺费用审核详情',
      *     'param'  => ''
      * )
      */
@@ -222,15 +219,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 收付款账号信息编辑审核
+     * 店铺费用信息编辑审核
      * @adminMenu(
-     *     'name'   => '收付款账号编辑审核',
+     *     'name'   => '店铺费用编辑审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号编辑审核',
+     *     'remark' => '店铺费用编辑审核',
      *     'param'  => ''
      * )
      */
@@ -239,15 +236,15 @@ class AdminPaytypeController extends AdminInfo0Controller
         parent::edit_review();
     }
     /**
-     * 收付款账号编辑记录批量删除
+     * 店铺费用编辑记录批量删除
      * @adminMenu(
-     *     'name'   => '收付款账号编辑记录批量删除',
+     *     'name'   => '店铺费用编辑记录批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号编辑记录批量删除',
+     *     'remark' => '店铺费用编辑记录批量删除',
      *     'param'  => ''
      * )
      */
@@ -257,33 +254,33 @@ class AdminPaytypeController extends AdminInfo0Controller
     }
     
     /**
-     * 收付款账号批量删除
+     * 店铺费用批量删除
      * @adminMenu(
-     *     'name'   => '收付款账号批量删除',
+     *     'name'   => '店铺费用批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '收付款账号批量删除',
+     *     'remark' => '店铺费用批量删除',
      *     'param'  => ''
      * )
      */
     public function del_all()
     {
-         
+        
         parent::del_all();
     }
-    /**
-     * 公共元素
-     */
-    public function cates($type=3)
-    {
-        
+    
+    public function cates($type=3){
         parent::cates($type);
-        $banks=Db::name('bank')->column('id,name');
-        $this->assign('banks',$banks);
+        $where_shop=$this->where_shop;
+        $where=[
+            'shop'=>$where_shop,
+            'status'=>2,
+        ];
+        $cates=Db::name('shop_fee_cate')->where($where)->column('id,name');
+        $this->assign('cates',$cates);
     }
-   
      
 }

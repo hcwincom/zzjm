@@ -26,15 +26,15 @@ class AdminOrdersupController extends OrderBaseController
         $this->oid_type=2;
         $this->ptype=2;
         $this->assign('utype',$this->utype);
+         
         $this->search=[
-            'p.name'=>'采购单编号',
-            'p.express_no'=>'物流编号',
-            'p.id'=>'采购单id',
-            'custom.name'=>'供应商名称',
-            'custom.code'=>'供应商编号',
-            'p.accept_name'=>'供应商发货人',
-            'p.mobile|p.phone'=>'供应商发货人电话',
-            
+            1=>['p.name','采购单编号'],
+            2=>['p.express_no','物流编号'],
+            3=>['p.id','采购单id'],
+            4=>['custom.name','供应商名称'],
+            5=>['custom.code','供应商编号'],
+            6=>['p.accept_name','供应商发货人'],
+            7=>['p.mobile|p.phone','供应商发货人电话'], 
         ]; 
          
     }

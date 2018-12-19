@@ -61,9 +61,9 @@ class AdminPriceController extends GoodsBaseController
         foreach($prices as $k=>$v){
             
             $where['c.sort']=['between',[$k*10,$k*10+10]];
-            $fees[$k]=Db::name('fee')
+            $fees[$k]=Db::name('goods_fee')
             ->alias('p')
-            ->join('cmf_cate_any c','c.id=p.cid')
+            ->join('cmf_goods_fee_cate c','c.id=p.cid')
             ->where($where)
             ->column('p.id,p.name,p.fee,p.type,p.dsc');
          }
@@ -117,8 +117,8 @@ class AdminPriceController extends GoodsBaseController
             $where['c.sort']=['between',[$k*10,$k*10+10]];
             $fees[$k]=Db::name('price_fee')
             ->alias('pf')
-            ->join('cmf_fee p','p.id=pf.p_id')
-            ->join('cmf_cate_any c','c.id=p.cid')
+            ->join('cmf_goods_fee p','p.id=pf.p_id')
+            ->join('cmf_goods_fee_cate c','c.id=p.cid')
             ->where($where)
             ->column('p.id,p.name,pf.fee,pf.type,pf.dsc');
         }
@@ -281,8 +281,8 @@ class AdminPriceController extends GoodsBaseController
             $where['c.sort']=['between',[$k*10,$k*10+10]];
             $fees[$k]=Db::name('price_fee')
             ->alias('pf')
-            ->join('cmf_fee p','p.id=pf.p_id')
-            ->join('cmf_cate_any c','c.id=p.cid')
+            ->join('cmf_goods_fee p','p.id=pf.p_id')
+            ->join('cmf_goods_fee_cate c','c.id=p.cid')
             ->where($where)
             ->column('p.id,p.name,pf.fee,pf.type,pf.dsc');
         }
