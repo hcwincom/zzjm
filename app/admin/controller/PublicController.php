@@ -93,8 +93,11 @@ class PublicController extends AdminBaseController
                     ->join('__ROLE__ b', 'a.role_id =b.id')
                     ->where(["user_id" => $result["id"], "status" => 1])
                     ->value("role_id");
-                if ($result["id"] != 1 && (empty($groups) || empty($result['user_status']))) {
+                if ($result["id"] != 1 && (empty($groups) || empty($result['user_status']) )) {
                     $this->error(lang('USE_DISABLED'));
+                }
+                if($result['job_status']==3){
+                    $this->error('已离职用户不能登录');
                 }
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);

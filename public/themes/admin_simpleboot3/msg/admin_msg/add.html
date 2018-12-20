@@ -1,0 +1,141 @@
+<include file="public@header" />
+<style>
+.unames{
+	height:100px;
+	border:1px solid; 
+	overflow:auto;
+}
+</style>
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="msg@admin_msg/nav" /> 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
+			 
+	 		<div class="form-group">
+			    <label  class="col-sm-2 control-label">消息类型</label>
+			    <div class="col-md-6 col-sm-10">
+			       <select class="form-control short-auto" name="type" id="">
+			       <foreach name="types" item="vo">
+			       		<option value="{$key}">{$vo}</option>
+			       </foreach>
+			       </select>
+			    </div>
+			</div>
+			<div class="form-group">
+			    <label for="" class="col-sm-2 control-label">发送对象</label>
+			    <div class="col-md-6 col-sm-10">
+			    <notempty name="shops">
+			   		<label class="input-line">
+				    	店铺
+				       <select class="form-control short-auto" name="shop" id="shop">
+				       		<option value="0">所有</option> 
+			       		<foreach name="shops" item="vo">
+			       			<option value="{$key}">{$vo}</option>
+			       		</foreach>
+				       		 
+				       </select>
+				    </label>
+				     <label class="radio-line">
+				    	<input type="radio" name="is_all" value="0" class="is_all" checked/>选择用户
+				    </label>
+				    <label class="radio-line">
+				    	<input type="radio" name="is_all" class="is_all" value="1"/>全站所有用户和管理员 
+				    </label>
+				     <label class="radio-line"> 
+				    	<input type="radio" name="is_all" class="is_all" value="2"/>全站所有用户 
+				    </label>
+				     <label class="radio-line"> 
+				    	<input type="radio" name="is_all" class="is_all" value="3"/>全站所有管理员
+				    </label>
+			    </notempty>
+			    <br/>
+			    	 <select class="form-control short-auto"  id="type1">
+			        <foreach name="utypes" item="vo">
+			        	<option value="{$key}"  >{$vo[1]}</option>
+			        </foreach> 
+			        </select> 
+			  
+			        <select class="form-control short-auto" id="type2"> 
+			         <foreach name="search_types" item="vo">
+			        	<option value="{$key}"  >{$vo}</option>
+			        </foreach>  
+			        </select> 
+			        <input type="text" class="form-control short-auto" id="name"  value=" ">
+			    	<button type="button" id="user_search">查询用户</button>
+			    </div>
+			</div>
+			<div class="form-group">
+			    <label class="col-sm-2 control-label">用户查询结果</label>
+			    <div class="col-md-6 col-sm-10 ">
+			    	<div class="unames">
+			 		 
+			 		</div>
+			    </div>
+			</div>
+			<div class="form-group">
+			    <label class="col-sm-2 control-label">消息内容</label>
+			    <div class="col-md-6 col-sm-10">
+			
+			        <textarea class="form-control" name="dsc" rows="5"  maxlength="250"> </textarea>
+			    </div>
+			</div>
+			 <div class="form-group">
+			    <label class="col-sm-2 control-label">相关链接</label>
+			    <div class="col-md-6 col-sm-10">
+			  		<input type="text" class="form-control " name="link" value=" ">
+			    </div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">发送</button>
+					 
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+	 
+</body>
+</html>
+<script>
+var url_user_search="{:url('msg/Msgajax/user_search')}";
+$('#user_search').click(function(){
+	var shop=parseInt($('#shop').val());
+	if(shop>=0){
+		$('.is_all').eq(0).click();
+	}
+	
+	var type1=$('#type1').val();
+	var type2=$('#type2').val();
+	var name=$('#name').val();
+	$.ajax({
+        type: 'POST',
+        url: url_user_search,
+        dataType: 'json', 
+        data:{'type1':type1,'type2':type2,'name':name,'shop':shop},
+        success: function (data) {
+        	console.log(data);
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	   var list=data.data;
+     	   var labels='';
+     	   for(var i in list){
+     		  labels+='<label class="checkbox-line">'+
+     		  '<input type="checkbox" name="uids['+i+']" value="'+i+'" checked/>'+list[i]+'</label>';
+	 		
+     	   }
+     	   $('.unames').html(labels);
+     	   
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+	
+});
+</script>

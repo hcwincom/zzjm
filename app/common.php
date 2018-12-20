@@ -7,6 +7,32 @@ use think\Db;
 use think\Url;
  
 // 应用公共文件
+
+ 
+/**
+ * 店铺搜索确认
+ * @param array $admin
+ * @param array $data
+ * @param array $where
+ * @param number $where_shop
+ * @param string $field
+ * @return array ['data'=>$data,'where'=>$where,'where_shop'=>$where_shop]
+ */
+function zz_shop($admin,$data,$where,$field='shop',$where_shop=0){
+    if($admin['shop']==1){
+        if(empty($data['shop'])){
+            $data['shop']=0;
+            $where_shop=2;
+        }else{
+            $where[$field]=$data['shop'];
+            $where_shop=$data['shop'];
+        }
+    }else{
+        $where[$field]=$admin['shop'];
+        $where_shop=$admin['shop'];
+    }
+    return ['data'=>$data,'where'=>$where,'where_shop'=>$where_shop];
+}
 /**
  * 生成订单号
  * @param number $aid
@@ -258,9 +284,9 @@ function zz_search($type,$name)
  * @param array $data 查询数据
  * @param array $where 查询条件
  * @param array 查询参数 $param
- *  name_type1 查询字段类型的name
- *  name_type2 查询方式的name
- *  name_name 查询值的name 
+ *  name_type1=type1 查询字段类型的name
+ *  name_type2=type2 查询方式的name
+ *  name_name=name 查询值的name 
  *  alias 表别名的追加
  * @return array 返回data和where
  */ 
@@ -312,8 +338,13 @@ function zz_search_param($types,$search_types,$data,$where,$param=[]){
  * @param $times 时间查询
  * @param $data 查询数据
  * @param $where 查询条件 
- * @param array $param 默认字段，包括day1 开始时间默认提前天数，day2 结束时间默认提前天数，
- * name_time1 开始时间的name，name_time2 结束时间的name,name_time时间类型选择的name,alias表别名追加
+ * @param array $param 默认字段，
+ * 包括day1=31 开始时间默认提前天数，
+ * day2 =0结束时间默认提前天数，
+ * name_time1=datetime1 开始时间的name，
+ * name_time2 =datetime2结束时间的name,
+ * name_time=time时间类型选择的name,
+ * alias表别名追加
  * @return string|array 错误返回说明|正常返回data和where
  */
 function zz_search_time($times,$data,$where,$param=[])

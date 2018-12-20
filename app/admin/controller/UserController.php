@@ -33,6 +33,8 @@ class UserController extends AdminBaseController
         parent::_initialize();
          
         $this->assign('jobs',[1=>'经理',2=>'员工']);
+        $this->assign('job_statuss',[1=>'试用期',2=>'已转正',3=>'已离职']);
+        
     }
 
     /**
@@ -59,24 +61,17 @@ class UserController extends AdminBaseController
         }
         /**搜索条件**/
         $data = $this->request->param();
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(empty($data['name'])){
-            $data['name']=''; 
-        }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']); 
-        }
+        $res=zz_search_param($types, $search_types, $data, $where,['alias'=>'p.']);
+        $data=$res['data'];
+        $where=$res['where'];
+        
         $users = Db::name('user')
         ->field('p.*,shop.name as shop_name,dt.name as dt_name')
         ->alias('p')
         ->join('cmf_shop shop','shop.id=p.shop')
         ->join('cmf_department dt','dt.id=p.department')
         ->where($where)
-        ->order("id DESC")
+        ->order("id desc")
         ->paginate();
         
         // 获取分页显示
@@ -272,7 +267,23 @@ class UserController extends AdminBaseController
         $user = DB::name('user') 
         ->where(["id" => $id])
         ->find();
+        if(empty($user['in_time'])){
+            $user['in_time']='';
+        }else{
+            $user['in_time']=date('Y-m-d', $user['in_time']);
+        }
+        if(empty($user['on_time'])){
+            $user['on_time']='';
+        }else{
+            $user['on_time']=date('Y-m-d', $user['on_time']);
+        }
+        if(empty($user['out_time'])){
+            $user['out_time']='';
+        }else{
+            $user['out_time']=date('Y-m-d', $user['out_time']);
+        }
         $this->assign($user);
+        
         return $this->fetch();
     }
 
@@ -326,7 +337,24 @@ class UserController extends AdminBaseController
                         'user_email'=>$data['user_email'], 
                         'mobile'=>$data['mobile'], 
                         'department'=>$data['department'],
+                        'emergency_mobile'=>$data['emergency_mobile'],
+                        'idcard'=>$data['idcard'],
+                        'address'=>$data['address'],
+                        'qq'=>$data['qq'],
+                        'weixin'=>$data['weixin'],
+                        'wangwang'=>$data['wangwang'],
+                        'job_status'=>intval($data['job_status']),
                     ];
+                    if(!empty($data['in_time'])){ 
+                        $data_user['in_time']=strtotime($data['in_time']);
+                    }
+                    if(!empty($data['on_time'])){ 
+                        $data_user['on_time']=strtotime($data['on_time']);
+                    }
+                    if(!empty($data['out_time'])){
+                        $data_user['out_time']=strtotime($data['out_time']);
+                    }
+                    
                     if(!empty($_POST['user_pass'])){
                         $data_user['user_pass']=$_POST['user_pass'];
                     }

@@ -113,6 +113,7 @@ class RbacController extends AdminBaseController
             $this->error("该角色不存在！");
         }
         $this->assign("data", $data);
+       
         return $this->fetch();
     }
 
