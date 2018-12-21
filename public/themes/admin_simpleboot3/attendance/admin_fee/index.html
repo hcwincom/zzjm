@@ -1,0 +1,175 @@
+<include file="public@header" />
+  
+</head>
+<body>
+
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs"> 
+		<include file="public@nav" />
+	 <a href="{:url('money/AdminFeeMonth/index')}">每月费用</a>
+		</ul>
+		 <form class="well form-inline margin-top-20" method="post"
+			action="">
+			状态: 
+			<select class="form-control" name="status" >
+				<option value='0'>全部</option> 
+				 <foreach name="statuss" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;  
+			类型: 
+			<select class="form-control" name="type" >
+				<option value='0'>全部</option> 
+				 <foreach name="param_types" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.type">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp; 
+			分类: 
+			<select class="form-control" name="cid" >
+				<option value='0'>全部</option> 
+				 <foreach name="cates" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.cid">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;   
+			 创建人: 
+			<select class="form-control" name="aid"  >
+				<option value='0'>全部</option> 
+				 <foreach name="aids" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp; 
+			审核人: 
+			<select class="form-control" name="rid" >
+				<option value='0'>全部</option> 
+				 <foreach name="rids" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<select class="form-control" name="type1" id="">
+	        <foreach name="types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+	        <select class="form-control" name="type2" id=""> 
+	         <foreach name="search_types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.type2">selected</if>>{$vo}</option>
+	        </foreach>  
+	        </select> 
+	        
+            <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
+            <select class="form-control" name="time" id="">
+	        <foreach name="times" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
+			--
+			<input class="js-datetime form-control" type="text" id="datetime2" name="datetime2" value="{$data.datetime2}">
+			
+			<input type="submit" class="btn btn-primary" value="搜索" />
+				 
+		</form>
+		 
+		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
+			<div class="table-actions">
+
+				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
+			 
+			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
+			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
+			 	 
+			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
+			 	<p class='error'></p>
+			</div>
+
+			<table class="table table-hover table-bordered table-list">
+				<thead>
+					<tr>
+					 	<th width="15">
+					 	<label> <input type="checkbox"
+								class="js-check-all" data-direction="x"
+								data-checklist="js-check-x">
+						</label>
+						</th>
+						<th width="100">{$flag}ID</th>
+						 
+						<th>{$flag}名</th> 
+						 
+						<th>创建人</th>
+						<th>创建时间</th>
+						<th>审核人</th>
+						<th>审核时间</th>
+						<th>最近更新时间</th>
+						<th>排序</th>
+						<th>状态</th>
+						 
+					</tr>
+				</thead>
+				<tbody>
+					<foreach name="list" item="vo">
+				 
+					<tr class="status{$vo.status}">
+						<td>
+							<input type="checkbox" class="js-check"
+							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+							value="{$vo.id}">
+						</td>
+						<td class='id'> 
+						{$vo.id}
+						</td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
+						 
+						<td>{$aids[$vo.aid]|default=$vo.aid}</td>
+						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
+						<eq name="vo.rid" value="0">
+						<td>-</td>
+						<td>-</td>
+						<else/>
+						<td>{$rids[$vo.rid]|default=$vo.rid}</td>
+						<td>{$vo.rtime|date='Y-m-d H:i',###}</td>
+						</eq>
+						
+						<td>{$vo.time|date='Y-m-d H:i',###}</td>
+						<td>{$vo.sort}</td>
+						<td>{$statuss[$vo.status]}</td>
+						 
+					</tr>
+				 
+					</foreach>
+				</tbody>
+
+			</table>
+
+		</form>
+	 	<div class="pagination">{$page}</div>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    $('.ban').click(function(){
+        $(this).parents('form').attr('action',"{:url('ban')}");
+        return is_check('批量禁用');
+    });
+    $('.cancel_ban').click(function(){
+        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
+        return is_check('批量恢复');
+    });
+    $('.review_all').click(function(){
+        $(this).parents('form').attr('action',"{:url('review_all')}");
+        return is_check('批量同意');
+    });
+    $('.del_all').click(function(){
+        $(this).parents('form').attr('action',"{:url('del_all')}");
+        return is_check('批量删除');
+    });
+</script>
+</body>
+</html>

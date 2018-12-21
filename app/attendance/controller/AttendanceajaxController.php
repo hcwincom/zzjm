@@ -1,12 +1,12 @@
 <?php
 
-namespace app\msg\controller;
+namespace app\attendance\controller;
 
 use app\common\controller\AdminBase0Controller;
 use think\Db;
  
 
-class MsgajaxController extends AdminBase0Controller
+class AttendanceajaxController extends AdminBase0Controller
 {
     
     function user_search(){

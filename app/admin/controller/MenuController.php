@@ -368,24 +368,26 @@ class MenuController extends AdminBaseController
 
         if (!empty($controllers)) {
             foreach ($controllers as $controller) {
+               
                 $controller      = preg_replace('/\.php$/', '', $controller);
+                
                 $controllerName  = preg_replace('/\Controller$/', '', $controller);
+             
                 $controllerClass = "app\\$app\\controller\\$controller";
-
+               
                 $menuAnnotations = Annotations::ofClass($controllerClass, '@adminMenuRoot');
-
+               
                 if (!empty($menuAnnotations)) {
                     foreach ($menuAnnotations as $menuAnnotation) {
-
-                        $name      = $menuAnnotation->name;
+                       
+                        $name      = $menuAnnotation->name; 
                         $icon      = $menuAnnotation->icon;
                         $type      = 0;//1:有界面可访问菜单,2:无界面可访问菜单,0:只作为菜单
                         $action    = $menuAnnotation->action;
                         $status    = empty($menuAnnotation->display) ? 0 : 1;
                         $listOrder = floatval($menuAnnotation->order);
                         $param     = $menuAnnotation->param;
-                        $remark    = $menuAnnotation->remark;
-
+                        $remark    = $menuAnnotation->remark; 
                         if (empty($menuAnnotation->parent)) {
                             $parentId = 0;
                         } else {
@@ -524,10 +526,9 @@ class MenuController extends AdminBaseController
 
                 $reflect = new \ReflectionClass($controllerClass);
                 $methods = $reflect->getMethods(\ReflectionMethod::IS_PUBLIC);
-
+             
                 if (!empty($methods)) {
-                    foreach ($methods as $method) {
-
+                    foreach ($methods as $method) { 
                         if ($method->class == $controllerClass && strpos($method->name, '_') !== 0) {
                             $menuAnnotations = Annotations::ofMethod($controllerClass, $method->name, '@adminMenu');
 
@@ -535,15 +536,14 @@ class MenuController extends AdminBaseController
 
                                 $menuAnnotation = $menuAnnotations[0];
 
-                                $name      = $menuAnnotation->name;
+                                $name      = $menuAnnotation->name; 
                                 $icon      = $menuAnnotation->icon;
                                 $type      = $menuAnnotation->hasView ? 1 : 2;//1:有界面可访问菜单,2:无界面可访问菜单,0:只作为菜单
                                 $action    = $method->name;
                                 $status    = empty($menuAnnotation->display) ? 0 : 1;
                                 $listOrder = floatval($menuAnnotation->order);
                                 $param     = $menuAnnotation->param;
-                                $remark    = $menuAnnotation->remark;
-
+                                $remark    = $menuAnnotation->remark; 
                                 if (empty($menuAnnotation->parent)) {
                                     $parentId = 0;
                                 } else {

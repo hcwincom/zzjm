@@ -1,0 +1,89 @@
+<div style="clear:both"></div>
+
+ <div class="form-group">
+    <label for="" class="col-sm-2 control-label">费用选择</label>
+    <div class="col-md-6 col-sm-10">
+	    <select  class="form-control short-auto" name="fee" id="fee">
+	    	<foreach name="fees" item="vo">
+	    	<option value="{$key}" <if condition="$key eq $info.fee" >selected</if>>{$vo}</option>
+	    	</foreach>
+	    </select>
+        <notempty name="info.fee">
+        	<a href="{:url('money/AdminFee/edit',['id'=>$info.fee])}" target="{$zztarget.other}">费用详情</a>
+        </notempty>
+    </div>
+</div>
+  <div class="form-group">
+    <label for="" class="col-sm-2 control-label">名称</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" id="name" class="form-control" name="name" value="{$info.name}" required/>
+        <present name='change.name'>
+            <input type="text" class="red form-control" value="{$change.name}" />
+        </present>
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">默认费用</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="number" step="0.01" class="form-control" name="money0" value="{$info.money0|default=0}" readonly/>
+    </div>
+</div>
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">实际费用</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="number" step="0.01" class="form-control" name="money" value="{$info.money|default=0}" required/>
+         <present name='change.money'>
+            <input type="text" class="red form-control" value="{$change.money}" />
+        </present>
+    </div>
+</div>
+ <div class="form-group">
+    <label for="" class="col-sm-2 control-label">最后结算时间</label>
+    <div class="col-md-6 col-sm-10">
+    <input type="hidden" name="year" value="{$info.year|default=$year}" id="year"/>
+    <input type="hidden" name="month" value="{$info.month|default=$month}" id="month"/>
+    <input type="hidden" name="last_time" value="{$info.last_time|default=0}" id="last_time"/>
+    <empty name="info">
+     	<input type="text" class="js-date form-control" value="" id="last_time0" required/>
+    <else/>
+    	 <input type="text" class="js-date form-control" id="last_time0" value="{$info.last_time|date='Y-m-d',###}" required/>
+    </empty>
+      
+         <present name='change.last_time'>
+            <input type="text" class="red form-control" value="{$change.last_time|date='Y-m-d',###}" />
+        </present>
+    </div>
+</div>
+<div class="form-group "  >
+    <label class="col-sm-2 control-label">备注</label>
+    <div class="col-md-6 col-sm-10">
+    <input type="hidden" name="sort" value="{$info.sort|default=1000}"/>
+        <input type="text" class="form-control" name="dsc" value="{$info.dsc}"  />
+        <present name='change.dsc'>
+            <input type="text" class="red form-control"  name="dsc"  value="{$change.dsc}"  />
+        </present>
+    </div>
+</div>
+<notempty name="info">
+<div class="form-group "  >
+    <label class="col-sm-2 control-label">支付状态</label>
+    <div class="col-md-6 col-sm-10">
+     <foreach name="pay_status" item="vo">
+	  	<label class="radio-inline">
+	 		<input type="radio" value="{$key}" name="pay_status" <if condition="$key eq $info.pay_status">checked</if>/>{$vo}
+	 	</label>
+	 </foreach>
+	 <present name="change.pay_status"> 
+	 	<span class="red">{$pay_status[$info.pay_status]}</span>
+	 </present>
+    </div>
+</div>
+</notempty>
+<include file="public@adsc" />
+<script>
+$('form').submit(function(){
+	var str=$('#last_time0').val(); 
+	var last_time = (new Date(Date.parse(str.replace(/-/g,"/")))).getTime() / 1000;
+	$('#last_time').val(last_time); 
+});
+</script>

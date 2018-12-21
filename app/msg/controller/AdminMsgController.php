@@ -23,9 +23,9 @@ class AdminMsgController extends AdminBaseController
     
     /**
      * 站内信
-     * @adminMenu(
+     * adminMenu(
      *     'name'   => '站内信',
-     *     'parent' => 'msg/AdminIndex/default',
+     *     'parent' => '',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10,
@@ -237,7 +237,7 @@ class AdminMsgController extends AdminBaseController
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
-     *     'order'  => 10,5
+     *     'order'  => 10,
      *     'icon'   => '',
      *     'remark' => '发送信息do',
      *     'param'  => ''
