@@ -5,8 +5,9 @@ namespace app\attendance\controller;
  
 use think\Db;
 use cmf\controller\AdminBaseController;
+use app\attendance\model\AttendanceDayModel;
 
-class AdminAttendanceRuleController extends AdminBaseController
+class AdminAttendanceDayController extends AdminBaseController
 {
     private $m;
     private $flag;
@@ -16,8 +17,8 @@ class AdminAttendanceRuleController extends AdminBaseController
         parent::_initialize();
         
         $this->flag='考勤记录';
-        $this->table='attendance_rule';
-        $this->m=Db::name('attendance_rule');
+        $this->table='attendance_day';
+        $this->m=new AttendanceDayModel();
          
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
@@ -118,7 +119,85 @@ class AdminAttendanceRuleController extends AdminBaseController
          
         return $this->fetch();
     }
-    
+    /**
+     * 我的考勤记录
+     * @adminMenu(
+     *     'name'   => ' 我的考勤记录',
+     *     'parent' => 'attendance/AdminIndex/default',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 1,
+     *     'icon'   => '',
+     *     'remark' => ' 我的考勤记录',
+     *     'param'  => ''
+     * )
+     */
+    public function myday()
+    {
+        $m=$this->m;
+        $admin=$this->admin;
+        
+        $data=$this->request->param();
+        $where=['p.aid'=>$admin['id']];
+         
+        //实际状态
+        if(empty($data['real_day_status'])){
+            $data['real_day_status']=0;
+        }else{
+            $where['p.real_day_status']=['eq',$data['real_day_status']];
+        }
+        //原始打卡状态
+        if(empty($data['day_status'])){
+            $data['day_status']=0;
+        }else{
+            $where['p.day_status']=['eq',$data['day_status']];
+        }
+        //签到状态
+        if(empty($data['start_tatus'])){
+            $data['start_tatus']=0;
+        }else{
+            $where['p.start_tatus']=['eq',$data['start_tatus']];
+        }
+        //签退状态
+        if(empty($data['end_status'])){
+            $data['end_status']=0;
+        }else{
+            $where['p.end_status']=['eq',$data['end_status']];
+        }
+        
+        
+        //时间类别
+        $times=[
+            1=>['p.start_time','签到时间'],
+            2=>['p.end_time','签退时间'],
+        ];
+        $res=zz_search_time($times, $data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
+        
+        
+        $list=$m
+        ->alias('p')
+        ->field('p.*') 
+        ->where($where)
+        ->order('p.status asc,p.sort asc,p.time desc')
+        ->paginate();
+        
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        
+        $this->assign('times',$times);
+        
+        $this->cates(1);
+        
+        
+        return $this->fetch();
+    }
      
     //
     public function cates($type=3){

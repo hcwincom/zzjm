@@ -32,7 +32,7 @@ class AdminAttendanceRuleController extends AdminInfo0Controller
      *     'parent' => 'attendance/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 10,
      *     'icon'   => '',
      *     'remark' => '考勤规则列表',
      *     'param'  => ''

@@ -20,12 +20,12 @@ class AdminMsgController extends AdminBaseController
         $this->assign('types', config('msg_types'));
         $this->assign('msg_status', config('msg_status'));
     }
-    
+     
     /**
      * 站内信
-     * adminMenu(
+     * @adminMenu(
      *     'name'   => '站内信',
-     *     'parent' => '',
+     *     'parent' => 'msg/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 10,
