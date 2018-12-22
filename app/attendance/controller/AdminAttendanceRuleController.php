@@ -83,7 +83,7 @@ class AdminAttendanceRuleController extends AdminInfo0Controller
                'end_hour'=>17,
                'end_minute'=>0,
                'start1'=>10,
-               'start2'=>30,
+               'start2'=>0,
                'end1'=>10,
                'end2'=>0,
                'aid'=>$admin['id'],

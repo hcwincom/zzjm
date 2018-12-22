@@ -4,9 +4,10 @@
 <body>
 
 	<div class="wrap js-check-wrap">
-		<ul class="nav nav-tabs"> 
-	 	
-		</ul>
+		 <ul class="nav nav-tabs"> 
+		
+	
+		 </ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
 			状态: 
@@ -18,16 +19,7 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-		  
-			 考勤人: 
-			<select class="form-control" name="aid"  >
-				<option value='0'>全部</option> 
-				 <foreach name="aids" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
-				</option>
-				</foreach>
-			</select> &nbsp;&nbsp; 
-			 
+		   
 	         
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
@@ -44,7 +36,17 @@
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
- 				<p>员工数{$count_user}记录数{$count_id}</p>
+  			<switch name="today">
+	 		<case value="start">
+	 		 	<button type="button" id="start_do">签到</button>
+	 		</case>
+	 		<case value="end">
+	 		 	<button type="button" id="start_do">签退</button>
+	 		</case>
+	 		<case value="end1">
+	 		 	<button type="button" id="start_do">重新签退</button>
+	 		</case>
+	 		</switch>
 			 	<p class='error'></p>
 			</div>
 
@@ -58,9 +60,7 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
-						 
-						<th>考勤人</th> 
-						<th>考勤日期</th> 
+						 <th>考勤日期</th> 
 						 <th>上班签到</th> 
 						<th>下班签到</th>
 						<th>工作时长</th>
@@ -81,14 +81,14 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td>{$vo.aname}</td>
-						<td>{$vo.day_time|date='Y-m-d',###}</td>
+					 	<td>{$vo.day_time|date='Y-m-d',###}</td>
 						 <td>
 						 <eq name="vo.start_time" value="0">
 						 	--
 						 <else/>
 						 	{$vo.start_time|date='Y-m-d H:i',###}
 						 </eq>
+						 {$start_statuss[$vo.start_status]}
 						 </td>
 						 <td>
 						 <eq name="vo.end_time" value="0">
@@ -96,6 +96,7 @@
 						 <else/>
 						 	{$vo.end_time|date='Y-m-d H:i',###}
 						 </eq>
+						 {$end_statuss[$vo.end_status]}
 						 </td>
 						 <td>
 						 <eq name="vo.day_status" value="1">
@@ -117,23 +118,27 @@
 	 	<div class="pagination">{$page}</div>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
-<script>
-    $('.ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('ban')}");
-        return is_check('批量禁用');
-    });
-    $('.cancel_ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
-        return is_check('批量恢复');
-    });
-    $('.review_all').click(function(){
-        $(this).parents('form').attr('action',"{:url('review_all')}");
-        return is_check('批量同意');
-    });
-    $('.del_all').click(function(){
-        $(this).parents('form').attr('action',"{:url('del_all')}");
-        return is_check('批量删除');
-    });
-</script>
+ 
 </body>
 </html>
+<script>
+var url_attendance_do="{:url('attendance/Attendanceajax/attendance_do')}";
+$('#start_do').click(function(){ 
+	$.ajax({
+        type: 'POST',
+        url: url_attendance_do,
+        dataType: 'json', 
+        data:{},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    }  
+     	   window.location.reload();
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
+</script>

@@ -62,14 +62,9 @@
 		    	<span class="red">{$change.start1}</span>
 		    </present> 
         </label>
-         <label  class="input-line">
-        	 关闭时间（分钟）
-         	<input type="number" min="0" max="120" class="form-control short" name="start2" value="{$info.start2|default=30}" />
-        	  <present name="change.start2">
-		    	<span class="red">{$change.start2}</span>
-		    </present>
-        </label>
-        <p class="notice">迟到开始时间表示超过指定的分钟后签到算迟到；关闭时间为0表示不关闭，即时到了下班时间也可以签到，再签退</p>
+        <input type="hidden" name="start2" value="0"/>
+        
+        <p class="notice">迟到开始时间表示超过指定的分钟后签到算迟到</p>
     </div>
 </div>
  <div class="form-group">
@@ -95,14 +90,9 @@
 		    	<span class="red">{$change.end1}</span>
 		    </present> 
         </label>
-         <label  class="input-line">
-        	 最早签退时间（分钟）
-         	<input type="number" min="0" max="120" class="form-control short" name="end2" value="{$info.end2|default=0}" />
-        	 <present name="change.end2">
-		    	<span class="red">{$change.end2}</span>
-		    </present>  
-        </label>
-        <p class="notice">早退开始时间表示提前指定的分钟签退算早退；最早签退时间为0表示签到后即可签退</p>
+         <input type="hidden" name="end2" value="0"/>
+         
+        <p class="notice">早退开始时间表示提前指定的分钟签退算早退</p>
     </div>
 </div>
  <div class="form-group">

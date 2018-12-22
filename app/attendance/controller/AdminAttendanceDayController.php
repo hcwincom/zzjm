@@ -59,7 +59,7 @@ class AdminAttendanceDayController extends AdminBaseController
              'shop'=>$res['where_shop'],
              'job_status'=>2
          ];
-         $aids=Db::name()->where()->column();
+         $aids=Db::name('user')->where($where_aid)->column('id,user_nickname');
          //实际状态
          if(empty($data['real_day_status'])){
              $data['real_day_status']=0;
@@ -90,6 +90,7 @@ class AdminAttendanceDayController extends AdminBaseController
          $times=[
              1=>['p.start_time','签到时间'],
              2=>['p.end_time','签退时间'], 
+             3=>['p.time','更新时间'],
          ];
          $res=zz_search_time($times, $data, $where);
          $data=$res['data'];
@@ -101,18 +102,24 @@ class AdminAttendanceDayController extends AdminBaseController
          ->field($field)
          ->join($join)
          ->where($where)
-         ->order('p.status asc,p.sort asc,p.time desc')
+         ->order('p.time desc')
          ->paginate();
          
          // 获取分页显示
          $page = $list->appends($data)->render();
-         
+         //统计
+         $count_tmp=$m->alias('p')->where($where)->group('aid')->column('aid,count(id) as count_id');
+         $count_user=count($count_tmp);
+         $count_id=array_sum($count_tmp);
          $this->assign('page',$page);
          $this->assign('list',$list);
+         $this->assign('count_user',$count_user);
+         $this->assign('count_id',$count_id);
          
          $this->assign('data',$data);
         
          $this->assign('times',$times);
+         $this->assign('aids',$aids);
          
          $this->cates(1);
          
@@ -170,6 +177,7 @@ class AdminAttendanceDayController extends AdminBaseController
         $times=[
             1=>['p.start_time','签到时间'],
             2=>['p.end_time','签退时间'],
+            3=>['p.time','更新时间'],
         ];
         $res=zz_search_time($times, $data, $where);
         $data=$res['data'];
@@ -180,12 +188,17 @@ class AdminAttendanceDayController extends AdminBaseController
         ->alias('p')
         ->field('p.*') 
         ->where($where)
-        ->order('p.status asc,p.sort asc,p.time desc')
+        ->order('p.time desc')
         ->paginate();
         
         // 获取分页显示
         $page = $list->appends($data)->render();
         
+        //签到显示
+         
+        $today=$m->is_attendance($admin);
+         
+        $this->assign('today',$today);
         $this->assign('page',$page);
         $this->assign('list',$list);
         
@@ -201,7 +214,10 @@ class AdminAttendanceDayController extends AdminBaseController
      
     //
     public function cates($type=3){
-        
+        $admin=$this->admin;
+        if($admin['shop']==1 && $type<3){
+            $shops=Db::name('shop')->where('status',2)->order('sort asc')->column('id,name');
+        }
         $weeks=[
             1=>'周一',
             2=>'周二',
@@ -214,9 +230,9 @@ class AdminAttendanceDayController extends AdminBaseController
         $this->assign('weeks',$weeks);
         $this->assign('work_types',[1=>'工作',2=>'休息']);
         $this->assign('rule_types',[1=>'每周考勤',2=>'自定义']);
-        $this->assign('start_tatuss',[1=>'未签到',2=>'正常签到',3=>'迟到',4=>'缺卡']);
-        $this->assign('end_tatuss',[1=>'未签退',2=>'正常签退',3=>'早退',4=>'缺卡']);
-        $this->assign('day_statuss',[1=>'一天未结束',2=>'正常上下班',3=>'迟到',4=>'早退',5=>'迟到+早退',6=>'旷工',7=>'请假',8=>'调休',9=>'出差']);
+        $this->assign('start_statuss',[1=>'未签到',2=>'正常签到',3=>'迟到',4=>'缺卡',5=>'补卡']);
+        $this->assign('end_statuss',[1=>'未签退',2=>'正常签退',3=>'早退',4=>'缺卡',5=>'补卡']);
+        $this->assign('day_statuss',[1=>'一天未结束',2=>'正常上下班',3=>'不正常打卡',6=>'旷工',17=>'请假',18=>'调休',19=>'出差']);
          
     }
      

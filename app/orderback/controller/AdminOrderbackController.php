@@ -1592,7 +1592,8 @@ class AdminOrderbackController extends AdminInfo0Controller
          
         $field='id,name';
         $order='shop asc,sort asc';
-        if($type<3){
+        $admin=$this->admin;
+        if($type<3 && $admin['shop']==1){
             $shops=Db::name('shop')->where($where)->order('sort asc')->column('id,name');
             $this->assign('shops',$shops);  
         }
