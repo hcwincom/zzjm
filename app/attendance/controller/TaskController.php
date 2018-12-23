@@ -25,13 +25,12 @@ class TaskController extends HomeBaseController
          $time0=time();
          $today=date('Y-m-d',$time0);
          $time=strtotime($today);
-         if($time0>($time+36000)){
+         /* if($time0>($time+36000)){
              exit('已生成过考勤规则');
-         }
+         } */
          $m_date=Db::name('attendance_date');
          $where_date=[
-             'day_time'=>$time,
-             'day_status'=>1
+             'day_time'=>$time, 
          ];
          $tmp=$m_date->where($where_date)->find();
          if(!empty($tmp)){
@@ -83,13 +82,14 @@ class TaskController extends HomeBaseController
          set_time_limit(300);
          //得到昨天的考勤规则
          $time0=time();
-         $today=date('Y-m-d',$time0-3600);
+         $today=date('Y-m-d',$time0-86400);
          $time=strtotime($today);
          $m_date=Db::name('attendance_date');
          $where_date=[
              'day_time'=>$time
          ];
          $rules=$m_date->where($where_date)->column('*','shop');
+         dump($rules);
          //得到所有要考勤的人
          $shops=array_keys($rules);
          $where_aid=[
@@ -122,8 +122,8 @@ class TaskController extends HomeBaseController
                              'aid'=>$vv,
                              'shop'=>$k,
                              'day_status'=>6,
-                             'start_tatus'=>4,
-                             'end_tatus'=>4,
+                             'start_status'=>4,
+                             'end_status'=>4,
                              'day_time'=>$time,
                              'time'=>$time0
                          ];
@@ -136,7 +136,7 @@ class TaskController extends HomeBaseController
          //下班缺卡更新
          if(!empty($data_id)){
              $update=[
-                 'end_tatus'=>4,
+                 'end_status'=>4,
                  'day_status'=>3,
                  'time'=>$time0
              ];

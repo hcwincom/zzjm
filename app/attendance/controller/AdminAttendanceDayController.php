@@ -88,6 +88,7 @@ class AdminAttendanceDayController extends AdminBaseController
          
          //时间类别
          $times=[
+             4=>['p.day_time','考勤日期'],
              1=>['p.start_time','签到时间'],
              2=>['p.end_time','签退时间'], 
              3=>['p.time','更新时间'],
@@ -124,6 +125,84 @@ class AdminAttendanceDayController extends AdminBaseController
          $this->cates(1);
          
          
+        return $this->fetch();
+    }
+    /**
+     * 考勤月统计
+     * @adminMenu(
+     *     'name'   => '考勤月统计',
+     *     'parent' => 'attendance/AdminIndex/default',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 2,
+     *     'icon'   => '',
+     *     'remark' => '考勤月统计',
+     *     'param'  => ''
+     * )
+     */
+    public function month()
+    {
+        $m=$this->m;
+        $admin=$this->admin;
+        
+        $data=$this->request->param();
+        $where=[];
+        //判断是否有店铺
+        $join=[
+            ['cmf_user a','a.id=p.aid','left'],
+        ];
+        $field='p.*,a.user_nickname as aname';
+        
+        //店铺,分店只能看到自己的数据，总店可以选择店铺
+        $res=zz_shop($admin, $data, $where,'p.shop');
+        $data=$res['data'];
+        $where=$res['where'];
+        $this->where_shop=$res['where_shop'];
+        $where_aid=[
+            'shop'=>$res['where_shop'],
+            'job_status'=>2
+        ];
+        $aids=Db::name('user')->where($where_aid)->column('id,user_nickname');
+         
+        
+        //时间类别
+        $times=[
+            4=>['p.day_time','考勤日期'], 
+        ];
+        $res=zz_search_time($times, $data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
+        
+        $field='count()';
+        $this->assign('day_statuss',[1=>'一天未结束',2=>'正常上下班',3=>'不正常打卡',6=>'旷工',17=>'请假',18=>'调休',19=>'出差']);
+        
+        $list=$m
+        ->alias('p')
+        ->field('')
+        ->join($join)
+        ->where($where)
+        ->order('p.time desc')
+        ->paginate();
+        
+        // 获取分页显示
+        $page = $list->appends($data)->render();
+        //统计
+        $count_tmp=$m->alias('p')->where($where)->group('aid')->column('aid,count(id) as count_id');
+        $count_user=count($count_tmp);
+        $count_id=array_sum($count_tmp);
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        $this->assign('count_user',$count_user);
+        $this->assign('count_id',$count_id);
+        
+        $this->assign('data',$data);
+        
+        $this->assign('times',$times);
+        $this->assign('aids',$aids);
+        
+        $this->cates(1);
+        
+        
         return $this->fetch();
     }
     /**
@@ -175,6 +254,7 @@ class AdminAttendanceDayController extends AdminBaseController
         
         //时间类别
         $times=[
+            4=>['p.day_time','考勤日期'],
             1=>['p.start_time','签到时间'],
             2=>['p.end_time','签退时间'],
             3=>['p.time','更新时间'],
