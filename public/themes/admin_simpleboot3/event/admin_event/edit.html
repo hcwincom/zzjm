@@ -11,7 +11,7 @@
 			<div class="form-group">
 				<label  class="col-sm-2 control-label">id</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="id" value="{$info.id}" readonly/>
+					<input type="text" class="form-control" name="id" value="{$info.id}" id="id" readonly/>
 					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
@@ -31,7 +31,9 @@
 				<div class="col-sm-offset-2 col-sm-10"> 
 					 <button type="submit" class="review btn btn-primary js-ajax-submit"  >审核状态</button> 
 					<button type="submit" class="save btn btn-primary js-ajax-submit" >提交编辑信息</button>
-					 
+				<eq name="info.status" value="2">
+					<button type="button" class="uid_add btn btn-primary " >申请参与</button>
+				</eq>	 
 				</div>
 				
 			</div>
@@ -49,4 +51,24 @@ $('.save').click(function(){
 	$('form').attr('action',"{:url('edit_do')}");
 });
  
+$('.uid_add').click(function(){
+	var id=$('#id').val();
+	$.ajax({
+        type: 'POST',
+        url: "{:url('event/Eventajax/uidd_add')}",
+        dataType: 'json', 
+        data:{'id':id,'dsc':'申请参与'},
+        success: function (data) {
+        	console.log(data);
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    }  
+     	    location.href=data.url;
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
 </script>

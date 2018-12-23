@@ -19,7 +19,7 @@ class EventajaxController extends AdminBase0Controller
          $dsc=$this->request->param('dsc');
          $time=time();
          $date_uid=[
-             'uid'=>$admin['uid'],
+             'uid'=>$admin['id'],
              'aid'=>$info['aid'],
              'event'=>$id,
              'ustatus'=>2,
@@ -34,7 +34,7 @@ class EventajaxController extends AdminBase0Controller
              'link'=>url('uidd',['id'=>$uidd]),
          ];
          $m_msg->send($data_msg,$admin,[$info['aid']]);
-         $this->success('ok','',['uidd'=>$uidd]);
+         $this->success('ok',url('event/AdminEvent/uid',['id'=>$uidd]));
      }
      /**
       * 确认参与
