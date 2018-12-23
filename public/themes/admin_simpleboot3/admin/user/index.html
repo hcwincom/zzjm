@@ -7,7 +7,14 @@
 			<li><a href="{:url('user/add')}">{:lang('ADMIN_USER_ADD')}</a></li>
 		</ul>
         <form class="well form-inline margin-top-20" method="post" action="{:url('User/index')}">
-  
+   		<notempty name="shops">
+	   		<select class="form-control" name="shop" id="shop">
+	   			<option value="0">所有店铺</option>
+	        <foreach name="shops" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.shop">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+        </notempty>
         <select class="form-control" name="type1" id="">
         <foreach name="types" item="vo">
         	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo[1]}</option>
@@ -27,7 +34,9 @@
 			<thead>
 				<tr>
 					<th width="50">ID</th>
+					 
 					<th>商家</th>
+				 
 					<th>部门</th>
 					<th>身份</th>
 					<th>用户名</th>
@@ -45,7 +54,9 @@
 				<foreach name="users" item="vo">
 				<tr>
 					<td>{$vo.id}</td>
+					 
 					<td>{$vo.shop_name}</td>
+				 
 					<td>{$vo.dt_name}</td>
 					<th>{$jobs[$vo.job]}</th>
 					<td>{$vo.user_login}</td>

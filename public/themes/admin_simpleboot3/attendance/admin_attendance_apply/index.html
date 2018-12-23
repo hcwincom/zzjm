@@ -5,21 +5,22 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-	 	 <a href="{:url('attendance/AdminAttendanceApply/index')}">attendance_apply</a>
+		<include file="attendance@admin_attendance_apply:nav"/> 
+		 
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
 			状态: 
-			<select class="form-control" name="day_status" >
+			<select class="form-control" name="status" >
 				<option value='0'>全部</option> 
-				 <foreach name="day_statuss" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.day_status">selected</if>> 
+				 <foreach name="statuss" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
 				 {$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
 		  
-			 考勤人: 
+			 申请人: 
 			<select class="form-control" name="aid"  >
 				<option value='0'>全部</option> 
 				 <foreach name="aids" item="vo" k="key">
@@ -27,11 +28,29 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
-			 
-	         
+			审核人: 
+			<select class="form-control" name="rid" >
+				<option value='0'>全部</option> 
+				 <foreach name="rids" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<select class="form-control" name="type1" id="">
+	        <foreach name="types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+	        <select class="form-control" name="type2" id=""> 
+	         <foreach name="search_types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.type2">selected</if>>{$vo}</option>
+	        </foreach>  
+	        </select> 
+	        
+            <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
-	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo[1]}</option>
+	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
 	        </foreach> 
 	        </select>
 			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
@@ -44,7 +63,9 @@
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
- 				<p>员工数{$count_user}记录数{$count_id}</p>
+   
+			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
+			 	 
 			 	<p class='error'></p>
 			</div>
 
@@ -59,20 +80,21 @@
 						</th>
 						<th width="100">{$flag}ID</th>
 						 
-						<th>考勤人</th> 
-						<th>考勤日期</th> 
-						 <th>上班签到</th> 
-						<th>下班签到</th>
-						<th>工作时长</th>
-						<th>一天考勤</th> 
-						<th>最近更新时间</th>
+						<th>{$flag}名</th> 
+						<th>起止时间</th>
+						<th>申请天数</th>
+						<th>申请类型</th> 
+						<th>申请时间</th>
+						 
+						<th>最近更新时间</th> 
+						<th>状态</th>
 						 
 					</tr>
 				</thead>
 				<tbody>
 					<foreach name="list" item="vo">
 				 
-					<tr >
+					<tr class="status{$vo.status}">
 						<td>
 							<input type="checkbox" class="js-check"
 							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
@@ -81,31 +103,17 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td>{$vo.aname}</td>
-						<td>{$vo.day_time|date='Y-m-d',###}</td>
-						 <td>
-						 <eq name="vo.start_time" value="0">
-						 	--
-						 <else/>
-						 	{$vo.start_time|date='Y-m-d H:i',###}
-						 </eq>
-						 </td>
-						 <td>
-						 <eq name="vo.end_time" value="0">
-						 	--
-						 <else/>
-						 	{$vo.end_time|date='Y-m-d H:i',###}
-						 </eq>
-						 </td>
-						 <td>
-						 <eq name="vo.day_status" value="1">
-						 	--
-						 <else/>
-						 	{$vo.work_hour}
-						 </eq>
-						 </td>
-						 <td>{$day_statuss[$vo.day_status]}</td>
-						 <th>{$vo.time|date='Y-m-d H:i',###}</th>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
+						<td>
+							 {$vo.start_day}-{$vo.end_day}
+						</td>
+						<td>{$vo.days}</td>
+						<td>{$apply_types[$vo.apply_type]} </td>
+						<td>{$vo.atime|date='Y-m-d H:i',###}</td> 
+						  
+						<td>{$vo.time|date='Y-m-d H:i',###}</td> 
+						<td>{$statuss[$vo.status]}</td>
+						 
 					</tr>
 				 
 					</foreach>
@@ -115,17 +123,11 @@
 
 		</form>
 	 	<div class="pagination">{$page}</div>
+	  
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
-    $('.ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('ban')}");
-        return is_check('批量禁用');
-    });
-    $('.cancel_ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
-        return is_check('批量恢复');
-    });
+   
     $('.review_all').click(function(){
         $(this).parents('form').attr('action',"{:url('review_all')}");
         return is_check('批量同意');

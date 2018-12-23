@@ -56,11 +56,13 @@ class UserController extends AdminBaseController
         $search_types=config('search_types');
         $where = ["p.user_type" => ['eq',1]];
         $admin=$this->admin;
-        if($admin['shop']!=1){
-            $where['p.shop'] =  ['eq',$admin['shop']];
-        }
+        
         /**搜索条件**/
         $data = $this->request->param();
+        $res=zz_shop($admin, $data, $where,'p.shop');
+        $data=$res['data'];
+        $where=$res['where'];
+        
         $res=zz_search_param($types, $search_types, $data, $where,['alias'=>'p.']);
         $data=$res['data'];
         $where=$res['where'];
@@ -82,6 +84,10 @@ class UserController extends AdminBaseController
         foreach ($rolesSrc as $r) {
             $roleId           = $r['id'];
             $roles["$roleId"] = $r;
+        }
+        if($admin['shop']==1){
+            $shops=Db::name('shop')->where('status',2)->order('sort asc')->column('id,name');
+            $this->assign("shops", $shops);
         }
         $this->assign("page", $page);
         $this->assign("roles", $roles);
