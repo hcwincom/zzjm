@@ -19,8 +19,9 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;  
-		   <notempty name="shops"> 
-	  	店铺:<select class="form-control" id="shop" name="shop" >
+		<notempty name="shops"> 
+		  	店铺:
+		  	<select class="form-control" id="shop" name="shop" >
 				<option value='0'>全部</option> 
 			 <foreach name="shops" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 

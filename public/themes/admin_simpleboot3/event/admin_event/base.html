@@ -1,0 +1,70 @@
+<div style="clear:both"></div>
+<div class="form-group">
+    <label  class="col-sm-2 control-label">{$flag}名称</label>
+    <div class="col-md-6 col-sm-10">
+    
+    	<input type="text"  class=" form-control" name="name" value="{$info.name}"  required/>
+    <present name="change.name">
+    	<input type="text"  class=" form-control red" value="{$change.name}" />
+    </present>	 
+    </div>
+</div>
+ 
+ <div class="form-group">
+    <label  class="col-sm-2 control-label">类型</label>
+    <div class="col-md-6 col-sm-10">
+    	 <select  class=" form-control " name="table" id="" required>
+    	  
+    	 <foreach name="tables" item="vo">
+    	 	<option value="{$key}" <if condition="$key eq $info.table">selected</if>>{$vo}</option>
+    	 </foreach>
+    	
+    	 </select>
+    	 
+    </div>
+</div>
+
+ <div class="form-group">
+    <label  class="col-sm-2 control-label">描述</label>
+    <div class="col-md-6 col-sm-10">
+    	 <textarea  class=" form-control " name="dsc" rows="10" maxlength="250">{$info.dsc}</textarea>
+    <present name="change.dsc">
+    	 <textarea  class=" form-control red" rows="10" >{$change.dsc}</textarea>
+    </present>
+    </div>
+</div>
+  <div class="form-group">
+    <label  class="col-sm-2 control-label">奖励</label>
+    <div class="col-md-6 col-sm-10">
+    	 <textarea  class=" form-control " name="reward" rows="10" maxlength="250">{$info.reward}</textarea>
+    <present name="change.reward">
+    	 <textarea  class=" form-control red" name="reward" rows="10" >{$change.reward}</textarea>
+    </present>
+    </div>
+</div>
+ <div class="form-group">
+    <label  class="col-sm-2 control-label">接收人</label>
+    <div class="col-md-6 col-sm-10">
+    	 <select  class=" form-control " name="uid" id="" required>
+    	   	<option value="0">未选择</option>
+    	 <foreach name="uids" item="vo">
+    	 	<option value="{$key}" <if condition="$key eq $info.uid">selected</if>>{$vo}</option>
+    	 </foreach> 
+    	 </select>
+    	 <span>
+    	 <eq name="info.ustatus" value="2">已确认<else/>未确认</eq>
+    	 </span>
+    </div>
+</div>
+ <div class="form-group">
+    <label  class="col-sm-2 control-label">进度</label>
+    <div class="col-md-6 col-sm-10">
+    	 <input type="number" step="0.01" min="0" max="100" class=" form-control " name="progress" value="{$info.progress|default=0}"   />
+     <present name="change.progress">
+    	  <input type="number" class=" form-control " value="{$change.progress}"   />
+    </present>	 
+    </div>
+</div>
+ 
+<input type="hidden"  class=" form-control " name="sort" value="{$info.sort|default=1000}"   />
+<include file="public@adsc" />

@@ -1,0 +1,79 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+			<li ><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class=""><a href="{:url('uidds',['id'=>$info.id])}">{$flag}参与记录</a></li>  
+			<li class="active"><a href="{:url('uid',['id'=>$info1.id])}">{$flag}参与详情</a></li>  
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('uid_do')}">
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">事件名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info.name}" readonly/>
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">事件状态</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$statuss[$info.status]}" readonly/>
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">接收人意见</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$review_status[$info1.ustatus]}" readonly/>
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">接收人描述</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="udsc" value="{$info1.udsc}"  />
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">发起人意见</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$review_status[$info1.astatus]}" readonly/>
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">发起人描述</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="adsc" value="{$info1.adsc}"  />
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10"> 
+					<input type="hidden" name="id" value="{$info1.id}"  />
+					<input type="hidden" name="type" value="{$type}"  /> 
+			 <notempty name="type"  >
+			 		<label class="radio-line">
+			 		<input type="radio" name="status" value="2"/>确认 
+			 		</label>
+			 		<label class="radio-line"> 
+			 		<input type="radio" name="status" value="3"/>放弃
+			 		</label>
+			 		<button type="submit" class=" btn btn-primary js-ajax-submit" >提交意见</button>
+			 </notempty>
+					
+					 
+				</div>
+				
+			</div>
+			
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+ 

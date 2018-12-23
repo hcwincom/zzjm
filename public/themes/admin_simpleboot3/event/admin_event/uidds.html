@@ -1,0 +1,70 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="public@nav" />
+			<li ><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+			<li class="active"><a href="{:url('uidds',['id'=>$info.id])}">{$flag}参与记录</a></li>  
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="">
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">事件名称</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$info.name}" readonly/>
+					 
+				</div>
+			</div>
+			<div class="form-group">
+				<label  class="col-sm-2 control-label">事件状态</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" value="{$statuss[$info.status]}" readonly/>
+					 
+				</div>
+			</div>
+		 <table class="table table-hover table-bordered table-list">
+				<thead>
+					<tr>
+					 	 
+						<th width="100">记录ID-接收人描述</th>
+						 
+						<th>接收人</th> 
+						<th>接收时间</th>  
+						<th>接收状态</th> 
+						 
+						<th>发起人意见</th>
+						 
+						 
+					</tr>
+				</thead>
+				<tbody>
+					<foreach name="list" item="vo">
+				 
+					<tr >
+					 
+						<td class='id'> 
+						<a href="{:url('uid',['id'=>$vo.id])}">{$vo.id}-{$vo.udsc}</a>
+						 </td>
+						<td>{$vo.uname}</td>
+						<td>{$vo.utime|date='Y-m-d H:i',###}</td>
+						<td> {$review_status[$vo.ustatus]} </td>
+						 
+						 <td> {$review_status[$vo.astatus]} </td>
+						
+						 
+						
+						 
+					</tr>
+				 
+					</foreach>
+				</tbody>
+
+			</table>
+		   
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+ 

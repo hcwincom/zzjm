@@ -6,12 +6,11 @@
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
 		<include file="public@nav" />
-		<li><a href="{:url('back0')}">初始化考勤规则</a></li>
-	 	
+		 
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
-			<notempty name="shops"> 
+			 <notempty name="shops"> 
 		  	店铺:
 		  	<select class="form-control" id="shop" name="shop" >
 				<option value='0'>全部</option> 
@@ -32,11 +31,19 @@
 				</foreach>
 			</select> &nbsp;&nbsp;  
 		  
-			 创建人: 
+			 发起人: 
 			<select class="form-control" name="aid"  >
 				<option value='0'>全部</option> 
 				 <foreach name="aids" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			 接受人: 
+			<select class="form-control" name="uid"  >
+				<option value='0'>全部</option> 
+				 <foreach name="aids" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.uid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
@@ -50,7 +57,7 @@
 			</select> &nbsp;&nbsp;
 			<select class="form-control" name="type1" id="">
 	        <foreach name="types" item="vo">
-	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
+	        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo[1]}</option>
 	        </foreach> 
 	        </select>
 	        <select class="form-control" name="type2" id=""> 
@@ -62,7 +69,7 @@
             <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
-	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
+	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo[1]}</option>
 	        </foreach> 
 	        </select>
 			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
@@ -75,10 +82,7 @@
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
-
-				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
-			 
-			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
+ 
 			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
 			 	 
 			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
@@ -97,15 +101,18 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
-						 
+						 <notempty name="shops"> 
+						 <th>店铺名</th> 
+						 </notempty> 
 						<th>{$flag}名</th> 
-						<th>日期</th>
-						<th>是否上班</th>
-						<th>上班时间</th> 
-						<th>下班时间</th>
-						 
+						<th>{$flag}类型</th> 
+						<th>发起人</th>
+						<th>发起时间</th>
+						<th>接收人</th> 
+						<th>接收时间</th>
+						<th>事件进度</th>
 						<th>最近更新时间</th>
-						<th>排序</th>
+						 
 						<th>状态</th>
 						 
 					</tr>
@@ -122,22 +129,25 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
+						 <notempty name="shops"> 
+						 <td>{$shops[$vo.shop]|default=$vo.shop}</td> 
+						 </notempty> 
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
+						<td> {$tables[$vo.table]|default=$vo.table} </td>
+						<td> {$vo.aname} </td>
+						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
+						<eq name="vo.ustatus" value="1">
+						<td>--</td>
+						<td>--</td>
+						<else/>
+						<td> {$vo.uname} </td>
+						<td>{$vo.utime|date='Y-m-d H:i',###}</td>
+						</eq>
 						<td>
-							{$rule_types[$vo.rule_type]}-
-							<eq name="vo.rule_type" value="1">
-							 {$weeks[$vo.week]}
-							<else/>
-							 {$vo.day}
-							</eq>
-						</td>
-						<td>
-						{$work_types[$vo.work_type]}</td>
-						<td>{$vo.start_hour}时{$vo.start_minute}分</td>
-						<td>{$vo.end_hour}时{$vo.end_minute}分</td>
-						  
+						{$vo.progress}%</td>
+						 
 						<td>{$vo.time|date='Y-m-d H:i',###}</td>
-						<td>{$vo.sort}</td>
+						 
 						<td>{$statuss[$vo.status]}</td>
 						 
 					</tr>
@@ -149,18 +159,11 @@
 
 		</form>
 	 	<div class="pagination">{$page}</div>
-	 	<p class="notice">重置考勤规则后即时生效，未定义每周考勤前请先重置。若已有规则设置，请谨慎操作</p>
+	 	 
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
-    $('.ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('ban')}");
-        return is_check('批量禁用');
-    });
-    $('.cancel_ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
-        return is_check('批量恢复');
-    });
+    
     $('.review_all').click(function(){
         $(this).parents('form').attr('action',"{:url('review_all')}");
         return is_check('批量同意');

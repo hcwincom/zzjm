@@ -9,17 +9,6 @@
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
-			<notempty name="shops"> 
-		  	店铺:
-		  	<select class="form-control" id="shop" name="shop" >
-				<option value='0'>全部</option> 
-			 <foreach name="shops" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 
-			 	{$vo}
-				</option>
-			</foreach>
-			</select> &nbsp;&nbsp; 
-		</notempty>
 			状态: 
 			<select class="form-control" name="day_status" >
 				<option value='0'>全部</option> 
@@ -55,7 +44,7 @@
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
- 				 
+ 				<p>员工数{$count_user}记录数{$count_id}</p>
 			 	<p class='error'></p>
 			</div>
 
