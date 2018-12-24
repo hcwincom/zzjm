@@ -543,7 +543,11 @@ class OrderBaseController extends AdminBaseController
                  'type'=>$utype,
              ];
              $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,paytype2');
-             $ugoods=$m_ugoods->where('uid',$custom['id'])->column('goods,name,cate,num,price');
+             $ugoods=$m_ugoods
+             ->alias('p')
+             ->join('cmf_goods goods','goods.id=p.goods')
+             ->where('p.uid',$custom['id']) 
+             ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
              $this->assign('ugoods',$ugoods);
             
          }
@@ -899,7 +903,11 @@ class OrderBaseController extends AdminBaseController
                     'type'=>$utype,
                 ];
                  $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,paytype2');
-                 $ugoods=$m_ugoods->where('uid',$custom['id'])->column('goods,name,cate,num,price');
+                 $ugoods=$m_ugoods
+                 ->alias('p')
+                 ->join('cmf_goods goods','goods.id=p.goods')
+                 ->where('p.uid',$custom['id'])
+                 ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
                  $this->assign('ugoods',$ugoods);
             }
             //支付信息

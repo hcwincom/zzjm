@@ -125,12 +125,14 @@ $('#goods_add').click(function(){
 	var strs=$('#goods').find('option:selected').text();
 	 
 	var arr=strs.split(',');
-	var goods_ucate=arr[0];
-	var goods_uname=arr[1];
-	var goods_unum=arr[2];
-	var goods_uprice=arr[3]; 
+	 
+	
+	var goods_ucate=arr[2];
+	var goods_uname=arr[3];
+	var goods_unum=arr[4];
+	var goods_uprice=arr[5]; 
 	var goods_upay=(goods_unum*goods_uprice).toFixed(2);
-	var $table=$check.parents('table');
+	var $table=$check.parents('table').eq(0);
 	$table.find('tr').each(function(){
 		if($(this).attr('class')==('goods'+goods)){
 			goods=0;
@@ -150,7 +152,7 @@ $('#goods_add').click(function(){
         dataType: 'json', 
         data:{'id':goods,'uid':custom,'type':utype},
         success: function (data) {
-        	 console.log(data);
+        	 
      	    if(data.code!=1){
      	    	msg(data.msg);
      	    	return false;
@@ -217,7 +219,7 @@ $('#goods_add').click(function(){
     	   
     	   $table.append(tr);
      	   tr_change($table.find('.goods'+info['id']),'num');
-     	   
+     	 
         }, 
         error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
             msg(event.responseText,1);

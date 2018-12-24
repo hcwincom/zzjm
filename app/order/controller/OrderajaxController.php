@@ -129,8 +129,10 @@ class OrderajaxController extends AdminBase0Controller
         //付款方式,发票信息
         if($type==1){
             $m=Db::name('custom');
+            $m_ugoods=Db::name('custom_goods'); 
         }else{
             $m=Db::name('supplier');
+            $m_ugoods=Db::name('supplier_goods'); 
         }
         $field='invoice_type,tax_point,freight,announcement,paytype,pay_type,receiver,payer';
         $info=$m->field($field)->where($where_custom)->find();
@@ -154,13 +156,12 @@ class OrderajaxController extends AdminBase0Controller
         ->order('p.site asc')
         ->column('p.*','p.site');
         //供应产品
-        if($type==2){
-            $info['ugoods']=Db::name('supplier_goods')->where('uid',$uid)->column('goods,name,cate,num,price');
-            
-        }else{
-            $info['ugoods']=Db::name('custom_goods')->where('uid',$uid)->column('goods,name,cate,num,price');
-        }
-       
+         
+        $info['ugoods']=$m_ugoods
+        ->alias('p')
+        ->join('cmf_goods goods','goods.id=p.goods')
+        ->where('p.uid',$uid)
+        ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
         $this->success('ok','',$info);
     }
     
