@@ -21,6 +21,7 @@ class TaskController extends HomeBaseController
       * 每天0点1分,生成当天的考勤规则
       */
      public function attendance_date_set(){
+         zz_log('attendance_date_set考勤规则','task.log');
          set_time_limit(300);
          $time0=time();
          $today=date('Y-m-d',$time0);
@@ -73,12 +74,14 @@ class TaskController extends HomeBaseController
              ];
          }
          $m_date->insertAll($data_date);
+         zz_log('已生成考勤规则','task.log');
          exit('已生成考勤规则');
      }
      /**
       * 每天0点10分,统计昨天的考勤
       */
      public function attendance_day_count(){
+         zz_log('attendance_day_count-start','task.log');
          set_time_limit(300);
          //得到昨天的考勤规则
          $time0=time();
@@ -89,7 +92,7 @@ class TaskController extends HomeBaseController
              'day_time'=>$time
          ];
          $rules=$m_date->where($where_date)->column('*','shop');
-         dump($rules);
+         
          //得到所有要考勤的人
          $shops=array_keys($rules);
          $where_aid=[
@@ -147,7 +150,7 @@ class TaskController extends HomeBaseController
          if(!empty($data_insert)){  
             $m_day->insertAll($data_insert);
          }
-         
+         zz_log('attendance_day_count-已统计昨日考勤','task.log');
          //real_day_status
          exit('已统计昨日考勤');
      }

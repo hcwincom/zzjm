@@ -35,6 +35,7 @@ class TaskController extends HomeBaseController
      */
     public function tabao_get()
     {
+       
         set_time_limit(300);
         $log='taobao_get.txt'; 
         //统一文件锁

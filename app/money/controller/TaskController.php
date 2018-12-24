@@ -24,6 +24,7 @@ class TaskController extends HomeBaseController
      */
     public function freight_update()
     { 
+        zz_log('物流结算信息','task.log');
         $where=[ 
             'status'=>2,
         ];
@@ -33,6 +34,7 @@ class TaskController extends HomeBaseController
         foreach($freights as $v){
             $m->freight_update($v);
         }
+        zz_log('物流结算信息ok','task.log');
     }
     
 }
