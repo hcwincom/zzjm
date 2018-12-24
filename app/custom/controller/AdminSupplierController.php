@@ -27,7 +27,19 @@ class AdminSupplierController extends CustomBaseController
         $this->flag='供货商';
         $this->table='supplier';
         $this->m=Db::name('supplier');
-        
+        $this->search=[
+            'p.name'=>'供货商名称',
+            'p.id'=>'供货商id',
+            'p.code'=>'供货商编码',
+            'p.email'=>'供货商邮箱',
+            'p.mobile'=>'供货商电话',
+            'tels.name'=>'联系人姓名',
+            'tels.mobile|tels.mobile1|tels.phone'=>'联系人手机',
+            'tels.qq|p.qq'=>'联系人qq',
+            'tels.wechat|p.wechat'=>'微信',
+            'tels.taobaoid|tels.aliid'=>'淘宝阿里id'
+            
+        ];
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
         

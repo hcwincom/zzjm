@@ -9,7 +9,7 @@ use app\goods\model\GoodsModel;
   
 class CustomBaseController extends AdminInfo0Controller
 {
-    
+    protected $tel_search; 
     public function _initialize()
     {
         parent::_initialize();
@@ -23,9 +23,18 @@ class CustomBaseController extends AdminInfo0Controller
         ];
         $this->search=[
             'p.name'=>'客户名称', 
+            'p.id'=>'客户id', 
             'p.code'=>'客户编码',
             'p.email'=>'客户邮箱',
             'p.mobile'=>'客户电话', 
+            'tels.name'=>'联系人姓名',
+            'tels.mobile|tels.mobile1|tels.phone'=>'联系人手机',
+            'tels.qq|p.qq'=>'联系人qq',
+            'tels.wechat|p.wechat'=>'微信',
+            'tels.taobaoid|tels.aliid'=>'淘宝阿里id'
+           
+        ];
+        $this->tel_search=[
             'tels.name'=>'联系人姓名',
             'tels.mobile|tels.mobile1|tels.phone'=>'联系人手机',
             'tels.qq|p.qq'=>'联系人qq',
@@ -185,6 +194,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
         }
  
+        //？点击分页后查询还是在分页基础上查询
         //先查询得到id再关联得到数据，否则sql查询太慢
         $list0=$m
         ->alias('p') 
@@ -193,6 +203,7 @@ class CustomBaseController extends AdminInfo0Controller
         ->where($where)  
         ->order('p.status asc,p.sort asc,p.time desc')
         ->paginate();
+     
         $page = $list0->appends($data)->render();
         $ids=[];
        

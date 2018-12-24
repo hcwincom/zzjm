@@ -14,16 +14,17 @@ class OldController extends AdminBaseController
     private $where_corrects;
     public function _initialize()
     {
+        parent::_initialize();
         //链接数据库
         $db=config('database'); 
         $this->dbconfig=[
             'host'=>$db['hostname'],
             'user'=>$db['username'],
             'psw'=>$db['password'],
-            'dbname'=>'genele',
+            'dbname'=>$db['database'],
             'port'=>$db['hostport'],
         ];
-        parent::_initialize();
+       
         $aid=session('ADMIN_ID');
         if($aid!=1){
             $this->error('开发者功能，不要操作');
@@ -57,8 +58,9 @@ class OldController extends AdminBaseController
             '客户(同步分类和主体，关联联系人和付款账号)'=>url('custom'), 
             '供货商(同步分类和主体，关联联系人和付款账号)'=>url('supplier'),   
             '订单'=>url('order'), 
-            '发货记录'=>url('freight_doc'),
-            '清空库存，出入库记录，料位，编辑记录,采购单，售后单'=>url('store_clear'),
+            '采购单'=>url('ordersup'), 
+           
+            '清空库存，出入库记录，料位，编辑记录,售后单,考勤和事件'=>url('store_clear'),
             '清空菜单和权限'=>url('menu_clear'),
            
         ];
@@ -233,6 +235,15 @@ class OldController extends AdminBaseController
         $m_goods->startTrans();
         //先截取旧数据
         $m_goods->execute('truncate table cmf_goods');
+        //删除标签和组合
+        $m_goods->execute('truncate table cmf_goods');
+        $m_goods->execute('truncate table cmf_goods_collect');
+        $m_goods->execute('truncate table cmf_goods_compare');
+        $m_goods->execute('truncate table cmf_goods_link');
+        $m_goods->execute('truncate table cmf_goods_label');
+        $m_goods->execute('truncate table cmf_goods_info');
+        $m_goods->execute('truncate table cmf_goods_sn');
+        $m_goods->execute('truncate table cmf_goods_tech');
         $row_mew=$m_goods->insertAll($data_goods);
         echo '<h2>已添加产品数据数'.$row_mew.'</h2>';
         //详情
@@ -379,7 +390,7 @@ class OldController extends AdminBaseController
         //mobile2,phone1无用
         //联系人,只取姓名不为空的数据
         $sql='select id,user_id as uid,name,position,other,'.
-            'sex,mobile,mobile1,phone,province,city,area,street,postcode,fax,qq,'.
+            'cast(sex as signed) as sex,mobile,mobile1,phone,province,city,area,street,postcode,fax,qq,'.
             'wechat,wechatphone,wechatname,email,taobaoid,aliid,ctype '.
             ' from sp_new_contacts where name is not null and name!=""'; 
         $data=$m_old->query($sql); 
@@ -390,8 +401,11 @@ class OldController extends AdminBaseController
         
         
         //对应付款账号
-        $sql='select id,user_id as uid,bank_id as bank1,account_name as name1,account_num as num1,account_location as location1,'.
-                'income_id as bank2,income_name as name2,income_num as num2,income_location as location2 from sp_new_accounts ';
+//         $sql='select id,user_id as uid,bank_id as bank1,account_name as name1,account_num as num1,account_location as location1,'.
+//                 'income_id as bank2,income_name as name2,income_num as num2,income_location as location2 from sp_new_accounts ';
+        $sql='select id,user_id as uid,bank_id as bank1,account_name as name1,account_num as num1,account_location as location1 '.
+            ' from sp_new_accounts ';
+        
         $data=$m_old->query($sql); 
         
         //先截取旧数据
@@ -568,6 +582,7 @@ class OldController extends AdminBaseController
                 'aid'=>1,
                 'rid'=>1,
                 'rtime'=>$time,
+                'time'=>$time,
             ];
            switch ($tmp['paytype']){ 
                case 2:
@@ -686,18 +701,42 @@ class OldController extends AdminBaseController
             $data_user[]=$tmp;
             
         }
-       //客户主体数据
+      
+        //客户关联产品sp_usergoods
+        $sql='select user_id as uid,goods_id as goods,u_goods_name as name,u_price as price,u_goods_model as dsc from sp_usergoods ';
+        $data=$m_old->query($sql); 
+        foreach($data as $k=>$v){
+            if(empty($v['name'])){
+                $data[$k]['name']='';
+            }
+            if(empty($v['dsc'])){
+                $data[$k]['dsc']='';
+            }
+            if(empty($v['price'])){
+                $data[$k]['price']=0;
+            }
+        }
+        $m_ugoods=Db::name('custom_goods');
+        $m_ugoods->execute('truncate table cmf_custom_goods');
+        $m_ugoods->insertAll($data);
+        //更新客户，供应商关联产品数
+        $goods_nums=$m_ugoods->group('uid')->column('uid,count(id)');
+        //客户主体数据
         //先截取旧数据
         $m_new=Db::name('custom');
-        $m_new->execute('truncate table cmf_custom');  
+        $m_new->execute('truncate table cmf_custom');
         $m_new->insertAll($data_user);
-        
+        //更新客户，供应商关联产品数
+        foreach($goods_nums as $k=>$v){
+            $m_new->where('id',$k)->update(['goods_num'=>$v]);
+        }
+       
         $m_new->commit();
         $this->success('已同步数据数'.$row_mew);
         exit;
     }
     //供货商
-    public function supplier(){
+    public function supplier(){;
         set_time_limit(300);
         $m_old=Db::connect($this->db_old);
         
@@ -758,6 +797,7 @@ class OldController extends AdminBaseController
                 'aid'=>1,
                 'rid'=>1,
                 'rtime'=>$time,
+                'time'=>$time,
             ];
             switch ($tmp['paytype']){
                 case 2:
@@ -849,6 +889,7 @@ class OldController extends AdminBaseController
             $data_user[]=$tmp;
                 
         }
+        
         //客户主体数据
         //先截取旧数据
         $m_new=Db::name('supplier');
@@ -856,6 +897,34 @@ class OldController extends AdminBaseController
         $row_mew=$m_new->insertAll($data_user);
       
         $m_new->where($this->where_corrects)->update($correct);
+        //客户关联产品sp_supgoods
+        $sql='select sup_id as uid,codegoods_id as goods,factory_no as name,factory_price as price'.
+        ',qdl as num,note as dsc from sp_supgoods ';
+        $data=$m_old->query($sql);
+        foreach($data as $k=>$v){
+            if(empty($v['name'])){
+                $data[$k]['name']='';
+            }
+            if(empty($v['dsc'])){
+                $data[$k]['dsc']='';
+            }
+            if(empty($v['price'])){
+                $data[$k]['price']=0;
+            }
+            if(empty($v['num'])){
+                $data[$k]['num']=1;
+            }
+        }
+        $m_ugoods=Db::name('supplier_goods');
+        $m_ugoods->execute('truncate table cmf_supplier_goods');
+        $m_ugoods->insertAll($data);
+        //更新客户，供应商关联产品数
+        $goods_nums=$m_ugoods->group('uid')->column('uid,count(id)');
+        
+        //更新客户，供应商关联产品数
+        foreach($goods_nums as $k=>$v){
+            $m_new->where('id',$k)->update(['goods_num'=>$v]);
+        }
         
         $m_new->commit();
         $this->success('已同步数据数'.$row_mew);
@@ -891,7 +960,7 @@ class OldController extends AdminBaseController
         }
         zz_log('order_goods订单产品同步完成');
         //统计产品数量
-        $nums=$m_new->group('oid')->column('oid,count(num)');
+        $nums=$m_new->group('oid')->column('oid,sum(num)');
         
         //订单主体
         $m_new=Db::name('order');
@@ -912,50 +981,7 @@ class OldController extends AdminBaseController
                 'p.ordertype as order_type,p.ordercompany as company,p.admin_id as aid,'.
                 'p.sfkp as invoice_type,'.
                 'concat(province.area_name,"-",city.area_name,"-",area.area_name) as addressinfo,area.area_postcode as postcode';
-        //订单状态变化
-        //336,上海拜豪机械设备有限公司 ,310114572666836,上海市嘉定区张掖路355号3B910 电话:021-60520497,农行上海江桥支行 账号: 03827500040041747,
-        /*  //原状态,6,7暂无
-         'order_status0'=>[
-         1=>'生成订单',
-         2=>'支付订单',
-         3=>'取消订单',
-         4=>'作废订单',
-         5=>'完成订单',
-         6=>'退款',
-         7=>'部分退款',
-         ],
-          pay_status--1付款0未付款
-         paystate--1确认付款0未付款
-         如果是先发货后付款的则是paystate=1，pay_status=0;
-         distribution_status--配送状态 0：未发送,1：已发送,2：部分发送,实际没有2
-                    新--
-         'pay_status'=>[
-         1=>'未付款',
-         2=>'付款未确认',
-         3=>'已确认付款', 
-         4=>'退款中',
-         5=>'退款完成', 
-         ],
-         'order_status'=>[
-         1=>'待付款',
-         2=>'待发货',
-         3=>'已发货', 
-         4=>'已收货', 
-         5=>'订单完成',
-         6=>'退货中',
-         7=>'退货完成',
-         8=>'取消订单',
-         9=>'废弃订单',
-         ],
-         'pay_type'=>[
-        1=>'先付款后发货',
-        2=>'货到付款',
-        3=>'定期结算',
-        4=>'其他',
-    ],
-     
-       //   sort专门排序，待发货10，仓库发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
-         */
+        
         //先检查pay_status
         for($i=0;$i<$page;$i++){
             $sql='select '.$field.
@@ -966,8 +992,7 @@ class OldController extends AdminBaseController
                 'where p.id >'.($i*$count).' and p.id<='.(($i+1)*$count);
             $data=$m_old->query($sql);
             foreach($data as $k=>$v){ 
-                $v['rstatus']=1;
-             
+                
                 $v['goods_num']=isset($nums[$v['id']])?$nums[$v['id']]:0;
                 //如果company为空就是上海极敏
                 if(empty($v['company'])){
@@ -1065,6 +1090,125 @@ class OldController extends AdminBaseController
        
         echo ('end');
     }
+    //采购单
+    public function ordersup(){
+        //         $val['ordertype']==1){echo "商城订单";}elseif ($val['ordertype']==2){echo "淘宝订单";}else{echo "线下订单";}
+        set_time_limit(300);
+        $m_old=Db::connect($this->db_old);
+        $count=1000;
+        
+        //订单产品主体
+        $m_new=Db::name('ordersup_goods');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_ordersup_goods');
+        //purchase purchase_codegoods
+        //获取最大的id来分页查询
+        $sql='select max(id) as count from sp_purchase_codegoods';
+        $data=$m_old->query($sql);
+        $page=ceil($data[0]['count']/$count);
+        $field='og.id,og.purchase_id as oid,og.codegoods_id as goods,og.codegoods_name as goods_uname,'.
+            'og.num,og.cai_price as price_real,og.cai_note as dsc,cast(og.cai_price * og.num  as  decimal(8,2)) as pay,'.
+            'g.name as goods_name,g.goods_no as goods_code,g.img as goods_pic';
+        for($i=0;$i<$page;$i++){
+            $sql='select '.$field.' from sp_purchase_codegoods as og '.
+                'join sp_codegoods g on g.id=og.codegoods_id '.
+                'where og.id >'.($i*$count).' and og.id<='.(($i+1)*$count);
+            $data=$m_old->query($sql);
+            $row_mew=$m_new->insertAll($data);
+        }
+        zz_log('order_goods订单产品同步完成');
+        //统计产品数量
+        $nums=$m_new->group('oid')->column('oid,sum(num) as goods_num,sum(pay) as goods_money');
+        
+        //订单主体
+        $m_new=Db::name('ordersup');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_ordersup');
+        //获取最大的id来分页查询
+        $sql='select max(id) as count from sp_purchase';
+        $data=$m_old->query($sql);
+        $page=ceil($data[0]['count']/$count);
+        //kc_type1上海库存2为合肥库存要改
+        //sta0为未结算1为已结算
+        //putin_admin入库操作管理员-暂时不管
+        //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4为已完成
+        $field='p.id,p.purchase_no as name,concat(p.wuname,p.order_no) as express_no,p.supplier_id as uid,'.
+            'p.kc_type as store,p.sta as pay_status, p.state as status,'. 
+            'p.addtime as create_time,p.pay_time,p.finish_time as completion_time';
+        
+        //先检查pay_status
+        for($i=0;$i<$page;$i++){
+            $sql='select '.$field.
+            ' from sp_purchase as p '. 
+            'where p.id >'.($i*$count).' and p.id<='.(($i+1)*$count);
+            $data=$m_old->query($sql);
+            foreach($data as $k=>$v){
+                if(empty($v['completion_time'])){
+                    $v['completion_time']=0;
+                }
+                if(empty($v['pay_time'])){
+                    $v['pay_time']=0;
+                }
+                if(empty($v['create_time'])){
+                    $v['create_time']=0;
+                }
+                $v['goods_num']=isset($nums[$v['id']])?$nums[$v['id']]['goods_num']:0;
+                $v['goods_money']=isset($nums[$v['id']])?$nums[$v['id']]['goods_money']:0;
+                $v['order_amount']= $v['goods_money'];
+                //kc_type1上海库存2为合肥库存要改
+                if($v['store']==1){
+                    $v['store']=2;
+                }else{
+                    $v['store']=1;
+                }
+                if(empty($v['pay_status'])){
+                    $v['pay_status']=1;
+                }else{
+                    $v['pay_status']=3;
+                }
+                
+                
+                $v['sort']=0;
+                //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4为已完成
+                switch ($v['status']){
+                    case 1:
+                        $v['status']=2;
+                        $v['sort']=2;
+                        break;
+                    case 2:
+                        $v['status']=10;
+                        $v['sort']=5;
+                        break;
+                    case 3:
+                        $v['status']=20;
+                        $v['sort']=10;
+                        break;
+                    case 4:
+                        $v['status']=30;
+                        break;
+                   
+                    default:
+                        $v['status']=1;
+                        $v['sort']=1;
+                        break;
+                }
+                
+                $data[$k]=$v;
+            }
+            
+            $row_mew=$m_new->insertAll($data);
+        }
+        
+        $m_new->commit();
+        zz_log('ordersup订单主体同步完成');
+        
+        
+        echo ('end');
+    }
     //发货记录
     public function freight_doc(){
           set_time_limit(300);
@@ -1109,12 +1253,16 @@ class OldController extends AdminBaseController
         $m_new->execute('truncate table cmf_edit_info'); 
         $m_new->execute('truncate table cmf_msg'); 
         $m_new->execute('truncate table cmf_msg_txt'); 
-        $m_new->execute('truncate table cmf_ordersup'); 
-        $m_new->execute('truncate table cmf_ordersup_goods'); 
+       
         $m_new->execute('truncate table cmf_orderback'); 
         $m_new->execute('truncate table cmf_orderback_goods'); 
         $m_new->execute('truncate table cmf_action'); 
+        $m_new->execute('truncate table cmf_attendance_day'); 
+        $m_new->execute('truncate table cmf_attendance_apply'); 
+        $m_new->execute('truncate table cmf_event'); 
+        $m_new->execute('truncate table cmf_event_uid'); 
          
+        //产品关联数据
         
         echo ('end');
     }

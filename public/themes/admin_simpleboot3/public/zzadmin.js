@@ -1,3 +1,5 @@
+
+ 
 $('#shop').change(function(){
 	 $(this).parents('well.form').eq(0).submit();   
 });

@@ -1050,10 +1050,7 @@ class AdminInfo0Controller extends AdminBaseController
             if($admin['shop']==1 && ($this->isshop) ){
                 $shops=Db::name('shop')->where('status',2)->column('id,name');
                 //首页列表页去除总站
-                if($type==1){
-                    unset($shops[1]);
-                }
-               
+                
                 $this->assign('shops',$shops);
             }
             
