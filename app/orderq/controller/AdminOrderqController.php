@@ -310,6 +310,8 @@ class AdminOrderqController extends AdminInfo0Controller
                 $goods=Db::name('goods')->where($where)->column('id,cid0,cid,code,pic,code_name,name,price_in,price_sale');
             }
             
+        }else{
+            $data['goods_ids']=[];
         }
         $data_goods=[];
         $tmp=[];
