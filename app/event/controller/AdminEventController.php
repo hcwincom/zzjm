@@ -228,9 +228,9 @@ class AdminEventController extends AdminInfo0Controller
                 'uid'=>$data_add['uid'],
                 'aid'=>$admin['id'],
                 'event'=>$id,
-                'rstatus'=>2,
+                'astatus'=>2,
                 'atime'=>$data_add['time'],
-                'rdsc'=>'邀请完成'
+                'adsc'=>'邀请完成'
             ];
             $uidd=Db::name('event_uid')->insertGetId($date_uid);
             $m_msg=new MsgModel();

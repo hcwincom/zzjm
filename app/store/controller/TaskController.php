@@ -245,7 +245,7 @@ class TaskController extends HomeBaseController
          exit('空间占用ok');
      }
      /**
-      * 每天2点30,仓库租金计算
+      * 每天2点20,仓库租金计算
       */
      public function store_fee(){
          zz_log('仓库租金','task.log');

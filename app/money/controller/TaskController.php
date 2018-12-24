@@ -35,6 +35,7 @@ class TaskController extends HomeBaseController
             $m->freight_update($v);
         }
         zz_log('物流结算信息ok','task.log');
+        exit('物流结算信息ok');
     }
     
 }
