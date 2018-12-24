@@ -234,11 +234,11 @@
 					   
 					  	<td><a href="{$order_user_url}/id/{$vo.uid}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
 						<td>{$vo.order_amount}</td>
-						<td>{$pay_status[$vo.pay_status]}</td>
+						<td>{$pay_status[$vo.pay_status]|default=$vo.pay_status}</td>
 					 
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
 					 
-						<td>{$statuss[$vo.status]}
+						<td>{$statuss[$vo.status]|default=$vo.status}
 							<eq name="vo.is_real" value="2">-已拆分</eq> 
 						</td>
 						 
