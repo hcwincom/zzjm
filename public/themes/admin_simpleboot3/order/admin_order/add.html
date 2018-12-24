@@ -148,6 +148,13 @@ function custom_change(custom){
 			/* 旧系统paytype和custom绑定，所以暂时还用info.paytype,否则应用付款账号绑定的paytype2 */
 			 $('#paytype').val(info.paytype); 
 			 $('#pay_type').val(info.pay_type); 
+			 list=info.ugoods;
+			 options=''; 
+			for(var k in list){ 
+				options+='<option value="'+list[k]['goods']+'" >'+
+				list[k]['cate']+','+list[k]['name']+','+list[k]['num']+','+list[k]['price']+'</option>'; 
+			}
+			 $('#goods1').html(options); 
 			 
 		},'json'); 
 	 

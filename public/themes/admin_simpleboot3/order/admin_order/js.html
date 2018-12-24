@@ -113,9 +113,40 @@ $('#goods_add').click(function(){
 	 
 	 var custom=$('#custom').val();
 	 if(!(custom>0)){
-		 custom=0; 
+		 $('#custom').focus();
+		 return 0;
 	 } 
 	var goods=parseInt($(this).siblings('.goods').val());
+	 
+	if(!(goods>0)){
+		return false;
+	}
+	 goods_add(goods);
+	 
+});
+$('#goods_add1').click(function(){
+	 if(!$check){
+		 msg('添加产品前先选择位置');
+		 return 0;
+	 }
+	 var goods=$('#goods1').val();
+	 if(!(goods>0)){
+		 $('#goods1').focus();
+		 return 0;
+	 }
+	 goods_add(goods);
+});
+function goods_add(goods){
+	if(!$check){
+		 msg('添加产品前先选择位置');
+		 return 0;
+	 }
+	 
+	 var custom=$('#custom').val();
+	 if(!(custom>0)){
+		 $('#custom').focus();
+		 return 0;
+	 } 
 	 
 	if(!(goods>0)){
 		return false;
@@ -135,20 +166,20 @@ $('#goods_add').click(function(){
 	 var oid=$table.siblings('.oid').val();
 	
 	$.ajax({
-        type: 'POST',
-        url: url_goods_add,
-        dataType: 'json', 
-        data:{'id':goods,'uid':custom},
-        success: function (data) {
-     	    if(data.code!=1){
-     	    	msg(data.msg);
-     	    	return false;
-     	    } 
-     	  
-     	    var info=data.data;
-     	    var tr='';
-     	    var div_pic='<div class="listposi">'+
-     	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
+       type: 'POST',
+       url: url_goods_add,
+       dataType: 'json', 
+       data:{'id':goods,'uid':custom},
+       success: function (data) {
+    	    if(data.code!=1){
+    	    	msg(data.msg);
+    	    	return false;
+    	    } 
+    	  
+    	    var info=data.data;
+    	    var tr='';
+    	    var div_pic='<div class="listposi">'+
+    	    '<div class="imglunclose"><span class="glyphicon glyphicon-remove-circle"></span></div>'+
 		    '<div class="imgGroup"><ul class="imgList" class="imgList">';
 		    var pics=info.pics;
 		    var nums=info.nums;
@@ -182,37 +213,38 @@ $('#goods_add').click(function(){
 		    }
 		    var button_del='<button type="button" class="goods_del">删除</button>';
 		     
-     	    tr+='<tr class="goods'+info['id']+'">'+
-     	    '<td><a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td>'+
-     	    '<td>'+info['code']+'</td>'+  
-     	   '<td class="tableImg"><div class="tdImg" style="background-size: 100% 100%;background-image:url('+image_url+'/'+info['pic']+');"></div>'+div_pic+'</td>'+
-     	    div_num+ 
-     	   '<td class="goods_uname"><input type="text" name="goods_unames-'+oid+'['+info['id']+']" class="form-control  " value="'+info['goods_uname']+'"/></td>'+
-     	   '<td class="goods_ucate"><input type="text" name="goods_ucates-'+oid+'['+info['id']+']" class="form-control  " value="'+info['goods_ucate']+'"/></td>'+
-   	       '<td>'+info['price_in']+'</td>'+ 
-     	   '<td>'+info['price_sale']+'</td>'+
-     	    '<td class="price_real"><input  type="number" step="0.01" name="price_reals-'+oid+'['+info['id']+']" class="form-control  " value="'+info['price_pay']+'"/></td>'+
-     	    '<td  class="num"><input  type="number" name="nums-'+oid+'['+info['id']+']" class="form-control input-order" value="1"/></td>'+
-     	    '<td class="pay_discount"><input type="number" step="0.01" name="pay_discounts-'+oid+'['+info['id']+']" class="form-control " value="0"/></td>'+
-     	    '<td class="pay"><input type="number" step="0.01" name="pays-'+oid+'['+info['id']+']" class="form-control" value="'+info['price_pay']+'" /></td>'+ 
-     	    '<td class=""><input  type="number" step="0.01"  name="weights-'+oid+'['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
-     	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td>'+
-     	   '<td><input  type="number" step="0.01" name="sizes-'+oid+'['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
-    	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td>'+
-    	   '<td class="dsc"><input type="text"  name="dscs-'+oid+'['+info['id']+']" class="form-control " value=""/></td>'+ 
-    	   '<td> <input type="hidden" class="goods_id" value="'+info['id']+'" name="goods_ids['+info['id']+']"/>'+
-    	   button_break+button_del+'</td></tr>';
-    	  
-    	  
-    	   $table.append(tr);
-     	   tr_change($table.find('.goods'+info['id']),'num');
-     	   
-        }, 
-        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-            msg(event.responseText,1);
-        }
-    }); 
-});
+    	    tr+='<tr class="goods'+info['id']+'">'+
+    	    '<td><a href="'+href_goods+'/id/'+info['id']+'" target="_blank">'+info['name']+'</a></td>'+
+    	    '<td>'+info['code']+'</td>'+  
+    	   '<td class="tableImg"><div class="tdImg" style="background-size: 100% 100%;background-image:url('+image_url+'/'+info['pic']+');"></div>'+div_pic+'</td>'+
+    	    div_num+ 
+    	   '<td class="goods_uname"><input type="text" name="goods_unames-'+oid+'['+info['id']+']" class="form-control  " value="'+info['goods_uname']+'"/></td>'+
+    	   '<td class="goods_ucate"><input type="text" name="goods_ucates-'+oid+'['+info['id']+']" class="form-control  " value="'+info['goods_ucate']+'"/></td>'+
+  	       '<td>'+info['price_in']+'</td>'+ 
+    	   '<td>'+info['price_sale']+'</td>'+
+    	    '<td class="price_real"><input  type="number" step="0.01" name="price_reals-'+oid+'['+info['id']+']" class="form-control  " value="'+info['price_pay']+'"/></td>'+
+    	    '<td  class="num"><input  type="number" name="nums-'+oid+'['+info['id']+']" class="form-control input-order" value="1"/></td>'+
+    	    '<td class="pay_discount"><input type="number" step="0.01" name="pay_discounts-'+oid+'['+info['id']+']" class="form-control " value="0"/></td>'+
+    	    '<td class="pay"><input type="number" step="0.01" name="pays-'+oid+'['+info['id']+']" class="form-control" value="'+info['price_pay']+'" /></td>'+ 
+    	    '<td class=""><input  type="number" step="0.01"  name="weights-'+oid+'['+info['id']+']" class="form-control weight1" value="'+info['weight1']+'"/>'+
+    	   '<input type="hidden" class="weight0" value="'+info['weight1']+'"/></td>'+
+    	   '<td><input  type="number" step="0.01" name="sizes-'+oid+'['+info['id']+']" class="form-control size1" value="'+info['size1']+'"/>'+
+   	   '<input type="hidden" class="size0" value="'+info['size1']+'"/></td>'+
+   	   '<td class="dsc"><input type="text"  name="dscs-'+oid+'['+info['id']+']" class="form-control " value=""/></td>'+ 
+   	   '<td> <input type="hidden" class="goods_id" value="'+info['id']+'" name="goods_ids['+info['id']+']"/>'+
+   	   button_break+button_del+'</td></tr>';
+   	  
+   	  
+   	   $table.append(tr);
+    	   tr_change($table.find('.goods'+info['id']),'num');
+    	   
+       }, 
+       error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+           msg(event.responseText,1);
+       }
+   }); 
+}
+ 
 $(document).on('click','.goods_del',function(){
 	$(this).parents('tr').remove();
 	order_change($(this).parents('.order'),'num');

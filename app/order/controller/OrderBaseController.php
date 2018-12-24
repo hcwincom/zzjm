@@ -527,8 +527,10 @@ class OrderBaseController extends AdminBaseController
         $utype=$this->utype;
         if($utype==1){
             $m_custom=Db::name('custom');
+            $m_ugoods=Db::name('custom_goods');
         }else{
             $m_custom=Db::name('supplier');
+            $m_ugoods=Db::name('supplier_goods');
         }
         //获取客户信息
         $custom=$m_custom->where('id',$info['uid'])->find();
@@ -541,7 +543,9 @@ class OrderBaseController extends AdminBaseController
                  'type'=>$utype,
              ];
              $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,paytype2');
-             
+             $ugoods=$m_ugoods->where('uid',$custom['id'])->column('goods,name,cate,num,price');
+             $this->assign('ugoods',$ugoods);
+            
          }
         //支付信息 
         if(empty($info['pay_id'])){
@@ -881,8 +885,10 @@ class OrderBaseController extends AdminBaseController
         $utype=$this->utype;
         if($utype==1){
             $m_custom=Db::name('custom');
+            $m_ugoods=Db::name('custom_goods');
         }else{
             $m_custom=Db::name('supplier');
+            $m_ugoods=Db::name('supplier_goods');
         }
         $custom=$m_custom->where('id',$info['uid'])->find();
         if($info['fid']==0){  
@@ -893,7 +899,8 @@ class OrderBaseController extends AdminBaseController
                     'type'=>$utype,
                 ];
                  $accounts=Db::name('account')->where($where)->order('site asc')->column('id,site,bank1,name1,num1,location1,paytype2');
-                
+                 $ugoods=$m_ugoods->where('uid',$custom['id'])->column('goods,name,cate,num,price');
+                 $this->assign('ugoods',$ugoods);
             }
             //支付信息
             if(!empty($info['pay_id'])){

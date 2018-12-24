@@ -17,7 +17,7 @@
 		        </foreach> 
 		        </select>
 	        </notempty>
-	         
+	         <input type="hidden" name="page" value="1"/>
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
 	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo[1]}</option>

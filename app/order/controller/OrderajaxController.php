@@ -157,6 +157,8 @@ class OrderajaxController extends AdminBase0Controller
         if($type==2){
             $info['ugoods']=Db::name('supplier_goods')->where('uid',$uid)->column('goods,name,cate,num,price');
             
+        }else{
+            $info['ugoods']=Db::name('custom_goods')->where('uid',$uid)->column('goods,name,cate,num,price');
         }
        
         $this->success('ok','',$info);
