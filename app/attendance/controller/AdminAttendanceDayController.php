@@ -57,7 +57,7 @@ class AdminAttendanceDayController extends AdminBaseController
          $this->where_shop=$res['where_shop'];
          $where_aid=[
              'shop'=>$res['where_shop'],
-             'job_status'=>2
+             'job_status'=>['lt',3]
          ];
          $aids=Db::name('user')->where($where_aid)->column('id,user_nickname');
          //实际状态
@@ -84,6 +84,12 @@ class AdminAttendanceDayController extends AdminBaseController
          }else{
              $where['p.end_status']=['eq',$data['end_status']];
          }
+         //签退状态
+         if(empty($data['aid'])){
+             $data['aid']=0;
+         }else{
+             $where['p.aid']=['eq',$data['aid']];
+         }
          
          
          //时间类别
@@ -108,14 +114,9 @@ class AdminAttendanceDayController extends AdminBaseController
          
          // 获取分页显示
          $page = $list->appends($data)->render();
-         //统计
-         $count_tmp=$m->alias('p')->where($where)->group('aid')->column('aid,count(id) as count_id');
-         $count_user=count($count_tmp);
-         $count_id=array_sum($count_tmp);
+         
          $this->assign('page',$page);
          $this->assign('list',$list);
-         $this->assign('count_user',$count_user);
-         $this->assign('count_id',$count_id);
          
          $this->assign('data',$data);
         
