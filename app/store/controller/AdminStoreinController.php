@@ -720,6 +720,8 @@ class AdminStoreinController extends AdminBaseController
                     'box'=>$res,
                     'rstatus'=>2, 
                     'rdsc'=>$rdsc,
+                    'rid'=>$admin['id'],
+                    'rtime'=>time(),
                 ];
                 $m->where('id',$k)->update($update);
             } 
@@ -737,6 +739,8 @@ class AdminStoreinController extends AdminBaseController
             $update=[
                 'rstatus'=>3,
                 'rdsc'=>$rdsc,
+                'rid'=>$admin['id'],
+                'rtime'=>time(),
             ];
             $m->where('id','in',$ids)->update($update);
         }  

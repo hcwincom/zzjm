@@ -465,7 +465,7 @@ class AdminGoodsController extends AdminBaseController
         $stores[0]='总库存';
         //获取所有库存
         $where=[ 
-            'id'=>['in',$ids],
+            'goods'=>['in',$goods_id],
             'shop'=>['eq',$shop],
         ];
         $list=$m->where($where)->column('id,store,goods,num,num1');
@@ -477,6 +477,16 @@ class AdminGoodsController extends AdminBaseController
                 'id'=>$v['id'],
             ];
              
+        }
+        $time0=strtotime(date('Y-m-d'));
+        //获取一个月库存历史
+        $where=[
+            'goods'=>['in',$goods_id],
+            'shop'=>['eq',$shop],
+        ];
+        $list=Db::name('store_goods_history')->where($where)->column('');
+        for($i=0;$i<30;$i++){
+            
         }
         
         $this->assign('stores',$stores);
@@ -598,4 +608,22 @@ class AdminGoodsController extends AdminBaseController
         $m->commit();
         $this->success('已修改',$back);
     }
+    /**
+     * 历史库存曲线
+     * @adminMenu(
+     *     'name'   => '历史库存曲线',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 10,
+     *     'icon'   => '',
+     *     'remark' => '历史库存曲线',
+     *     'param'  => ''
+     * )
+     */
+    public function store_history()
+    {
+        
+    }
+    
 }

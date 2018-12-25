@@ -18,7 +18,7 @@ class TaskController extends HomeBaseController
     }
     
      /**
-      * 每天2点,历史库存, 
+      * 每天2点,历史库存和安全库存更新
       */
      public function store_history(){
          zz_log('历史库存','task.log');
@@ -45,7 +45,7 @@ class TaskController extends HomeBaseController
                      'time'=>$time0,
                  ];
              }
-             dump($tmp);
+             
              $m_history->insertAll($tmp);
          }
          $m_new->commit();
@@ -62,7 +62,46 @@ class TaskController extends HomeBaseController
              'link'=>'',
              'shop'=>1,
          ];
-         //Db::name('action')->insert($data_action);
+         Db::name('action')->insert($data_action);
+        /*  //	理论安全库存数是根据库存进出数据，按公式算得
+         最大是指该产品在一定期间内单个订单最大订购数
+         直接改变当前里的数值，点确认 */
+         $days=30;
+         $m_storein=Db::name('store_in');
+         //store_in
+         $where=[
+             'rstatus'=>2,
+             'type'=>10,
+             'rtime'=>['between',[$time0-86400*$days,$time0+86400]]             
+         ];
+         $list=$m_storein->where($where)->group('store,goods')->column('id,min(num) as max,sum(num) as sum,store,goods,shop');
+         foreach($list as $k=>$v){
+             $max=abs($v['max']);
+             $count=ceil(abs($v['sum'])/$days);
+             $where=[
+                 'store'=>$v['store'],
+                 'goods'=>$v['goods']
+             ];
+             $update=[
+                 'safe_max'=>$max,
+                 'safe_count'=>$count,
+             ];
+             $m_new->where($where)->update($update);
+             
+         }
+         //记录操作记录
+         $data_action=[
+             'aid'=>1,
+             'time'=>$time,
+             'ip'=>get_client_ip(),
+             'action'=>'系统任务，更新理论和最大安全库存',
+             'table'=>'system',
+             'type'=>'edit',
+             'pid'=>0,
+             'link'=>'',
+             'shop'=>1,
+         ];
+         Db::name('action')->insert($data_action);
          exit('历史库存ok');
      }
      
