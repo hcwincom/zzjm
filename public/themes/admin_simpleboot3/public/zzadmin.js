@@ -1,8 +1,11 @@
 
- 
-$('#shop').change(function(){
-	 $(this).parents('well.form').eq(0).submit();   
+$(function(){
+	$('#shop').change(function(){
+		console.log($('#shop').val());
+		 $(this).parents('form.well').submit();   
+	});
 });
+
 function check_one(){
 	var i=0; 
 	var check_id=0;
