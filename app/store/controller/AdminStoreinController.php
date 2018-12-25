@@ -373,6 +373,9 @@ class AdminStoreinController extends AdminBaseController
         if($id<=0){
             $this->error('信息错误');
         }
+        if($box<=0){
+            $this->error('未选择料位');
+        }
         $m=$this->m;
         //查找信息
         $info=$m->where('id',$id)->find();

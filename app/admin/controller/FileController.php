@@ -25,7 +25,10 @@ class FileController extends AdminBaseController
         parent::_initialize();
        
         $this->flag='文件管理';
-        
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            exit('只有系统超管才能查看');
+        }
         //没有店铺区分
         $this->isshop=1;
         $this->assign('flag',$this->flag);

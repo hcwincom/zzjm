@@ -402,5 +402,40 @@ class StoreGoodsModel extends Model
         } 
         return 1; 
     }
-    
+    //更新料位
+    public function box_num($store,$goods,$shop){
+        $m_box=Db::name('store_box');
+        $time=time();
+        $where_box=[
+            'status'=>2,
+            'store'=>$store,
+            'goods'=>$goods
+        ]; 
+        $box_num=$m_box->where($where_box)->count();
+        $where_sg=[
+            'store'=>$store,
+            'goods'=>$goods 
+        ];
+        $update=[
+            'box_num'=>$box_num,
+            'time'=>$time,
+        ];
+        $this->where($where_sg)->update($update);
+        //总库存料位
+        $where_box=[
+            'status'=>2,
+            'shop'=>$shop,
+            'goods'=>$goods
+        ];
+        $box_num=$m_box->where($where_box)->count();
+        $where_sg=[
+            'shop'=>$shop,
+            'goods'=>$goods
+        ];
+        $update=[
+            'box_num'=>$box_num,
+            'time'=>$time,
+        ];
+        $this->where($where_sg)->update($update);
+    }
 }

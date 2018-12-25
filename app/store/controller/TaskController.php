@@ -18,7 +18,7 @@ class TaskController extends HomeBaseController
     }
     
      /**
-      * 每天2点,历史库存
+      * 每天2点,历史库存,料位数
       */
      public function store_history(){
          zz_log('历史库存','task.log');
@@ -253,5 +253,6 @@ class TaskController extends HomeBaseController
          zz_log('仓库租金ok','task.log');
          exit;
      }
+     
      
 }

@@ -23,6 +23,7 @@
 				<else/> 
 					<input type="text" class="form-control" value="{$info.store_name}-{$info.shelf_name}-{$info.floor_name}"/>
 					<input type="hidden" name="floor" value="{$info.floor}"/>
+					<input type="hidden" name="store" value="{$info.store}" id="store"/>
 				</empty>
 				<p class="notice">料位位置选择后不可更改</p>
 				</div>
@@ -99,6 +100,10 @@
 				<else/> 
 					<input type="hidden" name="num" class="form-control short"  value="{$info.num}" />
 					<input type="text" class="form-control" value="{$info.cate1_name}-{$info.cate2_name}-{$info.goods_name}*{$info.num}"/>
+			  		<eq name="info.num" value="0">
+			  		<a href="{:url('goods_cancel',['id'=>$info.id])}">清空料位</a>
+			  		<p class="notice">清空料位会删除料位与产品的关联</p>
+			  		</eq>
 			  </empty>
 			 
 			<present name="change.goods">
