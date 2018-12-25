@@ -1,7 +1,6 @@
 
 $(function(){
-	$('#shop').change(function(){
-		console.log($('#shop').val());
+	$('#shop').change(function(){  
 		 $(this).parents('form.well').submit();   
 	});
 });

@@ -18,7 +18,7 @@ class TaskController extends HomeBaseController
     }
     
      /**
-      * 每天2点,历史库存,料位数
+      * 每天2点,历史库存, 
       */
      public function store_history(){
          zz_log('历史库存','task.log');
@@ -45,10 +45,24 @@ class TaskController extends HomeBaseController
                      'time'=>$time0,
                  ];
              }
+             dump($tmp);
              $m_history->insertAll($tmp);
          }
          $m_new->commit();
          zz_log('历史库存ok','task.log');
+         //记录操作记录
+         $data_action=[
+             'aid'=>1,
+             'time'=>$time,
+             'ip'=>get_client_ip(),
+             'action'=>'系统任务，更新历史库存',
+             'table'=>'system',
+             'type'=>'add',
+             'pid'=>0,
+             'link'=>'',
+             'shop'=>1,
+         ];
+         //Db::name('action')->insert($data_action);
          exit('历史库存ok');
      }
      
@@ -58,6 +72,7 @@ class TaskController extends HomeBaseController
       */
      public function space_count(){
          zz_log('空间占用','task.log');
+         
          set_time_limit(300);
          $time=time();
          $date=date('Y-m-d',$time);
@@ -87,21 +102,27 @@ class TaskController extends HomeBaseController
          $count=$m_box->where('status',2)->count('id');
          //1000个一组
          $group=ceil($count/$count0);
-       
+       //产品type5是kg,m，其他事cm,g
          for($i=0;$i<$group;$i++){
              $list=$m_box
              ->alias('box')
              ->join('cmf_goods goods','goods.id=box.goods','left')
              ->limit($i*$count0,$count0)
-             ->column('box.length,box.space,box.num,goods.price_sale,goods.size0 as goods_size,goods.weight0 as goods_weight','box.id');
+             ->column('box.length,box.space,box.num,goods.price_sale,goods.size0 as goods_size,goods.weight0 as goods_weight,goods.type','box.id');
            
              //循环计算
              $tmp=[];
              foreach($list as $k=>$v){
-                 $space_use=bcmul($v['goods_size'],$v['num'],2);
-                 $weight=bcmul($v['goods_weight']*1000,$v['num'],2);
-                 $space_rate=bcdiv($space_use*100,$v['space'],2);
-                 $money=bcmul($v['price_sale'],$v['num'],2);
+                 if($v['type']==5){
+                     $space_use=round($v['goods_size']*$v['num'],2);
+                     $weight=round($v['goods_weight']*$v['num'],2);
+                 }else{
+                     $space_use=round($v['goods_size']/10000*$v['num'],2);
+                     $weight=round($v['goods_weight']/1000*$v['num'],2);
+                 }
+                 
+                 $space_rate=round($space_use*100/$v['space'],2);
+                 $money=round($v['price_sale']*$v['num'],2);
                  $tmp[]=[
                      'id'=>$k,
                      'space_use'=>$space_use,
@@ -157,7 +178,7 @@ class TaskController extends HomeBaseController
                     if($v<=$floors1[$k]['space_use']){
                         $floors1[$k]['space_rate']=100;
                     }else{
-                        $floors1[$k]['space_rate']=bcdiv($floors1[$k]['space_use']*100,$v,2);
+                        $floors1[$k]['space_rate']=round($floors1[$k]['space_use']*100/$v,2);
                     } 
                 } 
              }
@@ -196,7 +217,7 @@ class TaskController extends HomeBaseController
                      if($v<=$shelfs1[$k]['space_use']){
                          $shelfs1[$k]['space_rate']=100;
                      }else{
-                         $shelfs1[$k]['space_rate']=bcdiv($shelfs1[$k]['space_use']*100,$v,2);
+                         $shelfs1[$k]['space_rate']=round($shelfs1[$k]['space_use']*100/$v,2);
                      }
                  }
              }
@@ -228,7 +249,7 @@ class TaskController extends HomeBaseController
                   if($vv['space']<=$stores1[$kk]['space_use']){
                       $stores1[$kk]['space_rate']=100;
                   }else{
-                      $stores1[$kk]['space_rate']=bcdiv($stores1[$kk]['space_use']*100,$vv['space'],2);
+                      $stores1[$kk]['space_rate']=round($stores1[$kk]['space_use']*100/$vv['space'],2);
                   }
               }
           }
