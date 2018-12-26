@@ -99,64 +99,76 @@ function custom_change(custom){
 		 return false;
 	 } 
 	  $('#custom_link').attr('href',url_custom+custom);
-	 $.post(url_custom_info,{'uid':custom,'type':utype},function(data){
-			if(data.code!=1){
-				return false;
-			}  
-			var info=data.data;
-			var list=info.tels;
-			var selected=''; 
-			 
-			var options='<option value="0">选择收货人</option>'; 
-			//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
-			for(var i in list){
-				if(info.receiver==i){
-					selected='selected';  
-				}else{
-					selected=''; 
-				} 
-				options+='<option value="'+list[i]['id']+'" city="'+list[i]['city']+'" '+selected+' >'+
-				list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
-				list[i]['province_name']+list[i]['city_name']+list[i]['area_name']+list[i]['street']+','+list[i]['postcode']+'</option>'; 
-			}
-			 $('#accept').html(options); 
-			 $('#freight').val(info.freight);
-			 accept_change(); 
-			 list=info.accounts;
-			  options='<option value="0">选择付款账号</option>'; 
-			 for(var j in list){
-				if(info.payer==j){
-					selected='selected';  
-				}else{
-					selected=''; 
-				} 
-				options+='<option value="'+list[j]['id']+
-				'" bank1="'+list[j]['bank1']+ 
-				'" name1="'+list[j]['name1']+
-				'" num1="'+list[j]['num1']+
-				'" location1="'+list[j]['location1']+ 
-				'" paytype2="'+list[j]['paytype2']+  
-				'" selected >'+
-				list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
-			}
-			 $('#account').html(options); 
-			 account_change(); 
-			 $('#dsc').val(info.announcement);
-			 $('#invoice_type').val(info.invoice_type); 
-			 invoice_type_change();
-			 $('#tax_point').val(info.tax_point); 
-			/* 旧系统paytype和custom绑定，所以暂时还用info.paytype,否则应用付款账号绑定的paytype2 */
-			 $('#paytype').val(info.paytype); 
-			 $('#pay_type').val(info.pay_type); 
-			 list=info.ugoods;
-			 options=''; 
-			for(var k in list){ 
-				options+='<option value="'+list[k]['goods']+'" >'+
-				list[k]['goods_code']+','+list[k]['goods_name']+','+list[k]['cate']+','+list[k]['name']+','+list[k]['num']+','+list[k]['price']+'</option>'; 
-			}
-			 $('#goods1').html(options); 
-			 
-		},'json'); 
+	  $.ajax({
+	        type: 'POST',
+	        url: url_custom_info,
+	        dataType: 'json', 
+	        data:{'uid':custom,'type':utype},
+	        success: function (data) {
+	        	 console.log(data);
+	     	    if(data.code!=1){
+	     	    	msg(data.msg);
+	     	    	return false;
+	     	    } 
+	     	   var info=data.data;
+				var list=info.tels;
+				var selected=''; 
+				 
+				var options='<option value="0">选择收货人</option>'; 
+				//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
+				for(var i in list){
+					if(info.receiver==i){
+						selected='selected';  
+					}else{
+						selected=''; 
+					} 
+					options+='<option value="'+list[i]['id']+'" city="'+list[i]['city']+'" '+selected+' >'+
+					list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
+					list[i]['province_name']+list[i]['city_name']+list[i]['area_name']+list[i]['street']+','+list[i]['postcode']+'</option>'; 
+				}
+				 $('#accept').html(options); 
+				 $('#freight').val(info.freight);
+				 accept_change(); 
+				 list=info.accounts;
+				  options='<option value="0">选择付款账号</option>'; 
+				 for(var j in list){
+					if(info.payer==j){
+						selected='selected';  
+					}else{
+						selected=''; 
+					} 
+					options+='<option value="'+list[j]['id']+
+					'" bank1="'+list[j]['bank1']+ 
+					'" name1="'+list[j]['name1']+
+					'" num1="'+list[j]['num1']+
+					'" location1="'+list[j]['location1']+ 
+					'" paytype2="'+list[j]['paytype2']+  
+					'" selected >'+
+					list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
+				}
+				 $('#account').html(options); 
+				 account_change(); 
+				 $('#dsc').val(info.announcement);
+				 $('#invoice_type').val(info.invoice_type); 
+				 invoice_type_change();
+				 $('#tax_point').val(info.tax_point); 
+				/* 旧系统paytype和custom绑定，所以暂时还用info.paytype,否则应用付款账号绑定的paytype2 */
+				 $('#paytype').val(info.paytype); 
+				 $('#pay_type').val(info.pay_type); 
+				 list=info.ugoods;
+				 options=''; 
+				for(var k in list){ 
+					options+='<option value="'+list[k]['goods']+'" >'+
+					list[k]['goods_code']+','+list[k]['goods_name']+','+list[k]['cate']+','+list[k]['name']+','+list[k]['num']+','+list[k]['price']+'</option>'; 
+				}
+				 $('#goods1').html(options); 
+	     	    
+	        }, 
+	        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+	            msg(event.responseText,1);
+	        }
+	    });
+	  
 	 
 }
 

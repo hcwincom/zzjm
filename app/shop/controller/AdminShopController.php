@@ -273,6 +273,9 @@ class AdminShopController extends AdminInfo0Controller
             $this->error('没有选择店铺');
        }
        $ids=$_POST['ids'];
+       if(in_array(1,$ids) || in_array(2,$ids)){
+           $this->error('总站和总站对应店铺不能修改');
+       }
        $where=['shop'=>['in',$ids]];
        $user=Db::name('user')->where($where)->find();
        if(!empty($user)){

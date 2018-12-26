@@ -1030,7 +1030,7 @@ class CustomBaseController extends AdminInfo0Controller
                 }
             }else{
                 //不存在的直接添加,保存uid,site,type
-                $tmp=['uid'=>$id,'type'=>$tel_type,'site'=>$k];
+                $tmp=['uid'=>$id,'type'=>$tel_type,'site'=>$k,'shop'=>$info['shop']];
                 foreach($fields as $vv){
                     $tmp[$vv]=$data[$vv][$k];
                 }

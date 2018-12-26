@@ -112,6 +112,7 @@ class OrderajaxController extends AdminBase0Controller
     }
     //根据客户得到联系人
     public function get_custom_info(){
+       
         $admin=$this->admin;
         $uid=$this->request->param('uid',0,'intval');
         $type=$this->request->param('type',1,'intval');
@@ -123,7 +124,7 @@ class OrderajaxController extends AdminBase0Controller
             'p.status'=>1,
         ];
         if($admin['shop']>1){
-            $where['p.shop']=$admin['shop'];
+            //$where['p.shop']=$admin['shop'];
             $where_custom['shop']=$admin['shop'];
         }
         //付款方式,发票信息
