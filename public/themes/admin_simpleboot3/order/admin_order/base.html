@@ -14,7 +14,7 @@
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" value="{$info.id}" readonly/>
 				 
-					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">编辑记录</a>
+					<a href="{:url('edit_list',['type1'=>'1','name'=>$info.id])}" target="{$zztarget['edit']}">编辑记录</a>
 			 
 				<neq name="info.fid" value="0">
 					&nbsp;&nbsp;<a href="{:url('edit',['id'=>$info.fid])}" target="{$zztarget['edit']}">主订单</a>

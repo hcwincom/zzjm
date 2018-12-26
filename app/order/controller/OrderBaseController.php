@@ -151,7 +151,8 @@ class OrderBaseController extends AdminBaseController
             
         ];
         $field='p.*,custom.name as custom_name';
-        
+       
+       
         $list0=$m
         ->alias('p')
         ->field('p.id')
@@ -173,13 +174,16 @@ class OrderBaseController extends AdminBaseController
         ->where('p.id','in',$ids)
         ->order('p.sort desc,p.id asc')
         ->column($field);
-        
-        $ogtable=$this->ogtable;
-        $goods=Db::name($ogtable)->where('oid','in',$ids)
-        ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
-        foreach($goods as $k=>$v){
-            $list[$v['oid']]['infos'][]=$v;
+     
+        if(!empty($list)){
+            $ogtable=$this->ogtable;
+            $goods=Db::name($ogtable)->where('oid','in',$ids)
+            ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
+            foreach($goods as $k=>$v){
+                $list[$v['oid']]['infos'][]=$v;
+            }
         }
+        
          
         $this->assign('page',$page);
         $this->assign('list',$list);
@@ -765,15 +769,13 @@ class OrderBaseController extends AdminBaseController
         }else{
             $where['p.cid']=['eq',$data['cid']];
         }
-        //查询字段
-        $types=$this->search;
-        
-        //搜索类型
+       
+         //搜索类型
         $search_types=config('search_types');
-         
+        $types= [ 2=>['p.name' , '名称'],1=>['p.id','id']];  
         $res=zz_search_param($types, $search_types,$data, $where);
         $data=$res['data'];
-        $where=$res['where'];
+        $where=$res['where']; 
         
         //时间类别
         $times=config('edit_time_search');
