@@ -66,7 +66,7 @@
 					<tr>
 
 						<td>{$vo.id}</td>
-						<td>{$tables[$vo.table]}-{$types[$vo.type]}</td>
+						<td>{$tables[$vo.table]|default=$vo.table}-{$types[$vo.type]}</td>
 						<td>{$vo.pid}</td> 
 						<td>{$vo.uname1|default=$vo.aid}</td>
 						<td>{$vo.ip}</td> 
