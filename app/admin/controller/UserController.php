@@ -66,31 +66,56 @@ class UserController extends AdminBaseController
         $res=zz_search_param($types, $search_types, $data, $where,['alias'=>'p.']);
         $data=$res['data'];
         $where=$res['where'];
-        
-        $users = Db::name('user')
-        ->field('p.*,shop.name as shop_name,dt.name as dt_name')
-        ->alias('p')
-        ->join('cmf_shop shop','shop.id=p.shop')
-        ->join('cmf_department dt','dt.id=p.department')
+        $ids0 = Db::name('user')
+        ->field('p.id')
+        ->alias('p') 
         ->where($where)
-        ->order("id desc")
+        ->order("p.id asc")
         ->paginate();
-        
         // 获取分页显示
-        $page = $users->appends($data)->render();
-
-        $rolesSrc = Db::name('role')->select();
-        $roles    = [];
-        foreach ($rolesSrc as $r) {
-            $roleId           = $r['id'];
-            $roles["$roleId"] = $r;
+        $page = $ids0->appends($data)->render();
+        $ids=[];
+        foreach($ids0 as $v){
+            $ids[]=$v['id'];
         }
+        if(empty($ids)){
+            $users=[];
+            $roles=[];
+        }else{
+            
+            $users = Db::name('user')
+            ->field('p.*,shop.name as shop_name,dt.name as dt_name')
+            ->alias('p')
+            ->join('cmf_shop shop','shop.id=p.shop','left')
+            ->join('cmf_department dt','dt.id=p.department','left')
+            ->where('p.id','in',$ids) 
+            ->column('p.*,shop.name as shop_name,dt.name as dt_name');
+            //角色信息
+            $roles_user=Db::name('role_user')
+            ->alias('ru')
+            ->join('cmf_role r','r.id=ru.role_id')
+            ->where('ru.user_id','in',$ids)
+            ->column('ru.*,r.name as rname');
+            $roles_user[0]=['id'=>0,'role_id'=>1,'user_id'=>1,'rname'=>'系统超管'];
+            foreach($roles_user as $v){
+                if(empty($users[$v['user_id']])){
+                   continue;
+                }
+                if(isset($users[$v['user_id']]['roles'])){
+                    $users[$v['user_id']]['roles'].=','.$v['rname'];
+                }else{
+                    $users[$v['user_id']]['roles']=$v['rname'];
+                }
+                
+            }
+        }
+        
         if($admin['shop']==1){
             $shops=Db::name('shop')->where('status',2)->order('sort asc')->column('id,name');
             $this->assign("shops", $shops);
         }
         $this->assign("page", $page);
-        $this->assign("roles", $roles);
+      
         $this->assign("users", $users);
         $this->assign("data", $data);
         $this->assign("types", $types);
