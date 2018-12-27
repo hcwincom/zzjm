@@ -61,6 +61,7 @@ class GoodsModel extends Model
                     'num'=>$v['num'],
                     'num1'=>$v['num1'],
                     'safe'=>$v['safe'],
+                    'id'=>$v['id'],
                 ];
             } 
         }

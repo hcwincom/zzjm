@@ -5,6 +5,7 @@ namespace app\store\controller;
  
 use cmf\controller\AdminBaseController; 
 use think\Db; 
+use app\goods\model\GoodsModel;
   
 class AdminGoodsController extends AdminBaseController
 {
@@ -35,7 +36,7 @@ class AdminGoodsController extends AdminBaseController
         $this->flag='库存';
         $this->table='store_goods';
         $this->m=Db::name('store_goods');
-      
+        $this->assign('url_img',cmf_get_image_url(''));
        
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
@@ -450,34 +451,17 @@ class AdminGoodsController extends AdminBaseController
             $this->error('只能查看本店铺的数据',$back);
         }
         //获取所有产品
-        $goods_id=array_keys($tmp);
-        $where=[
-            'id'=>['in',$goods_id],
-            'shop'=>['eq',$shop],
-        ];
-        $goods=Db::name('goods')->where($where)->column('id,name,pic,code');
+        $goods_id=array_keys($tmp); 
+        $m_goods=new GoodsModel();
+        $goods=$m_goods->goods_infos($goods_id,$shop);
         //获取所有仓库
         $where=[
             'shop'=>$shop,
             'status'=>2,
         ];
         $stores=Db::name('store')->where($where)->order('sort asc')->column('id,name');
-        $stores[0]='总库存';
-        //获取所有库存
-        $where=[ 
-            'goods'=>['in',$goods_id],
-            'shop'=>['eq',$shop],
-        ];
-        $list=$m->where($where)->column('id,store,goods,num,num1');
-        //循环得到数据
-        $res=[];
-        foreach($list as $k=>$v){
-            $res[$v['goods']][$v['store']]=[
-                'num'=>$v['num'].'('.$v['num1'].')',
-                'id'=>$v['id'],
-            ];
-             
-        }
+        $stores[0]='总库存'; 
+      
         $time0=strtotime(date('Y-m-d'));
         //获取一个月库存历史
         $where=[
@@ -485,15 +469,20 @@ class AdminGoodsController extends AdminBaseController
             'shop'=>['eq',$shop],
         ];
         $list=Db::name('store_goods_history')->where($where)->column('');
+        $labels=[];
+        $time=$time0-86400*30;
         for($i=0;$i<30;$i++){
-            
+            $time=$time+86400;
+            $labels[$i]=date('Y-m-d',$time);
         }
-        
+        $this->assign('labels',json_encode($labels));
         $this->assign('stores',$stores);
-        $this->assign('goods',$goods);
-        $this->assign('res',$res);
+        $this->assign('goods',$goods); 
+       
+       
         return $this->fetch();
     }
+    
     /**
      * 库存调整
      * @adminMenu(
@@ -516,36 +505,48 @@ class AdminGoodsController extends AdminBaseController
         $data=$this->request->param();
         
         $admin=$this->admin;
-        
+      
         if(empty($data['num'])){
             $this->error('数据错误',$back);
         }
-       
+        
         ////循环得到所有更改
         $ids=[];
+        $data_update=[];
         foreach ($data['num'] as $k=>$v){
             if($v!=='' || $data['num1'][$k]!==''){
-                $ids[]=$k;
+                $data_update[$k]['id']=$k;
+                $data_update[$k]['num']=intval($v); 
             }
+            if($data['num1'][$k]!==''){
+                $data_update[$k]['id']=$k;
+                $data_update[$k]['num1']=intval($data['num1'][$k]);
+            }
+        }
+        if(empty($data_update)){
+            $this->error('未更改',$back);
+        }
+        $ids=array_keys($data_update);
+        $where_store_goods=[
+            'p.id'=>['in',$ids], 
+        ];
+        if($admin['shop']!=1 ){
+            $where_store_goods['p.shop']=$admin['shop'];
         }
         //先获取所有库存
         $nums=$m
         ->alias('p')
         ->join('cmf_goods goods','goods.id=p.goods','left')
         ->join('cmf_store store','store.id=p.store','left')
-        ->where('p.id','in',$ids)
+        ->where($where_store_goods)
         ->column('p.id,p.num,p.num1,p.store,p.goods,p.shop,goods.name as goods_name,store.name as store_name');
-        if(empty($ids) || empty($nums)){
-            $this->error('未更改',$back);
+        if(empty($nums)){
+            $this->error('无可更改数据',$back);
         }
         
         $info=current($nums); 
       
-        if($admin['shop']!=1 ){
-            if($admin['shop']!=$info['shop']){
-                $this->error('店铺数据错误',$back);
-            }
-        }
+        
         $time=time();
         $m->startTrans();
          
@@ -565,47 +566,46 @@ class AdminGoodsController extends AdminBaseController
         $goods=[];
         //循环设置所有输入的值
         foreach ($nums as $k=>$v){
-            if($v['shop']!=$info['shop']){
-                $m->rollback();
-                $this->error('店铺数据错误',$back);
-            }
+             
             $tmp=$data_action0;
             $goods[$v['goods']]=$v['goods'];
             $update_info=[
                 'time'=>$time, 
             ];
             $tmp['action'].=$v['store_name'].'-'.$v['goods_name'];
-            if($data['num'][$k]!==''){
-                $update_info['num']=intval($data['num'][$k]);
+            if(isset($data_update[$k]['num'])){
+                $update_info['num']=$data_update[$k]['num'];
                 $tmp['action'].='，库存'.$v['num'].'调整为'.$update_info['num'];
             }
-            if($data['num1'][$k]!==''){
-                $update_info['num1']=intval($data['num1'][$k]);
+            if(isset($data_update[$k]['num1'])){
+                $update_info['num1']=$data_update[$k]['num1'];
                 $tmp['action'].='，冻结库存'.$v['num1'].'调整为'.$update_info['num1'];
-            } 
+            }
+            
             $m->where('id',$k)->update($update_info);
+            //总库存更新
+            $where_store0=[
+                'goods'=>['eq',$v['goods']],
+                'shop'=>['eq',$v['shop']],
+                'store'=>['gt',0],
+            ];
+            
+            //得到总库存
+            $nums=$m->where($where_store0)->sum('num');
+            $nums1=$m->where($where_store0)->sum('num1');
+            $where_store0['store']=['eq',0];
+            $update_store0=[
+                'time'=>$time,
+                'num'=>$nums,
+                'num1'=>$nums1,
+            ];
+            $m->where($where_store0)->update($update_store0);
+            
             $data_action[]=$tmp; 
         }
-        if(empty($ids)){
-            $m->rollback();
-            $this->error('未修改',$back);
-        }
-        
-        //调整店铺总安全库存
-        $where_store=[
-            'shop'=>['eq',$info['shop']],
-        ];
-        //先得到总库存在更新,按产品更新
-        foreach($goods as $k=>$v){
-            $where_store['store']=['gt',0];
-            $where_store['goods']=['eq',$v];
-            $safe_sum=$m->where($where_store)->sum('safe');
-            $where_store['store']=['eq',0];
-            $m->where($where_store)->setField('safe',$safe_sum);
-        }
-        
+      
         Db::name('action')->insertAll($data_action);
-        $m->commit();
+        $m->commit(); 
         $this->success('已修改',$back);
     }
     /**
@@ -623,7 +623,58 @@ class AdminGoodsController extends AdminBaseController
      */
     public function store_history()
     {
-        
+        $data=$this->request->param();
+        if(empty($data['ids'])){
+            $this->error('未选中信息');
+        }
+        $ids=explode(',', $data['ids']);
+        array_pop($ids);
+        $m=$this->m;
+        $admin=$this->admin;
+        $where=['sg.id'=>['in',$ids]];
+        if($admin['shop']!=1){
+            $where['sg.shop']=$admin['shop'];
+        }
+        $list=$m
+        ->alias('sg')
+        ->join('cmf_store store','store.id=sg.store','left')
+        ->join('cmf_goods goods','goods.id=sg.goods')
+        ->where($where)
+        ->column('sg.*,store.name as store_name,goods.name as goods_name');
+        $m_history=Db::name('store_goods_history');
+       
+        $time2=strtotime(date('Y-m-d'));
+        $time1=$time2-86400*29;
+        $time=$time1-86400;
+        $times=[];
+        for($i=0;$i<30;$i++){
+            $time=$time+86400;
+            $times[$i]=$time;
+        }
+        foreach($list as $k=>$v){
+            if($v['store']==0){
+                $list[$k]['store_name']='总库存';
+            }
+            $where_history=[
+                'store'=>$v['store'],
+                'goods'=>$v['goods'],
+                'shop'=>$v['shop'],
+                'time'=>['between',[$time1,$time2]],
+            ];
+            $nums=$m_history->where($where_history)->column('time,num');
+            $nums[$time2]=$v['num'];
+          
+            foreach($times as $kk=>$vv){
+                if(isset($nums[$vv])){
+                    $list[$k]['history'][$kk]=$nums[$vv];
+                }else{
+                    $list[$k]['history'][$kk]=0;
+                }
+                
+            } 
+        }
+        $this->success('ok','',$list);
+         
     }
     
 }

@@ -167,6 +167,7 @@ class StoreGoodsModel extends Model
                 ];
                 $where=[
                     'id'=>$box,
+                    'goods'=>$info['goods']
                 ];
                
                 $row=$m_box->where($where)->inc('num',$info['num'])->update($update_info);

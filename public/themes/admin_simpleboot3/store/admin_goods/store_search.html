@@ -15,7 +15,7 @@
 		 	<td>产品编码</td>
 		 	<td>产品图片</td>
 		 	<foreach name="stores" item="vo">
-		 	<td>{$vo}</td>
+		 	<td>{$vo}库存-待入库-安全</td>
 		 	</foreach>
 		 	</tr>
 		 <foreach name="goods" item="vv" key="kk">
@@ -26,17 +26,17 @@
 				 	</label>
 				</td>
 		 		<td>{$vv.code}</td>
-		 		<td>{$vv.pic}</td>
+		 		<td><img src="{$url_img}/{$vv.pic}" alt="" /></td>
 		 	<foreach name="stores" item="v" key="k">
 		 		 <td>
-			 	<present name="res[$kk][$k]">
+			 	<present name="vv['nums'][$k]">
 			 		<label class="checkbox-inline">
-				 		<input type="checkbox" class="check_store" value="{$kk}-{$k}" name="store[]" />
-				 		{$res[$kk][$k]['num']}
-				 		<neq name="k" value="0">
-				 			<input type="number" name="num[{$res[$kk][$k]['id']}]" style="width:60px;"/>-
-				 			<input type="number" name="num1[{$res[$kk][$k]['id']}]" style="width:60px;"/>
-				 		</neq>
+				 		<input type="checkbox" class="check_store" value="{$vv['nums'][$k]['id']}" name="store[]" />
+				 		{$vv['nums'][$k]['num']}-{$vv['nums'][$k]['num1']}-{$vv['nums'][$k]['safe']}
+				 		 <neq name="k" value="0"> 
+				 			<input type="number" name="num[{$vv['nums'][$k]['id']}]" style="width:60px;"/>-
+				 			<input type="number" name="num1[{$vv['nums'][$k]['id']}]" style="width:60px;"/>
+				 	 </neq>
 				 	</label> 
 			 	<else/> 
 			 		--
@@ -46,20 +46,115 @@
 		 	</tr>
 		 </foreach>
 		 </table>
+		  <br/>
 		 <div class="form-group">
 			<div class="col-sm-offset-2 col-sm-10"> 
 				 <button type="submit" class="store_do btn btn-primary js-ajax-submit" >确认调整库存</button>
-				 <button type="submit" class="search_do btn btn-primary js-ajax-submit" >生成库存曲线</button>
-				 <p class="notice">确认调整库存后，即时生效，请谨慎操作</p>
-				 <p class="notice">选择需要的库存生成曲线，暂无</p>
+				 <button type="button" class="search_do btn btn-primary js-ajax-submit" >生成库存曲线</button>
+				 <p class="notice">确认调整库存后，即时生效，请谨慎操作</p> 
 			</div> 
 		</div>
 		</form>
+		 <br/>
+		<div id="main" style="width: 100%;height:400px;"></div>
+		
 	</div>
 	<script src="__STATIC__/js/admin.js"></script> 
+	<script src="__STATIC__/js/echarts/echarts.min.js"></script>
 </body>
 </html>
 <script>
+var json_labels={$labels};
+
+var labels=new Array();
+for(var i in json_labels){
+	labels[i]=json_labels[i]; 
+}
+
+var url_history="{:url('store/AdminGoods/store_history')}";
+$('.search_do').click(function(){
+	var ids='';
+	$('.check_store').each(function(){ 
+		if($(this).prop('checked')){
+			ids=ids+($(this).val())+',';
+		}
+	});
+	if(ids==''){
+		msg('先选择需要查看的库存');
+		return 0; 
+	}
+	 
+	
+	
+	$.ajax({
+	       type: 'POST',
+	       url: url_history,
+	       dataType: 'json', 
+	       data:{'ids':ids},
+	       success: function (data) { 
+	    	    if(data.code!=1){
+	    	    	msg(data.msg);
+	    	    	return false;
+	    	    }  
+	    	    var datas=data.data;
+	    	    var datasets=new Array();
+	    	    var legend=new Array();
+	    	    var tmp_name;
+	    		var tmp_data;
+	    	    for(var i in datas){
+	    	    	tmp_data=new Array();
+	    	    	var nums=datas[i]['history'];
+	    	    	for(var j in nums){
+	    	    		tmp_data[j]=nums[j];
+	    	    	}
+	    	    	tmp_name={
+	    	    			name:  datas[i]['store_name']+'-'+datas[i]['goods_name'],
+	    	    			type: 'line',
+	    	    			stack: '总量',
+	    	    			data: tmp_data 
+	    	    	};
+	    	    	legend.push(tmp_name['name']);
+	    	    	datasets.push(tmp_name);
+	    	    	
+	    	    }
+	    	 // 基于准备好的dom，初始化echarts实例
+	    	    var myChart = echarts.init(document.getElementById('main'));
+	    	    // 使用刚指定的配置项和数据显示图表。
+	    	    
+	    	    myChart.setOption({
+		    	    tooltip: {
+		    	    	trigger: 'axis'
+		    	    },
+		    	    legend: {
+		    	    	data: legend
+		    	    },
+		    	    grid: {
+			    	    left: '3%',
+			    	    right: '4%',
+			    	    bottom: '3%',
+			    	    containLabel: true
+		    	    },
+		    	    xAxis: {
+			    	    type: 'category',
+			    	    boundaryGap: false,
+			    	    data: labels
+		    	    },
+		    	    yAxis: {
+		    	    	type: 'value'
+		    	    },
+		    	    series:  datasets
+	    	    });
+	    	    return false;
+	    	    
+	       }, 
+	       error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+	           msg(event.responseText,1);
+	       }
+	   }); 
+	return false;
+}); 
+	
+	   
 $('.store_do').click(function(){
 	if(!confirm('确认调整库存吗？')){
 		return false;
@@ -67,11 +162,7 @@ $('.store_do').click(function(){
 	$('form').attr('action',"{:url('store_do')}");
 	 
 });
-$('.search_do').click(function(){
  
-	$('form').attr('action',"{:url('search_do')}");
-	 return false;
-});
 $('.check_goods').change(function(){ 
 	$(this).parents('tr').find('.check_store').prop('checked',$(this).prop('checked')); 
 });

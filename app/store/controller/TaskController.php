@@ -32,6 +32,7 @@ class TaskController extends HomeBaseController
          $count=$m_new->count('id');
          //1000个一组
          $group=ceil($count/1000);
+         $time_old=$time0-86400;
          for($i=0;$i<$group;$i++){
              $list=$m_new->limit($i*1000,($i+1)*1000)->column('store,goods,num,shop','id');
              //如果直接在数据库查询中给定时间就不用循环了
@@ -42,7 +43,7 @@ class TaskController extends HomeBaseController
                      'goods'=>$v['goods'],
                      'num'=>$v['num'],
                      'shop'=>$v['shop'],
-                     'time'=>$time0,
+                     'time'=>$time_old,
                  ];
              }
              
