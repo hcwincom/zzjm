@@ -52,6 +52,7 @@ class UserController extends AdminBaseController
      */
     public function index()
     {
+        
         $types=config('user_search');
         $search_types=config('search_types');
         $where = ["p.user_type" => ['eq',1]];

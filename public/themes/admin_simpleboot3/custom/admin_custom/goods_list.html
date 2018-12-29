@@ -21,12 +21,7 @@
 			</foreach>
 			</select> &nbsp;&nbsp; 
 		</notempty>
-		  	<select class="form-control" id="cate1" name="cid1" >
-				<option value='0'>一级分类</option>  
-			</select>
-			<select class="form-control" id="cate2" name="cid2" >
-				<option value='0'>二级分类</option>  
-			</select> 
+		  <include file="public@cate" />  
 			 &nbsp;&nbsp; 
 			<select class="form-control" name="goods_field" id="">
 	        <foreach name="goods_fields" item="vo">
@@ -144,20 +139,7 @@
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
 city_js($('#province'),"{$data.province|default=0}",$('#city'),"{$data.city|default=0}");
-cate_js($('#cate1'),"{$data.cid1}",$('#cate2'),"{$data.cid2}");
-$('#shop').change(function(){
-	var shop=$(this).val();  
-	if(shop==0){
-		$('.shop').show();
-	}else{
-		$('.shop').hide();
-		$('.shop'+shop).show();
-	}
-	$('#company').val(0);
-	$('#paytype').val(0);
-   
-});
- 
+  
 </script>
 </body>
 </html>

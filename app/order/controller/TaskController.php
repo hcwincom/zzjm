@@ -77,7 +77,7 @@ class TaskController extends HomeBaseController
             $where=[
                 'shop'=>['in',$shops],
                 'order_type'=>['eq',$order_type],
-                'create_time'=>['egt',$time_start],
+                'time'=>['egt',$time_start],
             ];
             $m=$this->m;
             $m_store_goods=new StoreGoodsModel();
@@ -146,6 +146,7 @@ class TaskController extends HomeBaseController
         zz_log('淘宝同步结束',$log);
         exit();
     }   
+    
     /**
      * 根据淘宝订单状态判断是否需要更改
      * @param string $taobao_status
@@ -162,7 +163,7 @@ class TaskController extends HomeBaseController
                     //付款了要状态修改
                     $update_order['pay_status']=3;
                     $update_order['status']=20;
-                    $update_order['sort']=10;
+                    $update_order['sort']=5;
                 }
                 break;
             case 'TRADE_CLOSED_BY_TAOBAO':
@@ -183,7 +184,7 @@ class TaskController extends HomeBaseController
                     //已收货，货款也到付了,待确认
                     $update_order['pay_status']=2;
                     $update_order['status']=26;
-                    $update_order['sort']=5;
+                    $update_order['sort']=4;
                 }
                 break;
             case 'TRADE_FINISHED':
@@ -192,12 +193,14 @@ class TaskController extends HomeBaseController
                     $update_order['pay_status']=3;
                     $update_order['status']=30;
                     $update_order['sort']=0;
+                    $update_order['completion_time']=strtotime($taobao['modified']);
                 }
                 break;
             case 'TRADE_CLOSED':
                 // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭)
-                if($order['pay_status']==4){
-                    $update_order['pay_status']=5;
+                if($order['is_back']==0){
+                    $update_order['pay_status']=3;
+                    $update_order['is_back']=1;
                     $update_order['status']=70;
                     $update_order['sort']=0;
                 }
@@ -207,12 +210,13 @@ class TaskController extends HomeBaseController
         if(empty($update_order)){
             return 1;
         }else{
+            $update_order['time']=time();
             if(empty($order['pay_time']) && isset($taobao['pay_time'])){
                 $update_order['pay_time']=strtotime($taobao['pay_time']);
             }
-            $m->where('id',$order['id'])->update($update_order); 
+            $m->where('id',$order['id'])->update($update_order);
             
-        } 
+        }
         return 1;
     }
     /**
@@ -234,69 +238,77 @@ class TaskController extends HomeBaseController
             'aid'=>$aid,
             'shop'=>$shop,
             'order_amount'=>$taobao['payment'],
-            'pay_freight'=>$taobao['post_fee'], 
+            'pay_freight'=>$taobao['post_fee'],
             'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.(isset($taobao['receiver_district'])?$taobao['receiver_district']:''),
             'address'=>$taobao['receiver_address'],
             'accept_name'=>$taobao['receiver_name'],
             'mobile'=>isset($taobao['receiver_mobile'])?$taobao['receiver_mobile']:'',
             'pay_time'=>isset($taobao['pay_time'])?strtotime($taobao['pay_time']):0,
             'create_time'=>time(),
+            'time'=>time(),
             'pay_status'=>1,
             'status'=>10,
-            'sort'=>5,
+            'sort'=>0,
         ];
-       
+        
         //根据订单状态比较
         switch ($taobao['status']){
             case 'WAIT_SELLER_SEND_GOODS':
-                //等待卖家发货,即:买家已付款) 
+                //等待卖家发货,即:买家已付款)
                 $update_order['pay_status']=3;
                 $update_order['status']=20;
-                $update_order['sort']=10; 
+                $update_order['sort']=5;
                 break;
             case 'TRADE_CLOSED_BY_TAOBAO':
-                //付款以前，卖家或买家主动关闭交易) 
+                //付款以前，卖家或买家主动关闭交易)
                 $update_order['status']=80;
                 $update_order['pay_status']=1;
-                $update_order['sort']=0; 
+                $update_order['sort']=0;
                 break;
             case 'TRADE_BUYER_SIGNED':
-                //买家已签收,货到付款专用) 
+                //买家已签收,货到付款专用)
                 $update_order['pay_status']=2;
                 $update_order['status']=26;
-                $update_order['sort']=5; 
+                $update_order['sort']=3;
                 break;
             case 'TRADE_FINISHED':
-                //(交易成功) 
+                //(交易成功)
                 $update_order['pay_status']=3;
                 $update_order['status']=30;
-                $update_order['sort']=0; 
+                $update_order['sort']=0;
+                $update_order['completion_time']=strtotime($taobao['modified']);
                 break;
             case 'TRADE_CLOSED':
-                // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭) 
-                $update_order['pay_status']=5;
+                // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭)
+                $update_order['pay_status']=3;
+                $update_order['is_back']=1;
                 $update_order['status']=70;
-                $update_order['sort']=0; 
+                $update_order['sort']=0;
                 break;
         }
         $m=$this->m;
         $oid=$m->insertGetId($update_order);
-        //标记排序，如果产品没有编码20，没找到产品21 
+        //标记排序，如果产品没有编码20，没找到产品21
         $sort=0;
         $iids=[];
         $goods_add=[];
         $ogs=$taobao['orders']['order'];
         //用于没查找到数据的产品的goods-id
         $flag=0;
-        //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
         foreach($ogs as $k=>$v){
             
             $rows=['oid'=>$oid];
             
+            //outer_sku_id	String	81893848	外部网店自己定义的Sku编号
+            //outer_sku_id
+            //$tmp_goods['goods_code'] = $v['outer_sku_id'];//产品编码
+            //outer_iid	String	152e442aefe88dd41cb0879232c0dcb0
+            //商家外部编码(可与商家外部系统对接)。外部商家自己定义的商品Item的id，可以通过taobao.items.custom.get获取商品的Item的信息
+            //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
             if(empty($v['outer_sku_id'])){
                 if(empty($v['outer_iid'])){
-                    //标记排序，如果产品没有编码,没找到产品 
-                    $sort=20; 
+                    //标记排序，如果产品没有编码,没找到产品
+                    $sort=20;
                     $rows['goods_code']=$flag--;
                 }else{
                     $rows['goods_code'] = $v['outer_iid'];//产品编码
@@ -304,8 +316,8 @@ class TaskController extends HomeBaseController
             }else{
                 $rows['goods_code'] = $v['outer_sku_id'];//产品编码
             }
-           
-            $iids[]= $rows['goods_code']; 
+            
+            $iids[]= $rows['goods_code'];
             $rows['goods_uname'] = $v['title'];//产品名称
             $rows['goods_ucate']=isset($v['sku_properties_name'])?$v['sku_properties_name']:'';//产品型号
             $rows['num'] = $v['num'];//产品数量
@@ -315,7 +327,7 @@ class TaskController extends HomeBaseController
             $rows['pay_discount'] = $v['discount_fee'];//优惠费用
             
             $rows['pay'] = $v['total_fee'];//产品总价
-          
+            
             $goods_add[$rows['goods_code']]=$rows;
         }
         $where_goods=[
@@ -325,8 +337,8 @@ class TaskController extends HomeBaseController
         $goods_infos=Db::name('goods')->where($where_goods)->column('code,id,name,name3,price_in,price_sale');
         
         foreach ($goods_add as $k=>$v){
-            if(empty($goods_infos[$k])){ 
-                $sort=20; 
+            if(empty($goods_infos[$k])){
+                $sort=1;
                 $goods_add[$k]['goods']=$flag--;
                 $goods_add[$k]['goods_name']='';
                 $goods_add[$k]['print_name']='';
@@ -342,7 +354,7 @@ class TaskController extends HomeBaseController
             
         }
         Db::name('order_goods')->insertAll($goods_add);
-        if($sort>0){
+        if(empty($update_order['sort']) && $sort>0){
             $m->where('id',$oid)->update(['sort'=>$sort,'dsc'=>'产品要调整']);
         }
         return $oid;

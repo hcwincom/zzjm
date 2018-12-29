@@ -164,6 +164,7 @@
 						<th>支付状态</th>  
 					 
 					    <th>下单时间</th>
+					    <th>更新时间</th>
 					  <th>{$flag}状态</th>
 					</tr>
 				</thead>
@@ -239,6 +240,7 @@
 						<td>{$pay_status[$vo.pay_status]|default=$vo.pay_status}</td>
 					 
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
+						<td>{$vo.time|date='Y-m-d H:i',###}</td>
 					 
 						<td>{$statuss[$vo.status]|default=$vo.status}
 							<eq name="vo.is_real" value="2">-已拆分</eq> 
@@ -254,7 +256,7 @@
 		</form>
 	 	<div class="pagination">{$page}</div>
 	 	<p class="notice">
-	 	 sort排序，待发货10，已准备发货9，管理员有改动8，员工有改动7，待确认货款5，待付款4，退货退款中3，提交待确认2，未提交1，其他0 
+	 	 sort排序，线下订单待发货10，已准备发货9，线下待确认货款5，线下待付款4，淘宝待发货3，淘宝待付款2，淘宝错误1，其他按时间顺序排 
 	 	</p>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>

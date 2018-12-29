@@ -31,7 +31,16 @@ class OldController extends AdminBaseController
         }
         $this->corrects=['status'=>2,'aid'=>1,'rid'=>1,'atime'=>time(),'rtime'=>time(),'time'=>time()];
         $this->where_corrects=['rid'=>0];
-        $this->db_old= config('db_old');
+        $this->db_old= [
+            'type' => 'mysql',
+            'hostname' => $db['hostname'],
+            'database' => 'genele',
+            'username' =>$db['username'],
+            'password' =>$db['password'],
+            'charset' => 'utf8',
+            'prefix' => 'sp_',
+        ];
+       
     }
      
     /**
@@ -961,7 +970,16 @@ class OldController extends AdminBaseController
         zz_log('order_goods订单产品同步完成');
         //统计产品数量
         $nums=$m_new->group('oid')->column('oid,sum(num)');
-        
+        //检查订单号重复
+        $sql='select order_sn as name,count(id) as num from sp_order group by order_sn';
+        $list=$m_old->query($sql);
+        $order_sns=[];
+        //没重复的去掉
+        foreach($list as $k=>$v){
+            if($v['num']>1){
+                $order_sns[$v['name']]=$v['num'];
+            }
+        }
         //订单主体
         $m_new=Db::name('order');
         //开启事务
@@ -969,7 +987,7 @@ class OldController extends AdminBaseController
         //先截取旧数据
         $m_new->execute('truncate table cmf_order');   
         //获取最大的id来分页查询
-        $sql='select max(id) as count from sp_order';
+        $sql='select max(id) as count from sp_order'; 
         $data=$m_old->query($sql);
         $page=ceil($data[0]['count']/$count);
         $field='p.id,p.order_sn as name,p.order_no as express_no,p.user_id as uid,'.
@@ -981,7 +999,7 @@ class OldController extends AdminBaseController
                 'p.ordertype as order_type,p.ordercompany as company,p.admin_id as aid,'.
                 'p.sfkp as invoice_type,'.
                 'concat(province.area_name,"-",city.area_name,"-",area.area_name) as addressinfo,area.area_postcode as postcode';
-        
+        // sort排序，线下订单待发货10，已准备发货9，待确认货款5，待付款4，淘宝已付款 待发货3，其他按时间顺序排 
         //先检查pay_status
         for($i=0;$i<$page;$i++){
             $sql='select '.$field.
@@ -991,9 +1009,16 @@ class OldController extends AdminBaseController
                 ' left join sp_areas area on area.area_type=3 and p.area>0 and area.id=p.area '.
                 'where p.id >'.($i*$count).' and p.id<='.(($i+1)*$count);
             $data=$m_old->query($sql);
-            foreach($data as $k=>$v){ 
-                
+            foreach($data as $k=>$v){
+                //补足重复的订单号
+                if(isset($order_sns[$v['name']])){
+                    $order_sns[$v['name']]--;
+                    $v['name']=$v['name'].'_'.$order_sns[$v['name']];
+                   
+                } 
+                $v['time']=max($v['create_time'],$v['send_time'],$v['pay_time'],$v['completion_time']);
                 $v['goods_num']=isset($nums[$v['id']])?$nums[$v['id']]:0;
+                
                 //如果company为空就是上海极敏
                 if(empty($v['company'])){
                     $v['company']=5;
@@ -1019,8 +1044,22 @@ class OldController extends AdminBaseController
                         $v['pay_type']=1;
                         break;
                 }
-                 
-              
+                //order_type
+               /*  1 => '线下订单',
+                2 => '商城订单',
+                3 => '淘宝订单', */
+                switch ($v['order_type']){
+                    case 1:
+                        $v['order_type']=2;
+                        break;
+                    case 2:
+                        $v['order_type']=3;
+                        break;
+                    case 3:
+                        $v['order_type']=1;
+                        break;
+                }
+                // sort排序，线下订单待发货10，已准备发货9，待确认货款5，待付款4，淘宝已付款 待发货3，其他按时间顺序排 
                 $v['sort']=0;
                 switch ($v['status']){
                     case 3:
@@ -1033,16 +1072,15 @@ class OldController extends AdminBaseController
                         $v['status']=30;
                         break;
                     default:  
-                        //status1,2
-                       
-                        if($v['pay_type']==1 && $v['paystate']==0 && $v['order_type']==3){
+                        //status1,2 
+                        if($v['pay_type']==1 && $v['paystate']==0 && $v['order_type']==1){
                             //待确认货款5，
                             $v['sort']=5;
                             $v['status']=10;
                         }elseif($v['distribution_status']==0){
                             if($v['pay_status']==1 || ($v['pay_type']==2 || $v['pay_type']==10)){
                                 //待发货
-                                $v['sort']=10;
+                                $v['sort']=($v['order_type']==1)?10:3;
                                 $v['status']=20;
                               
                             }else{
@@ -1062,18 +1100,7 @@ class OldController extends AdminBaseController
                 }else{
                     $v['pay_status']=($v['sort']==5)?2:3;
                 }
-                //order_type
-                switch ($v['order_type']){
-                    case 1:
-                        $v['order_type']=2;
-                        break;
-                    case 2:
-                        $v['order_type']=3;
-                        break;
-                    case 3:
-                        $v['order_type']=1;
-                        break;
-                }
+                
                 unset($v['paystate']);
                 unset($v['distribution_status']);
                 
@@ -1085,8 +1112,6 @@ class OldController extends AdminBaseController
         
         $m_new->commit();
         zz_log('order订单主体同步完成');
-        
-        $m_new->commit();
        
         echo ('end');
     }

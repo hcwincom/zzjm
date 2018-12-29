@@ -710,70 +710,41 @@ class OrderModel extends Model
      }
      /* 订单排序 */
      public function order_sort($id){
-         //   sort专门排序，待发货10，仓库发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0 
+          $sort=0; 
+          // sort排序，线下订单待发货10，已准备发货9，线下待确认货款8，线下待付款7，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排 
+        $order=$this->where('id',$id)->find();
          
-         //pay_status
-         //是否有待审核
-         $where=[
-             'edit.pid'=>['eq',$id],
-             'edit.table'=>['eq','order'],
-             'edit.rstatus'=>['eq',1],
-         ];
-         $aids=Db::name('edit')
-         ->alias('edit')
-         ->join('cmf_user user','user.id=edit.aid')
-         ->where($where)
-         ->column('user.job,edit.aid');
-         $sort=0;
-         //管理员有改动8，员工有改动7，
-         if(isset($aids[1])){
-             $sort=8;
-         }elseif(isset($aids[2])){
-             $sort=7;
-         }else{
-             $order=$this->where('id',$id)->find();
-             //淘宝订单检查是否有产品未设置
-             if($order['order_type']==3){
-                 $goods_ids=Db::name('order_goods')->where('oid',$id)->column('id');
-             }
-             //   sort专门排序，待发货10，准备发货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
-             switch ($order['status']){
-                 case 20:
-                     $sort=10;
-                     break;
-                 case 22:
-                     $sort=9;
-                     break;
-                 case 10:
-                     switch ($order['pay_status']){
-                         case 1:
-                             $sort=4;
-                             break;
-                         case 2:
-                             $sort=5;
-                             break;
-                         case 4:
-                             $sort=3;
-                             break;
-                         default: 
-                             break;
-                     }  
-                     break;
-                 case 40:
-                     $sort=3;
-                     break;
-                 case 2:
-                     $sort=2;
-                     break;
-                 case 1:
-                     $sort=1;
-                     break;
-                 default:
-                     break;
-             }
+         switch ($order['status']){
+             case 20:
+                 $sort=10; 
+                 break;
+             case 22:
+                 $sort=9;
+                 break;
+             case 10:
+                 switch ($order['pay_status']){
+                     case 1:
+                         $sort=7;
+                         break;
+                     case 2:
+                         $sort=8;
+                         break; 
+                     default: 
+                         break;
+                 }  
+                 break;  
+             default:
+                 break;
          }
-         $this->where('id',$id)->setField('sort',$sort);
-           
+         //淘宝订单落后
+         if($order['order_type']==3 && $sort >5){
+             $sort=$sort-5;
+         }
+         if($order['sort']!=$sort){ 
+             $this->where('id',$id)->setField('sort',$sort);
+         }
+        
+         return 1;
      }
      /* 订单产品数量检查 */
      public function order_store($id){

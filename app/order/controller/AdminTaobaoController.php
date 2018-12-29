@@ -122,10 +122,10 @@ buyer_nick	String	我在测试	买家昵称
             $where=[
                 'shop'=>['eq',$shop],
                 'order_type'=>['eq',$order_type],
-                'create_time'=>['egt',$time_start],
+                'time'=>['egt',$time_start],
             ];
             $m=$this->m;
-            $m_store_goods=
+          
             $oids=$m->where($where)->column('name,id,status,pay_status,paytype,pay_type,order_amount,pay_time','name');
             $m->startTrans();
             foreach($companys as $k=>$v){
@@ -135,7 +135,7 @@ buyer_nick	String	我在测试	买家昵称
                 $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
                 
                 $order = $client->getContent(); 
-//                 zz_log($order);
+                zz_log($order);
                 $state=intval($client->status);
                
                 //返回状态失败
@@ -219,7 +219,7 @@ buyer_nick	String	我在测试	买家昵称
                     //付款了要状态修改
                     $update_order['pay_status']=3;
                     $update_order['status']=20;
-                    $update_order['sort']=10;
+                    $update_order['sort']=5;
                 }
                 break;
             case 'TRADE_CLOSED_BY_TAOBAO':
@@ -240,7 +240,7 @@ buyer_nick	String	我在测试	买家昵称
                     //已收货，货款也到付了,待确认
                     $update_order['pay_status']=2;
                     $update_order['status']=26;
-                    $update_order['sort']=5;
+                    $update_order['sort']=4;
                 }
                 break;
             case 'TRADE_FINISHED':
@@ -249,14 +249,16 @@ buyer_nick	String	我在测试	买家昵称
                     $update_order['pay_status']=3;
                     $update_order['status']=30;
                     $update_order['sort']=0;
+                    $update_order['completion_time']=strtotime($taobao['modified']);
                 }
                 break;
             case 'TRADE_CLOSED':
                 // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭)
-                if($order['pay_status']==4){
-                    $update_order['pay_status']=5;
+                if($order['is_back']==0){
+                    $update_order['pay_status']=3;
+                    $update_order['is_back']=1;
                     $update_order['status']=70;
-                    $update_order['sort']=0;
+                    $update_order['sort']=0; 
                 }
                 break;
         }
@@ -264,6 +266,7 @@ buyer_nick	String	我在测试	买家昵称
         if(empty($update_order)){
             return 1;
         }else{
+            $update_order['time']=time();
             if(empty($order['pay_time']) && isset($taobao['pay_time'])){
                 $update_order['pay_time']=strtotime($taobao['pay_time']);
             }
@@ -298,9 +301,10 @@ buyer_nick	String	我在测试	买家昵称
             'mobile'=>isset($taobao['receiver_mobile'])?$taobao['receiver_mobile']:'',
             'pay_time'=>isset($taobao['pay_time'])?strtotime($taobao['pay_time']):0,
             'create_time'=>time(),
+            'time'=>time(),
             'pay_status'=>1,
             'status'=>10,
-            'sort'=>5,
+            'sort'=>0,
         ];
        
         //根据订单状态比较
@@ -309,7 +313,7 @@ buyer_nick	String	我在测试	买家昵称
                 //等待卖家发货,即:买家已付款) 
                 $update_order['pay_status']=3;
                 $update_order['status']=20;
-                $update_order['sort']=10; 
+                $update_order['sort']=5;  
                 break;
             case 'TRADE_CLOSED_BY_TAOBAO':
                 //付款以前，卖家或买家主动关闭交易) 
@@ -321,17 +325,19 @@ buyer_nick	String	我在测试	买家昵称
                 //买家已签收,货到付款专用) 
                 $update_order['pay_status']=2;
                 $update_order['status']=26;
-                $update_order['sort']=5; 
+                $update_order['sort']=3; 
                 break;
             case 'TRADE_FINISHED':
                 //(交易成功) 
                 $update_order['pay_status']=3;
                 $update_order['status']=30;
                 $update_order['sort']=0; 
+                $update_order['completion_time']=strtotime($taobao['modified']);
                 break;
             case 'TRADE_CLOSED':
                 // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭) 
-                $update_order['pay_status']=5;
+                $update_order['pay_status']=3;
+                $update_order['is_back']=1;
                 $update_order['status']=70;
                 $update_order['sort']=0; 
                 break;
@@ -388,7 +394,7 @@ buyer_nick	String	我在测试	买家昵称
         
         foreach ($goods_add as $k=>$v){
             if(empty($goods_infos[$k])){ 
-                $sort=20; 
+                $sort=1; 
                 $goods_add[$k]['goods']=$flag--;
                 $goods_add[$k]['goods_name']='';
                 $goods_add[$k]['print_name']='';
@@ -404,7 +410,7 @@ buyer_nick	String	我在测试	买家昵称
             
         }
         Db::name('order_goods')->insertAll($goods_add);
-        if($sort>0){
+        if(empty($update_order['sort']) && $sort>0){
             $m->where('id',$oid)->update(['sort'=>$sort,'dsc'=>'产品要调整']);
         }
         return $oid;
