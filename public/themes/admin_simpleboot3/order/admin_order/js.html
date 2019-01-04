@@ -111,11 +111,6 @@ $('#goods_add').click(function(){
 		 return 0;
 	 }
 	 
-	 var custom=$('#custom').val();
-	 if(!(custom>0)){
-		 $('#custom').focus();
-		 return 0;
-	 } 
 	var goods=parseInt($(this).siblings('.goods').val());
 	 
 	if(!(goods>0)){
@@ -144,8 +139,7 @@ function goods_add(goods){
 	 
 	 var custom=$('#custom').val();
 	 if(!(custom>0)){
-		 $('#custom').focus();
-		 return 0;
+		 custom=0;
 	 } 
 	 
 	if(!(goods>0)){

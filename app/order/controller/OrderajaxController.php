@@ -237,6 +237,57 @@ class OrderajaxController extends AdminBase0Controller
         $this->success('ok','',$price);
         
     }
-    
+    /*
+     *关联产品库存
+     *  */
+    public function goods_about_store()
+    {
+        $id=$this->request->param('id');
+       
+        $where=[
+            'id'=>$id,
+        ];
+        
+        $admin=$this->admin;
+        if($admin['shop']>1){
+            $where['shop']=$admin['shop'];
+        }
+        
+        $type=Db::name('goods')->where($where)->value('type');
+        if($type<2 || $type>5){
+            $this->error('无关联');
+        }
+        $m_sg=Db::name('store_goods');
+        
+        if($type==3){
+            $pid=Db::name('goods_label')->where('pid0',$id)->value('pid1');
+            $nums=$m_sg->where('goods',$pid)->column('store,num');
+        }else{
+            //关联库存要先得到关联，再获取关联库存，再计算得到可拼凑库存
+            $pnums=Db::name('goods_link')->where('pid0',$id)->column('pid1,num');
+            $pids=array_keys($pnums); 
+            
+            $nums1=$m_sg->where('goods','in',$pids)->column('id,goods,store,num');
+            //按仓库分组库存
+            $stores=[];
+            foreach($nums1 as $v){
+                $stores[$v['store']][$v['goods']]=$v['num'];
+            }
+            
+            //按仓库库存比较
+            foreach($stores as $k=>$v){
+                //定义临时库存数，最后取最小的
+                $num_tmp=[];
+                foreach($pnums as $kk=>$vv){
+                    $num_tmp[$kk]=bcdiv($v[$kk],$vv,0);
+                }
+                //取最小的作为
+                $nums[$k]=min($num_tmp);
+            }
+        }
+       
+        
+        $this->success('ok','',$nums);
+    }
     
 }

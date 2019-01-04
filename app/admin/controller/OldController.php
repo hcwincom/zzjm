@@ -25,10 +25,7 @@ class OldController extends AdminBaseController
             'port'=>$db['hostport'],
         ];
        
-        $aid=session('ADMIN_ID');
-        if($aid!=1){
-            $this->error('开发者功能，不要操作');
-        }
+        
         $this->corrects=['status'=>2,'aid'=>1,'rid'=>1,'atime'=>time(),'rtime'=>time(),'time'=>time()];
         $this->where_corrects=['rid'=>0];
         $this->db_old= [

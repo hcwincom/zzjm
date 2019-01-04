@@ -418,9 +418,13 @@
      	   				<div style="position:relative;" class="goInfo" data-width="0"> 
      	   				<present name="goods[$key]['nums'][0]">
      	   				{$goods[$key]['nums'][0]['num']}({$goods[$key]['nums'][0]['num1']})
+     	   				
      	   				<else/>
      	   				--
      	   				</present> 
+     	   				<neq name="vo.goods_type" value="1">
+     	   					<button type="button" class="link_store" goods="{$key}">关联库存</button>
+     	   				</neq>
      	   		 		</div>
      	   		 		<div class="goodsInfo">
 	     	   		 		<table class="table table-hover table-bordered">
@@ -855,7 +859,7 @@
 				 	&nbsp;&nbsp;&nbsp;&nbsp;
 				 	<a href="{:url('print_order',['id'=>$kk])}" target="{$zztarget.other}">配货单</a> 
 				 	&nbsp;&nbsp;&nbsp;&nbsp;
-					<a href="{:url('store/AdminStorein/index',['type'=>1,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
+					<a href="{:url('store/AdminStorein/index',['type'=>10,'type1'=>6,'type2'=>1,'name'=>$kk])}" target="{$zztarget.other}">查看出库记录</a>
 				   	订单备注：  
 					<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
 				<present name="changevv['dsc']">
