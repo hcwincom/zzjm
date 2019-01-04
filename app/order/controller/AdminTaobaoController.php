@@ -126,7 +126,7 @@ buyer_nick	String	我在测试	买家昵称
             ];
             $m=$this->m;
           
-            $oids=$m->where($where)->column('name,id,status,pay_status,paytype,pay_type,order_amount,pay_time','name');
+            $oids=$m->where($where)->column('name,id,status,is_back,pay_status,paytype,pay_type,order_amount,pay_time','name');
             $m->startTrans();
             foreach($companys as $k=>$v){
                

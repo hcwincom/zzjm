@@ -4,7 +4,7 @@
 <body>
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
-			<include file="public@nav" />
+				<include file="orderback@admin_orderback:nav" />
 			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
 		 
 		</ul>
@@ -25,19 +25,9 @@
 					</eq>
 					<gt name="info.status" value="1"> 
 					 <button type="submit" action="{:url('status0_do')}" class="save btn btn-primary js-ajax-submit" >还原售后单</button>
-					<gt name="pay_status" value="1">
-					  <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >货款还原</button>
-					</gt>
-					<switch name="info.pay_status">
-					<case value="1">
-					 <button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >退款</button>
-					</case>
-					<case value="2">
-					 <button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >退款确认</button>
-					</case> 
-					</switch>
+				    </gt>
+				<br/>
 					
-					</gt>
 				 <if condition="$info.status gt 1 && $info.status lt 4">
 				 <switch name="info.status1">
 				 	<case value="1"> 
@@ -81,6 +71,21 @@
 				  </if>
 				    
 				</eq>
+				
+				<neq name="info.type" value="1">
+					<br/>
+					<gt name="pay_status" value="1">
+					  <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >货款还原</button>
+					</gt>
+					<switch name="info.pay_status">
+					<case value="1">
+					 <button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >退款</button>
+					</case>
+					<case value="2">
+					 <button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >退款确认</button>
+					</case> 
+					</switch>
+				</neq>	
 				</div>
 				
 			</div>

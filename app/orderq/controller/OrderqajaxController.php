@@ -110,7 +110,7 @@ class OrderqajaxController extends AdminBase0Controller
         ];
        
         if($admin['shop']>1){
-            $where['p.shop']=$admin['shop'];
+//             $where['p.shop']=$admin['shop'];
             $where_custom['shop']=$admin['shop'];
         }
         //得到名称，编码和默认联系人 

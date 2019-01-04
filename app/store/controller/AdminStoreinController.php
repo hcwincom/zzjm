@@ -614,9 +614,10 @@ class AdminStoreinController extends AdminBaseController
         $data_add['goods']=$box['goods'];
          
         $m->startTrans();
-         
+       
         $m_store_goods=new StoreGoodsModel();
-        $id=$m_store_goods->instore0($data_add);
+        $id=$m_store_goods->instore0($data_add,1,$data['sns']);
+        
         if(!($id>0)){
             $m->rollback();
             $this->error($id);
@@ -641,7 +642,7 @@ class AdminStoreinController extends AdminBaseController
         $rule='review';
         $res=$this->check_review($admin,$rule);
         if($res){
-            $this->redirect($rule,['id'=>$id,'rstatus'=>2,'rdsc'=>'直接审核']);
+            $this->redirect($rule,['id'=>$id,'rstatus'=>2,'rdsc'=>'直接审核','box'=>$data_add['box'],'sns'=>$data['sns']]);
         }
         
         $this->success('添加成功',$url);

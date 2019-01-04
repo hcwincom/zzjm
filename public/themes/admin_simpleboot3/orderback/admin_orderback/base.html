@@ -333,6 +333,14 @@
 			    
 			   </label>
 			    <a class="express_no_href">查快递</a>
+			    &nbsp;&nbsp;&nbsp;&nbsp;
+			<gt name="info.status1" value="1">
+			<eq name="order_type" value="1">
+				<a href="{:url('store/AdminStorein/index',['type'=>21,'type1'=>6,'type2'=>1,'name'=>$info.id])}" target="{$zztarget.other}">售后入库</a>
+			<else/>
+				<a href="{:url('store/AdminStorein/index',['type'=>22,'type1'=>6,'type2'=>1,'name'=>$info.id])}" target="{$zztarget.other}">售后出库</a>
+			</eq>
+			</gt>
 			</div>
 		</div>
 		<div class="form-group fleft-all ">
@@ -395,6 +403,7 @@
 					 <input type="text"  class="form-control short red" name="back_money"  value="{$change.back_money}"/>
 				</present>
 				</label>
+				  
 			</div>
 		</div>
 		
@@ -442,6 +451,14 @@
 			    <input type="text"  name="express_no2" class="express_no form-control short200" /> 
 			   </label>
 			    <a class="express_no_href">查快递</a>
+			     &nbsp;&nbsp;&nbsp;&nbsp;
+			<gt name="info.status2" value="1">
+			<eq name="order_type" value="2">
+				<a href="{:url('store/AdminStorein/index',['type'=>21,'type1'=>6,'type2'=>1,'name'=>$info.id])}" target="{$zztarget.other}">售后入库</a>
+			<else/>
+				<a href="{:url('store/AdminStorein/index',['type'=>22,'type1'=>6,'type2'=>1,'name'=>$info.id])}" target="{$zztarget.other}">售后出库</a>
+			</eq>
+			</gt>
 			</div>
 		</div>
 	    <div class="form-group fleft-all ">

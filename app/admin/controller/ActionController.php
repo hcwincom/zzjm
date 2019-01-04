@@ -111,23 +111,80 @@ class ActionController extends AdminBaseController
         return $this->fetch();
     }
     /**
-     * 清空系统任务
+     * 清除操作记录
      * @adminMenu(
-     *     'name'   => '清空系统任务',
+     *     'name'   => '清除操作记录',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 0,
      *     'icon'   => '',
-     *     'remark' => '清空系统任务',
+     *     'remark' => '清除操作记录',
      *     'param'  => ''
      * )
      */
     public function clear()
     {
+        
         $m=$this->m;
-        $m->where('table','system')->delete();
-        $this->success('已清空');
+        $where=[];
+        $data=$this->request->param();
+        $admin=$this->admin;
+        if($admin['shop']!=1){
+            $where['shop'] =  ['eq',$admin['shop']];
+        }
+        if(empty($data['type'])){
+            $data['type']='';
+        }else{
+            $where['type']=$data['type'];
+        }
+        if(empty($data['table'])){
+            $data['table']='';
+        }else{
+            $where['table']=$data['table'];
+        }
+        //关联id
+        if(empty($data['pid'])){
+            $data['pid']='';
+        }else{
+            $where['pid']=$data['pid'];
+        }
+        //操作人
+        if(empty($data['aid'])){
+            $data['aid']=0;
+        }else{
+            $where['aid']=$data['aid'];
+        }
+        //时间处理
+        if(empty($data['datetime1'])){
+            $data['datetime1']='';
+            $time1=0;
+            if(empty($data['datetime2'])){
+                $data['datetime2']='';
+                $time2=0;
+            }else{
+                //只有结束时间
+                $time2=strtotime($data['datetime2']);
+                $where['time']=['elt',$time2];
+            }
+        }else{
+            //有开始时间
+            $time1=strtotime($data['datetime1']);
+            if(empty($data['datetime2'])){
+                $data['datetime2']='';
+                $where['time']=['egt',$time1];
+            }else{
+                //有结束时间有开始时间between
+                $time2=strtotime($data['datetime2']);
+                if($time2<=$time1){
+                    $this->error('结束时间必须大于起始时间');
+                }
+                $where['time']=['between',[$time1,$time2]];
+            }
+        }
+        $rows= $m->where($where)->delete();
+      
+        $this->success('已清空'.$rows.'条记录',url('index'),$data);
     }
     
 }

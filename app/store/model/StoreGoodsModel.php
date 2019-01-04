@@ -33,9 +33,10 @@ class StoreGoodsModel extends Model
      * 添加入库
      * @param array $data入库数据
      * @param number $num_ok是否严格审核库存和料位，1严格，2不审核
+     * @param string $sns一货一码输入
      * @return string|number 有库存变化时返回入库id,否则返回1
      */
-    function instore0($data,$num_ok=1){
+    function instore0($data,$num_ok=1,$sns=''){
         //统一文件锁
         $file = "log/store_lock.txt";
         $fp = fopen($file, "r");
@@ -73,6 +74,41 @@ class StoreGoodsModel extends Model
                 }
                 //入库记录
                 $store_in_id=Db::name('store_in')->insertGetId($data);
+                //一货一码
+                if(!empty($sns)){
+                    $m_goods_sn=Db::name('goods_sn');
+                    $sns=explode(',', $sns);
+                    //去除重复
+                    $sns=array_unique($sns);
+                    $sns0=$m_goods_sn->where('store_in',$store_in_id)->column('sn');
+                    //不要的去掉
+                    $sn_delete=array_diff($sns0, $sns);
+                    if(!empty($sn_delete[0])){
+                        $where_delete=[
+                            'store_in'=>$store_in_id,
+                            'sn'=>['in',$sn_delete]
+                        ];
+                        $m_goods_sn->where($where_delete)->delete();
+                    }
+                    //新增
+                    $sn_add=array_diff($sns,$sns0);
+                    if(!empty($sn_add[0])){
+                        $data_sn=[];
+                        foreach($sn_add as $v){
+                            if(empty($v)){
+                                continue;
+                            }
+                            $data_sn[]=[
+                                'sn'=>$v,
+                                'store_in'=>$store_in_id,
+                                'shop'=>$data['shop'],
+                                'goods'=>$data['goods'],
+                            ];
+                        }
+                        $m_goods_sn->insertAll($data_sn);
+                    }
+                    
+                }
             }else{
                 $store_in_id=1;
             }
