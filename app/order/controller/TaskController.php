@@ -81,7 +81,7 @@ class TaskController extends HomeBaseController
             ];
             $m=$this->m;
             $m_store_goods=new StoreGoodsModel();
-            $oids0=$m->where($where)->column('id,name,status,pay_status,paytype,pay_type,order_amount,pay_time,shop');
+            $oids0=$m->where($where)->column('id,name,status,is_back,pay_status,paytype,pay_type,order_amount,pay_time,shop');
             $oids=[];
             foreach($oids0 as $k=>$v){
                 $oids[$v['shop']][$v['name']]=$v;
