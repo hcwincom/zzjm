@@ -98,7 +98,9 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
-						 
+					<notempty name="shops">
+					 	<th>所属店铺</th> 
+					</notempty>	 
 						<th>{$flag}名</th> 
 						<th>日期</th>
 						<th>是否上班</th>
@@ -123,6 +125,9 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
+						<notempty name="shops">
+					 	<td>{$shops[$vo.shop]}</td>
+					</notempty>	 
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 						<td>
 							{$rule_types[$vo.rule_type]}-

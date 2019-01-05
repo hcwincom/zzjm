@@ -70,7 +70,9 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
-						 
+						 	<notempty name="shops">
+					 	<th>所属店铺</th> 
+					</notempty>	 
 						<th>考勤人</th> 
 						<th>考勤日期</th> 
 						 <th>上班签到</th> 
@@ -93,6 +95,9 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
+						<notempty name="shops">
+					 	<td>{$shops[$vo.shop]}</td>
+					</notempty>	 
 						<td>{$vo.aname}</td>
 						<td>{$vo.day_time|date='Y-m-d',###}</td>
 						 <td>
