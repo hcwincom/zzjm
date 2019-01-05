@@ -125,7 +125,7 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<notempty name="shops">
+					<notempty name="shops">
 					 	<td>{$shops[$vo.shop]}</td>
 					</notempty>	 
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>

@@ -90,7 +90,9 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
-						 
+					<notempty name="shops">
+					 	<th>所属店铺</th> 
+					</notempty>	  
 						<th>{$flag}名</th> 
 						<th>起止时间</th>
 						<th>申请天数</th>
@@ -114,6 +116,9 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
+					<notempty name="shops">
+					 	<td>{$shops[$vo.shop]}</td>
+					</notempty>	 
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 						<td>
 							 {$vo.start_day}-{$vo.end_day}
