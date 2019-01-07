@@ -20,11 +20,11 @@
 			</foreach>
 			</select> &nbsp;&nbsp; 
 		</notempty>
-		状态：<select class="form-control" name="status" >
+		状态：<select class="form-control" name="rstatus" >
 				<option value='0'>全部</option> 
 			 
 				 <foreach name="review_status" item="vo" k="key">
-				<option value="{$key}"  <if condition="$key eq $data.status">selected</if>> 
+				<option value="{$key}"  <if condition="$key eq $data.rstatus">selected</if>> 
 				 {$vo}
 				</option>
 				</foreach>

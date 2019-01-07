@@ -209,16 +209,16 @@ class AdminInfo0Controller extends AdminBaseController
     {
         $m=$this->m;
         $data=$this->request->param();
-        if(empty($data['name'])){
-            $this->error('名称不能为空');
-        }
         
         $url=url('index');
         
         $table=$this->table;
         $time=time();
         $admin=$this->admin;
-        $data_add=$data;
+        $data_add=$this->param_check($data);
+        if(!is_array($data_add)){
+            $this->error($data_add);
+        }
         //判断是否有店铺
         if($this->isshop){
             $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
@@ -491,6 +491,11 @@ class AdminInfo0Controller extends AdminBaseController
         $table=$this->table;
         $flag=$this->flag;
         $data=$this->request->param();
+        $data=$this->param_check($data);
+        if(!is_array($data)){
+            $this->error($data);
+        }
+     
         $info=$m->where('id',$data['id'])->find();
         if(empty($info)){
             $this->error('数据不存在');
@@ -1056,6 +1061,18 @@ class AdminInfo0Controller extends AdminBaseController
             
         } 
          
+    }
+    /**
+     * 检查参数
+     * @param array $data
+     * @return array|string错误返回错误说明
+     */
+    public function param_check($data)
+    {
+        if(empty($data['name'])){
+          return '名称不能为空';
+        }
+        return $data;
     }
     
 }

@@ -260,6 +260,8 @@ class AdminMsgController extends AdminBaseController
           $where_user['id']=['in',$data['uids']];
        }else{
            switch ($data['is_all']){
+               case 1: 
+                   break;
                case 2:
                    $where_user['user_type']=2;
                    break;

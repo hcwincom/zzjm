@@ -1211,7 +1211,11 @@ class AdminBoxController extends AdminInfo0Controller
         if( $info['num']>0 || $info['goods']==0){
             $this->error('不存在关联产品或产品数量不为0，不能清除产品');
         }
-        $tmp=Db::name('store_in')->where('box',$id)->find();
+        $where=[
+            'box'=>$id,
+            'rstatus'=>1,
+        ];
+        $tmp=Db::name('store_in')->where($where)->find();
         if(!empty($tmp)){
             $this->error('料位有待审核出入库，不能删除产品');
         }

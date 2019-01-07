@@ -121,7 +121,7 @@
 								<td>
 							 		<select name="is_box" id="is_box">
 									<foreach name="is_box" item="vo"> 
-										<option value="{$key}" <if condition="$key eq $info.is_box"></if>>{$vo}</option>
+										<option value="{$key}" <if condition="$key eq $info.is_box">selected</if>>{$vo}</option>
 									</foreach> 
 									</select>
 								</td>

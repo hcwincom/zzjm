@@ -195,7 +195,12 @@ class AdminGoodsController extends AdminBaseController
      */
     public function search($where,$data){
         
-        
+        //店铺
+        if(empty($data['shop'])){
+            $data['shop']=0;
+        }else{
+            $where['p.shop']=['eq',$data['shop']];
+        }
         //状态
         if(empty($data['status'])){
             $data['status']=0;
@@ -988,7 +993,9 @@ class AdminGoodsController extends AdminBaseController
         $data=$this->request->param();
         $admin=$this->admin;
         $where=[];
-        
+        if($admin['shop']>1){
+            $where['gs.shop']=$admin['shop'];
+        }
         //查询字段
         $types=[
             1=>['p.name','全名'], 
@@ -1032,9 +1039,6 @@ class AdminGoodsController extends AdminBaseController
         // 获取分页显示
         $page = $list->appends($data)->render();
          
-        
-        // 获取分页显示
-        $page = $list->appends($data)->render();
         
         $this->assign('page',$page);
         $this->assign('list',$list);
@@ -2600,10 +2604,12 @@ class AdminGoodsController extends AdminBaseController
                 $this->error('关联产品数量错误');
             }
          }
+         
         //关联产品比较
-        if(!empty(array_diff($links0,$links1)) ||  !empty(array_diff($links1,$links0))){
+         if(!empty(array_diff_assoc($links0,$links1)) ||  !empty(array_diff_assoc($links1,$links0))){
             $content['id_links']=json_encode($links1);
         }
+        
         if(empty($content)){
             $this->error('未修改');
         }
@@ -2935,10 +2941,12 @@ class AdminGoodsController extends AdminBaseController
                 $this->error('关联产品数量错误');
             }
         }
+        
         //关联产品比较
-        if(!empty(array_diff($links0,$links1)) ||  !empty(array_diff($links1,$links0))){
+        if(!empty(array_diff_assoc($links0,$links1)) ||  !empty(array_diff_assoc($links1,$links0))){
             $content['id_links']=json_encode($links1);
         }
+       
         if(empty($content)){
             $this->error('未修改');
         }
@@ -3721,7 +3729,7 @@ class AdminGoodsController extends AdminBaseController
             }
         }
         //关联产品比较
-        if(!empty(array_diff($links0,$links1)) ||  !empty(array_diff($links1,$links0))){
+        if(!empty(array_diff_assoc($links0,$links1)) ||  !empty(array_diff_assoc($links1,$links0))){
             $content['id_links']=json_encode($links1);
         }
         if(empty($content)){
@@ -4893,20 +4901,46 @@ class AdminGoodsController extends AdminBaseController
     //获取分类信息
     public function cates($type=3){
        
-        //分类
-       /*  $m_cate=Db::name('cate');
-        $where_cate=[
-            'fid'=>0,
-            'status'=>2,
-        ];
-        $cates0=$m_cate->where($where_cate)->order('code_num asc')->column('id,name,code,type');
-        $where_cate=[
-            'fid'=>['neq',0],
-            'status'=>['eq',2],
-        ];
-        $cates=$m_cate->where($where_cate)->order('code asc')->column('id,name,fid,code,type');
-        $this->assign('cates0',$cates0);
-        $this->assign('cates',$cates); */
+        $admin=$this->admin;
+        
+        if($type<3){
+            $shop=$this->where_shop;
+            if(empty($shop)){
+                $where_shop=['eq',1];
+            }elseif($admin['shop']==1){
+                $where_shop=['in',[1,$shop]];
+            }else{
+                $where_shop=['eq',$shop];
+            }
+            //显示编辑人和审核人
+            $m_user=Db::name('user');
+            //可以加权限判断，目前未加
+            //创建人
+            $where_aid=[
+                'user_type'=>1,
+                'shop'=>$where_shop,
+            ];
+            
+            $aids=$m_user->where($where_aid)->column('id,user_nickname');
+            //审核人
+            $where_rid=[
+                'user_type'=>1,
+                'shop'=>$where_shop,
+            ];
+            $rids=$m_user->where($where_rid)->column('id,user_nickname');
+            $this->assign('aids',$aids);
+            $this->assign('rids',$rids);
+            
+            //如果分店铺又是列表页查找,显示所有店铺
+            if($admin['shop']==1 && ($this->isshop) ){
+                $shops=Db::name('shop')->where('status',2)->column('id,name');
+                //首页列表页去除总站
+                
+                $this->assign('shops',$shops);
+            }
+            
+        }
+        
          
     }
     //获取品牌信息

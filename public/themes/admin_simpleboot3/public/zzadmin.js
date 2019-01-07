@@ -64,12 +64,13 @@ function city_js($province,province,$city,city,$area=null,area=0){
 			 get_citys($area,0,0); 
 		}
 	});
-	$city.change(function(){ 
-		if($area){
+	if($area){
+		$city.change(function(){  
 			city=$(this).val();
-			 get_citys($area,city,0); 
-		}
-	});
+			 get_citys($area,city,0);  
+		});
+	}
+	
 }
 //获取cate信息
 function get_cates($select,fid=0,id=0){

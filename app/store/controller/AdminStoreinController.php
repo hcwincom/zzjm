@@ -79,10 +79,10 @@ class AdminStoreinController extends AdminBaseController
             $where['p.shop']=['eq',$admin['shop']];
         }
         //状态
-        if(empty($data['status'])){
-            $data['status']=0;
+        if(empty($data['rstatus'])){
+            $data['rstatus']=0;
         }else{
-            $where['p.status']=['eq',$data['status']];
+            $where['p.rstatus']=['eq',$data['rstatus']];
         }
         //产品分类
         if(empty($data['cid0'])){
@@ -373,9 +373,7 @@ class AdminStoreinController extends AdminBaseController
         if($id<=0){
             $this->error('信息错误');
         }
-        if($box<=0){
-            $this->error('未选择料位');
-        }
+       
         $m=$this->m;
         //查找信息
         $info=$m->where('id',$id)->find();
@@ -412,6 +410,9 @@ class AdminStoreinController extends AdminBaseController
         $m_store_goods=new StoreGoodsModel();
         
         if($status==2){
+            if($box<=0){
+                $this->error('未选择料位');
+            }
             //更新仓库和总库存
             $res=$m_store_goods->instore2($info,$box,$sns);
             //返回更新真正入库的料位

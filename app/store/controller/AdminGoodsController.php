@@ -349,14 +349,16 @@ class AdminGoodsController extends AdminBaseController
         $data=$this->request->param();
         
         $admin=$this->admin; 
-      
+        //没有库存调整就没有修改
         if(empty($data['safe'])){
             $this->error('数据错误',$back);
         }
         $safes=$data['safe'];
         $id0=key($safes);
         $info=$m->where('id',$id0)->find();
-        
+        dump($id0);
+        dump($info);
+        exit;
         if(empty($info)){
             $this->error('数据错误',$back);
         }
