@@ -65,6 +65,9 @@ function zz_action($data_action,$data=[]){
             'department'=>['in',[1,$data['department']]],
             'job'=>['eq',1],
             ];
+            if($data_action['shop']==2){
+                $where['shop']=['in',[1,$data_action['shop']]];
+            }
             $uids=$m_user->where($where)->column('id');
             break;
         case 'review':
