@@ -252,7 +252,9 @@ class CustomBaseController extends AdminInfo0Controller
      */
     public function add()
     {
-        
+        $admin=$this->admin;
+        $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
+            
         //客户分类信息
         $this->cates();
         $this->assign('info',null);
@@ -406,6 +408,7 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('数据不存在');
         } 
+        $this->where_shop=$info['shop'];
         $table=$this->table;
         if($table=='custom'){ 
             $tel_type=1;
@@ -657,6 +660,7 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
         }
+        $this->where_shop=$info['shop'];
         //获取改变的信息
         $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
@@ -894,7 +898,7 @@ class CustomBaseController extends AdminInfo0Controller
         if($type==3){  
             //可选物流
             $freights=Db::name('freight')->where($where)->order('shop asc,sort asc')->column($field);
-            
+          
             //开票类型
             $invoice_types=config('invoice_type');
             //付款银行
