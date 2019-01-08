@@ -1,0 +1,124 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:url('user/index')}">{:lang('ADMIN_USER_INDEX')}</a></li>
+			<li class="active"><a href="{:url('user/add')}">{:lang('ADMIN_USER_ADD')}</a></li>
+		</ul>
+		<form method="post" class="form-horizontal js-ajax-form{$zzajax} margin-top-20" action="{:url('user/addpost')}">
+			<div class="form-group">
+				<label for="input-user_login" class="col-sm-2 control-label"><span class="form-required">*</span>{:lang('USERNAME')}</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-user_login" name="user_login">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-nickname" class="col-sm-2 control-label">姓名</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-nickname" name="user_nickname">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-user_pass" class="col-sm-2 control-label"><span class="form-required">*</span>{:lang('PASSWORD')}</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-user_pass" name="user_pass" placeholder="******">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-user_mobile" class="col-sm-2 control-label"><span class="form-required">*</span>手机号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-user_mobile" name="mobile">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-user_email" class="col-sm-2 control-label"><span class="form-required">*</span>{:lang('EMAIL')}</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" id="input-user_email" name="user_email">
+				</div>
+			</div>
+		 
+			<div class="form-group">
+				<label for="input-department" class="col-sm-2 control-label"><span class="form-required">*</span>所属部门</label>
+				<div class="col-md-6 col-sm-10">
+				<notempty name="shops">
+					<label class="select-line">
+						店铺
+						<select name="shop" id="shop" class="form-control short-auto"> 
+						<foreach name="shops" item="vo">
+							<option value="{$key}">{$vo}</option>
+						</foreach>
+						</select>
+					</label>
+				</notempty>
+					<label class="select-line">
+						子公司
+						<select name="company" id="company" class="form-control short-auto"> 
+							<option class="shop0" value="0">总公司</option>
+						<foreach name="companys" item="vo">
+							<option class="shop{$vo.shop}" value="{$key}">{$vo.name}</option>
+						</foreach>
+						</select>
+					</label>
+				   <label class="select-line">
+						部门
+						<select name="department" id="department" class="form-control short-auto">
+							 
+						<foreach name="departments" item="vo">
+							<option value="{$key}">{$vo}</option>
+						</foreach>
+						</select>
+					</label>
+					<label class="select-line">
+						职位
+						 <select name="job" id=" " class="form-control short-auto"> 
+						<foreach name="jobs" item="vo">
+							<option value="{$key}">{$vo}</option>
+						</foreach>
+						</select>
+					</label>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="input-user_email" class="col-sm-2 control-label"><span class="form-required">*</span>{:lang('ROLE')}</label>
+				<div class="col-md-6 col-sm-10" id="role">
+					<foreach name="roles" item="vo">
+						<label class="checkbox-inline">
+							<input value="{$vo.id}" class="department{$vo.department}" type="checkbox" name="role_id[]" <if condition="cmf_get_current_admin_id() neq 1 && $vo['id'] eq 1">disabled="true"</if>>{$vo.name}
+						</label>
+					</foreach>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('ADD')}</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+</body>
+</html>
+<script>
+var shop="{$shop}";
+$('#company option').hide();
+$('.shop0').show();
+$('.shop'+shop).show();
+$('#shop').change(function(){
+	shop=parseInt($(this).val());
+	$('#company option').hide();
+	$('.shop'+shop).show();
+	$('.shop0').show();
+	$('.shop0').prop('selected',true);
+});
+
+var department=parseInt($('#department').val());
+$('#role input').hide(); 
+$('#role .department'+department).show();
+$('#department').change(function(){
+	department=parseInt($(this).val());
+	$('#role input').prop('checked',false).hide();
+	$('#role .department'+department).prop('checked',true).show();
+	 
+});
+</script>

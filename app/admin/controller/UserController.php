@@ -12,6 +12,7 @@ namespace app\admin\controller;
 
 use cmf\controller\AdminBaseController;
 use think\Db;
+use app\shop\model\DepartmentModel;
 
 /**
  * Class UserController
@@ -56,10 +57,32 @@ class UserController extends AdminBaseController
         $types=config('user_search');
         $search_types=config('search_types');
         $where = ["p.user_type" => ['eq',1]];
+       
         $admin=$this->admin;
         
         /**搜索条件**/
         $data = $this->request->param();
+        if(isset($data['company']) && $data['company']>=0){
+            $where['p.company']=$data['company']; 
+        }else{
+            $data['company']=-1;
+        }
+        if(empty($data['dt'])){
+            $data['dt']=0;
+        }else{
+            $where['p.dt']=$data['dt'];
+        }
+        if(isset($data['department']) && $data['department']>=0){
+            $where['p.department']=$data['department'];
+        }else{
+            $data['department']=-1; 
+        }
+        if(empty($data['job_status'])){
+            $data['job_status']=0;
+        }else{
+            $where['p.job_status']=$data['job_status'];
+        }
+        
         $res=zz_shop($admin, $data, $where,'p.shop');
         $data=$res['data'];
         $where=$res['where'];
@@ -84,13 +107,11 @@ class UserController extends AdminBaseController
             $roles=[];
         }else{
             
-            $users = Db::name('user')
-            ->field('p.*,shop.name as shop_name,dt.name as dt_name')
-            ->alias('p')
-            ->join('cmf_shop shop','shop.id=p.shop','left')
-            ->join('cmf_department dt','dt.id=p.department','left')
+            $users = Db::name('user') 
+            ->alias('p')  
+            ->join('cmf_company company','company.id=p.company','left')
             ->where('p.id','in',$ids) 
-            ->column('p.*,shop.name as shop_name,dt.name as dt_name');
+            ->column('p.*,company.name as company_name');
             //角色信息
             $roles_user=Db::name('role_user')
             ->alias('ru')
@@ -114,7 +135,34 @@ class UserController extends AdminBaseController
         if($admin['shop']==1){
             $shops=Db::name('shop')->where('status',2)->order('sort asc')->column('id,name');
             $this->assign("shops", $shops);
+            if(empty($data['shop'])){
+                $where_company=[
+                    'status'=>2, 
+                ];
+            }else{
+                $where_company=[
+                    'status'=>2,
+                    'shop'=>$data['shop']
+                ];
+            }
+        }else{
+            $where_company=[
+                'status'=>2,
+                'shop'=>$admin['shop']
+            ];
         }
+        
+        $companys=Db::name('company')->where($where_company)->order('shop asc,sort asc')->column('id,name');
+        $this->assign("companys", $companys);
+        
+        
+        //部门
+        $m_dt=new DepartmentModel();
+        $departments=$m_dt->get_all2(); 
+        $this->assign("departments", $departments);
+        $dts=$m_dt->get_all1();
+        $this->assign("dts", $dts);
+        
         $this->assign("page", $page);
       
         $this->assign("users", $users);
@@ -161,17 +209,32 @@ class UserController extends AdminBaseController
         if($admin['shop']==1){ 
             $m_shop=Db::name('shop');
             $where_shop=['status'=>2];
-            $shops=$m_shop->where($where_shop)->column('id,name'); 
+            $shops=$m_shop->where($where_shop)->column('id,name');
+            $where_company=['status'=>2,'type'=>1];
+            $this->assign("shop", 1);
         }else{
             $shops=[];
+            $where_company=['status'=>2,'shop'=>$admin['shop'],'type'=>1]; 
+            $this->assign("shop", $admin['shop']);
         }
-        //部门
-        $where_dt=['status'=>2];
-        $departments=Db::name('department')->where($where_dt)->column('id,name');
+        $companys=Db::name('company')->where($where_company)->order('shop asc,sort asc')->column('id,shop,name');
+        $this->assign("companys", $companys);
+        if(empty($companys)){
+            $this->error('请先添加线下子公司');
+        }
         
+        //部门
+        $m_dt=new DepartmentModel();
+        $departments=$m_dt->get_all2();
+        $this->assign("departments", $departments);
+        $dts=$m_dt->get_all1();
+        $this->assign("dts", $dts);
+       
         $this->assign("shops", $shops);
         $this->assign("departments", $departments);
         $this->assign("roles", $roles);
+        $this->assign("info", null); 
+        $this->assign("role_ids", []);
         return $this->fetch();
     }
 
@@ -238,18 +301,29 @@ class UserController extends AdminBaseController
                     if(preg_match($reg['mobile'][0], $data['mobile'])!=1){
                         $this->error($reg['mobile'][1]);
                     }
-                    
-                    $data_user=[
+                     $time=time();
+                    $data_user=[ 
+                        'user_pass'=>cmf_password($data['user_pass']),
+                        'company'=>$data['company'],
+                        //判断是总站添加还是分站添加
+                        'shop'=>(($admin['shop']==1)?$data['shop']:$admin['shop']),
                         'user_login'=>$data['user_login'],
                         'user_nickname'=>$data['user_nickname'],
                         'user_email'=>$data['user_email'],
-                        'user_pass'=>cmf_password($data['user_pass']),
                         'mobile'=>$data['mobile'],
-                        //判断是总站添加还是分站添加
-                        'shop'=>(($admin['shop']==1)?$data['shop']:$admin['shop']),
                         'department'=>$data['department'],
+                        'dt'=>$data['dt'],
+                        'emergency_mobile'=>$data['emergency_mobile'],
+                        'idcard'=>$data['idcard'],
+                        'address'=>$data['address'],
+                        'qq'=>$data['qq'],
+                        'weixin'=>$data['weixin'],
+                        'wangwang'=>$data['wangwang'],
+                        'job_status'=>1,
+                        'in_time'=>$time,
+                        'create_time'=>$time,
                     ];
-                    
+                     
                     $result = DB::name('user')->insertGetId($data_user);
                     if ($result !== false) {
                         //$role_user_model=M("RoleUser");
@@ -292,10 +366,13 @@ class UserController extends AdminBaseController
         $role_ids = DB::name('RoleUser')->where(["user_id" => $id])->column("role_id");
         $this->assign("role_ids", $role_ids);
         //部门
-        $where_dt=['status'=>2];
-        $departments=Db::name('department')->where($where_dt)->column('id,name');
-         
+        //部门
+        $m_dt=new DepartmentModel();
+        $departments=$m_dt->get_all2();
         $this->assign("departments", $departments);
+        $dts=$m_dt->get_all1();
+        $this->assign("dts", $dts);
+       
         $user = DB::name('user') 
         ->where(["id" => $id])
         ->find();
@@ -314,8 +391,13 @@ class UserController extends AdminBaseController
         }else{
             $user['out_time']=date('Y-m-d', $user['out_time']);
         }
-        $this->assign($user);
-        
+        $this->assign('info',$user);
+        $where_company=[
+            'status'=>2,
+            'shop'=>$user['shop']
+        ];
+        $companys=Db::name('company')->where($where_company)->order('shop asc,sort asc')->column('id,shop,name');
+        $this->assign("companys", $companys);
         return $this->fetch();
     }
 
@@ -369,6 +451,7 @@ class UserController extends AdminBaseController
                         'user_email'=>$data['user_email'], 
                         'mobile'=>$data['mobile'], 
                         'department'=>$data['department'],
+                        'dt'=>$data['dt'],
                         'emergency_mobile'=>$data['emergency_mobile'],
                         'idcard'=>$data['idcard'],
                         'address'=>$data['address'],
@@ -560,4 +643,5 @@ class UserController extends AdminBaseController
             $this->error('数据传入失败！');
         }
     }
+    
 }

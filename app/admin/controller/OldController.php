@@ -60,6 +60,7 @@ class OldController extends AdminBaseController
             '产品分类数据更正'=>url('cate_correct'),
             '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
             '付款银行+付款类型'=>url('sys'),
+            '地区信息'=>url('area'), 
             '(客户/供货商)联系人+对应付款账号+物流公司对应联系人和账号'=>url('tel'),
             '客户(同步分类和主体，关联联系人和付款账号)'=>url('custom'), 
             '供货商(同步分类和主体，关联联系人和付款账号)'=>url('supplier'),   
@@ -1303,6 +1304,73 @@ class OldController extends AdminBaseController
         $m_new->execute('truncate table cmf_auth_rule');
         
         echo ('end');
+    }
+    /**
+     * 地区信息同步
+     * @adminMenu(
+     *     'name'   => '地区信息同步',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 0,
+     *     'icon'   => '',
+     *     'remark' => '地区信息同步',
+     *     'param'  => ''
+     * )
+     */
+    public function area()
+    {
+        debug('begin');
+        $m_old=Db::connect($this->db_old);
+        
+        $sql='select * from sp_areas';
+        
+        $data=$m_old->query($sql);
+        if(empty($data)){
+            $this->error('数据查询错误');
+        }
+        $time=time();
+        foreach($data as $k=>$v){
+            $tmp=[
+                'aid'=>1,
+                'rid'=>1,
+                'status'=>2,
+                'atime'=>$time,
+                'rtime'=>$time,
+                'time'=>$time,
+                'type'=>intval($v['area_type']),
+                'fid'=>intval($v['pid']),
+                'sort'=>intval($v['sort']),
+                'code'=>(empty($v['area_code']))?'':$v['area_code'],
+                'postcode'=>(empty($v['area_postcode']))?'':$v['area_postcode'],
+                'name'=>(empty($v['area_name']))?'':$v['area_name'],
+                'type'=>intval($v['area_type']),
+            ];
+             
+            $data[$k]=$tmp;
+        }
+        $m_new=Db::name('area');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_area');
+        $row_mew=$m_new->insertAll($data);
+        
+        $m_new->where($this->where_corrects)->update($this->corrects);
+        
+        echo '<h2>已添加地区'.$row_mew.'</h2>';
+        
+        //根据分类编码修正
+        
+        $m_new->commit();
+        
+        // ...其他代码段
+        debug('end');
+        // ...也许这里还有其他代码
+        // 进行统计区间
+        echo debug('begin','end').'s';
+        echo debug('begin','end','m').'kb';
+        exit;
     }
     
 }

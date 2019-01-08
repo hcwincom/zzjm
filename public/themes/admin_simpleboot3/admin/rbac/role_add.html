@@ -13,12 +13,22 @@
                 <input type="text" class="form-control" id="input-name" name="name">
             </div>
         </div>
+         <div class="form-group">
+            <label for="input-name" class="col-sm-2 control-label"><span class="form-required">*</span>所属部门</label>
+            <div class="col-md-6 col-sm-10">
+                <select name="dt" id="dt" class="form-control short-auto"> 
+				<foreach name="dts" item="vo">
+					<option value="{$key}">{$vo}</option>
+				</foreach>
+				</select>
+            </div>
+        </div>
         <div class="form-group">
-				<label for="input-list_order" class="col-sm-2 control-label"><span class="form-required">*</span>权重排序（数字越小权限越大）</label>
-				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" id="input-list_order" name="list_order" value="10">
-				</div>
+			<label for="input-list_order" class="col-sm-2 control-label"><span class="form-required">*</span>权重排序（数字越小权限越大）</label>
+			<div class="col-md-6 col-sm-10">
+				<input type="text" class="form-control" id="input-list_order" name="list_order" value="1000">
 			</div>
+		</div>
         <div class="form-group">
             <label for="input-remark" class="col-sm-2 control-label">{:lang('ROLE_DESCRIPTION')}</label>
             <div class="col-md-6 col-sm-10">
@@ -29,7 +39,7 @@
             <label class="col-sm-2 control-label">{:lang('STATUS')}</label>
             <div class="col-md-6 col-sm-10">
                 <label class="radio-inline">
-                    <input type="radio" name="status" value="1"> {:lang('ENABLED')}
+                    <input type="radio" name="status" value="1" checked> {:lang('ENABLED')}
                 </label>
                 <label class="radio-inline">
                     <input type="radio" name="status" value="0"> {:lang('DISABLED')}

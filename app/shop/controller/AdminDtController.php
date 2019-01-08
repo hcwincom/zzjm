@@ -5,18 +5,17 @@ namespace app\shop\controller;
  
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
-use app\shop\model\DepartmentModel;
   
-class AdminDepartmentController extends AdminInfo0Controller
+class AdminDtController extends AdminInfo0Controller
 {
     
     public function _initialize()
     {
         parent::_initialize();
        
-        $this->flag='二级部门';
-        $this->table='department';
-        $this->m=new DepartmentModel();
+        $this->flag='一级部门';
+        $this->table='dt';
+        $this->m=Db::name('dt');
         $this->edit=['name','sort','dsc'];
         $this->search=[
             'name' => '名称', 
@@ -30,15 +29,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门列表
+     * 一级部门列表
      * @adminMenu(
-     *     'name'   => '二级部门列表',
+     *     'name'   => '一级部门列表',
      *     'parent' => 'admin/User/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
      *     'icon'   => '',
-     *     'remark' => '二级部门列表',
+     *     'remark' => '一级部门列表',
      *     'param'  => ''
      * )
      */
@@ -50,15 +49,15 @@ class AdminDepartmentController extends AdminInfo0Controller
      
    
     /**
-     * 二级部门添加
+     * 一级部门添加
      * @adminMenu(
-     *     'name'   => '二级部门添加',
+     *     'name'   => '一级部门添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门添加',
+     *     'remark' => '一级部门添加',
      *     'param'  => ''
      * )
      */
@@ -69,15 +68,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门添加do
+     * 一级部门添加do
      * @adminMenu(
-     *     'name'   => '二级部门添加do',
+     *     'name'   => '一级部门添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门添加do',
+     *     'remark' => '一级部门添加do',
      *     'param'  => ''
      * )
      */
@@ -87,15 +86,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门详情
+     * 一级部门详情
      * @adminMenu(
-     *     'name'   => '二级部门详情',
+     *     'name'   => '一级部门详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门详情',
+     *     'remark' => '一级部门详情',
      *     'param'  => ''
      * )
      */
@@ -105,15 +104,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 二级部门状态审核
+     * 一级部门状态审核
      * @adminMenu(
-     *     'name'   => '二级部门状态审核',
+     *     'name'   => '一级部门状态审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门状态审核',
+     *     'remark' => '一级部门状态审核',
      *     'param'  => ''
      * )
      */
@@ -122,15 +121,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::review();
     }
     /**
-     * 二级部门状态批量同意
+     * 一级部门状态批量同意
      * @adminMenu(
-     *     'name'   => '二级部门状态批量同意',
+     *     'name'   => '一级部门状态批量同意',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门状态批量同意',
+     *     'remark' => '一级部门状态批量同意',
      *     'param'  => ''
      * )
      */
@@ -139,7 +138,7 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::review_all();
     }
     /**
-     * 二级部门禁用
+     * 一级部门禁用
      * @adminMenu(
      *     'name'   => '信息状态禁用',
      *     'parent' => 'index',
@@ -156,15 +155,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::ban();
     }
     /**
-     * 二级部门信息状态恢复
+     * 一级部门信息状态恢复
      * @adminMenu(
-     *     'name'   => '二级部门信息状态恢复',
+     *     'name'   => '一级部门信息状态恢复',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门信息状态恢复',
+     *     'remark' => '一级部门信息状态恢复',
      *     'param'  => ''
      * )
      */
@@ -173,15 +172,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::cancel_ban();
     }
     /**
-     * 二级部门编辑提交
+     * 一级部门编辑提交
      * @adminMenu(
-     *     'name'   => '二级部门编辑提交',
+     *     'name'   => '一级部门编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑提交',
+     *     'remark' => '一级部门编辑提交',
      *     'param'  => ''
      * )
      */
@@ -191,15 +190,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::edit_do();
     }
     /**
-     * 二级部门编辑列表
+     * 一级部门编辑列表
      * @adminMenu(
-     *     'name'   => '二级部门编辑列表',
+     *     'name'   => '一级部门编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑列表',
+     *     'remark' => '一级部门编辑列表',
      *     'param'  => ''
      * )
      */
@@ -209,15 +208,15 @@ class AdminDepartmentController extends AdminInfo0Controller
     }
     
     /**
-     * 二级部门审核详情
+     * 一级部门审核详情
      * @adminMenu(
-     *     'name'   => '二级部门审核详情',
+     *     'name'   => '一级部门审核详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门审核详情',
+     *     'remark' => '一级部门审核详情',
      *     'param'  => ''
      * )
      */
@@ -227,15 +226,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 二级部门信息编辑审核
+     * 一级部门信息编辑审核
      * @adminMenu(
-     *     'name'   => '二级部门编辑审核',
+     *     'name'   => '一级部门编辑审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑审核',
+     *     'remark' => '一级部门编辑审核',
      *     'param'  => ''
      * )
      */
@@ -244,15 +243,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::edit_review();
     }
     /**
-     * 二级部门编辑记录批量删除
+     * 一级部门编辑记录批量删除
      * @adminMenu(
-     *     'name'   => '二级部门编辑记录批量删除',
+     *     'name'   => '一级部门编辑记录批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑记录批量删除',
+     *     'remark' => '一级部门编辑记录批量删除',
      *     'param'  => ''
      * )
      */
@@ -262,15 +261,15 @@ class AdminDepartmentController extends AdminInfo0Controller
     }
     
     /**
-     * 二级部门批量删除
+     * 一级部门批量删除
      * @adminMenu(
-     *     'name'   => '二级部门批量删除',
+     *     'name'   => '一级部门批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门批量删除',
+     *     'remark' => '一级部门批量删除',
      *     'param'  => ''
      * )
      */
@@ -288,23 +287,19 @@ class AdminDepartmentController extends AdminInfo0Controller
         if($admin['shop']!=1){
             $this->error('店铺不能操作系统数据');
         } 
-        
+        if(in_array(1, $ids)){
+            $this->error('总部门不能删除');
+        }
         //彻底删除
-        $where=['department'=>['in',$ids]];
+        $where=['dt'=>['in',$ids]];
        //检查是否有用户
         $user=Db::name('user')->where($where)->find();
         if(!empty($user)){
-            $this->error('二级部门下有用户，不能删除');
+            $this->error('一级部门下有用户，不能删除');
         }
         parent::del_all();
     }
    
-     public function cates($type=3){
-         parent::cates($type);
-         $m=$this->m;
-         $dts=$m->get_all1();
-         $this->assign('dts',$dts);
-     }
      
      
 }

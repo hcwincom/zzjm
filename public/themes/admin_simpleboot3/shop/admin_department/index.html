@@ -86,7 +86,7 @@
 						<th width="100">{$flag}ID</th>
 					 
 						<th>{$flag}名</th> 
-						 
+						 <th>上级部门</th>
 						<th>创建人</th>
 						<th>创建时间</th>
 						<th>审核人</th>
@@ -111,7 +111,7 @@
 						</td>
 					 
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
-					  
+					  	<td>{$dts[$vo.dt]|default=$vo.dt}</td>
 						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">

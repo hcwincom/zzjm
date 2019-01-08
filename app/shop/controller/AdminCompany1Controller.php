@@ -1,44 +1,31 @@
 <?php
  
 namespace app\shop\controller;
-
  
-use app\common\controller\AdminInfo0Controller; 
-use think\Db; 
-use app\shop\model\DepartmentModel;
   
-class AdminDepartmentController extends AdminInfo0Controller
+class AdminCompany1Controller extends CompanyBaseController
 {
     
     public function _initialize()
     {
         parent::_initialize();
        
-        $this->flag='二级部门';
-        $this->table='department';
-        $this->m=new DepartmentModel();
-        $this->edit=['name','sort','dsc'];
-        $this->search=[
-            'name' => '名称', 
-            'id' => 'id',
-        ];
-        //没有店铺区分
-        $this->isshop=0;
+        $this->flag='线下子公司';
+         
+        $this->company_type=1;
         $this->assign('flag',$this->flag);
-        $this->assign('table',$this->table);
-        
         
     }
     /**
-     * 二级部门列表
+     * 线下子公司列表
      * @adminMenu(
-     *     'name'   => '二级部门列表',
-     *     'parent' => 'admin/User/default',
+     *     'name'   => '线下子公司列表',
+     *     'parent' =>  'admin/User/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
      *     'icon'   => '',
-     *     'remark' => '二级部门列表',
+     *     'remark' => '线下子公司列表',
      *     'param'  => ''
      * )
      */
@@ -50,15 +37,15 @@ class AdminDepartmentController extends AdminInfo0Controller
      
    
     /**
-     * 二级部门添加
+     * 线下子公司添加
      * @adminMenu(
-     *     'name'   => '二级部门添加',
+     *     'name'   => '线下子公司添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门添加',
+     *     'remark' => '线下子公司添加',
      *     'param'  => ''
      * )
      */
@@ -69,15 +56,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门添加do
+     * 线下子公司添加do
      * @adminMenu(
-     *     'name'   => '二级部门添加do',
+     *     'name'   => '线下子公司添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门添加do',
+     *     'remark' => '线下子公司添加do',
      *     'param'  => ''
      * )
      */
@@ -87,15 +74,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门详情
+     * 线下子公司详情
      * @adminMenu(
-     *     'name'   => '二级部门详情',
+     *     'name'   => '线下子公司详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门详情',
+     *     'remark' => '线下子公司详情',
      *     'param'  => ''
      * )
      */
@@ -105,15 +92,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 二级部门状态审核
+     * 线下子公司状态审核
      * @adminMenu(
-     *     'name'   => '二级部门状态审核',
+     *     'name'   => '线下子公司状态审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门状态审核',
+     *     'remark' => '线下子公司状态审核',
      *     'param'  => ''
      * )
      */
@@ -122,15 +109,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::review();
     }
     /**
-     * 二级部门状态批量同意
+     * 线下子公司状态批量同意
      * @adminMenu(
-     *     'name'   => '二级部门状态批量同意',
+     *     'name'   => '线下子公司状态批量同意',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门状态批量同意',
+     *     'remark' => '线下子公司状态批量同意',
      *     'param'  => ''
      * )
      */
@@ -139,7 +126,7 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::review_all();
     }
     /**
-     * 二级部门禁用
+     * 线下子公司禁用
      * @adminMenu(
      *     'name'   => '信息状态禁用',
      *     'parent' => 'index',
@@ -156,15 +143,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::ban();
     }
     /**
-     * 二级部门信息状态恢复
+     * 线下子公司信息状态恢复
      * @adminMenu(
-     *     'name'   => '二级部门信息状态恢复',
+     *     'name'   => '线下子公司信息状态恢复',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门信息状态恢复',
+     *     'remark' => '线下子公司信息状态恢复',
      *     'param'  => ''
      * )
      */
@@ -173,15 +160,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::cancel_ban();
     }
     /**
-     * 二级部门编辑提交
+     * 线下子公司编辑提交
      * @adminMenu(
-     *     'name'   => '二级部门编辑提交',
+     *     'name'   => '线下子公司编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑提交',
+     *     'remark' => '线下子公司编辑提交',
      *     'param'  => ''
      * )
      */
@@ -191,15 +178,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::edit_do();
     }
     /**
-     * 二级部门编辑列表
+     * 线下子公司编辑列表
      * @adminMenu(
-     *     'name'   => '二级部门编辑列表',
+     *     'name'   => '线下子公司编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑列表',
+     *     'remark' => '线下子公司编辑列表',
      *     'param'  => ''
      * )
      */
@@ -209,15 +196,15 @@ class AdminDepartmentController extends AdminInfo0Controller
     }
     
     /**
-     * 二级部门审核详情
+     * 线下子公司审核详情
      * @adminMenu(
-     *     'name'   => '二级部门审核详情',
+     *     'name'   => '线下子公司审核详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门审核详情',
+     *     'remark' => '线下子公司审核详情',
      *     'param'  => ''
      * )
      */
@@ -227,15 +214,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 二级部门信息编辑审核
+     * 线下子公司信息编辑审核
      * @adminMenu(
-     *     'name'   => '二级部门编辑审核',
+     *     'name'   => '线下子公司编辑审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑审核',
+     *     'remark' => '线下子公司编辑审核',
      *     'param'  => ''
      * )
      */
@@ -244,15 +231,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::edit_review();
     }
     /**
-     * 二级部门编辑记录批量删除
+     * 线下子公司编辑记录批量删除
      * @adminMenu(
-     *     'name'   => '二级部门编辑记录批量删除',
+     *     'name'   => '线下子公司编辑记录批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑记录批量删除',
+     *     'remark' => '线下子公司编辑记录批量删除',
      *     'param'  => ''
      * )
      */
@@ -262,49 +249,22 @@ class AdminDepartmentController extends AdminInfo0Controller
     }
     
     /**
-     * 二级部门批量删除
+     * 线下子公司批量删除
      * @adminMenu(
-     *     'name'   => '二级部门批量删除',
+     *     'name'   => '线下子公司批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门批量删除',
+     *     'remark' => '线下子公司批量删除',
      *     'param'  => ''
      * )
      */
     public function del_all()
     {
-        if(empty($_POST['ids'])){
-            $this->error('未选中信息');
-        }
-        $ids=$_POST['ids'];
-        
-        $m=$this->m;
-      
-        $admin=$this->admin;
-        //其他店铺检查,如果没有shop属性就只能是1号主站操作,有shop属性就带上查询条件
-        if($admin['shop']!=1){
-            $this->error('店铺不能操作系统数据');
-        } 
-        
-        //彻底删除
-        $where=['department'=>['in',$ids]];
-       //检查是否有用户
-        $user=Db::name('user')->where($where)->find();
-        if(!empty($user)){
-            $this->error('二级部门下有用户，不能删除');
-        }
+         
         parent::del_all();
     }
-   
-     public function cates($type=3){
-         parent::cates($type);
-         $m=$this->m;
-         $dts=$m->get_all1();
-         $this->assign('dts',$dts);
-     }
-     
-     
+    
 }

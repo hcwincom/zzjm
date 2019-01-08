@@ -443,12 +443,14 @@ class StoreGoodsModel extends Model
     public function box_num($store,$goods,$shop){
         $m_box=Db::name('store_box');
         $time=time();
+        //先得到更新的仓库的料位数
         $where_box=[
             'status'=>2,
             'store'=>$store,
             'goods'=>$goods
         ]; 
         $box_num=$m_box->where($where_box)->count();
+        //更新仓库的料位数
         $where_sg=[
             'store'=>$store,
             'goods'=>$goods 
@@ -458,16 +460,18 @@ class StoreGoodsModel extends Model
             'time'=>$time,
         ];
         $this->where($where_sg)->update($update);
-        //总库存料位
+        //总库存料位更新
         $where_box=[
             'status'=>2,
             'shop'=>$shop,
-            'goods'=>$goods
+            'goods'=>$goods,
+            'store'=>['gt',0],
         ];
         $box_num=$m_box->where($where_box)->count();
         $where_sg=[
             'shop'=>$shop,
-            'goods'=>$goods
+            'goods'=>$goods,
+            'store'=>0,
         ];
         $update=[
             'box_num'=>$box_num,

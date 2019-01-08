@@ -15,6 +15,26 @@
 	        </foreach> 
 	        </select>
         </notempty>
+         <select class="form-control" name="company"  >
+         	<option value="-1">未选择子公司</option>
+   			<option value="0" <if condition="0 eq $data.company">selected</if>>总公司</option>
+        <foreach name="companys" item="vo">
+        	<option value="{$key}" <if condition="$key eq $data.company">selected</if>>{$vo}</option>
+        </foreach> 
+        </select>
+        <select class="form-control" name="dt"  >
+   			<option value="0">部门</option>
+        <foreach name="dts" item="vo">
+        	<option value="{$key}" <if condition="$key eq $data.dt">selected</if>>{$vo}</option>
+        </foreach> 
+        </select>
+         <select class="form-control" name="department"  >
+   			<option value="-1">小组</option>
+   			<option value="0" <eq name="data.department" value="0">selected</eq>>总负责</option>
+        <foreach name="departments" item="vo">
+        	<option class="dt{$vo.dt}" value="{$key}" <if condition="$key eq $data.department">selected</if>>{$vo.name}</option>
+        </foreach> 
+        </select>
         <select class="form-control" name="type1" id="">
         <foreach name="types" item="vo">
         	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo[1]}</option>
@@ -34,10 +54,11 @@
 			<thead>
 				<tr>
 					<th width="50">ID</th>
-					 
+					<notempty name="shops">
 					<th>商家</th>
-				 
-					<th>部门</th>
+				    </notempty>
+				    <th>子公司</th>
+					<th>部门-小组</th>
 					<th>系统权限角色</th>
 					<th>身份</th>
 					<th>用户名</th>
@@ -55,9 +76,26 @@
 				<foreach name="users" item="vo">
 				<tr>
 					<td>{$vo.id}</td>
-					 
-					<td>{$vo.shop_name}</td> 
-					<td>{$vo.dt_name}</td>
+					<notempty name="shops">
+					<td>{$shops[$vo.shop]|default=vo.shop}</td> 
+				    </notempty>
+				    <td>
+				    <eq name="vo.company" value="0"> 
+				    	总公司
+				    <else/>
+				     {$vo.company_name|default=$vo.company}
+				    </eq>
+				   
+				    </td> 
+				 	<td>
+				 	{$dts[$vo.dt]|default=vo.dt}-
+				 	<eq name="vo.department" value="0">
+				 	总负责
+				 	<else/>
+				 	{$departments[$vo.department]['name']|default=vo.department}
+				 	</eq>
+				 	</td> 
+				 
 					<td>{$vo.roles}</td>
 					<th>{$jobs[$vo.job]}</th>
 					<td>{$vo.user_login}</td>
