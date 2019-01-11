@@ -259,11 +259,20 @@
 			</div>
 			
 			 <div class="form-group fleft-all">
-				<label class="col-sm-2 control-label">发票抬头</label>
+				<label class="col-sm-2 control-label">公司发票抬头</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control" name="invoice_title" value="{$info.invoice_title}" />
 				 <present name="change.invoice_title">
 					 <input type="text" class="form-control red" value="{$change.invoice_title}" />
+				</present>  
+				</div>
+			</div>
+			<div class="form-group fleft-all">
+				<label class="col-sm-2 control-label">公司税号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="invoice_ucode" value="{$info.invoice_ucode}" />
+				 <present name="change.invoice_ucode">
+					 <input type="text" class="form-control red" value="{$change.invoice_ucode}" />
 				</present>  
 				</div>
 			</div>
