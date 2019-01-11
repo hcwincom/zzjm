@@ -9,7 +9,7 @@
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">上级部门</label>
     <div class="col-md-6 col-sm-10">
-        <select name="dt" id="">
+        <select name="dt"  class="form-control">
         <foreach name="dts" item="vo">
         	<option value="{$key}" <if condition="$key eq $info.dt">selected</if>>{$vo}</option>
         </foreach> 

@@ -53,7 +53,7 @@ class UserController extends AdminBaseController
      */
     public function index()
     {
-        
+         
         $types=config('user_search');
         $search_types=config('search_types');
         $where = ["p.user_type" => ['eq',1]];
@@ -320,6 +320,7 @@ class UserController extends AdminBaseController
                         'weixin'=>$data['weixin'],
                         'wangwang'=>$data['wangwang'],
                         'job_status'=>1,
+                        'job'=>$data['job'],
                         'in_time'=>$time,
                         'create_time'=>$time,
                     ];
@@ -459,6 +460,7 @@ class UserController extends AdminBaseController
                         'weixin'=>$data['weixin'],
                         'wangwang'=>$data['wangwang'],
                         'job_status'=>intval($data['job_status']),
+                        'job'=>intval($data['job']),
                     ];
                     if(!empty($data['in_time'])){ 
                         $data_user['in_time']=strtotime($data['in_time']);
@@ -511,11 +513,29 @@ class UserController extends AdminBaseController
     public function userInfo()
     {
         $id   = cmf_get_current_admin_id();
-        $user = Db::name('user')->where(["id" => $id])->find();
+        $user = Db::name('user')
+        ->field('u.*,dt.name as dt_name,de.name as de_name')
+        ->alias('u')
+        ->join('cmf_dt dt','dt.id=u.dt','left')
+        ->join('cmf_department de','de.id=u.department','left')
+        ->where(["u.id" => $id])
+        ->find();
+        if($user['department']==0){
+            $user['de_name']='总负责';
+         }
+         if($id==1){
+             $user['rname']='系统超管';
+         }else{
+             //角色信息
+             $roles_user=Db::name('role_user')
+             ->alias('ru')
+             ->join('cmf_role r','r.id=ru.role_id')
+             ->where('ru.user_id','eq',$id)
+             ->column('r.id,r.name');
+             $user['rname']=implode(',', $roles_user);
+         }
          
-        $dt=Db::name('department')->where('id',$user['department'])->value('name');
-        $this->assign($user);
-        $this->assign('dt',$dt);
+        $this->assign('info',$user); 
         return $this->fetch();
     }
 

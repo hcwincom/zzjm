@@ -37,7 +37,7 @@ class AdminOrderController extends OrderBaseController
             7=>['p.mobile|p.phone','收货人电话'],
             
         ]; 
-        $this->assign('order_types',[]);
+       
     }
     
     /**
@@ -57,177 +57,7 @@ class AdminOrderController extends OrderBaseController
     {
         parent::index();
         return $this->fetch();
-        $table=$this->table;
-        $m=$this->m;
-        $admin=$this->admin;
-        $data=$this->request->param();
-        $where=[];
-       
         
-        //店铺,分店只能看到自己的数据，总店可以选择店铺
-        if($admin['shop']==1){
-            if(empty($data['shop'])){
-                $data['shop']=0;
-            }else{
-                $where['p.shop']=['eq',$data['shop']];
-            }
-        }else{
-            $where['p.shop']=['eq',$admin['shop']];
-            $this->where_shop=$admin['shop'];
-            
-        }
-        
-        //状态
-        if(empty($data['status'])){
-            $data['status']=0;
-        }else{
-            $where['p.status']=['eq',$data['status']];
-        }
-        //订单类型
-        if(empty($data['order_type'])){
-            $data['order_type']=0;
-        }else{
-            $where['p.order_type']=['eq',$data['order_type']];
-        }
-        //分类
-        if(empty($data['order_type'])){
-            $data['order_type']=0;
-        }else{
-            $where['p.order_type']=['eq',$data['order_type']];
-        }
-        
-        //添加人
-        if(empty($data['aid'])){
-            $data['aid']=0;
-        }else{
-            $where['p.aid']=['eq',$data['aid']];
-        }
-        
-        //所属公司
-        if(empty($data['company'])){
-            $data['company']=0;
-        }else{
-            $where['p.company']=['eq',$data['company']];
-        }
-        //付款方式
-        if(empty($data['paytype'])){
-            $data['paytype']=0;
-        }else{
-            $where['p.paytype']=['eq',$data['paytype']];
-        }
-        //付款类型
-        if(empty($data['pay_type'])){
-            $data['pay_type']=0;
-        }else{
-            $where['p.pay_type']=['eq',$data['pay_type']];
-        }
-       
-        //省
-        if(empty($data['province'])){
-            $data['province']=0;
-        }else{
-            $where['p.province']=['eq',$data['province']];
-        }
-        //市
-        if(empty($data['city'])){
-            $data['city']=0;
-        }else{
-            $where['p.city']=['eq',$data['city']];
-        }
-        
-        //类型
-        if(empty($data['type'])){
-            $data['type']=0;
-        }else{
-            $where['p.type']=['eq',$data['type']];
-        }
-        //查询字段
-        $types=[
-            'p.name'=>'订单编号',
-            'p.express_no'=>'物流编号',
-            'p.id'=>'订单id',
-            'custom.name'=>'客户名称',
-            'custom.code'=>'客户编号', 
-            'p.accept_name'=>'收货人',
-            'p.mobile|p.phone'=>'收货人电话', 
-        ];
-        $res=zz_search_param($types, $data, $where);
-        $data=$res['data'];
-        $where=$res['where'];
-        dump($res);
-       /*  //选择查询字段
-        if(empty($data['type1'])){
-            $data['type1']=key($types);
-        }
-        //搜索类型
-        $search_types=config('search_types');
-        if(empty($data['type2'])){
-            $data['type2']=key($search_types);
-        }
-        if(!isset($data['name']) || $data['name']==''){
-            $data['name']='';
-        }else{
-            $where[$data['type1']]=zz_search($data['type2'],$data['name']);
-        } */
-        
-        //时间类别
-        $times=config('order_time');
-        $res=zz_search_time($times, $data, $where);
-        $data=$res['data'];
-        $where=$res['where'];
-         
-        //客户类型
-        if(empty($data['custom_cate'])){
-            $data['custom_cate']=0;
-        }else{
-            $where['custom.cid']=['eq',$data['custom_cate']];
-        }
-        //关联表
-        $join=[
-            ['cmf_custom custom','p.uid=custom.id','left'],
-            
-        ];
-        $field='p.*,custom.name as custom_name';
-        
-        $list0=$m
-        ->alias('p')
-        ->field('p.id')
-        ->join($join)
-        ->where($where)
-        ->order('p.sort desc,p.id asc')
-        ->paginate();
-        // 获取分页显示
-        $page = $list0->appends($data)->render();
-       
-        $ids=[];
-        foreach($list0 as $k=>$v){
-            $ids[$v['id']]=$v['id'];
-            
-        }
-        $list=$m
-        ->alias('p') 
-        ->join($join)
-        ->where('p.id','in',$ids)
-        ->order('p.sort desc,p.id asc')
-        ->column($field);
-        
-      
-        $goods=Db::name('order_goods')->where('oid','in',$ids)
-        ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
-        foreach($goods as $k=>$v){
-            $list[$v['oid']]['infos'][]=$v;
-        }
-         
-        $this->assign('page',$page);
-        $this->assign('list',$list);
-        
-        $this->assign('data',$data);
-        $this->assign('types',$types);
-        $this->assign('times',$times);
-        $this->assign("search_types", $search_types);
-        
-        $this->cates(1);
-        return $this->fetch();
     }
      
    
@@ -246,28 +76,9 @@ class AdminOrderController extends OrderBaseController
      */
     public function add()
     {
-       
-        $admin=$this->admin;
-        $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
-        $this->cates();
-        $uid=$this->request->param('uid',0,'intval');
-        if($uid==0){
-            $custom=null;
-        }else{
-            //获取客户信息
-            $custom=Db::name('custom')->where('id',$uid)->find();
-            
-        }
-        $this->assign('info',null);
-      
-        $this->assign('tels',null);
-        $this->assign('accounts',null);
-        $this->assign('custom',$custom);
-        $this->assign('pay',null);
-        $this->assign('invoice',null);
-        $this->assign('ok_break',2); 
-        return $this->fetch();  
-        
+       parent::add();
+       $this->assign('ok_break',1);
+       return $this->fetch();  
     }
     /**
      * 订单添加do

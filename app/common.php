@@ -59,16 +59,35 @@ function zz_action($data_action,$data=[]){
     switch($data_action['type']){
         case 'add':
         case 'edit':
+            if(empty($data['dt'])){
+                $data=session('admin');
+            }
             //如果是添加和编辑要通知经理
+            //先得到小组经理和部门经理
             $where=[
-            'shop'=>['eq',$data_action['shop']],
-            'department'=>['in',[1,$data['department']]],
-            'job'=>['eq',1],
+                'shop'=>['eq',$data_action['shop']],
+                'department'=>['in',[0,$data['department']]],
+                'dt'=>['eq',$data['dt']],
+                'job'=>['eq',1],
+                'job_status'=>['lt',3],
+                'user_status'=>['eq',1],
             ];
+            $uids1=$m_user->where($where)->column('id');
+            //总部门总负责经理
+            $where=[
+                'shop'=>['eq',$data_action['shop']],
+                'department'=>['eq',0],
+                'dt'=>['eq',1],
+                'job'=>['eq',1],
+                'job_status'=>['lt',3],
+                'user_status'=>['eq',1],
+            ]; 
             if($data_action['shop']==2){
                 $where['shop']=['in',[1,$data_action['shop']]];
             }
-            $uids=$m_user->where($where)->column('id');
+            $uids2=$m_user->where($where)->column('id');
+            $uids=array_unique(array_merge($uids1,$uids2));
+            
             break;
         case 'review':
         case 'edit_review':

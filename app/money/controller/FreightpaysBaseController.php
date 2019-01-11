@@ -414,7 +414,8 @@ class FreightpaysBaseController extends AdminBaseController
             $data_oid[]=[
                 'pid'=>$id,
                 'oid'=>$k,
-                'money'=>$v['real_freight']
+                'money'=>$v['real_freight'],
+                'dsc'=>'sd',
             ];
         }
         Db::name($table.'_oid')->insertAll($data_oid);

@@ -6,6 +6,7 @@ namespace app\custom\controller;
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
 use app\goods\model\GoodsModel;
+use app\admin\model\UserModel;
   
 class CustomBaseController extends AdminInfo0Controller
 {
@@ -18,7 +19,7 @@ class CustomBaseController extends AdminInfo0Controller
         $this->isshop=1;
         $this->edit=['name','company','cid','city_code','code_num','postcode','paytype','pay_type',
             'email','mobile','level','url','shopurl','wechat','qq','fax',
-            'province','city','area','street','other','announcement','invoice_type',
+            'province','city','area','street','other','announcement','invoice_type','invoice_title',
             'tax_point','freight','payer','dsc','sort',
         ];
         $this->search=[
@@ -83,6 +84,12 @@ class CustomBaseController extends AdminInfo0Controller
             $data['status']=0;
         }else{
             $where['p.status']=['eq',$data['status']];
+        }
+        //付款类型
+        if(empty($data['pay_type'])){
+            $data['pay_type']=0;
+        }else{
+            $where['p.pay_type']=['eq',$data['pay_type']];
         }
         //分类
         if(empty($data['cid'])){
@@ -379,7 +386,8 @@ class CustomBaseController extends AdminInfo0Controller
             
         ];
         zz_action($data_action,['department'=>$admin['department']]);
-        
+        $m_user=new UserModel(); 
+        $m_user->aid_add($admin['id'], $id, $table.'_aid');
         $m->commit();
         //直接审核
         $rule='review';
@@ -409,6 +417,10 @@ class CustomBaseController extends AdminInfo0Controller
             $this->error('数据不存在');
         } 
         $this->where_shop=$info['shop'];
+        $admin=$this->admin;
+        if($admin['shop'] >1 && $admin['shop']!=$info['shop']){
+            $this->error('非法查看店铺信息');
+        }
         $table=$this->table;
         if($table=='custom'){ 
             $tel_type=1;
@@ -426,7 +438,12 @@ class CustomBaseController extends AdminInfo0Controller
         $account3=(isset($accounts[3]))?$accounts[3]:null;
         //客户分类信息
         $this->cates();
-        
+        $m_user=new UserModel();
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
         $this->assign('info',$info);
         $this->assign('account1',$account1);
         $this->assign('account2',$account2);
@@ -581,7 +598,15 @@ class CustomBaseController extends AdminInfo0Controller
             }
             
         }
-          
+        //检测是否有授权变化
+        if(!empty($data['aids'])){
+            $m_user=new UserModel();
+            $res=$m_user->aid_edit($admin,$info['aid'],$data['aids'],$info['id'],$table.'_aid');
+            if($res==1){
+                $content['aids']=$data['aids'];
+            }
+        }
+      
         if(empty($content)){
             $this->error('未修改');
         }
@@ -706,7 +731,12 @@ class CustomBaseController extends AdminInfo0Controller
         $this->assign('account3',$account3);
         $this->assign('info1',$info1);
         $this->assign('change',$change);
-        
+        $m_user=new UserModel();
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
         unset($change);
         return $this->fetch();  
     }
@@ -725,7 +755,7 @@ class CustomBaseController extends AdminInfo0Controller
         $table=$this->table;
         $m_edit=Db::name('edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,a.user_nickname as aname')
+        ->field('e.*,p.name as pname,a.user_nickname as aname,p.aid as paid')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
@@ -840,6 +870,13 @@ class CustomBaseController extends AdminInfo0Controller
                 }
                 unset($change['account3']);
             }
+            //检测是否有授权变化
+            if(isset($change['aids'])){
+                $m_user=new UserModel();
+                $m_user->aid_edit_do($admin,$info['paid'],$change['aids'],$info['pid'],$table.'_aid');
+                unset($change['aids']);
+            }
+            
             foreach($change as $k=>$v){
                 $update_info[$k]=$v;
             }
@@ -990,7 +1027,7 @@ class CustomBaseController extends AdminInfo0Controller
             'shop'=>$admin['shop'],
         ];
         $update['adsc']=(empty($data['adsc']))?'联系人信息编辑':$data['adsc'];
-        $fields=['contacter','receiver','checker'];
+        $fields=['contacter','receiver','checker','invoice_tel'];
         
         $content=[];
         //检测改变了哪些字段

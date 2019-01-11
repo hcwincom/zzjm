@@ -181,10 +181,17 @@ $('#shop').change(function(){
 var dt=parseInt($('#dt').val());
 $('#role input').hide(); 
 $('#role .dt'+dt).show();
+$('#department .dt').hide();
+$('#department .dt'+dt).show(); 
+
 $('#dt').change(function(){
 	dt=parseInt($(this).val());
 	$('#role input').prop('checked',false).hide();
 	$('#role .dt'+dt).show();
+	
+	$('#department .dt').hide();
+	$('#department .dt'+dt).show();
+	$('#department').val(0);
 	 
 });
 </script>	 

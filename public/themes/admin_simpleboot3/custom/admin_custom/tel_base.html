@@ -216,6 +216,15 @@
 			<div class="form-group fleft" style="width:100%">
 				<label  class="col-sm-2 control-label">身份状态</label>
 				<div class="col-md-6 col-sm-10">
+					<label class="radio-inline receiver">
+				 		<input type="radio" value="{$key}" name="invoice_tel" <if condition="$info.invoice_tel eq $key">checked</if> />
+				 		发票联系地址
+				 		<present name="change.invoice_tel">
+					 		<if condition="$change.invoice_tel eq $key">
+					 			<span class="red">新选中</span>
+					 		</if> 
+						</present> 
+				 	</label>
 					<label class="radio-inline checker">
 				 		<input type="radio" value="{$key}"   name="checker"  <if condition="$info.checker eq $key">checked</if>/>
 				 		默认对账人
@@ -243,6 +252,7 @@
 					 		</if> 
 						</present> 
 				 	</label>
+				 	
 				 	<label class="select-inline receiver">
 					 	<select name="status[{$key}]"  >
 						 	<option value="1">正常联系人</option>

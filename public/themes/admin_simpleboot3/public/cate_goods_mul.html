@@ -1,0 +1,39 @@
+ <include file="public@cate" />  
+ <input type="text" class="form-control short" value="" id="search_value"/> 
+  <button type="button" id="goods_search">查找</button>
+<div class=" goods_mul" id="goods_mul">
+ 选择分类,输入产品名称查询,二级分类和产品名称至少输入一个
+</div> 
+ 
+<script>
+ 
+$(function(){ 
+ 	 
+ 	var url="{:url('goods/Goodsajax/goods')}";
+	 
+	$('#goods_search').click(function(){
+		var cid=parseInt($('#cate2').val()); 
+		var cid0=parseInt($('#cate1').val()); 
+		var name=$.trim($('#search_value').val()); 
+		 if(cid==0 && name==''){ 
+			 return false;
+		 }
+		 $.post(url,{'cid':cid,'cid0':cid0,'name':name},function(data){ 
+			 if(data.code!=1){
+				 return false;
+			 }
+			 var list=data.data;
+			 var options='';
+			 for(var i in list){
+				 options+=' <label class="checkbox-line">'+
+				 '<input type="checkbox"  value="'+i+'" />'+list[i]['code']+','+list[i]['name']+'</label>';
+			 }
+			 
+			 $('#goods_mul').html(options);
+		 },'json');
+	});
+	 
+});
+
+
+</script>

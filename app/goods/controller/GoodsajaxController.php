@@ -240,11 +240,21 @@ class GoodsajaxController extends AdminBase0Controller
     }
     //获取分类下所有产品
     public function goods(){
-        $cid=$this->request->param('cid');
+        $cid=$this->request->param('cid',0,'intval');
+        $cid0=$this->request->param('cid0',0,'intval');
+        $name=$this->request->param('name','');
         $where=[
-            'cid'=>$cid,
             'status'=>2,
         ];
+        if($cid0>0){
+            $where['cid0']=$cid0;
+        }
+        if($cid>0){
+            $where['cid']=$cid0;
+        }
+        if(!empty($name)){
+            $where['name']=['like','%'.$name.'%'];
+        }
         $admin=$this->admin; 
         $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         

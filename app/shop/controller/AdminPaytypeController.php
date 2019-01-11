@@ -29,7 +29,7 @@ class AdminPaytypeController extends AdminInfo0Controller
      * 收付款账号列表
      * @adminMenu(
      *     'name'   => '收付款账号列表',
-     *     'parent' => 'shop/AdminIndex/default',
+     *     'parent' => 'money/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
