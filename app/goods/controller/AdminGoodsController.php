@@ -21,6 +21,7 @@ class AdminGoodsController extends AdminBaseController
     private $goods_type;
     private $units;
     private $fields_link;
+    private $where_shop;
     
     public function _initialize()
     {
@@ -86,17 +87,16 @@ class AdminGoodsController extends AdminBaseController
      * )
      */
     public function index()
-    { 
-        
-
-         
+    {  
         $m=$this->m;
         $data=$this->request->param();
         $admin=$this->admin;
-        $where=[];
-        if($admin['shop']!=1){
-            $where['p.shop']=['eq',$admin['shop']];
-        }
+        $where=[]; 
+        
+        $tmp=$this->search($where, $data,$admin);
+        $where=$tmp['where'];
+        $data=$tmp['data'];
+       
         //类型
         if(empty($data['type'])){
             $data['type']=0;
@@ -104,9 +104,7 @@ class AdminGoodsController extends AdminBaseController
             $where['p.type']=['eq',$data['type']];
         }
          
-        $tmp=$this->search($where, $data);
-        $where=$tmp['where'];
-        $data=$tmp['data'];
+        
         //关联设备数
         $goods_links=[
             '-1'=>'关联设备',
@@ -171,14 +169,13 @@ class AdminGoodsController extends AdminBaseController
             $list=[];
         }else{
             $list=$m
-            ->alias('p')
-            ->join('cmf_shop s','s.id=p.shop','left')
+            ->alias('p') 
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
             ->where('p.id','in',$ids)
             ->order('p.status asc,p.time desc')
-            ->column('p.*,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname');
+            ->column('p.*,b.name as bname,a.user_nickname as aname,r.user_nickname as rname');
             //取商城图片
             $list=$m->goods_pics($list);
             
@@ -193,14 +190,14 @@ class AdminGoodsController extends AdminBaseController
     /**
      * 产品查询
      */
-    public function search($where,$data){
+    public function search($where,$data,$admin,$shop_field='p.shop'){
         
-        //店铺
-        if(empty($data['shop'])){
-            $data['shop']=0;
-        }else{
-            $where['p.shop']=['eq',$data['shop']];
-        }
+        //店铺 
+        $res=zz_shop($admin, $data, $where,$shop_field);
+        $data=$res['data'];
+        $where=$res['where'];
+        $this->where_shop=$res['where_shop'];
+        
         //状态
         if(empty($data['status'])){
             $data['status']=0;
@@ -435,12 +432,11 @@ class AdminGoodsController extends AdminBaseController
         $this->assign('times',$times);
       
         //分类
-        $this->cates();
+        $this->cates(1);
         $this->assign('cid0',$data['cid0']);
         $this->assign('cid',$data['cid']);
         $this->assign('select_class','form-control');
-        //品牌
-        $this->brands();
+       
         $this->assign('bchar',$data['bchar']);
         $this->assign('brand',$data['brand']);
         
@@ -493,15 +489,15 @@ class AdminGoodsController extends AdminBaseController
         return $this->fetch();
     }
     /**
-     * 产品组合列表
+     * 产品组合关联
      * @adminMenu(
-     *     'name'   => '产品组合列表',
+     *     'name'   => '产品组合关联',
      *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
      *     'icon'   => '',
-     *     'remark' => '产品组合列表',
+     *     'remark' => '产品组合关联',
      *     'param'  => ''
      * )
      */
@@ -517,10 +513,8 @@ class AdminGoodsController extends AdminBaseController
         //类型组合
         
         $where['gl.type']=['eq',2];
-        if($admin['shop']!=1){
-            $where['gl.shop']=['eq',$admin['shop']];
-        }
-        $tmp=$this->search($where, $data);
+        
+        $tmp=$this->search($where, $data,$admin,'gl.shop');
         $where=$tmp['where'];
         $data=$tmp['data'];
         //关联设备数
@@ -575,10 +569,9 @@ class AdminGoodsController extends AdminBaseController
             $data['is_link']=0;
             $list=Db::name('goods_link')
             ->alias('gl')
-            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p','p.id=gl.pid0')
-            ->join('cmf_goods p1','p1.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=gl.shop','left')
+            ->join('cmf_goods p1','p1.id=gl.pid1','left') 
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -588,10 +581,9 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $list=Db::name('goods_link')
             ->alias('gl')
-            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p0','p0.id=gl.pid0')
             ->join('cmf_goods p','p.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=p.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -613,15 +605,15 @@ class AdminGoodsController extends AdminBaseController
     }
     
     /**
-     * 加工产品列表
+     * 加工产品关联
      * @adminMenu(
-     *     'name'   => '加工产品列表',
+     *     'name'   => '加工产品关联',
      *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 4,
      *     'icon'   => '',
-     *     'remark' => '加工产品列表',
+     *     'remark' => '加工产品关联',
      *     'param'  => ''
      * )
      */
@@ -636,11 +628,8 @@ class AdminGoodsController extends AdminBaseController
         $where=[];
         //类型组合
         $where['gl.type']=['eq',4];
-        
-        if($admin['shop']!=1){
-            $where['gl.shop']=['eq',$admin['shop']];
-        }
-        $tmp=$this->search($where, $data);
+          
+        $tmp=$this->search($where, $data,$admin,'gl.shop');
         $where=$tmp['where'];
         $data=$tmp['data'];
         //关联设备数
@@ -695,10 +684,9 @@ class AdminGoodsController extends AdminBaseController
             $data['is_link']=0;
             $list=Db::name('goods_link')
             ->alias('gl')
-            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p','p.id=gl.pid0')
             ->join('cmf_goods p1','p1.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=gl.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -708,10 +696,9 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $list=Db::name('goods_link')
             ->alias('gl')
-            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p0','p0.id=gl.pid0')
             ->join('cmf_goods p','p.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=gl.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -754,11 +741,8 @@ class AdminGoodsController extends AdminBaseController
         $admin=$this->admin;
         $where=[];
         $where['gl.type']=['eq',5];
-        if($admin['shop']!=1){
-            $where['gl.shop']=['eq',$admin['shop']];
-        }
         
-        $tmp=$this->search($where, $data);
+        $tmp=$this->search($where, $data,$admin,'gl.shop');
         $where=$tmp['where'];
         $data=$tmp['data'];
         //关联设备数
@@ -816,10 +800,9 @@ class AdminGoodsController extends AdminBaseController
             $data['is_link']=0;
             $list=Db::name('goods_link')
             ->alias('gl')
-            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p','p.id=gl.pid0')
             ->join('cmf_goods p1','p1.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=gl.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -830,10 +813,9 @@ class AdminGoodsController extends AdminBaseController
            
             $list=Db::name('goods_link')
             ->alias('gl')
-            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p0','p0.id=gl.pid0')
             ->join('cmf_goods p','p.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=gl.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -853,15 +835,15 @@ class AdminGoodsController extends AdminBaseController
         return $this->fetch();
     }
     /**
-     * 标签产品列表
+     * 标签产品关联
      * @adminMenu(
-     *     'name'   => '标签产品列表',
+     *     'name'   => '标签产品关联',
      *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 3,
      *     'icon'   => '',
-     *     'remark' => '标签产品列表',
+     *     'remark' => '标签产品关联',
      *     'param'  => ''
      * )
      */
@@ -874,12 +856,8 @@ class AdminGoodsController extends AdminBaseController
         $data=$this->request->param();
         $admin=$this->admin;
         $where=[];
-        //类型组合
-         
-        if($admin['shop']!=1){
-            $where['gl.shop']=['eq',$admin['shop']];
-        }
-        $tmp=$this->search($where, $data);
+        //类型组合 
+        $tmp=$this->search($where, $data,$admin,'gl.shop');
         $where=$tmp['where'];
         $data=$tmp['data'];
         //关联设备数
@@ -936,10 +914,9 @@ class AdminGoodsController extends AdminBaseController
             $data['is_link']=0;
             $list=Db::name('goods_label')
             ->alias('gl')
-            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p.*,gl.pid1,gl.num as link_num,p1.name as link_name,p1.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p','p.id=gl.pid0')
             ->join('cmf_goods p1','p1.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=gl.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -949,10 +926,9 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $list=Db::name('goods_label')
             ->alias('gl')
-            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,s.name as sname,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
+            ->field('p0.*,gl.pid1,gl.num as link_num,p.name as link_name,p.code as link_code,b.name as bname,a.user_nickname as aname,r.user_nickname as rname')
             ->join('cmf_goods p0','p0.id=gl.pid0')
             ->join('cmf_goods p','p.id=gl.pid1','left')
-            ->join('cmf_shop s','s.id=gl.shop','left')
             ->join('cmf_brand b','b.id=p.brand','left')
             ->join('cmf_user a','a.id=p.aid','left')
             ->join('cmf_user r','r.id=p.rid','left')
@@ -993,9 +969,12 @@ class AdminGoodsController extends AdminBaseController
         $data=$this->request->param();
         $admin=$this->admin;
         $where=[];
-        if($admin['shop']>1){
-            $where['gs.shop']=$admin['shop'];
-        }
+        
+        //店铺
+        $res=zz_shop($admin, $data, $where,'gs.shop');
+        $data=$res['data'];
+        $where=$res['where'];
+        $this->where_shop=$res['where_shop'];
         //查询字段
         $types=[
             1=>['p.name','全名'], 
@@ -1026,12 +1005,11 @@ class AdminGoodsController extends AdminBaseController
         $this->assign("search_types", $search_types);
         //
         $fields='gs.*,p.name as goods_name,p.code as goods_code,p.time as goods_time'.
-                ',shop.name as shop_name,si.type,si.about,si.about_name,si.atime,si.rtime';
+                ',si.type,si.about,si.about_name,si.atime,si.rtime';
         $list=Db::name('goods_sn')
         ->alias('gs')
         ->join('cmf_goods p','p.id=gs.goods')
-        ->join('cmf_store_in si','si.id=gs.store_in')
-        ->join('cmf_shop shop','shop.id=gs.shop')
+        ->join('cmf_store_in si','si.id=gs.store_in') 
         ->field($fields)
         ->where($where)
         ->order('gs.goods asc,gs.store_in desc')
@@ -1039,7 +1017,7 @@ class AdminGoodsController extends AdminBaseController
         // 获取分页显示
         $page = $list->appends($data)->render();
          
-        
+        $this->cates(1);
         $this->assign('page',$page);
         $this->assign('list',$list);
         
@@ -1300,8 +1278,7 @@ class AdminGoodsController extends AdminBaseController
        $this->cates();
        $this->assign('cid0',0);
        $this->assign('cid',0);
-       //品牌
-       $this->brands();
+       
        $this->assign('bchar',-1);
        $this->assign('brand',-1); 
        //权限检测
@@ -1453,8 +1430,7 @@ class AdminGoodsController extends AdminBaseController
         $this->cates();
         $this->assign('cid0',$info['cid0']);
         $this->assign('cid',$info['cid']);
-        //品牌
-        $this->brands();
+       
         $this->assign('bchar',$info['bchar']);
         $this->assign('brand',$info['brand']);
         //权限检测
@@ -4199,7 +4175,7 @@ class AdminGoodsController extends AdminBaseController
                 $content[$v]=$data[$v];
             } 
         }
-       
+        
          //技术参数记录,新旧参数比较  .加标产品不修改参数
          if($info['type']!=3 && is_array($data['value'])){
              $params=[];
@@ -4932,28 +4908,24 @@ class AdminGoodsController extends AdminBaseController
             $this->assign('rids',$rids);
             
             //如果分店铺又是列表页查找,显示所有店铺
-            if($admin['shop']==1 && ($this->isshop) ){
+            if($admin['shop']==1 ){
                 $shops=Db::name('shop')->where('status',2)->column('id,name');
-                //首页列表页去除总站
-                
+                //首页列表页去除总站 
                 $this->assign('shops',$shops);
             }
             
         }
-        
-         
-    }
-    //获取品牌信息
-    public function brands(){
-        //分类 
+        //品牌分类
         $bcates=config('chars');
-        $where_brand=[ 
+        $where_brand=[
             'status'=>['eq',2],
         ];
         $brands=Db::name('brand')->where($where_brand)->order('char asc,sort asc')->column('id,name,char');
         $this->assign('bcates',$bcates);
         $this->assign('brands',$brands);
+         
     }
+     
     
     //获取价格模板
     public function prices(){

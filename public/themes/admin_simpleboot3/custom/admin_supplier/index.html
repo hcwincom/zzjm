@@ -60,8 +60,15 @@
 				</foreach>
 			</select> &nbsp;&nbsp;
 			
-			<select class="form-control" name="paytype" id="paytype">
+			<select class="form-control" name="pay_type" id="pay_type">
 				<option value='0'>付款类型</option> 
+				 <foreach name="pay_types" item="vo" k="key">
+				<option value="{$key} " <if condition="$key eq $data.pay_type">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<select class="form-control" name="paytype" id="paytype">
+				<option value='0'>付款账号</option> 
 				 <foreach name="paytypes" item="vo" k="key">
 				<option value="{$key} " <if condition="$key eq $data.paytype">selected</if>>{$vo}
 				</option>

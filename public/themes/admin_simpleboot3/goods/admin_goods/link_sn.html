@@ -10,6 +10,17 @@
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
+			<notempty name="shops"> 
+			 	店铺:<select class="form-control" id="shop" name="shop" >
+					<option value='0'>全部</option> 
+				 <foreach name="shops" item="vo" k="key">
+					<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 
+				 	{$vo}
+					</option>
+				</foreach>
+				</select> &nbsp;&nbsp; 
+			</notempty>
+			
 			<select class="form-control" name="type1" id="">
 			<foreach name="types" item="vo">
 				<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo[1]}</option>
@@ -41,7 +52,9 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
+						<notempty name="shops"> 
 						 <th>店铺</th> 
+						 </notempty>
 						<th>产品名</th> 
 						 <th>产品编码</th>  
 						<th>产品更新时间</th>
@@ -67,7 +80,9 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td>{$vo.shop_name}</td>
+						<notempty name="shops"> 
+						<td>{$shops[$vo.shop]|default=$vo.shop}</td>
+						</notempty>
 						<td><a href="{$goods_url}/id/{$vo.goods}"  target="{$zztarget['other']}">{$vo.goods_name}</a></td>
 						<td  > {$vo.goods_code}</td>
 						<td >  {$vo.goods_time|date='Y-m-d H:i',###} </td>

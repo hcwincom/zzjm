@@ -71,6 +71,16 @@ span.red{
 .notice{
 	color:blue;
 }
+.aids{
+ height:70px;
+	border:1px solid; 
+	overflow:auto;
+}
+.goods_mul{
+	 height:110px;
+	border:1px solid; 
+	overflow:auto;
+}
 .pic1{
 	background-position: center center;background-repeat: no-repeat;
  	 	display:inline-block;width:70px;height:70px;background-size:contain;

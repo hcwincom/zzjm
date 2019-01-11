@@ -27,10 +27,10 @@ class AdminOrderqController extends AdminInfo0Controller
      * 询盘列表
      * @adminMenu(
      *     'name'   => '询盘列表',
-     *     'parent' => 'orderq/AdminIndex/default',
+     *     'parent' => 'order/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 1,
+     *     'order'  => 2,
      *     'icon'   => '',
      *     'remark' => '询盘列表',
      *     'param'  => ''

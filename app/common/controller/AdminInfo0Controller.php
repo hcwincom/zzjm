@@ -246,8 +246,8 @@ class AdminInfo0Controller extends AdminBaseController
             'shop'=>$admin['shop'], 
             
         ];
-        zz_action($data_action,['department'=>$admin['department']]);
-        
+      
+        zz_action($data_action,$admin);
         $m->commit();
         //直接审核
         $rule='review';
@@ -562,9 +562,8 @@ class AdminInfo0Controller extends AdminBaseController
             'link'=>url('edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'], 
         ];
-      
-        zz_action($data_action,['department'=>$admin['department']]);
-        
+       
+        zz_action($data_action,$admin);
         $m_edit->commit();
         //判断是否直接审核
         $rule='edit_review';

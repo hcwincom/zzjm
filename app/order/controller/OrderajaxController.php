@@ -135,8 +135,8 @@ class OrderajaxController extends AdminBase0Controller
             $m=Db::name('supplier');
             $m_ugoods=Db::name('supplier_goods'); 
         }
-        $field='invoice_type,tax_point,freight,announcement,paytype,pay_type,receiver,payer';
-        $info=$m->field($field)->where($where_custom)->find();
+        
+        $info=$m->where($where_custom)->find();
         //联系人 
         $field='p.site,p.id,p.name,p.mobile,p.phone,p.street,p.postcode'.
             ',p.province,p.city,p.area'.
@@ -162,6 +162,35 @@ class OrderajaxController extends AdminBase0Controller
         ->alias('p')
         ->join('cmf_goods goods','goods.id=p.goods')
         ->where('p.uid',$uid)
+        ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
+        $this->success('ok','',$info);
+    }
+    //根据客户得到联系人
+    public function get_ugoods(){
+        
+        $admin=$this->admin;
+        $uid=$this->request->param('uid',0,'intval');
+        $type=$this->request->param('type',1,'intval');
+        $name=$this->request->param('name','');
+        
+        $where=['p.uid'=>$uid]; 
+        if($admin['shop']>1){ 
+            $where['p.shop']=$admin['shop'];
+        }
+        if(!empty($name)){
+            $where['p.name|goods.name']=['like','%'.$name.'%']; 
+        }
+        //付款方式,发票信息
+        if($type==1){ 
+            $m_ugoods=Db::name('custom_goods');
+        }else{ 
+            $m_ugoods=Db::name('supplier_goods');
+        } 
+        //供应产品 
+        $info=$m_ugoods
+        ->alias('p')
+        ->join('cmf_goods goods','goods.id=p.goods')
+        ->where($where)
         ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
         $this->success('ok','',$info);
     }

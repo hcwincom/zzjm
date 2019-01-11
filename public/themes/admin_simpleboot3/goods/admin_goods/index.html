@@ -50,7 +50,9 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
+						<notempty name="shops"> 
 						 <th>店铺</th> 
+						 </notempty>
 						<th>产品名</th> 
 						 <th>产品编码</th> 
 						 <th>产品类型</th> 
@@ -77,7 +79,9 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td>{$vo.sname|default=$vo.shop}</td>
+						<notempty name="shops"> 
+						<td>{$shops[$vo.shop]|default=$vo.shop}</td>
+						</notempty>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 						<td  > {$vo.code}</td>
 						<td >  {$goods_type[$vo.type]} </td>

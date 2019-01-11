@@ -58,9 +58,14 @@ class TaskController extends HomeBaseController
             $order_type=$this->order_type; 
            
             $m_store_goods=new StoreGoodsModel(); 
-            $fields = 'tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time,'.
-                'receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'; 
-              
+            $fields = 'tid,type,status,payment,orders,rx_audit_status,post_fee,status,modified,pay_time'.
+                ',receiver_name,receiver_state,receiver_city,receiver_district,receiver_address,receiver_mobile'.
+                ',buyer_nick,created,has_buyer_message,end_time,discount_fee,total_fee';
+            $fields_full = 'tid,logistics_company,buyer_message,seller_memo,buyer_memo,invoice_name'.
+                ',type,status,payment,orders,receiver_name,receiver_state,receiver_city,'.
+                'receiver_district,receiver_address,receiver_mobile,receiver_phone,'.
+                'receiver_zip,consign_time,received_payment,invoice_kind,'.
+                'invoice_type,buyer_cod_fee'; 
             $time=time();
             $time_start=$time-2400*24;
             $time_end=$time;
@@ -109,6 +114,30 @@ class TaskController extends HomeBaseController
                     //所有的订单
                     $trades=$json['trades_sold_get_response']['trades']['trade'];
                     foreach($trades as $kk=>$vv){ 
+                        $vv['dsc']='';
+                        $vv['udsc']='';
+                        //"buyer_message":"麻烦不要放价格清单","buyer_nick":"tb913800314",
+                        //order--"logistics_company":"中通快递",
+                        if(!empty($vv['has_buyer_message'])){
+                            $client->get('/JSB/rest/trade/TradeFullinfoGetRequest?fields='.$fields_full.'&tid='.$vv['tid']);
+                            $order_full = $client->getContent();
+                            zz_log($order_full);
+                            $arr=json_decode($order_full,true);
+                            $trade=$arr['trade_fullinfo_get_response']['trade'];
+                            if(!empty($trade['buyer_message'])){
+                                $vv['udsc'].=$trade['buyer_message'].'。';
+                            }
+                            if(!empty($trade['buyer_memo'])){
+                                $vv['udsc'].=$trade['buyer_memo'].'。';
+                            }
+                            if(!empty($trade['seller_message'])){
+                                $vv['dsc'].=$trade['seller_message'].'。';
+                            }
+                            if(!empty($trade['seller_memo'])){
+                                $vv['dsc'].=$trade['seller_memo'].'。';
+                            }
+                            
+                        }
                         //订单已存在
                         $update_order=[];
                         $old_status=1;
@@ -147,7 +176,7 @@ class TaskController extends HomeBaseController
         exit();
     }   
     
-    /**
+     /**
      * 根据淘宝订单状态判断是否需要更改
      * @param string $taobao_status
      * @param array $order
@@ -157,44 +186,61 @@ class TaskController extends HomeBaseController
         $update_order=[];
         //根据订单状态比较
         switch ($taobao['status']){
-            case 'WAIT_SELLER_SEND_GOODS':
-                //等待卖家发货,即:买家已付款)
-                if($order['status']==10){
+            case 'TRADE_NO_CREATE_PAY':
+            case 'WAIT_BUYER_PAY':
+                //没有创建支付宝交易，等待买家付款
+                if($order['status']<10){
                     //付款了要状态修改
-                    $update_order['pay_status']=3;
-                    $update_order['status']=20;
-                    $update_order['sort']=5;
-                }
+                    $update_order['pay_status']=1;
+                    $update_order['status']=10;
+                } 
+                break;
+            case 'PAY_PENDING':
+                //国际信用卡支付付款确认中
+                if($order['status']<10){
+                    //付款了要状态修改
+                    $update_order['pay_status']=2;
+                    $update_order['status']=10;
+                }  
                 break;
             case 'TRADE_CLOSED_BY_TAOBAO':
                 //付款以前，卖家或买家主动关闭交易)
-                if($order['status']>=80){
-                    //'已废弃',
-                    continue;
-                }else{
+                if($order['status']<80){ 
                     $update_order['status']=80;
                     $update_order['pay_status']=1;
-                    $update_order['sort']=0;
-                    
                 }
+               
+                break;
+            case 'WAIT_SELLER_SEND_GOODS':
+                //等待卖家发货,即:买家已付款)
+                if($order['status']<20){
+                    //付款了要状态修改
+                    $update_order['pay_status']=3;
+                    $update_order['status']=20;
+                } 
+                break;
+            case 'WAIT_BUYER_CONFIRM_GOODS':
+                //等待买家确认收货,即:卖家已发货)
+                if($order['status']<24){
+                    $update_order['pay_status']=3;
+                    $update_order['status']=24;
+                } 
                 break;
             case 'TRADE_BUYER_SIGNED':
                 //买家已签收,货到付款专用)
-                if($order['status']==24){
+                if($order['status']<26){
                     //已收货，货款也到付了,待确认
                     $update_order['pay_status']=2;
                     $update_order['status']=26;
-                    $update_order['sort']=4;
-                }
+                } 
                 break;
             case 'TRADE_FINISHED':
                 //(交易成功)
-                if($order['status']==24 || $order['status']==26){
+                if($order['status']<30){
                     $update_order['pay_status']=3;
                     $update_order['status']=30;
-                    $update_order['sort']=0;
                     $update_order['completion_time']=strtotime($taobao['modified']);
-                }
+                } 
                 break;
             case 'TRADE_CLOSED':
                 // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭)
@@ -202,21 +248,23 @@ class TaskController extends HomeBaseController
                     $update_order['pay_status']=3;
                     $update_order['is_back']=1;
                     $update_order['status']=70;
-                    $update_order['sort']=0;
-                }
+                } 
                 break;
-        }
-        $m=$this->m;
+             
+        } 
         if(empty($update_order)){
             return 1;
-        }else{
-            $update_order['time']=time();
-            if(empty($order['pay_time']) && isset($taobao['pay_time'])){
-                $update_order['pay_time']=strtotime($taobao['pay_time']);
-            }
-            $m->where('id',$order['id'])->update($update_order);
-            
+        } 
+        $m=$this->m;
+        $update_order['order_type']=$this->order_type;
+        $update_order['sort']=$m->get_sort($update_order); 
+        $update_order['time']=time();
+        if(empty($order['pay_time']) && isset($taobao['pay_time'])){
+            $update_order['pay_time']=strtotime($taobao['pay_time']);
         }
+        $m->where('id',$order['id'])->update($update_order); 
+            
+       
         return 1;
     }
     /**
@@ -228,9 +276,14 @@ class TaskController extends HomeBaseController
      * @return number|string
      */
     public function order_add($taobao,$company,$shop=2,$aid=1){
+        if(empty($taobao['receiver_district'])){
+            $taobao['receiver_district']='';
+            zz_log('receiver_district'.json_encode($taobao));
+        }
         //新增
         $update_order=[
             'name'=>$taobao['tid'],
+            'uname'=>$taobao['buyer_nick'],
             'order_type'=>$this->order_type,
             'company'=>$company['id'],
             'store'=>$company['store'],
@@ -238,67 +291,115 @@ class TaskController extends HomeBaseController
             'aid'=>$aid,
             'shop'=>$shop,
             'order_amount'=>$taobao['payment'],
-            'pay_freight'=>$taobao['post_fee'],
-            'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.(isset($taobao['receiver_district'])?$taobao['receiver_district']:''),
+            'pay_freight'=>$taobao['post_fee'], 
+            'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.$taobao['receiver_district'],
             'address'=>$taobao['receiver_address'],
             'accept_name'=>$taobao['receiver_name'],
             'mobile'=>isset($taobao['receiver_mobile'])?$taobao['receiver_mobile']:'',
             'pay_time'=>isset($taobao['pay_time'])?strtotime($taobao['pay_time']):0,
-            'create_time'=>time(),
+            'create_time'=>strtotime($taobao['created']),
             'time'=>time(),
             'pay_status'=>1,
             'status'=>10,
             'sort'=>0,
+            'udsc'=>$taobao['udsc'],
+            'dsc'=>$taobao['dsc']
         ];
-        
+        //省市县查询
+        $m_area=Db::name('area');
+        $where_area=[
+            'type'=>1,
+            'name'=>['like',mb_substr($taobao['receiver_state'], 0,2).'%']
+        ];
+        $province=$m_area->where($where_area)->find();
+        if(!empty($province)){
+            $update_order['province']=$province['id'];
+        }
+        $where_area=[
+            'type'=>2,
+            'name'=>['like',mb_substr($taobao['receiver_city'], 0,2).'%']
+        ];
+        $city=$m_area->where($where_area)->find();
+        if(!empty($city)){
+            $update_order['city']=$city['id'];
+            $update_order['postcode']=$city['postcode']; 
+        }
+        if(!empty($taobao['receiver_district'])){
+            $where_area=[
+                'type'=>3,
+                'name'=>['like',mb_substr($taobao['receiver_district'], 0,2).'%']
+            ];
+            $area=$m_area->where($where_area)->find();
+            if(!empty($area)){
+                $update_order['area']=$area['id'];
+                $update_order['postcode']=$area['postcode']; 
+            } 
+        }
+     
         //根据订单状态比较
         switch ($taobao['status']){
-            case 'WAIT_SELLER_SEND_GOODS':
-                //等待卖家发货,即:买家已付款)
-                $update_order['pay_status']=3;
-                $update_order['status']=20;
-                $update_order['sort']=5;
+            case 'TRADE_NO_CREATE_PAY':
+            case 'WAIT_BUYER_PAY':
+                //没有创建支付宝交易，等待买家付款
+                $update_order['pay_status']=1;
+                $update_order['status']=10;
+                break;
+            case 'PAY_PENDING':
+                //国际信用卡支付付款确认中
+                $update_order['pay_status']=2;
+                $update_order['status']=10;
                 break;
             case 'TRADE_CLOSED_BY_TAOBAO':
                 //付款以前，卖家或买家主动关闭交易)
                 $update_order['status']=80;
                 $update_order['pay_status']=1;
-                $update_order['sort']=0;
                 break;
+            case 'WAIT_SELLER_SEND_GOODS':
+                //等待卖家发货,即:买家已付款) 
+                $update_order['pay_status']=3;
+                $update_order['status']=20; 
+                break;
+            case 'WAIT_BUYER_CONFIRM_GOODS':
+                //等待买家确认收货,即:卖家已发货)
+                $update_order['pay_status']=3;
+                $update_order['status']=24;
+                break;  
             case 'TRADE_BUYER_SIGNED':
-                //买家已签收,货到付款专用)
+                //买家已签收,货到付款专用) 
                 $update_order['pay_status']=2;
-                $update_order['status']=26;
-                $update_order['sort']=3;
+                $update_order['status']=26; 
                 break;
             case 'TRADE_FINISHED':
-                //(交易成功)
+                //(交易成功) 
                 $update_order['pay_status']=3;
-                $update_order['status']=30;
-                $update_order['sort']=0;
+                $update_order['status']=30; 
                 $update_order['completion_time']=strtotime($taobao['modified']);
                 break;
             case 'TRADE_CLOSED':
-                // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭)
+                // * TRADE_CLOSED(付款以后用户退款成功，交易自动关闭) 
                 $update_order['pay_status']=3;
                 $update_order['is_back']=1;
-                $update_order['status']=70;
-                $update_order['sort']=0;
+                $update_order['status']=70; 
                 break;
         }
         $m=$this->m;
+        $update_order['sort']=$m->get_sort($update_order);
         $oid=$m->insertGetId($update_order);
-        //标记排序，如果产品没有编码20，没找到产品21
+        //标记排序，如果产品没有编码20，没找到产品21 
         $sort=0;
         $iids=[];
         $goods_add=[];
         $ogs=$taobao['orders']['order'];
         //用于没查找到数据的产品的goods-id
         $flag=0;
+        $buyer_nick='';
+        //统计数量
+        $num=0;
         foreach($ogs as $k=>$v){
-            
+             
+            $buyer_nick=(empty($v['buyer_nick']))?$buyer_nick:$v['buyer_nick'];
             $rows=['oid'=>$oid];
-            
+           
             //outer_sku_id	String	81893848	外部网店自己定义的Sku编号
             //outer_sku_id
             //$tmp_goods['goods_code'] = $v['outer_sku_id'];//产品编码
@@ -307,8 +408,8 @@ class TaskController extends HomeBaseController
             //outer_sku_id和outer_iid都有，outer_sku_id更多，以outer_sku_id为主
             if(empty($v['outer_sku_id'])){
                 if(empty($v['outer_iid'])){
-                    //标记排序，如果产品没有编码,没找到产品
-                    $sort=20;
+                    //标记排序，如果产品没有编码,没找到产品 
+                    $sort=1; 
                     $rows['goods_code']=$flag--;
                 }else{
                     $rows['goods_code'] = $v['outer_iid'];//产品编码
@@ -316,18 +417,19 @@ class TaskController extends HomeBaseController
             }else{
                 $rows['goods_code'] = $v['outer_sku_id'];//产品编码
             }
-            
-            $iids[]= $rows['goods_code'];
+           
+            $iids[]= $rows['goods_code']; 
             $rows['goods_uname'] = $v['title'];//产品名称
             $rows['goods_ucate']=isset($v['sku_properties_name'])?$v['sku_properties_name']:'';//产品型号
             $rows['num'] = $v['num'];//产品数量
+            $num+=$v['num'];
             $rows['goods_pic'] = $v['pic_path'];//产品数量
             
             $rows['price_real'] = $v['price'];//产品单价
             $rows['pay_discount'] = $v['discount_fee'];//优惠费用
             
             $rows['pay'] = $v['total_fee'];//产品总价
-            
+          
             $goods_add[$rows['goods_code']]=$rows;
         }
         $where_goods=[
@@ -337,8 +439,8 @@ class TaskController extends HomeBaseController
         $goods_infos=Db::name('goods')->where($where_goods)->column('code,id,name,name3,price_in,price_sale');
         
         foreach ($goods_add as $k=>$v){
-            if(empty($goods_infos[$k])){
-                $sort=1;
+            if(empty($goods_infos[$k])){ 
+                $sort=1; 
                 $goods_add[$k]['goods']=$flag--;
                 $goods_add[$k]['goods_name']='';
                 $goods_add[$k]['print_name']='';
@@ -354,11 +456,14 @@ class TaskController extends HomeBaseController
             
         }
         Db::name('order_goods')->insertAll($goods_add);
+        $update=[
+            'goods_num'=>$num,
+        ];
         if(empty($update_order['sort']) && $sort>0){
-            $m->where('id',$oid)->update(['sort'=>$sort,'dsc'=>'产品要调整']);
+            $update['sort']=$sort; 
         }
+        $m->where('id',$oid)->update($update);
         return $oid;
     }
-    
 }
        

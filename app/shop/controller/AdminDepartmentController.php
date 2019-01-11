@@ -14,7 +14,7 @@ class AdminDepartmentController extends AdminInfo0Controller
     {
         parent::_initialize();
        
-        $this->flag='二级部门';
+        $this->flag='部门小组';
         $this->table='department';
         $this->m=new DepartmentModel();
         $this->edit=['name','sort','dsc'];
@@ -30,15 +30,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门列表
+     * 部门小组列表
      * @adminMenu(
-     *     'name'   => '二级部门列表',
+     *     'name'   => '部门小组列表',
      *     'parent' => 'admin/User/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 3,
      *     'icon'   => '',
-     *     'remark' => '二级部门列表',
+     *     'remark' => '部门小组列表',
      *     'param'  => ''
      * )
      */
@@ -50,15 +50,15 @@ class AdminDepartmentController extends AdminInfo0Controller
      
    
     /**
-     * 二级部门添加
+     * 部门小组添加
      * @adminMenu(
-     *     'name'   => '二级部门添加',
+     *     'name'   => '部门小组添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门添加',
+     *     'remark' => '部门小组添加',
      *     'param'  => ''
      * )
      */
@@ -69,15 +69,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门添加do
+     * 部门小组添加do
      * @adminMenu(
-     *     'name'   => '二级部门添加do',
+     *     'name'   => '部门小组添加do',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门添加do',
+     *     'remark' => '部门小组添加do',
      *     'param'  => ''
      * )
      */
@@ -87,15 +87,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         
     }
     /**
-     * 二级部门详情
+     * 部门小组详情
      * @adminMenu(
-     *     'name'   => '二级部门详情',
+     *     'name'   => '部门小组详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门详情',
+     *     'remark' => '部门小组详情',
      *     'param'  => ''
      * )
      */
@@ -105,15 +105,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 二级部门状态审核
+     * 部门小组状态审核
      * @adminMenu(
-     *     'name'   => '二级部门状态审核',
+     *     'name'   => '部门小组状态审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门状态审核',
+     *     'remark' => '部门小组状态审核',
      *     'param'  => ''
      * )
      */
@@ -122,15 +122,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::review();
     }
     /**
-     * 二级部门状态批量同意
+     * 部门小组状态批量同意
      * @adminMenu(
-     *     'name'   => '二级部门状态批量同意',
+     *     'name'   => '部门小组状态批量同意',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门状态批量同意',
+     *     'remark' => '部门小组状态批量同意',
      *     'param'  => ''
      * )
      */
@@ -139,7 +139,7 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::review_all();
     }
     /**
-     * 二级部门禁用
+     * 部门小组禁用
      * @adminMenu(
      *     'name'   => '信息状态禁用',
      *     'parent' => 'index',
@@ -156,15 +156,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::ban();
     }
     /**
-     * 二级部门信息状态恢复
+     * 部门小组信息状态恢复
      * @adminMenu(
-     *     'name'   => '二级部门信息状态恢复',
+     *     'name'   => '部门小组信息状态恢复',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门信息状态恢复',
+     *     'remark' => '部门小组信息状态恢复',
      *     'param'  => ''
      * )
      */
@@ -173,15 +173,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::cancel_ban();
     }
     /**
-     * 二级部门编辑提交
+     * 部门小组编辑提交
      * @adminMenu(
-     *     'name'   => '二级部门编辑提交',
+     *     'name'   => '部门小组编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑提交',
+     *     'remark' => '部门小组编辑提交',
      *     'param'  => ''
      * )
      */
@@ -191,15 +191,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::edit_do();
     }
     /**
-     * 二级部门编辑列表
+     * 部门小组编辑列表
      * @adminMenu(
-     *     'name'   => '二级部门编辑列表',
+     *     'name'   => '部门小组编辑列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑列表',
+     *     'remark' => '部门小组编辑列表',
      *     'param'  => ''
      * )
      */
@@ -209,15 +209,15 @@ class AdminDepartmentController extends AdminInfo0Controller
     }
     
     /**
-     * 二级部门审核详情
+     * 部门小组审核详情
      * @adminMenu(
-     *     'name'   => '二级部门审核详情',
+     *     'name'   => '部门小组审核详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门审核详情',
+     *     'remark' => '部门小组审核详情',
      *     'param'  => ''
      * )
      */
@@ -227,15 +227,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         return $this->fetch();  
     }
     /**
-     * 二级部门信息编辑审核
+     * 部门小组信息编辑审核
      * @adminMenu(
-     *     'name'   => '二级部门编辑审核',
+     *     'name'   => '部门小组编辑审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑审核',
+     *     'remark' => '部门小组编辑审核',
      *     'param'  => ''
      * )
      */
@@ -244,15 +244,15 @@ class AdminDepartmentController extends AdminInfo0Controller
         parent::edit_review();
     }
     /**
-     * 二级部门编辑记录批量删除
+     * 部门小组编辑记录批量删除
      * @adminMenu(
-     *     'name'   => '二级部门编辑记录批量删除',
+     *     'name'   => '部门小组编辑记录批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门编辑记录批量删除',
+     *     'remark' => '部门小组编辑记录批量删除',
      *     'param'  => ''
      * )
      */
@@ -262,15 +262,15 @@ class AdminDepartmentController extends AdminInfo0Controller
     }
     
     /**
-     * 二级部门批量删除
+     * 部门小组批量删除
      * @adminMenu(
-     *     'name'   => '二级部门批量删除',
+     *     'name'   => '部门小组批量删除',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '二级部门批量删除',
+     *     'remark' => '部门小组批量删除',
      *     'param'  => ''
      * )
      */
@@ -294,7 +294,7 @@ class AdminDepartmentController extends AdminInfo0Controller
        //检查是否有用户
         $user=Db::name('user')->where($where)->find();
         if(!empty($user)){
-            $this->error('二级部门下有用户，不能删除');
+            $this->error('部门小组下有用户，不能删除');
         }
         parent::del_all();
     }

@@ -5,6 +5,7 @@ namespace app\admin\controller;
  
 use cmf\controller\AdminBaseController; 
 use think\Db; 
+use app\order\model\OrderModel;
  /* 旧数据处理 */
 class OldController extends AdminBaseController
 {
@@ -979,11 +980,11 @@ class OldController extends AdminBaseController
             }
         }
         //订单主体
-        $m_new=Db::name('order');
+        $m_order=new OrderModel();
         //开启事务
-        $m_new->startTrans();
+        $m_order->startTrans();
         //先截取旧数据
-        $m_new->execute('truncate table cmf_order');   
+        $m_order->execute('truncate table cmf_order');   
         //获取最大的id来分页查询
         $sql='select max(id) as count from sp_order'; 
         $data=$m_old->query($sql);
@@ -1072,18 +1073,14 @@ class OldController extends AdminBaseController
                     default:  
                         //status1,2 
                         if($v['pay_type']==1 && $v['paystate']==0 && $v['order_type']==1){
-                            //待确认货款5，
-                            $v['sort']=5;
+                            //待确认货款 
                             $v['status']=10;
                         }elseif($v['distribution_status']==0){
                             if($v['pay_status']==1 || ($v['pay_type']==2 || $v['pay_type']==10)){
-                                //待发货
-                                $v['sort']=($v['order_type']==1)?10:3;
-                                $v['status']=20;
-                              
+                                //待发货 
+                                $v['status']=20; 
                             }else{
-                                //待付款4
-                                $v['sort']=4;
+                                //待付款 
                                 $v['status']=10;
                             } 
                         }  
@@ -1095,20 +1092,22 @@ class OldController extends AdminBaseController
                 }
                 if($v['pay_status']==0){
                     $v['pay_status']=1;
-                }else{
-                    $v['pay_status']=($v['sort']==5)?2:3;
+                }else{ 
+                    $v['pay_status']=($v['status']==10)?2:3;
                 }
-                
+                //排序
+                $v['sort']=$m_order->get_sort($v);
+                 
                 unset($v['paystate']);
                 unset($v['distribution_status']);
                 
                 $data[$k]=$v; 
             }
            
-            $row_mew=$m_new->insertAll($data);
+            $row_mew=$m_order->insertAll($data);
         } 
         
-        $m_new->commit();
+        $m_order->commit();
         zz_log('order订单主体同步完成');
        
         echo ('end');

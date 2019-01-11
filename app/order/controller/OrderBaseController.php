@@ -4,6 +4,7 @@ namespace app\order\controller;
 
  
 use think\Db; 
+use app\admin\model\UserModel;
  
 use cmf\controller\AdminBaseController; 
 use app\money\model\OrdersInvoiceModel;
@@ -34,8 +35,9 @@ class OrderBaseController extends AdminBaseController
        
         
         $this->review_status=config('review_status');
-        $this->assign('review_status',$this->review_status);
-        
+        $this->assign('review_status',$this->review_status); 
+        //is_back
+//         0无售后，1需要售后，2有售后，3售后结束
     }
     
     public function index()
@@ -60,6 +62,10 @@ class OrderBaseController extends AdminBaseController
             $this->where_shop=$admin['shop'];
             
         }
+        $res=zz_shop($admin, $data, $where,'p.shop');
+        $data=$res['data'];
+        $where=$res['where'];
+        $this->where_shop=$res['where_shop'];
         
         //状态
         if(empty($data['status'])){
@@ -158,8 +164,9 @@ class OrderBaseController extends AdminBaseController
         ->field('p.id')
         ->join($join)
         ->where($where)
-        ->order('p.sort desc,p.id asc')
+        ->order('p.sort desc,p.time desc')
         ->paginate();
+        
         // 获取分页显示
         $page = $list0->appends($data)->render();
        
@@ -184,7 +191,18 @@ class OrderBaseController extends AdminBaseController
             }
         }
         
-         
+        //公司
+        $where=[
+            'status'=>2, 
+        ];
+        if(empty($data['shop'])){
+            $where['shop']=($admin['shop']==1)?2:$admin['shop'];
+        }else{
+            $where['shop']=$data['shop'];
+        }
+        $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column('id,name');
+        $this->assign('companys',$companys);
+        
         $this->assign('page',$page);
         $this->assign('list',$list);
         
@@ -216,6 +234,15 @@ class OrderBaseController extends AdminBaseController
             $custom=Db::name($utable)->where('id',$uid)->find();
             
         }
+        //公司
+        $where=[
+            'shop'=>($admin['shop']==1)?2:$admin['shop'],
+            'type'=>1,
+            'status'=>2,
+        ];
+        $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name');
+        $this->assign('companys',$companys);
+        
         $this->assign('info',null);
       
         $this->assign('tels',null);
@@ -224,6 +251,7 @@ class OrderBaseController extends AdminBaseController
         $this->assign('pay',null);
         $this->assign('invoice',null);
         $this->assign('ok_break',2); 
+        $this->assign('ok_add',1); 
         return $this->fetch();  
         
     }
@@ -490,6 +518,9 @@ class OrderBaseController extends AdminBaseController
         if(!empty($update)){
             $m->where('id',$oid)->update($update);
         }
+        $m_user=new UserModel();
+        $m_user->aid_add($admin['id'], $id, $table.'_aid');
+        $m->commit();
         $m->commit();
         $this->success($dsc,url('edit',['id'=>$oid]));
     }
@@ -587,6 +618,22 @@ class OrderBaseController extends AdminBaseController
         }else{
             $ok_add=1;
         }
+        $m_user=new UserModel();
+        $table=$this->table;
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
+        //公司
+        $where=[
+            'shop'=>($admin['shop']==1)?2:$admin['shop'],
+            'type'=>($info['order_type']==1)?1:2,
+            'status'=>2,
+        ]; 
+        $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name');
+        $this->assign('companys',$companys);
+        
         $this->assign('ok_add',$ok_add); 
         
         $this->assign('infos',$res['infos']);
@@ -657,6 +704,15 @@ class OrderBaseController extends AdminBaseController
         if(!is_array($content)){
             $this->error($content);
         }  
+        //检测是否有授权变化
+        if(!empty($data['aids'])){
+            $m_user=new UserModel();
+            $res=$m_user->aid_edit($admin,$info['aid'],$data['aids'],$info['id'],$table.'_aid');
+            if($res==1){
+                $content['aids']=$data['aids'];
+            }
+        }
+        
         if(empty($content)){
             $this->error('未修改');
         }
@@ -926,6 +982,22 @@ class OrderBaseController extends AdminBaseController
         //订单产品
          $res=$m->order_goods($info,$admin['id'],$change);
         $this->cates(); 
+        
+        $m_user=new UserModel();
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
+        //公司
+        $where=[
+            'shop'=>$info['shop'],
+            'type'=>($info['order_type']==1)?1:2,
+            'status'=>2,
+        ];
+        $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name');
+        $this->assign('companys',$companys);
+        
         $this->assign('infos',$res['infos']);
         $this->assign('orders',$res['orders']);
         $this->assign('goods',$res['goods']);
@@ -1021,6 +1093,13 @@ class OrderBaseController extends AdminBaseController
             //得到修改的字段
             $change=Db::name('edit_info')->where('eid',$id)->value('content');
             $change=json_decode($change,true);
+            //检测是否有授权变化
+            if(isset($change['aids'])){
+                $m_user=new UserModel();
+                $m_user->aid_edit_do($admin,$order['aid'],$change['aids'],$order['id'],$table.'_aid');
+                unset($change['aids']);
+            }
+            
             $row=$m->order_edit_review($order, $change);
            
             if($row!==1){
@@ -1116,25 +1195,22 @@ class OrderBaseController extends AdminBaseController
             'user_type'=>1,
             'user_status'=>1,
         ];
-        if($type==3){
-            $field='id,name';
-            $order='sort asc';
-        }else{
-            $field='id,name,shop';
-            $order='shop asc,sort asc';
-        }
-       
-        if(empty($where_shop)){
+        $order='shop asc,sort asc';
+        $field='id,name'; 
+        $admin=$this->admin;
+        if($admin['shop']==1){
             $shops=Db::name('shop')->where($where)->order('sort asc')->column('id,name');
             $this->assign('shops',$shops);  
-        }else{
+        }
+        if(!empty($where_shop)){ 
             $where['shop']=$where_shop;
             $where_admin['shop']=$where_shop;
+        } 
+        if($where_admin['shop']==1 || $where_admin['shop']==2){
+            $where_admin['shop']=['lt',3];
         }
-        
+      
        
-        //公司
-        $companys=Db::name('company')->where($where)->order($order)->column($field);
         //付款方式
         $paytypes=Db::name('paytype')->where($where)->order($order)->column($field);
         //获取所有仓库
@@ -1142,7 +1218,7 @@ class OrderBaseController extends AdminBaseController
         //获取所有物流方式
         $freights=Db::name('freight')->where($where)->order('shop asc,sort asc,store asc')->column('id,name,shop,store'); 
         //管理员
-        $aids=Db::name('user')->where($where_admin)->column('id,user_nickname as name,shop');
+        $aids=Db::name('user')->where($where_admin)->column('id,user_nickname as name');
         if($type==3){ 
             $stores_tr='<thead><tr>';
             foreach($stores as $k=>$v){
@@ -1152,7 +1228,7 @@ class OrderBaseController extends AdminBaseController
             $this->assign('stores_tr',$stores_tr);
             $this->assign('stores_json',json_encode($stores)); 
         }
-        $this->assign('companys',$companys);
+    
         $this->assign('paytypes',$paytypes); 
         $this->assign('aids',$aids); 
         $this->assign('rids',$aids); 
@@ -1211,10 +1287,7 @@ class OrderBaseController extends AdminBaseController
         if($pay_status!=0 && $info['pay_status']!=$pay_status){
             $this->error('状态信息错误');
         }
-        $content=$m->order_edit($info, $data);
-        if(!is_array($content)){
-            $this->error($content);
-        }
+        
         switch ($pay_status){
             case 1:
                 //用户付款提交
@@ -1227,10 +1300,8 @@ class OrderBaseController extends AdminBaseController
                     $content['status']=20;
                 }elseif($info['status']==26){
                     $content['status']=30;
-                }
-              
-                break;
-            
+                } 
+                break; 
             case 0:
                 //超管编辑
                 $content['pay_status']=1;
@@ -1238,8 +1309,7 @@ class OrderBaseController extends AdminBaseController
             default:
                 $this->error('操作错误');
         }
-        
-        
+         
         //保存更改
         $m_edit=Db::name('edit');
         $m_edit->startTrans();

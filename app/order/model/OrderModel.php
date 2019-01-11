@@ -481,6 +481,7 @@ class OrderModel extends Model
          //新添加订单号
          $instore_add_oids=[];
          //依次处理change的信息，处理后unset
+         
          //先处理字订单产品，再处理订单信息
          if(isset($change['edit'])){
              foreach($change['edit'] as $koid=>$vo){
@@ -712,28 +713,49 @@ class OrderModel extends Model
      public function order_sort($id){
           $sort=0; 
           // sort排序，线下订单待发货10，已准备发货9，线下待确认货款8，线下待付款7，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排 
-        $order=$this->where('id',$id)->find();
-         
+          // sort排序，线下订单待发货10，准备发货9，线下待确认货款8，线下待付款7，待确认和待提交6，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排
+        
+          $order=$this->where('id',$id)->find();
+         /*  'order_status' =>
+          array (
+              1 => '未提交',
+              2 => '提交待确认',
+              10 => '待付款',
+              20 => '待发货',
+              22 => '已准备发货',
+              24 => '已发货',
+              26 => '已收货',
+              30 => '订单完成',
+              70 => '订单关闭',
+              80 => '已取消',
+              81 => '已废弃',
+          ), */
+          
          switch ($order['status']){
              case 20:
                  $sort=10; 
                  break;
              case 22:
                  $sort=9;
-                 break;
+                 break;  
              case 10:
                  switch ($order['pay_status']){
                      case 1:
-                         $sort=7;
+                         $sort=8;
                          break;
                      case 2:
-                         $sort=8;
+                         $sort=7;
                          break; 
                      default: 
                          break;
                  }  
                  break;  
+             case 2: 
+             case 1:
+                 $sort=6;
+                 break; 
              default:
+                 $sort=0;
                  break;
          }
          //淘宝订单落后
@@ -745,6 +767,59 @@ class OrderModel extends Model
          }
         
          return 1;
+     }
+     /* 获取订单排序 */
+     public function get_sort($order){
+         $sort=0;
+         // sort排序，线下订单待发货10，准备发货9，线下待确认货款8，线下待付款7，待确认和待提交6，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排
+          
+         /*  'order_status' =>
+          array (
+          1 => '未提交',
+          2 => '提交待确认',
+          10 => '待付款',
+          20 => '待发货',
+          22 => '已准备发货',
+          24 => '已发货',
+          26 => '已收货',
+          30 => '订单完成',
+          70 => '订单关闭',
+          80 => '已取消',
+          81 => '已废弃',
+          ), */
+         
+         switch ($order['status']){
+             case 20:
+                 $sort=10;
+                 break;
+             case 22:
+                 $sort=9;
+                 break;
+             case 10:
+                 switch ($order['pay_status']){
+                     case 1:
+                         $sort=8;
+                         break;
+                     case 2:
+                         $sort=7;
+                         break;
+                     default:
+                         break;
+                 }
+                 break;
+             case 2:
+             case 1:
+                 $sort=6;
+                 break;
+             default:
+                 $sort=0;
+                 break;
+         }
+         //淘宝订单落后
+         if($order['order_type']==3 && $sort >5){
+             $sort=$sort-5;
+         } 
+         return $sort;
      }
      /* 订单产品数量检查 */
      public function order_store($id){

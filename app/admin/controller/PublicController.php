@@ -102,6 +102,7 @@ class PublicController extends AdminBaseController
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);
                 session('name', $result["user_login"]);
+                session('admin',$result);
                 session('shop', $result["shop"]);
                 $is_review=Db::name('shop')->where('id',$result["shop"])->value('is_review');
                 session('shop_review', $is_review);

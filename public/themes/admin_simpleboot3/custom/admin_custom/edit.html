@@ -1,4 +1,5 @@
 <include file="public@header" />
+ 
 </head>
 <body>
 	<div class="wrap">
@@ -15,9 +16,11 @@
 				<div class="col-md-6 col-sm-10">
 				 
 				 <foreach name="statuss" item="vo">
+				
 				  	<label class="radio-inline">
 				 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
 				 	</label>
+				 
 				 </foreach>
 				</div>
 			</div>
