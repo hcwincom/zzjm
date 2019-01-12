@@ -1,35 +1,36 @@
 <include file="public@header" />
 <style>
 .order10 {
-	background: #f21534;
+	background: #f81233;
 }
 .order9 {
-	background: #999;
+	background: rgba(248,18,51,0.9);
 }
 .order8 {
-	background: rgb(32,87,244,0.8);
+	background: rgba(0,128,0,0.9);
 }
 .order7 {
-	background: rgb(16,120,13,0.8);
+	background: rgba(234,242,22,0.9);
 }
 .order6{
-	background: #ff7733;
+	background: rgba(27,76,237,0.9);
+	color: #121212;
 }
 .order5 {
-	background: #ebe41f;
+	background: rgba(27,76,237,0.8);
 }
 .order4 {
-	background: #3deb2b;
+	background: rgba(248,18,51,0.8);
 }
 .order3{
-	background: #26e9ab;
+	background: rgba(248,18,51,0.7);
 }
 .order2{
-	background: #f62c74;
+	background: rgba(234,242,22,0.6);
 }
 .order1{
-	background: rgb(0,90,131,0.8);
-	color: #121212;
+	background: rgba(27,76,237,0.6);
+	
 }
 </style>
 </head>
@@ -172,16 +173,17 @@
 					</tr>
 				</thead>
 				<tbody>
+					<php>$i=10;</php>
 					<foreach name="list" item="vo">
 				 
-					<tr class="order{$vo.sort}">
+					<tr class="order{$i--}">
 						<td>
 							<input type="checkbox" class="js-check"
 							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						{$vo.id} -{$vo.sort}
+						{$vo.id} -{$i+1}
 						<if condition="$vo.status eq 30 ||  $vo.status eq 26"> 
 							<a href="{:url('orderback/AdminOrderback/add',['oid'=>$vo.id,'order_type'=>1])}">申请售后</a>
 						 
