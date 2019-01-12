@@ -189,18 +189,7 @@ class AdminOrdersupController extends OrderBaseController
     {
         parent::edit_review();
     }
-    
-    //分类
-    public function cates($type=3){
-        
-        parent::cates($type);
-      
-        $this->assign('statuss',config('ordersup_status')); 
-        $this->assign('order_types',config('ordersup_type')); 
-        $this->assign('order_url',url('ordersup/AdminOrdersup/edit',false,false)); 
-        $this->assign('order_user_url',url('custom/AdminSupplier/edit',false,false)); 
-       
-    }
+     
     /**
      * 采购单提交
      * @adminMenu(

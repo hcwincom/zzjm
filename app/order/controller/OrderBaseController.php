@@ -1156,8 +1156,7 @@ class OrderBaseController extends AdminBaseController
     //分类
     public function cates($type=3){
         $this->assign('invoice_types',config('invoice_type'));
-        $this->assign('order_types',config('order_type'));
-        $this->assign('statuss',config('order_status'));
+     
         $this->assign('pay_status',config('pay_status'));
         $this->assign('pay_types',config('pay_type'));
         $this->assign('invoice_status',config('invoice_status'));
@@ -1239,10 +1238,16 @@ class OrderBaseController extends AdminBaseController
         if($utable=='custom'){
             $this->assign('order_url',url('order/AdminOrder/edit',false,false));
             $this->assign('order_user_url',url('custom/AdminCustom/edit',false,false));
-          }else{
-              $this->assign('order_url',url('ordersup/AdminOrdersup/edit',false,false));
-              $this->assign('order_user_url',url('custom/AdminSupplier/edit',false,false));
-          }
+            $this->assign('order_types',config('order_type'));
+            $this->assign('statuss',config('order_status'));
+      }else{
+          $this->assign('order_url',url('ordersup/AdminOrdersup/edit',false,false));
+          $this->assign('order_user_url',url('custom/AdminSupplier/edit',false,false));
+          $this->assign('statuss',config('ordersup_status'));
+          $this->assign('order_types',config('ordersup_type')); 
+      }
+          
+          
         $this->assign('order_url',url('order/AdminOrder/edit',false,false));
         $this->assign('order_user_url',url('custom/AdminCustom/edit',false,false));
         $this->assign('edit_url',url('edit_list',['type1'=>'id','type2'=>1],false));

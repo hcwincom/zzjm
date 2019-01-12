@@ -1194,31 +1194,58 @@ class OldController extends AdminBaseController
                 }
                 
                 
-                $v['sort']=0;
+               
+                $v['order_type']=1;
                 //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4为已完成
                 switch ($v['status']){
                     case 1:
-                        $v['status']=2;
-                        $v['sort']=2;
+                        $v['status']=2; 
                         break;
                     case 2:
-                        $v['status']=10;
-                        $v['sort']=5;
+                        $v['status']=10; 
                         break;
                     case 3:
-                        $v['status']=20;
-                        $v['sort']=10;
+                        $v['status']=20; 
                         break;
                     case 4:
                         $v['status']=30;
-                        break;
-                   
+                        break; 
                     default:
-                        $v['status']=1;
-                        $v['sort']=1;
+                        $v['status']=1; 
                         break;
                 }
-                
+                //排序
+                switch ($v['status']){
+                    case 24:
+                        $sort=9;
+                        break;
+                    case 22:
+                        $sort=8;
+                        break;
+                    case 20:
+                        $sort=7;
+                        break;
+                    case 2:
+                    case 1:
+                        $sort=6;
+                        break;
+                    case 10:
+                        switch ($v['pay_status']){
+                            case 1:
+                                $sort=3;
+                                break;
+                            case 2:
+                                $sort=2;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        $sort=0;
+                        break;
+                }
+                $v['sort']=$sort;
                 $data[$k]=$v;
             }
             

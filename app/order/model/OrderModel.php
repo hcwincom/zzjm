@@ -711,8 +711,7 @@ class OrderModel extends Model
      }
      /* 订单排序 */
      public function order_sort($id){
-          $sort=0; 
-          // sort排序，线下订单待发货10，已准备发货9，线下待确认货款8，线下待付款7，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排 
+          $sort=0;  
           // sort排序，线下订单待发货10，准备发货9，线下待确认货款8，线下待付款7，待确认和待提交6，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排
         
           $order=$this->where('id',$id)->find();
@@ -765,7 +764,27 @@ class OrderModel extends Model
          if($order['sort']!=$sort){ 
              $this->where('id',$id)->setField('sort',$sort);
          }
-        
+        //检查是否更新父级,且订单完成
+        if($order['fid']>0 && $order['status']>=30){
+            //如果子订单全部完成，则父级完成
+            $where_child=[
+                'fid'=>$order['fid'],
+                'status'=>['lt',30],
+            ];
+            $tmp=$this->where($where_child)->find();
+            if(empty($tmp)){
+                $update=[
+                    'sort'=>0,
+                    'time'=>time(),
+                    'status'=>30,
+                ];
+                $where=[
+                    'id'=>$order['fid'],
+                    'status'=>['lt',30]
+                ];
+                $this->where($where)->update($update);
+            }
+        }
          return 1;
      }
      /* 获取订单排序 */
@@ -819,6 +838,7 @@ class OrderModel extends Model
          if($order['order_type']==3 && $sort >5){
              $sort=$sort-5;
          } 
+         
          return $sort;
      }
      /* 订单产品数量检查 */
@@ -1223,15 +1243,14 @@ class OrderModel extends Model
              }else{
                  $update_info['is_freight_pay']=1;
              }
-           
-            zz_log(json_encode($update_info));
+            
              //有变化修改
              if($update_info['is_freight_pay']!=$order['is_freight_pay']){
                  $update_info['time']=time();
                  $this->where('id',$oid)->update($update_info);
              }
          } 
-         zz_log(json_encode($order));
+        
          return $res;
      }
      /**
