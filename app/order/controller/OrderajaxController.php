@@ -191,6 +191,7 @@ class OrderajaxController extends AdminBase0Controller
         ->alias('p')
         ->join('cmf_goods goods','goods.id=p.goods')
         ->where($where)
+        ->order('goods.code asc')
         ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
         $this->success('ok','',$info);
     }

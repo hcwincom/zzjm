@@ -145,10 +145,10 @@ class OrderBaseController extends AdminBaseController
         $data=$res['data'];
         $where=$res['where'];
         //客户类型
-        if(empty($data['custom_cate'])){
-            $data['custom_cate']=0;
+        if(empty($data['cid'])){
+            $data['cid']=0;
         }else{
-            $where['custom.cid']=['eq',$data['custom_cate']];
+            $where['custom.cid']=['eq',$data['cid']];
         }
         $utable=$this->utable;
         //关联表
@@ -262,6 +262,7 @@ class OrderBaseController extends AdminBaseController
     {
         $m=$this->m;
         $ogtable=$this->ogtable;
+        $table=$this->table;
         $flag=$this->flag;
         $oid_type=$this->oid_type;
         $ptype=$this->ptype;
@@ -315,7 +316,7 @@ class OrderBaseController extends AdminBaseController
             'udsc'=>$data['udsc'],
             'dsc'=>$data['dsc'],
             'create_time'=>$time,
-            'sort'=>2,
+            'sort'=>5,
             'ok_break'=>$data['ok_break'],
         ];
  
@@ -519,9 +520,8 @@ class OrderBaseController extends AdminBaseController
             $m->where('id',$oid)->update($update);
         }
         $m_user=new UserModel();
-        $m_user->aid_add($admin['id'], $id, $table.'_aid');
-        $m->commit();
-        $m->commit();
+        $m_user->aid_add($admin['id'], $oid, $table.'_aid');
+        $m->commit(); 
         $this->success($dsc,url('edit',['id'=>$oid]));
     }
     /**
@@ -759,7 +759,7 @@ class OrderBaseController extends AdminBaseController
             'shop'=>$admin['shop'],
         ];
         
-        zz_action($data_action,['department'=>$admin['department']]);
+        zz_action($data_action,$admin);
         
         $m_edit->commit();
         //直接审核
@@ -1236,7 +1236,13 @@ class OrderBaseController extends AdminBaseController
         $this->assign('freights',$freights); 
         $this->assign('goods_url',url('goods/AdminGoods/edit',false,false)); 
         $this->assign('image_url',cmf_get_image_url('')); 
-      
+        if($utable=='custom'){
+            $this->assign('order_url',url('order/AdminOrder/edit',false,false));
+            $this->assign('order_user_url',url('custom/AdminCustom/edit',false,false));
+          }else{
+              $this->assign('order_url',url('ordersup/AdminOrdersup/edit',false,false));
+              $this->assign('order_user_url',url('custom/AdminSupplier/edit',false,false));
+          }
         $this->assign('order_url',url('order/AdminOrder/edit',false,false));
         $this->assign('order_user_url',url('custom/AdminCustom/edit',false,false));
         $this->assign('edit_url',url('edit_list',['type1'=>'id','type2'=>1],false));

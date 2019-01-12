@@ -93,8 +93,15 @@
 				</foreach>
 			</select> &nbsp;&nbsp;
 			
-			<select class="form-control" name="paytype" id="paytype">
+			<select class="form-control" name="pay_type" id="pay_type">
 				<option value='0'>付款类型</option> 
+				 <foreach name="pay_types" item="vo" k="key">
+				<option value="{$key} " <if condition="$key eq $data.pay_type">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<select class="form-control" name="paytype" id="paytype">
+				<option value='0'>付款账号</option> 
 				 <foreach name="paytypes" item="vo" k="key">
 				<option value="{$key} " <if condition="$key eq $data.paytype">selected</if>>{$vo}
 				</option>
@@ -108,9 +115,9 @@
 				  </select>	 
 			<br/>
 			<select class="form-control" name="cid" >
-				<option value='0'>客户类型</option> 
+				<option value='0'>{$uflag}类型</option> 
 				 <foreach name="custom_cates" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.custom_cate">selected</if>>{$vo}
+				<option value="{$key}" <if condition="$key eq $data.cid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -173,17 +180,17 @@
 					</tr>
 				</thead>
 				<tbody>
-					<php>$i=10;</php>
+				 
 					<foreach name="list" item="vo">
 				 
-					<tr class="order{$i--}">
+					<tr class="order{$vo.sort}">
 						<td>
 							<input type="checkbox" class="js-check"
 							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
 							value="{$vo.id}">
 						</td>
 						<td class='id'> 
-						{$vo.id} -{$i+1}
+						{$vo.id} 
 						<if condition="$vo.status eq 30 ||  $vo.status eq 26"> 
 							<a href="{:url('orderback/AdminOrderback/add',['oid'=>$vo.id,'order_type'=>1])}">申请售后</a>
 						 
@@ -301,7 +308,7 @@
 					  
 					<else/>
 					 	已拆分
-					 	<eq name="info.status" value="2"> 
+					 	<eq name="vo.status" value="2"> 
 						 	 确认下单 
 						 </eq>
 					</eq>

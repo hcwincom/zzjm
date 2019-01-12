@@ -20,7 +20,7 @@ class CustomBaseController extends AdminInfo0Controller
         $this->edit=['name','company','cid','city_code','code_num','postcode','paytype','pay_type',
             'email','mobile','level','url','shopurl','wechat','qq','fax',
             'province','city','area','street','other','announcement','invoice_type','invoice_title',
-            'tax_point','freight','payer','dsc','sort',
+            'invoice_ucode','tax_point','freight','payer','dsc','sort',
         ];
         $this->search=[
             'p.name'=>'客户名称', 

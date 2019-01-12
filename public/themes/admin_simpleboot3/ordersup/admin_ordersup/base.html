@@ -39,6 +39,7 @@
 					<input type="text" class="form-control"  value="{$order_types[$info.order_type]}" readonly/> 
 				</div>
 			</div>
+			 <include file="public@aids" /> 
 		</notempty>
 		    
 	   		 <div class="form-group fleft">
@@ -52,65 +53,56 @@
 					</select>  
 				</div>
 			</div>
-	 	<empty name="info.id">
+	 	 <empty name="info.id">
 			 <div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">供应商筛选</label>
+				<label  class="col-sm-2 control-label">{$uflag}筛选</label>
 				<div class="col-md-6 col-sm-10">
 			 		<select  class="form-control  short-auto" id="company"   >
-						<option value="0">供应商来源</option>
+						<option value="0">{$uflag}所属公司</option>
 					<foreach name="companys" item="vo">
 						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo}</option>
 					</foreach>
 					</select>  
 					 
 					<select  class="form-control short-auto" id="custom_cate"  > 
-						<option value="0">供应商分类</option>
+						<option value="0">{$uflag}分类</option>
 					<foreach name="custom_cates" item="vo">
 						<option value="{$key}" <if condition="$key eq $custom.cid">selected</if>>{$vo}</option>
 					</foreach>
 					</select>
 					<select  class="form-control short-auto" id="province"  > 
-						<option value="0">供应商所在省</option> 
+						<option value="0">{$uflag}所在省</option> 
 					</select>
 					<select  class="form-control short-auto" id="city"  > 
-						<option value="0">供应商所在市</option> 
+						<option value="0">{$uflag}所在市</option> 
 					</select> 
-					<p class="notice">供应商所在省为必选项</p>
+					<p class="notice">{$uflag}所在省为必选项</p>
 				</div>
 			</div>
 			 <div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">供应商</label>
+				<label  class="col-sm-2 control-label">{$uflag}</label>
 				<div class="col-md-6 col-sm-10"> 
 					 
 					<select  class="form-control " name="uid" id="custom"   >
-						<option value="{$custom.id}" >{$custom.name|default="请选择供应商"}</option>
+						<option value="{$custom.id}" >{$custom.name|default="请选择"}</option>
 					</select>
-					<a href="{:url('custom/AdminCustom/edit',['id'=>$custom.id])}" target="{$zztarget['other']}" id="custom_link">供应商详情</a>
+					<a href="{$order_user_url}/id{$custom.id}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
+				<p class="notice">选择{$uflag}后默认订单所属公司为{$uflag}所属公司，若有不同请手动更改</p>
 				</div>
 			</div>
 		<else/>
 		 	<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">供应商</label>
+				<label  class="col-sm-2 control-label">客户</label>
 				<div class="col-md-6 col-sm-10"> 
-					 <select  class="form-control  short-auto" id="company"   >
-						<option value="0">供应商来源</option>
-					<foreach name="companys" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>  
-					 
-					<select  class="form-control short-auto" id="custom_cate"  > 
-						<option value="0">供应商分类</option>
-					<foreach name="custom_cates" item="vo">
-						<option value="{$key}" <if condition="$key eq $custom.cid"></if>>{$vo}</option>
-					</foreach>
-					</select>
-					<select  class="form-control " id="custom"   >
-						<option value="{$custom.id}" >{$custom.name}</option>
-					</select>
-					<a href="{:url('custom/AdminSupplier/edit',['id'=>$custom.id])}" target="{$zztarget['other']}" id="custom_link">供应商详情</a>
+				 	<input type="hidden" id="custom" value="{$info.uid}"/>
+					 <input type="text"  class="form-control " value="{$custom.name|default=$info.uname}"/>
+					 <notempty name="info.uid">
+					  	<a href="{$order_user_url}/id{$info.uid}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
+		  			 </notempty>
+					
 				</div>
-			</div> 
+			</div>
+		
 		</empty>
 			 
 			 <div class="form-group fleft-all accept">
@@ -268,18 +260,34 @@
 					 </label> 
 				</div>
 			</div>
+			</empty>
+		<eq name="ok_add" value="1"> 
+	 		 
 			<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">添加产品</label>
+				<label  class="col-sm-2 control-label">订购产品</label>
 				<div class="col-md-6 col-sm-10">
-				     <select id="goods"  class="form-control short-auto">
-				   
-				   	 </select>
-					 <button type="button" id="goods_add">确定</button>
-					 <p class="notice">确定添加前要选中产品添加</p>
+					<div class="goods_mul" id="goods_mul1">
+						<empty name="ugoods">
+				     		没有订购产品
+					     <else/>
+					     <foreach name="ugoods" item="vo"> 
+					     	<label class="checkbox-line">
+					 			<input type="checkbox"  value="{$vo['goods']}" />{$vo.goods_code},{$vo.goods_name},{$vo.cate},{$vo.name},{$vo.num},{$vo.price}
+					 		</label>
+					     </foreach>
+					     </empty>  
+					</div>
+				 	 <input type="text" class="form-control short" value="" id="search_value1"/> 
+  					<button type="button" id="goods_search1">查找</button>
+  					 
+					 <button type="button" id="goods_add1">添加</button> 
 				 
 				</div>
 			</div>
-			<div style="clear:both"></div>
+			 
+		</eq>
+		<div style="clear:both"></div>
+		<empty name="info.id"> 
 			<div class="order" id="order_add"> 
 			 <input type="hidden" class="oid" value="0" name="oids[]"/>
 			  <table class="table table-hover table-bordered table-list goods-list" id="goods-list"> 
@@ -308,19 +316,7 @@
 	 		</div>
 	 		<div style="clear:both"></div>
 	 	<else/>
-	 	<eq name="ok_add" value="1"> 
-	 		<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">添加产品</label>
-				<div class="col-md-6 col-sm-10">
-				   <select id="goods"  class="form-control short-auto">
-				   
-				   </select>
-					 <button type="button" id="goods_add">确定</button>
-					 <p class="notice">确定添加前要选中产品添加</p> 
-				</div>
-			</div>
-			<div style="clear:both"></div>
-		</eq>
+	 	 
 		<div class="orders">
 		<foreach name="orders" item="vv" key="kk"> 
 		<notempty name="change['edit'][$kk]">
@@ -1358,6 +1354,6 @@ is_real=2;
 if(is_real==1){
 	  $('#order_pay').hide();
 } 
-var utype="{$utype|default=1}";
+ 
 </script>
-  <include file="ordersup@admin_ordersup:js" /> 
+ 

@@ -19,6 +19,12 @@ class OrdersInvoiceModel extends Model
             $data['company_bank_num']=$paytype['num'];  
             $data['company_bank_location']=$paytype['location']; 
         }
+       
+        if(empty($data['atime'])){
+            $time=time();
+            $data['atime']=$time;
+            $data['time']=$time;
+        }
         if(isset($data['id'])){
             unset($data['id']);
         }
@@ -49,6 +55,7 @@ class OrdersInvoiceModel extends Model
             $data['company_bank_num']=$paytype['num'];
             $data['company_bank_location']=$paytype['location'];
         }
+       $data['time']=time();
         $res=$this->where('id',$id)->update($data);
         return 1; 
     }

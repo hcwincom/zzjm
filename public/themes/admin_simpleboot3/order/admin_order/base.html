@@ -56,39 +56,39 @@
 			</div>
 	 	<empty name="info.id">
 			 <div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">客户筛选</label>
+				<label  class="col-sm-2 control-label">{$uflag}筛选</label>
 				<div class="col-md-6 col-sm-10">
 			 		<select  class="form-control  short-auto" id="company"   >
-						<option value="0">客户所属公司</option>
+						<option value="0">{$uflag}所属公司</option>
 					<foreach name="companys" item="vo">
 						<option value="{$key}" <if condition="$key eq $custom.company" >selected</if>>{$vo}</option>
 					</foreach>
 					</select>  
 					 
 					<select  class="form-control short-auto" id="custom_cate"  > 
-						<option value="0">客户分类</option>
+						<option value="0">{$uflag}分类</option>
 					<foreach name="custom_cates" item="vo">
 						<option value="{$key}" <if condition="$key eq $custom.cid">selected</if>>{$vo}</option>
 					</foreach>
 					</select>
 					<select  class="form-control short-auto" id="province"  > 
-						<option value="0">客户所在省</option> 
+						<option value="0">{$uflag}所在省</option> 
 					</select>
 					<select  class="form-control short-auto" id="city"  > 
-						<option value="0">客户所在市</option> 
+						<option value="0">{$uflag}所在市</option> 
 					</select> 
-					<p class="notice">客户所在省为必选项</p>
+					<p class="notice">{$uflag}所在省为必选项</p>
 				</div>
 			</div>
 			 <div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">客户</label>
+				<label  class="col-sm-2 control-label">{$uflag}</label>
 				<div class="col-md-6 col-sm-10"> 
 					 
 					<select  class="form-control " name="uid" id="custom"   >
-						<option value="{$custom.id}" >{$custom.name|default="请选择客户"}</option>
+						<option value="{$custom.id}" >{$custom.name|default="请选择"}</option>
 					</select>
-					<a href="{:url('custom/AdminCustom/edit',['id'=>$custom.id])}" target="{$zztarget['other']}" id="custom_link">客户详情</a>
-				<p class="notice">选择客户后默认订单所属公司为客户所属公司，若有不同请手动更改</p>
+					<a href="{$order_user_url}/id{$custom.id}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
+				<p class="notice">选择{$uflag}后默认订单所属公司为{$uflag}所属公司，若有不同请手动更改</p>
 				</div>
 			</div>
 		<else/>
@@ -98,8 +98,8 @@
 				 	<input type="hidden" id="custom" value="{$info.uid}"/>
 					 <input type="text"  class="form-control " value="{$custom.name|default=$info.uname}"/>
 					 <notempty name="info.uid">
-					 <a href="{:url('custom/AdminCustom/edit',['id'=>$info.uid])}" target="{$zztarget['other']}" id="custom_link">客户详情</a>
-					 </notempty>
+					  	<a href="{$order_user_url}/id{$info.uid}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
+		  			 </notempty>
 					
 				</div>
 			</div>
@@ -194,7 +194,7 @@
 			</div>
 		 
 			<div class="form-group fleft-all"  >
-				<label  class="col-sm-2 control-label">用户留言</label>
+				<label  class="col-sm-2 control-label">{$uflag}留言</label>
 				<div class="col-md-6 col-sm-10" > 
 				  <input type="text" class="form-control" name="udsc" value="{$info.udsc}" />
 				<present name="change.udsc">
@@ -434,14 +434,14 @@
      	   			<td class="price_in">{$vo.price_in}</td> 
      	   			<td class="price_sale">{$vo.price_sale}</td>
      	    		<td class="price_real">
-     	    			<input type="number" step="0.01" name="price_reals-{$kk}[{$key}]" class="form-control  " value="{$vo.price_real}"/>
+     	    			<input type="number" step="0.01" name="price_reals-{$kk}[{$key}]" class="form-control " value="{$vo.price_real}"/>
      	    		<present name="changevv['goods'][$key]['price_real']">
      	    			<input type="text"  class="form-control  red" value="{$changevv['goods'][$key]['price_real']}"/>
      	    		</present> 
      	    		</td>
      	    			
      	    		<td class="num">
-     	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control  " value="{$vo.num}" <eq name="ok_add" value="2">readonly</eq> />
+     	    			<input type="number" name="nums-{$kk}[{$key}]" class="form-control " value="{$vo.num}" <eq name="ok_add" value="2">readonly</eq> />
      	    		<present name="changevv['goods'][$key]['num']">
      	    		 	<input type="number" class="form-control  red" value="{$changevv['goods'][$key]['num']}" readonly/> 
      	    		</present> 
@@ -1346,6 +1346,5 @@ is_real=2;
 if(is_real==1){
 	  $('#order_pay').hide();
 } 
-var utype="{$utype|default=1}";
+ 
 </script>
-  <include file="order@admin_order:js" /> 

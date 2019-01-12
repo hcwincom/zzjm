@@ -250,7 +250,7 @@ class GoodsajaxController extends AdminBase0Controller
             $where['cid0']=$cid0;
         }
         if($cid>0){
-            $where['cid']=$cid0;
+            $where['cid']=$cid;
         }
         if(!empty($name)){
             $where['name']=['like','%'.$name.'%'];
@@ -258,7 +258,7 @@ class GoodsajaxController extends AdminBase0Controller
         $admin=$this->admin; 
         $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         
-        $goods=Db::name('goods')->where($where)->column('id,name,code');
+        $goods=Db::name('goods')->where($where)->order('code asc')->column('id,name,code');
         $this->success('ok','',$goods);
     }
     //获取产品的参数值
