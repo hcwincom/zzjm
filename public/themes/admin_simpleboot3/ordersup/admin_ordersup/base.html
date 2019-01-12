@@ -20,10 +20,10 @@
 					&nbsp;&nbsp;<a href="{:url('edit',['id'=>$info.fid])}" target="{$zztarget['edit']}">主采购单</a>
 				</neq>
 				<if condition="$info.status eq 30 ||  $info.status eq 26"> 
-				&nbsp;&nbsp;<a href="{:url('orderback/AdminOrderback/add',['oid'=>$info.id,'order_type'=>2])}" target="{$zztarget['edit']}">申请售后</a>
+				&nbsp;&nbsp;<a href="{:url('orderback/AdminOrderback2/add',['oid'=>$info.id,'order_type'=>2])}" target="{$zztarget['edit']}">申请售后</a>
 				</if>
 				<eq name="info.is_back" value="1">
-				&nbsp;&nbsp;<a href="{:url('orderback/AdminOrderback/index',['type1'=>'p.about','name'=>$info.id])}" target="{$zztarget['edit']}">售后记录</a>
+				&nbsp;&nbsp;<a href="{:url('orderback/AdminOrderback2/index',['type1'=>'p.about','type2'=>1,'name'=>$info.id])}" target="{$zztarget['edit']}">售后记录</a>
 				</eq>
 				</div>
 			</div>
@@ -86,7 +86,7 @@
 					<select  class="form-control " name="uid" id="custom"   >
 						<option value="{$custom.id}" >{$custom.name|default="请选择"}</option>
 					</select>
-					<a href="{$order_user_url}/id{$custom.id}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
+					<a href="{$order_user_url}/id/{$custom.id}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
 				<p class="notice">选择{$uflag}后默认订单所属公司为{$uflag}所属公司，若有不同请手动更改</p>
 				</div>
 			</div>

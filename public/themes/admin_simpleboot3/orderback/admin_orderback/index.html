@@ -98,12 +98,11 @@
 						<th width="100">{$flag}ID</th>  
 						<th>售后编号</th> 
 						<th>所属店铺</th> 
-						<th>所属公司</th> 
-						<th>订单类型</th>  
-						<th>订单号</th>
-						<th>客户名称</th>
-						<th>客户联系人</th>
-						<th>客户手机</th>
+						<th>所属公司</th>   
+						<th>{$typeinfo['order_type'][$order_type]}号</th>
+						<th>{$typeinfo['uflag'][$order_type]}名称</th>
+						<th>{$typeinfo['uflag'][$order_type]}联系人</th>
+						<th>{$typeinfo['uflag'][$order_type]}手机</th>
 						<th>售后状态</th>
 						<th>提交人</th> 
 					    <th>添加时间</th> 
@@ -128,9 +127,9 @@
 						 
 						<td > {$shops[$vo.shop]|default='--'}</td>
 						<td > {$vo.company_name}</td>
-						<td >{$typeinfo['order_type'][$vo.order_type]} </td>
-						<td > <a href="{$typeinfo['order_url'][$vo.order_type]}/id/{$vo.about}" target="{$zztarget.other}">{$vo.about_name}</a></td>
-						<td ><a href="{$typeinfo['custom_url'][$vo.order_type]}/id/{$vo.uid}" target="{$zztarget.other}"> {$vo.uname}</a></td>
+						 
+						<td > <a href="{$typeinfo['order_url'][$order_type]}/id/{$vo.about}" target="{$zztarget.other}">{$vo.about_name}</a></td>
+						<td ><a href="{$typeinfo['custom_url'][$order_type]}/id/{$vo.uid}" target="{$zztarget.other}"> {$vo.uname}</a></td>
 						<td > {$vo.accept_name}</td>
 						<td > {$vo.mobile}</td>
 						<td>{$statuss[$vo.status]}</td>

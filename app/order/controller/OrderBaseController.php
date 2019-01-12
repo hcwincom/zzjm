@@ -319,7 +319,9 @@ class OrderBaseController extends AdminBaseController
             'sort'=>5,
             'ok_break'=>$data['ok_break'],
         ];
- 
+        $utable=$this->utable;
+        $custom=Db::name($utable)->where('id',$data_order['uid'])->find();
+        $data_order['uname']=$custom['name'];
         //收货地址信息 
         $field='p.name,p.mobile,p.phone,p.street,p.postcode'.
             ',p.province,p.city,p.area'.
