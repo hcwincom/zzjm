@@ -82,8 +82,10 @@ span.red{
 	overflow:auto;
 }
 .pic1{
-	background-position: center center;background-repeat: no-repeat;
- 	 	display:inline-block;width:70px;height:70px;background-size:contain;
+		background-position: center center;background-repeat: no-repeat;
+		  display:inline-block;width:70px;height:70px;background-size:contain;
+		  vertical-align: middle;
+		 
  	 }
 #clickImg{
 	  display: none;
