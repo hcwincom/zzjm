@@ -1,0 +1,62 @@
+<include file="public@header" />
+</head>
+<body>
+	<div class="wrap">
+		<ul class="nav nav-tabs"> 
+			  <include file="money@admin_freightpays:nav" /> 
+			<li class="active"><a href="{:url('edit',['id'=>$info.id])}">{$flag}审核</a></li>  
+		 
+		</ul>
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('review')}" id="form-edit">
+			 
+			 <include file="money@admin_freightpays:base" /> 
+			<div class="form-group fleft-all accept">
+				<label  class="col-sm-2 control-label">审核备注</label>
+				<div class="col-md-6 col-sm-10"> 
+					<input type="text" class="form-control " name="rdsc" value="{$info.rdsc}" id="rdsc"/> 
+				<present name="change.rdsc">
+					<input type="text" class="form-control red"  value="{$change.rdsc}" />
+				</present>
+				</div>
+			</div>
+		 
+		 	<div class="form-group fleft-all">
+				<label  class="col-sm-2 control-label">结算状态</label>
+				<div class="col-md-6 col-sm-10">
+				<foreach name="review_status" item="vo">
+				 	<label class="radio-inline">  
+				   		<input type="radio" value="{$key}" name="rstatus" <if condition="$key eq $info.rstatus">checked</if>/>{$vo}
+				    </label>
+				 </foreach>   
+				  
+		  		</div>
+		    </div>
+			<div class="form-group fleft-all">
+				<div class="col-sm-offset-2 col-sm-10"> 
+				 <p>
+				 <input type="hidden"  name="id" value="{$info.id}" />
+				 
+					
+				<eq name="info.rstatus" value="1">
+					<button type="submit" action="{:url('review',['res'=>2])}" class="save btn btn-primary js-ajax-submit" >审核通过</button>
+					<button type="submit" action="{:url('review',['res'=>3])}" class="save btn btn-primary js-ajax-submit" >审核驳回</button>
+				
+				</eq>	 
+				</p>
+				
+					 
+				</div>
+				
+			</div>
+		</form>
+	 
+	</div>
+	<script src="__STATIC__/js/admin.js"></script> 
+</body>
+</html>
+<script>
+$('.save').click(function(){
+	 
+	$(this).parents('form').eq(0).attr('action',$(this).attr('action'));
+});
+</script>

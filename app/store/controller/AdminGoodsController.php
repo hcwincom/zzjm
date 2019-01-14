@@ -24,8 +24,7 @@ class AdminGoodsController extends AdminBaseController
     {
         parent::_initialize();
         $this->statuss=config('info_status');
-        
-       
+         
         $this->assign('statuss',$this->statuss);
       
         $this->assign('html',$this->request->action());
@@ -208,16 +207,52 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $where['p.store']=['eq',$data['store']]; 
         }
-        $list=$m
+        $ids0=$m
         ->alias('p')
-        ->field($field)
+        ->field('p.id')
         ->join($join)
         ->where($where)
         ->order('shop.sort asc,shop.id asc,p.time desc')
         ->paginate();
-        
         // 获取分页显示
-        $page = $list->appends($data)->render();
+        $page = $ids0->appends($data)->render();
+        $ids=[];
+        foreach($ids0 as $k=>$v){
+            $ids[]=$v['id'];
+        }
+        if(!empty($ids)){
+            $list=$m
+            ->alias('p') 
+            ->join($join)
+            ->where('p.id','in',$ids)
+            ->order('shop.sort asc,shop.id asc,p.time desc')
+            ->column($field);
+            $m_box=Db::name('store_box');
+            
+            foreach($list as $k=>$v){
+                 
+                $where_box=[
+                    'status'=>2,
+                    'goods'=>$v['goods'],
+                ];
+                if($v['store']>0){
+                    $where_box['store']=$v['store'];
+                }
+                
+                $box=$m_box->where($where_box)->column('code');
+                if(empty($box)){
+                    $list[$k]['box']='';
+                    $list[$k]['box_num']=0;
+                }else{
+                    //implode(',', $box)
+                    $list[$k]['box']=implode(',', $box);
+                    $list[$k]['box_num']=count($box);
+                }
+            }
+        }
+       
+       
+       
       
         //仓库
         $where=[

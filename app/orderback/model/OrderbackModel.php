@@ -19,14 +19,14 @@ class OrderbackModel extends Model
           
          $content=[];
          //检测改变了哪些字段 
-         $fields_int=['store1','store2','express1','express2','province','city','area','freight'];
+         $fields_int=['store1','store2','express1','express2','province','city','area','freight','pay_type'];
          foreach($fields_int as $v){ 
              $data[$v]=intval($data[$v]);
              if($info[$v]!=$data[$v]){
                  $content[$v]=$data[$v];
              }
          }
-         $fields_round=['goods_money','back_money','weight','size','pay_freight'];
+         $fields_round=['goods_money','back_money','weight','size','real_freight','pay_freight'];
          foreach($fields_round as $v){
              $data[$v]=round($data[$v],2);
              if($info[$v]!=$data[$v]){
@@ -113,35 +113,33 @@ class OrderbackModel extends Model
          foreach($change as $k=>$v){
              $update_info[$k]=$v;
          } 
+         //最新状态
+         if(isset($update_info['status2'])){
+             $orderback['status2']=$update_info['status2'];
+         }
+         if(isset($update_info['status1'])){
+             $orderback['status1']=$update_info['status1'];
+         }
+         if(isset($update_info['pay_status'])){
+             $orderback['pay_status']=$update_info['pay_status'];
+         }
+         if(isset($update_info['type'])){
+             $orderback['type']=$update_info['type'];
+         }
          
-         
-         //售后完成
+         //售后完成判断
          if($orderback['status']==4){
-             //已收货，货款结清是完成
-             if(isset($update_info['status2'])){
-                 $orderback['status2']=$update_info['status2'];
-             }
-             if(isset($update_info['pay_status'])){
-                 $orderback['pay_status']=$update_info['pay_status'];
-             }
-             if(isset($update_info['type'])){
-                 $orderback['type']=$update_info['type'];
-             }
-             //重新下单的需要手动点完成
-             if($orderback['status2']==5){
-                 
-             }
-             //标记发货和支付是否完成
+             //已收货，货款结清是完成 
+             //最后完成检测,标记发货和支付是否完成
              $store=0;
-             $pay=0;
+             $pay=0; 
              //重新下单的需要手动点完成
              if($orderback['status2']==5){
                  $store=0;
-             }elseif($orderback['order_type']==1 && $orderback['status2']>3){
+             }elseif($orderback['status2']==4 && $orderback['status1']==4){
+                 //都入库出库的
                  $store=1;
-             }elseif($orderback['order_type']==2 && $orderback['status2']>2){
-                 $store=1;
-             }
+             } 
              if($orderback['type']==1){
                  $pay=1;
              }elseif($orderback['pay_status']==3){
@@ -150,9 +148,17 @@ class OrderbackModel extends Model
              //售后完成
              if($pay && $store){
                  $update_info['status']=5;
+                 $update_info['completion_time']=$time;
+             } 
+         }
+         //物流费用
+         if($orderback['is_freight_pay']==1){
+             if($orderback['order_type']==1 && $orderback['status2']==4){
+                 $update_info['is_freight_pay']=2; 
+             }elseif($orderback['order_type']==2 && $orderback['status1']==4){
+                 $update_info['is_freight_pay']=2; 
              }
          }
-         
          
          $this->where('id',$orderback['id'])->update($update_info);
         
@@ -545,7 +551,9 @@ class OrderbackModel extends Model
          }
          $status_name=trim($status_name);
          $new_status=$order[$status_name];
+         //售后入库
          $type=21;
+         //售后发货
          if($order['order_type']==1 && $status_name=='status2'){
              $type=22; 
          }elseif($order['order_type']==2 && $status_name=='status1'){
@@ -567,12 +575,18 @@ class OrderbackModel extends Model
                  $res=$this->order_storein0($order['id'],$type,$num_ok);
                  break;
              case 3:  
-                 //入库确认
-//                  只标记为收货，但未入库
+                 //出库确认 
+                 //售后入库4入库要检测，出库3就是发出 
+                 if($type==22){
+                     $res=$this->order_storein2($order['id'],$type,$num_ok);
+                 } 
                  break;
              case 4:
                  //检测入库
-                 $res=$this->order_storein2($order['id'],$type,$num_ok);
+                 if($type==21){
+                     $res=$this->order_storein2($order['id'],$type,$num_ok);
+                 }
+                
                  break;
              case 5:
                  //重新下单

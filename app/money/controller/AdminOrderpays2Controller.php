@@ -33,7 +33,7 @@ class AdminOrderpays2Controller extends OrderpaysBaseController
      *     'parent' => 'money/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 1,
+     *     'order'  => 2,
      *     'icon'   => '',
      *     'remark' => ' 定期结账供应商列表',
      *     'param'  => ''

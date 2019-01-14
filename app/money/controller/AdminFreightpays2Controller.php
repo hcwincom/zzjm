@@ -2,7 +2,7 @@
  
 namespace app\money\controller;
  
-class AdminFreightpays1Controller extends FreightpaysBaseController
+class AdminFreightpays2Controller extends FreightpaysBaseController
 {
     
     public function _initialize()
@@ -10,32 +10,34 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         parent::_initialize();
        
        
-        $this->oflag='订单';
+        $this->oflag='客户售后';
        
-        $this->otable='order';
-        $this->otype=1;
-        $this->ogtable='order_goods';
+        $this->otable='orderback';
+        $this->otype=2;
+        $this->ogtable='orderback_goods';
        
-        $this->flag='订单运费结算';
+        $this->flag='客户售后运费结算';
          
         $this->assign('flag',$this->flag); 
        
         $this->assign('oflag',$this->oflag); 
-        $this->assign('order_status',config('order_status')); 
-       
-        $this->assign('ourl',url('order/AdminOrder/edit','',false,false)); 
+        $this->assign('otype',$this->otype); 
+    
+        $this->assign('order_status',[
+            1=>'待审核',2=>'确认',3=>'售后产品提交中',4=>'售后产品处理中',5=>'已完成',6=>'已取消',7=>'已废弃']);
+        $this->assign('ourl',url('orderback/AdminOrderback1/edit','',false,false)); 
         
     }
     /**
-     * 订单运费结算
+     * 客户售后运费结算
      * @adminMenu(
-     *     'name'   => ' 订单运费结算',
+     *     'name'   => ' 客户售后运费结算',
      *     'parent' => 'money/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 11,
+     *     'order'  => 12,
      *     'icon'   => '',
-     *     'remark' => ' 订单运费结算',
+     *     'remark' => ' 客户售后运费结算',
      *     'param'  => ''
      * )
      */
@@ -47,15 +49,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
      
     
     /**
-     * 客户订单列表
+     * 客户客户售后列表
      * @adminMenu(
-     *     'name'   => ' 客户订单列表',
+     *     'name'   => ' 客户客户售后列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '客户订单列表',
+     *     'remark' => '客户客户售后列表',
      *     'param'  => ''
      * )
      */
@@ -65,15 +67,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         return $this->fetch('admin_freightpays/orders');
     }
     /**
-     * 订单运费结算添加页面
+     * 客户售后运费结算添加页面
      * @adminMenu(
-     *     'name'   => '订单运费结算添加页面',
+     *     'name'   => '客户售后运费结算添加页面',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单运费结算添加页面',
+     *     'remark' => '客户售后运费结算添加页面',
      *     'param'  => ''
      * )
      */
@@ -83,15 +85,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         return $this->fetch('admin_freightpays/add');
     }
     /**
-     * 订单运费结算添加
+     * 客户售后运费结算添加
      * @adminMenu(
-     *     'name'   => '订单运费结算添加',
+     *     'name'   => '客户售后运费结算添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单运费结算添加',
+     *     'remark' => '客户售后运费结算添加',
      *     'param'  => ''
      * )
      */
@@ -103,15 +105,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
     
      
     /**
-     * 订单运费结算列表
+     * 客户售后运费结算列表
      * @adminMenu(
-     *     'name'   => ' 订单运费结算列表',
+     *     'name'   => ' 客户售后运费结算列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单运费结算列表',
+     *     'remark' => '客户售后运费结算列表',
      *     'param'  => ''
      * )
      */
@@ -121,15 +123,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         return $this->fetch('admin_freightpays/orderpays');
     }
     /**
-     * 订单运费结算详情
+     * 客户售后运费结算详情
      * @adminMenu(
-     *     'name'   => ' 订单运费结算详情',
+     *     'name'   => ' 客户售后运费结算详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单运费结算详情',
+     *     'remark' => '客户售后运费结算详情',
      *     'param'  => ''
      * )
      */
@@ -140,15 +142,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
     }
     
     /**
-     * 订单运费结算审核
+     * 客户售后运费结算审核
      * @adminMenu(
-     *     'name'   => '订单运费结算审核',
+     *     'name'   => '客户售后运费结算审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '订单运费结算审核',
+     *     'remark' => '客户售后运费结算审核',
      *     'param'  => ''
      * )
      */

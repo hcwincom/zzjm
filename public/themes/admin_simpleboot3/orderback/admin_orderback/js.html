@@ -91,6 +91,40 @@ $(document).on('click','.goods_del',function(){
 	$(this).parents('tr').remove(); 
 	tr_change();
 });  
+
+var url_freight_count="{:url('order/Orderajax/freight_count')}";
+
+$('.freight_count').click(function(){
+	   
+	var freight=$('#freight').val();
+	var weight=$('.weight').val();
+	var size=$('.size').val();
+	 
+	if(!(weight>0) || !(size>0)){
+		msg('先填写重量和体积');
+		return false;
+	} 
+	 
+	var city=$('#city').val();
+	 
+	$.ajax({
+        type: 'POST',
+        url: url_freight_count,
+        dataType: 'json', 
+        data:{'freight':freight,'city':city,'size':size,'weight':weight},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    }  
+     	    $('.real_freight').val(data.data);
+     	  
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
 </script>
 <script type="text/html" id="photos-item-pics"> 
 <li id="saved-imagepics{id}">

@@ -43,12 +43,12 @@
 				 	 <td >运费支付状态</td> 
 				 	 <td >发货时间</td> 
 				 	 <td >收货时间</td>
-					 <td >结算备注</td>
+					 
 				</tr>
 				<foreach name="orders" item="vv" key="kk"> 
 				<tr >
 				 	 <td class="order_name">
-				 	 	
+				 	 	<input type="hidden" class="oid" value="{$kk}" name="oids[]"/>
 				 	 	<a href="{$ourl}/id/{$kk}" target="{$zztarget.other}">{$vv.name}</a> 
 				 	 </td>
 				 	  <td class="clickInfo">
@@ -89,8 +89,6 @@
 				 	 <td  >{$freight_pay_status[$vv.is_freight_pay]}</td> 
 				 	 <td >{$vv.send_time|date='Y-m-d H:i',###}</td>
 					 <td >{$vv.accept_time|date='Y-m-d H:i',###}</td>
-					 <td ><input type="text" class="oid" value="{$vv.dsc}" name="oids[{$kk}]"/></td>
-					 
 				</tr>	
 				</foreach>
 			 </table> 

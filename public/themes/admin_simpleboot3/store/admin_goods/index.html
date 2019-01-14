@@ -125,7 +125,7 @@
 						<td><a href="{:url('goods/AdminGoods/edit',['id'=>$vo.goods])}"  target="{$zztarget['other']}">{$vo.goods_name}</a></td>
 					    <td>{$vo.goods_code}</td> 
 						<td>{$vo.num}</td>
-						<td>{$vo.box_num}</td>
+						<td>{$vo.box_num}({$vo.box})</td>
 						<td class="<if condition='$vo.num elt $vo.safe'>red</if>">
 								{$vo.num}({$vo.num1})
 						</td>

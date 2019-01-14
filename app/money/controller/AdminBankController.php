@@ -29,7 +29,7 @@ class AdminBankController extends AdminInfo0Controller
      *     'parent' => 'money/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 100,
      *     'icon'   => '',
      *     'remark' => '银行列表',
      *     'param'  => ''

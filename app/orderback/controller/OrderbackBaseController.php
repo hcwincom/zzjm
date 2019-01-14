@@ -340,6 +340,7 @@ class OrderbackBaseController extends AdminInfo0Controller
             'name'=>date('Ymd').substr($time,-6).$admin['id'],
             'aid'=>$admin['id'], 
             'atime'=>$time,
+            'create_time'=>$time, 
             'time'=>$time,
             'type'=>intval($data['type']),
             'order_type'=>$order_type,
@@ -352,11 +353,11 @@ class OrderbackBaseController extends AdminInfo0Controller
             'pics'=>'',
             
         ]; 
-        $fields_int=['store1','store2','express1','express2','province','city','area','freight'];
+        $fields_int=['store1','store2','express1','express2','province','city','area','freight','pay_type'];
         foreach($fields_int as $v){
             $data_orderback[$v]=intval($data[$v]);
         }
-        $fields_round=['goods_money','back_money','weight','size','pay_freight'];
+        $fields_round=['goods_money','back_money','weight','size','real_freight','pay_freight'];
         foreach($fields_round as $v){
             $data_orderback[$v]=round($data[$v],2);
         }
@@ -966,14 +967,32 @@ class OrderbackBaseController extends AdminInfo0Controller
         if($content['status1']<=$info['status1']){
             $this->error('数据状态错误，请重试');
         }
-       
-         if($info['status']==2){
-            $content['status']=3;
-         } elseif($info['order_type']==1 && $content['status1']==3){
-             $content['status']=4;
-         }elseif($info['order_type']==2 && $content['status1']==4){
-             $content['status']=4;
-         }
+         
+        //更新时间和状态
+        if($info['order_type']==2){
+            switch($content['status1']){
+                case 2:
+                    $content['status']=3;
+                    break; 
+                case 3:
+                    $content['send_time']=$time;
+                    break;
+                case 4:
+                    $content['accept_time']=$time;
+                    $content['status']=4; 
+                    break; 
+           }
+        }else{
+            switch($content['status1']){
+                case 2:
+                    $content['status']=3;
+                    break; 
+                case 3:
+                    $content['status']=4;
+                    break; 
+            }
+        }
+        
         //保存更改
         $m_edit=Db::name('edit');
         $m_edit->startTrans();
@@ -1071,7 +1090,17 @@ class OrderbackBaseController extends AdminInfo0Controller
         if($content['status2']<=$info['status2']){
             $this->error('数据状态错误，请重试');
         }
-        
+        //更新时间和状态
+        if($info['order_type']==1){
+            switch($content['status2']){ 
+                case 3:
+                    $content['send_time']=$time;
+                    break;
+                case 4:
+                    $content['accept_time']=$time; 
+                    break;
+            }
+        } 
         //保存更改
         $m_edit=Db::name('edit');
         $m_edit->startTrans();
@@ -1265,6 +1294,7 @@ class OrderbackBaseController extends AdminInfo0Controller
         }
       
         $content['pay_status']=2;
+        $content['pay_time']=$time;
         
         
         //保存更改
@@ -1602,6 +1632,7 @@ class OrderbackBaseController extends AdminInfo0Controller
         $this->assign('orderback_types',[1=>'免费换货',2=>'退货退款',3=>'仅退款',4=>'付费维修']);
          
         $this->assign('pay_status',[ 1=>'未付款/退款',2=>'付款/退款中',3=>'货款确认']);
+        $this->assign('pay_types',config('pay_type'));
         
         //店铺所属，管理员，公司，付款方式
         $where_shop=$this->where_shop;

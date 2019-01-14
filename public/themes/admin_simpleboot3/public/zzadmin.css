@@ -82,23 +82,22 @@ span.red{
 	overflow:auto;
 }
 .pic1{
-		background-position: center center;background-repeat: no-repeat;
-		  display:inline-block;width:70px;height:70px;background-size:contain;
-		  vertical-align: middle;
-		 
- 	 }
+	background-position: center center;background-repeat: no-repeat;
+	display:inline-block;width:70px;height:70px;background-size:contain;
+	vertical-align: middle;
+}
 #clickImg{
-	  display: none;
-	  position: fixed;
-	  top:0;
-	  right: 0;
-	  left: 0;
-	  bottom: 0;
-	  margin: auto;
-	  background: rgba(0,0,0,0.3); 
-	 z-index: 10;	
+  display: none;
+  position: fixed;
+  top:0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  margin: auto;
+  background: rgba(0,0,0,0.3); 
+  z-index: 10;	
 
-  }
+}
 #clickImg .btnImg{text-align: right;padding: 5px 2%;}
 #clickImg .glyphicon-remove-circle{font-size: 50px;color: #fff;cursor: pointer;}
 #clickImg  #bigImg{margin: 0 auto;background-repeat: no-repeat;background-position: center center;max-width: 90%;max-height: 80%;} 

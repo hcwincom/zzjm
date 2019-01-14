@@ -43,7 +43,7 @@ class AdminInvoiceController extends AdminInfo0Controller
      *     'parent' => 'money/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 5,
      *     'icon'   => '',
      *     'remark' => '发票列表',
      *     'param'  => ''

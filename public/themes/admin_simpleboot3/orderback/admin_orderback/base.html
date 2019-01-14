@@ -325,20 +325,26 @@
 			   </label>
 			   
 		   		 <label class="input-inline"> 
-					 包装总重：<input type="text" class="form-control short order_weight" name="weight" value="{$info.weight|default=order.weight}"  /> 
+					 包装总重：<input type="text" class="form-control short weight" name="weight" value="{$info.weight|default=order.weight}"  /> 
 					  <present name="change.weight" >
 					  	<span class="red">{$change.weight}</span>
 					  </present>
 					 </label>
 				 	 <label class="input-inline"> 
-					 包装总体积：<input type="text" class="form-control short order_size" name="size" value="{$info.size|default=$order.size}"  /> 
+					 包装总体积：<input type="text" class="form-control short size" name="size" value="{$info.size|default=$order.size}"  /> 
 					  <present name="change.size" >
 					  	<span class="red">{$change.size}</span>
 					  </present>
 					</label>
 				 	 <button class="freight_count" type="button">运费计算</button>
 				 	 <label class="input-inline"> 
-					 实际运费：<input type="text" class="form-control short real_freight" name="pay_freight" value="{$info.pay_freight}"  /> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" value="{$info.real_freight}"  /> 
+					 <present name="change.real_freight" >
+					  	<span class="red">{$change.real_freight}</span>
+					  </present>
+					 </label>
+					  <label class="input-inline"> 
+					 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight" value="{$info.pay_freight}"  /> 
 					 <present name="change.pay_freight" >
 					  	<span class="red">{$change.pay_freight}</span>
 					  </present>
@@ -385,7 +391,7 @@
 			<label  class="col-sm-2 control-label">原订单付款信息</label>
 			<div class="col-md-6 col-sm-10"> 
 				 <label class="input-inline"> 
-					 支付运费：<input type="text" class="form-control short  " value="{$order.pay_freight}" readonly/> 
+					 支付运费：<input type="text" class="form-control short  " value="{$order.real_freight}" readonly/> 
 					 
 					</label>
 				 	 <label class="input-inline"> 
@@ -427,6 +433,15 @@
 				 	<select  class="form-control short-auto"  name="type" required >
 				 	<foreach name="orderback_types" item="vo"> 
 						<option value="{$key}" <if condition="$key eq $info.type">selected</if>>{$vo}</option>
+					</foreach> 
+					</select> 
+				</label>
+			 
+				  <label class="input-inline">  
+				 	付款类型
+				 	<select  class="form-control short-auto"  name="pay_type" required >
+				 	<foreach name="pay_types" item="vo"> 
+						<option value="{$key}" <if condition="$key eq $info.pay_type">selected</if>>{$vo}</option>
 					</foreach> 
 					</select> 
 				</label>
@@ -482,24 +497,30 @@
 			   </label>
 			   
 		   		 <label class="input-inline"> 
-					 包装总重：<input type="text" class="form-control short order_weight" name="weight" value="{$info.weight|default=order.weight}"  /> 
-					  <present name="change.weight" >
-					  	<span class="red">{$change.weight}</span>
-					  </present>
-					 </label>
-				 	 <label class="input-inline"> 
-					 包装总体积：<input type="text" class="form-control short order_size" name="size" value="{$info.size|default=$order.size}"  /> 
-					  <present name="change.size" >
-					  	<span class="red">{$change.size}</span>
-					  </present>
-					</label>
-				 	 <button class="freight_count" type="button">运费计算</button>
-				 	 <label class="input-inline"> 
-					 实际运费：<input type="text" class="form-control short real_freight" name="pay_freight" value="{$info.pay_freight}"  /> 
-					 <present name="change.pay_freight" >
-					  	<span class="red">{$change.pay_freight}</span>
-					  </present>
-					 </label>
+				 包装总重：<input type="text" class="form-control short weight" name="weight" value="{$info.weight|default=order.weight}"  /> 
+				  <present name="change.weight" >
+				  	<span class="red">{$change.weight}</span>
+				  </present>
+				 </label>
+			 	 <label class="input-inline"> 
+				 包装总体积：<input type="text" class="form-control short size" name="size" value="{$info.size|default=$order.size}"  /> 
+				  <present name="change.size" >
+				  	<span class="red">{$change.size}</span>
+				  </present>
+				</label>
+			 	 <button class="freight_count" type="button">运费计算</button>
+			 	 <label class="input-inline"> 
+				 实际运费：<input type="text" class="form-control short real_freight" name="real_freight" value="{$info.real_freight}"  /> 
+				 <present name="change.real_freight" >
+				  	<span class="red">{$change.real_freight}</span>
+				  </present>
+				 </label>
+				 <label class="input-inline"> 
+				 支付运费：<input type="text" class="form-control short pay_freight" name="pay_freight" value="{$info.pay_freight}"  /> 
+				 <present name="change.pay_freight" >
+				  	<span class="red">{$change.pay_freight}</span>
+				  </present>
+				 </label>
 		    <else/>
 			   <label class="input-inline">
 			   快递公司
