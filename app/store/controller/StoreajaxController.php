@@ -119,7 +119,7 @@ class StoreajaxController extends AdminBase0Controller
             'store'=>$store,
             'status'=>2,
         ];
-        $list=Db::name('store_shelf')->where($where)->column('id,name');
+        $list=Db::name('store_shelf')->where($where)->order('sort asc')->column('id,name');
         $this->success('ok','',$list);
     }
     //根据货架获取层号
@@ -139,7 +139,7 @@ class StoreajaxController extends AdminBase0Controller
             'status'=>2,
             'goods'=>0,
         ];
-        $list=Db::name('store_box')->where($where)->column('id,name');
+        $list=Db::name('store_box')->where($where)->order('sort asc')>column('id,name');
         $this->success('ok','',$list);
     }
     
@@ -189,6 +189,7 @@ class StoreajaxController extends AdminBase0Controller
         ->alias('box')
         ->join('cmf_goods goods','goods.id=box.goods')
         ->where($where)
+        ->order('box.sort asc')
         ->column('box.id,box.name,box.code,box.goods,goods.code as goods_code,goods.name as goods_name,box.num');
         $this->success('ok','',$list);
     }
@@ -207,6 +208,7 @@ class StoreajaxController extends AdminBase0Controller
         ];
         $list=Db::name('store_box') 
         ->where($where)
+        ->order('sort asc')
         ->column('id,name,code,num');
         if(empty($list)){
             $list='';

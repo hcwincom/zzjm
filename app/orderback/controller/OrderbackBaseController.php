@@ -76,14 +76,26 @@ class OrderbackBaseController extends AdminInfo0Controller
                 'p.name'=>'售后编号',
                 'p.about_name'=>'订单编号',
                 'p.about'=>'订单id',
+                'p.express_no1'=>'收货运单号',
+                'p.express_no1'=>'发货运单号',
+                'p.uname'=>'客户名称',
+                'p.accept_name'=>'联系人',
+                'p.mobile'=>'联系手机',
+                'p.phone'=>'联系电话',
                 
             ];
+        
         }else{
             $types=[
                 'p.name'=>'售后编号',
                 'p.about_name'=>'采购编号',
                 'p.about'=>'采购id',
-                
+                'p.express_no1'=>'发货运单号',
+                'p.express_no1'=>'收货运单号',
+                'p.uname'=>'供应商名称',
+                'p.accept_name'=>'联系人',
+                'p.mobile'=>'联系手机',
+                'p.phone'=>'联系电话',
             ];
         }
         
@@ -312,8 +324,8 @@ class OrderbackBaseController extends AdminInfo0Controller
         if(empty($order)){
             $this->error('未找到订单');
         }
-        if($order['is_real']!=1 || $order['status']<26 || $order['status']>30){
-//             $this->error('订单不可申请售后');
+        if($order['is_real']!=1 || $order['status']<26){
+            $this->error('订单不可申请售后');
         }
        
         //店铺
@@ -340,11 +352,11 @@ class OrderbackBaseController extends AdminInfo0Controller
             'pics'=>'',
             
         ]; 
-        $fields_int=['store1','store2','express1','express2','province','city','area'];
+        $fields_int=['store1','store2','express1','express2','province','city','area','freight'];
         foreach($fields_int as $v){
             $data_orderback[$v]=intval($data[$v]);
         }
-        $fields_round=['goods_money','back_money'];
+        $fields_round=['goods_money','back_money','weight','size','pay_freight'];
         foreach($fields_round as $v){
             $data_orderback[$v]=round($data[$v],2);
         }
@@ -352,7 +364,7 @@ class OrderbackBaseController extends AdminInfo0Controller
         foreach($fields_str as $v){
             $data_orderback[$v]=$data[$v];
         }
-        
+      
         $m=$this->m;
         $m_info=Db::name('orderback_goods');
         $m->startTrans();
@@ -422,6 +434,9 @@ class OrderbackBaseController extends AdminInfo0Controller
         if(!empty($info['pics'])){
             $info['pics']=json_decode($info['pics'],true);
         }
+        if(!empty($info['files'])){
+            $info['files']=json_decode($info['files'],true);
+        }
         
         $shop=$info['shop'];
         if($admin['shop']>1 && $admin['shop']!=$shop){
@@ -449,7 +464,7 @@ class OrderbackBaseController extends AdminInfo0Controller
         if(empty($order)){
             $order=null; 
         }
-        
+     
         $this->cates();
         $this->assign('infos',$infos); 
         
@@ -620,15 +635,22 @@ class OrderbackBaseController extends AdminInfo0Controller
         if(!empty($info['pics'])){
             $info['pics']=json_decode($info['pics'],true);
         }
+        if(!empty($info['files'])){
+            $info['files']=json_decode($info['files'],true);
+        }
         
         //获取改变的信息
         $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
         if(!empty($change['pics'])){
             $change['pics']=json_decode($change['pics'],true);
+           
         }
-        
-        
+        if(!empty($change['files'])){
+            $change['files']=json_decode($change['files'],true);
+            
+        }
+       
         $this->where_shop=$info['shop'];
       
         $id=$info['id'];
@@ -1603,12 +1625,12 @@ class OrderbackBaseController extends AdminInfo0Controller
         $order_type=$this->order_type;
         if($order_type==1){
             //客户发货
-            $this->assign('status1',[ 1=>'未发货',2=>'寄出',3=>'确认收货']);
+            $this->assign('status1',[ 1=>'未发货',2=>'寄出',3=>'确认收货',4=>'检测入库']);
             $this->assign('status2',[ 1=>'未发货',2=>'配货',3=>'寄出',4=>'已收货',5=>'重新下单发货']);
         }else{
             //采购售后
             $this->assign('status1',[1=>'未发货',2=>'配货',3=>'寄出',4=>'已收货']);
-            $this->assign('status2',[ 1=>'未发货',2=>'寄出',3=>'确认收货',5=>'重新下单发货']);
+            $this->assign('status2',[ 1=>'未发货',2=>'寄出',3=>'确认收货',4=>'检测入库',5=>'重新下单发货']);
         }
       
         $typeinfo=[
@@ -1644,14 +1666,74 @@ class OrderbackBaseController extends AdminInfo0Controller
        
         $this->assign('goods_url',url('goods/AdminGoods/edit',false,false)); 
         $this->assign('image_url',cmf_get_image_url('')); 
-        //快递公司
+         //快递公司
         $expresses=Db::name('express')->order('sort asc')->where('status',2)->column('id,name,code');
-        $this->assign('expresses',$expresses);  
+        $this->assign('expresses',$expresses);
         
         //合作快递公司
         $freights=Db::name('freight')->order('sort asc')->where('status',2)->column('id,name,express');
         $this->assign('freights',$freights);  
         
     }
-     
+     //文件下载
+    public function orderback_file_load(){
+        $id=$this->request->param('id',0,'intval');
+        $sort=$this->request->param('sort',0,'intval');
+        $m=$this->m;
+        $files=$m->where('id',$id)->value('files');
+        if(empty($files)){
+            $this->error('没有文件，请刷新');
+        }
+        $files=json_decode($files,true);
+        if(empty($files[$sort]['url'])){
+            $this->error('没有该文件，请刷新');
+        }
+       
+        $path='upload/';
+        $file=$path.$files[$sort]['url'];
+        $filename=empty($files[$sort]['name'])?date('Ymd-His'):$files[$sort]['name'];
+        if(is_file($file)){
+            $fileinfo=pathinfo($file);
+            $ext=$fileinfo['extension'];
+            $filename=$filename.'.'.$ext;
+            header('Content-type: application/x-'.$ext);
+            header('content-disposition:attachment;filename='.$filename);
+            header('content-length:'.filesize($file));
+            readfile($file);
+            exit;
+        }else{
+            $this->error('文件损坏，不存在');
+        }
+    }
+    
+    public function file_load(){
+        $id=$this->request->param('id',0,'intval');
+        $sort=$this->request->param('sort',0,'intval');
+        $field=$this->request->param('field','pics');
+        $m=$this->m;
+        $files=$m->where('id',$id)->value($field);
+        if(empty($files)){
+            $this->error('没有文件，请刷新');
+        }
+        $files=json_decode($files,true);
+        if(empty($files[$sort]['url'])){
+            $this->error('没有该文件，请刷新');
+        }
+        
+        $path='upload/';
+        $file=$path.$files[$sort]['url'];
+        $filename=empty($files[$sort]['name'])?date('Ymd-His'):$files[$sort]['name'];
+        if(is_file($file)){
+            $fileinfo=pathinfo($file);
+            $ext=$fileinfo['extension'];
+            $filename=$filename.'.'.$ext;
+            header('Content-type: application/x-'.$ext);
+            header('content-disposition:attachment;filename='.$filename);
+            header('content-length:'.filesize($file));
+            readfile($file);
+            exit;
+        }else{
+            $this->error('文件损坏，不存在');
+        }
+    }
 }

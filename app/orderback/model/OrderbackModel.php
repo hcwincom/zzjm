@@ -19,14 +19,14 @@ class OrderbackModel extends Model
           
          $content=[];
          //检测改变了哪些字段 
-         $fields_int=['store1','store2','express1','express2','province','city','area'];
+         $fields_int=['store1','store2','express1','express2','province','city','area','freight'];
          foreach($fields_int as $v){ 
              $data[$v]=intval($data[$v]);
              if($info[$v]!=$data[$v]){
                  $content[$v]=$data[$v];
              }
          }
-         $fields_round=['goods_money','back_money'];
+         $fields_round=['goods_money','back_money','weight','size','pay_freight'];
          foreach($fields_round as $v){
              $data[$v]=round($data[$v],2);
              if($info[$v]!=$data[$v]){
@@ -453,7 +453,10 @@ class OrderbackModel extends Model
          //图片尺寸
         
          $files=[];
-         $file_type=['pics'=>'产品图片'];
+         $file_type=[
+             'pics'=>'产品图片',
+             'files'=>'检测文件'
+         ];
         
          //循环得到上传后的数据
          foreach($file_type as $k=>$v){
@@ -510,13 +513,14 @@ class OrderbackModel extends Model
                      } 
                  } 
              }
-         }
-         if(isset($file_type['picschange'])){
-             $content['pics']=json_encode($files['pics']);
+             if(isset($file_type[$k.'change'])){
+                 $content[$k]=json_encode($files[$k]);
+             }
          }
          
          return $content;
      }
+     
      /**
       * 入库操作更新
       * @param number $oid
@@ -564,7 +568,11 @@ class OrderbackModel extends Model
                  break;
              case 3:  
                  //入库确认
-                 $res=$this->order_storein2($order['id'],$type,$num_ok); 
+//                  只标记为收货，但未入库
+                 break;
+             case 4:
+                 //检测入库
+                 $res=$this->order_storein2($order['id'],$type,$num_ok);
                  break;
              case 5:
                  //重新下单

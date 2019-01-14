@@ -298,6 +298,23 @@ class AdminOrderback1Controller extends OrderbackBaseController
         parent::status_end();
         
     }
+    /**
+     *售后文件下载
+     * @adminMenu(
+     *     'name'   => '售后文件下载',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '售后文件下载',
+     *     'param'  => ''
+     * )
+     */
+    public function file_load(){
+        parent::file_load();
+        
+    }
     
      
 }

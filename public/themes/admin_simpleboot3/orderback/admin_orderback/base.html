@@ -305,8 +305,12 @@
 				   		<option value="{$key}"  <if condition="$key eq $info.store1">selected</if>>{$vo}</option>
 				   	</foreach>
 				   </select>
+				   <present name="change.store1" >
+				   <span class="red">{$stores[$change.store1]|default=$change.store1}</span>
+				   </present>
 			   </label>
 			 <eq name="order_type" value="2">
+			 	 <input type="hidden" value="0" name="express1"/>
 			    <label class="input-inline">
 				   合作快递
 				   <select name="freight"  class="form-control short-auto freight" id="freight">
@@ -315,24 +319,58 @@
 				   		<option value="{$key}" express="{$vo.express}" <if condition="$key eq $info.freight">selected</if>>{$vo.name}</option>
 				   	</foreach>
 				   </select>
+				    <present name="change.freight" >
+				   <span class="red">{$freights[$change.freight]['name']|default=$change.freight}</span>
+				   </present>
 			   </label>
 			   
-			 </eq>
-			   <label class="input-inline">
-				   快递公司
-				   <select name="express1"  class="form-control short-auto express" id="express1">
+		   		 <label class="input-inline"> 
+					 包装总重：<input type="text" class="form-control short order_weight" name="weight" value="{$info.weight|default=order.weight}"  /> 
+					  <present name="change.weight" >
+					  	<span class="red">{$change.weight}</span>
+					  </present>
+					 </label>
+				 	 <label class="input-inline"> 
+					 包装总体积：<input type="text" class="form-control short order_size" name="size" value="{$info.size|default=$order.size}"  /> 
+					  <present name="change.size" >
+					  	<span class="red">{$change.size}</span>
+					  </present>
+					</label>
+				 	 <button class="freight_count" type="button">运费计算</button>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="pay_freight" value="{$info.pay_freight}"  /> 
+					 <present name="change.pay_freight" >
+					  	<span class="red">{$change.pay_freight}</span>
+					  </present>
+					 </label>
+		    <else/>
+		   		 <label class="input-inline">
+				   		快递公司
+				   <select name="express1"  class="express form-control short-auto" id="express1">
 				   	<foreach name="expresses" item="vo">
 				   		<option value="{$key}" code="{$vo.code}" <if condition="$key eq $info.express1">selected</if>>{$vo.name}</option>
 				   	</foreach>
 				   </select>
+				   <present name="change.express1" >
+				   <span class="red">{$expresses[$change.express1]['name']|default=$change.express1}</span>
+				   </present>
 			   </label>
-			   
+		    </eq>
 			    <label class="input-inline">
 			    快递单号
-			    <input type="text"  name="express_no1"  class="form-control express_no short200" /> 
-			    
+			    <input type="text"  name="express_no1"  value="{$info.express_no1}" class="form-control express_no short200" /> 
+			     <present name="change.express_no1" >
+				  	<span class="red">{$change.express_no1}</span>
+				  </present>
 			   </label>
-			    <a class="express_no_href">查快递</a>
+			<notempty name="info.express_no1">
+				 <eq name="order_type" value="2">
+				 		<a href="{:url('express/AdminFreight/express_query',['freight'=>$info.freight,'no'=>$info.express_no1])}" target="{$zztarget.other}">查快递</a> 
+			     <else/>
+				 	<a href="{:url('express/AdminFreight/express_query',['express'=>$info.express1,'no'=>$info.express_no1])}" target="{$zztarget.other}">查快递</a> 
+			     </eq>
+			</notempty>
+			  
 			    &nbsp;&nbsp;&nbsp;&nbsp;
 			<gt name="info.status1" value="1">
 			<eq name="order_type" value="1">
@@ -427,16 +465,42 @@
 				   	</foreach>
 				   </select>
 			   </label>
-			   <eq name="order_type" value="1">
+			  
+			 <eq name="order_type" value="1">
+			 <input type="hidden" value="0" name="express2"/>
 			    <label class="input-inline">
 				   合作快递
 				   <select name="freight"  class="form-control short-auto freight" id="freight">
+				   		 
 				   	<foreach name="freights" item="vo">
 				   		<option value="{$key}" express="{$vo.express}" <if condition="$key eq $info.freight">selected</if>>{$vo.name}</option>
 				   	</foreach>
 				   </select>
+				    <present name="change.freight" >
+				   <span class="red">{$freights[$change.freight]['name']|default=$change.freight}</span>
+				   </present>
 			   </label>
-			 </eq>
+			   
+		   		 <label class="input-inline"> 
+					 包装总重：<input type="text" class="form-control short order_weight" name="weight" value="{$info.weight|default=order.weight}"  /> 
+					  <present name="change.weight" >
+					  	<span class="red">{$change.weight}</span>
+					  </present>
+					 </label>
+				 	 <label class="input-inline"> 
+					 包装总体积：<input type="text" class="form-control short order_size" name="size" value="{$info.size|default=$order.size}"  /> 
+					  <present name="change.size" >
+					  	<span class="red">{$change.size}</span>
+					  </present>
+					</label>
+				 	 <button class="freight_count" type="button">运费计算</button>
+				 	 <label class="input-inline"> 
+					 实际运费：<input type="text" class="form-control short real_freight" name="pay_freight" value="{$info.pay_freight}"  /> 
+					 <present name="change.pay_freight" >
+					  	<span class="red">{$change.pay_freight}</span>
+					  </present>
+					 </label>
+		    <else/>
 			   <label class="input-inline">
 			   快递公司
 			   <select name="express2"  class="express form-control short-auto" id="express2">
@@ -444,13 +508,27 @@
 			   		<option value="{$key}" code="{$vo.code}" <if condition="$key eq $info.express2">selected</if>>{$vo.name}</option>
 			   	</foreach>
 			   </select>
+			     <present name="change.express2" >
+				   <span class="red">{$expresses[$change.express2]['name']|default=$change.express2}</span>
+				   </present>
 			   </label>
-			   
+		  </eq>  
 			    <label class="input-inline">
 			    快递单号
-			    <input type="text"  name="express_no2" class="express_no form-control short200" /> 
+			    <input type="text"  name="express_no2" value="{$info.express_no2}" class="express_no form-control short200" /> 
+			    <present name="change.express_no2" >
+				  	<span class="red">{$change.express_no2}</span>
+				</present>
+			   
 			   </label>
-			    <a class="express_no_href">查快递</a>
+			   
+			<notempty name="info.express_no2">
+				 <eq name="order_type" value="1">
+				 		<a href="{:url('express/AdminFreight/express_query',['freight'=>$info.freight,'no'=>$info.express_no2])}" target="{$zztarget.other}">查快递</a> 
+			     <else/>
+				 	<a href="{:url('express/AdminFreight/express_query',['express'=>$info.express2,'no'=>$info.express_no2])}" target="{$zztarget.other}">查快递</a> 
+			     </eq>
+			</notempty>
 			     &nbsp;&nbsp;&nbsp;&nbsp;
 			<gt name="info.status2" value="1">
 			<eq name="order_type" value="2">
@@ -469,13 +547,13 @@
 			<notempty name="info.pics"> 
 				<foreach name="info.pics" item="vo"> 
 				   <li id="saved-imagepics{$key}">
-				    <input class="form-control" id="photo-pics{$key}-name" type="text" name="pics_names[]" value="{$vo.name}"
+				    <input class="form-control short" id="photo-pics{$key}-name" type="text" name="pics_names[]" value="{$vo.name}"
 				               style="width: 200px;" title="图片名称"> 
 				        
 				       <input class="file0" id="photo-pics{$key}" type="hidden" name="pics_urls[]" value="{$vo.url}">
 				       
 						<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.url)});"></div>
-				       <a href="{:url('orderback_pic_load',['id'=>$info.id,'sort'=>$key])}">下载</a>
+				       <a href="{:url('file_load',['id'=>$info.id,'sort'=>$key])}">下载</a>
 				     	&nbsp;&nbsp;&nbsp; 
 				        <a href="javascript:(function(){$('#saved-imagepics{$key}').remove();})();">移除</a> 
 				    </li>
@@ -487,28 +565,93 @@
 			</div>
 		</div>	
 	<present name="change.pics">
-	 <div class="form-group fleft-all red">
-			<label for="" class="col-sm-2 control-label">上传图片</label>
+		<div class="form-group fleft-all red">
+			<label for="" class="col-sm-2 control-label">新上传图片</label>
 				<div class="col-md-6 col-sm-10">
 				  <ul id="pics" class="pic-list list-unstyled form-inline">
-			 
+				 
+			<notempty name="change.pics"> 
 				<foreach name="change.pics" item="vo"> 
+				   <li id="saved-imagepics{$key}">
+				    	<input class="form-control" id="photo-pics{$key}-name" type="text" name="pics_names[]" value="{$vo.name}"
+				               style="width: 200px;" title="图片名称"> 
+				        
+				       <input class="file0" id="photo-pics{$key}" type="hidden" name="pics_urls[]" value="{$vo.url}">
+				       
+						<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.url)});"></div>
+				       <a href="{:url('file_load',['id'=>$info.id,'sort'=>$key])}">下载</a>
+				     
+				    </li>
+				 </foreach>   
+			</notempty>
+					</ul> 
+			     
+			</div>
+		</div>	
+	</present>
+		 <div class="form-group fleft-all ">
+			<label for="" class="col-sm-2 control-label">检测描述</label>
+			<div class="col-md-6 col-sm-10">
+				<textarea name="test_dsc" class="form-control" rows="10">{$info.test_dsc}</textarea>
+				<present name="change.test_dsc">
+					<textarea name="test_dsc" class="form-control" rows="10">{$change.test_dsc}</textarea>
+				</present>
+			</div>
+		</div>
+				 
+		  <div class="form-group fleft-all ">
+			<label for="" class="col-sm-2 control-label">检测文件</label>
+				<div class="col-md-6 col-sm-10">
+				  <ul id="files" class="pic-list list-unstyled form-inline">
+				 
+			<notempty name="info.files"> 
+			
+				<foreach name="info.files" item="vo">
+				    <li id="saved-filefiles{$key}">
+				        <input  class="file0" id="file-files{$key}" type="hidden" name="files_urls[]" value="{$vo.url}">
+				        <input class="form-control" id="file-files{$key}-name" type="text" name="files_names[]" value="{$vo.name}"
+				               style="width: 200px;" title="文件名称">
+				  
+				     		 <a href="{:url('file_load',['id'=>$info.id,'sort'=>$key,'field'=>'files'])}">下载</a>
+				     	&nbsp;&nbsp;&nbsp;
+				   
+				   
+				        <a href="javascript:(function(){$('#saved-filefiles{$key}').remove();})();">移除</a>
+				   
+				    </li> 
+			   </foreach>  
+			    
+			</notempty>
+					</ul> 
+			    	<a href="javascript:uploadMultiFile('附件上传','#files','files-item-files');"
+                               class="btn btn-sm btn-default">选择文件</a>
+			</div>
+		</div>	
+ 	<present name="change.files">
+		<div class="form-group fleft-all red">
+			<label for="" class="col-sm-2 control-label">新上传文件</label>
+				<div class="col-md-6 col-sm-10">
+				  <ul id="files" class="pic-list list-unstyled form-inline">
+				 
+			<notempty name="change.files"> 
+				<foreach name="change.files" item="vo"> 
 				   <li id="saved-imagepics{$key}">
 				    <input class="form-control" id="photo-pics{$key}-name" type="text" name="pics_names[]" value="{$vo.name}"
 				               style="width: 200px;" title="图片名称"> 
 				        
 				       <input class="file0" id="photo-pics{$key}" type="hidden" name="pics_urls[]" value="{$vo.url}">
 				       
-						<div class="pics" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.url)});"></div>
-				       
+						<div class="pic1" style="background-size:contain;background-image:url({:cmf_get_image_url($vo.url)});"></div>
+				       <a href="{:url('file_load',['id'=>$info.id,'sort'=>$key,'field'=>'files'])}">下载</a>
+				     
 				    </li>
-				 </foreach>  
+				 </foreach>   
+			</notempty>
 					</ul> 
 			     
 			</div>
 		</div>	
 	</present>
-	  
 	<notempty name="info">
 		 
 		<div class="form-group fleft-all">
@@ -517,7 +660,7 @@
 			 
 			 <foreach name="statuss" item="vo">
 			  	<label class="radio-inline">
-			 		<input type="radio" value="{$key}"  <if condition="$key eq $info.status">checked</if>/>{$vo}
+			 		<input type="radio" name="s" value="{$key}"  <if condition="$key eq $info.status">checked</if>/>{$vo}
 			 		<if condition="isset($change.status) && ($key eq $change.status)">
 			 		<span class="red">新状态</span>
 			 		</if>
@@ -532,7 +675,7 @@
 			 
 			 <foreach name="status1" item="vo">
 			  	<label class="radio-inline">
-			 		<input type="radio" value="{$key}"   <if condition="$key eq $info.status1">checked</if>/>{$vo}
+			 		<input type="radio" name="s1" value="{$key}"   <if condition="$key eq $info.status1">checked</if>/>{$vo}
 			 		 
 			 	</label>
 			 </foreach> 
@@ -547,7 +690,7 @@
 			 
 			 <foreach name="status2" item="vo">
 			  	<label class="radio-inline">
-			 		<input type="radio" value="{$key}"  <if condition="$key eq $info.status2">checked</if>/>{$vo}
+			 		<input type="radio" name="s2" value="{$key}"  <if condition="$key eq $info.status2">checked</if>/>{$vo}
 			 		 
 			 	</label> 
 			 </foreach>
