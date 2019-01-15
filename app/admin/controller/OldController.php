@@ -62,13 +62,13 @@ class OldController extends AdminBaseController
             '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
             '付款银行+付款类型'=>url('sys'),
             '地区信息'=>url('area'), 
+            
             '(客户/供货商)联系人+对应付款账号+物流公司对应联系人和账号'=>url('tel'),
             '客户(同步分类和主体，关联联系人和付款账号)'=>url('custom'), 
             '供货商(同步分类和主体，关联联系人和付款账号)'=>url('supplier'),   
             '订单'=>url('order'), 
-            '采购单'=>url('ordersup'), 
-           
-            '清空库存，出入库记录，料位，编辑记录,售后单,考勤和事件'=>url('store_clear'),
+            '采购单'=>url('ordersup'),  
+            '仓库还原,清空库存，出入库记录，料位，编辑记录,售后单,考勤和事件'=>url('store_clear'),
             '清空菜单和权限'=>url('menu_clear'),
            
         ];
@@ -1154,10 +1154,11 @@ class OldController extends AdminBaseController
         $sql='select max(id) as count from sp_purchase';
         $data=$m_old->query($sql);
         $page=ceil($data[0]['count']/$count);
-        //kc_type1上海库存2为合肥库存要改
+        //kc_type1上海库存2为合肥库存,3,仓库三库存
         //sta0为未结算1为已结算
         //putin_admin入库操作管理员-暂时不管
         //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4为已完成
+        //examin_time审核时间
         $field='p.id,p.purchase_no as name,concat(p.wuname,p.order_no) as express_no,p.supplier_id as uid,'.
             'p.kc_type as store,p.sta as pay_status, p.state as status,'. 
             'p.addtime as create_time,p.pay_time,p.finish_time as completion_time';
@@ -1200,18 +1201,22 @@ class OldController extends AdminBaseController
                 switch ($v['status']){
                     case 1:
                         $v['status']=2; 
+                        $v['pay_status']=1;
                         break;
                     case 2:
                         $v['status']=10; 
+                        $v['pay_status']=1;
                         break;
                     case 3:
                         $v['status']=20; 
+                        $v['pay_status']=3;
                         break;
                     case 4:
                         $v['status']=30;
                         break; 
                     default:
-                        $v['status']=1; 
+                        $v['status']=2; 
+                        $v['pay_status']=1;
                         break;
                 }
                 //排序
@@ -1287,13 +1292,78 @@ class OldController extends AdminBaseController
         
         echo ('end');
     }
-    //发货记录
+    /**
+     * 仓库还原
+     * @adminMenu(
+     *     'name'   => '仓库还原',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> false,
+     *     'order'  => 0,
+     *     'icon'   => '',
+     *     'remark' => '仓库还原',
+     *     'param'  => ''
+     * )
+     */
+    public function store()
+    {
+        debug('begin');
+        $m_old=Db::connect($this->db_old);
+        
+        $sql='select id,cate_name as name,code_num,t_num as code,pid as fid,sortnum as sort '.
+            ' from sp_category2 ';
+        
+        $data=$m_old->query($sql);
+        if(empty($data)){
+            $this->error('数据查询错误');
+        }
+        
+        $m_new=Db::name('cate');
+        //开启事务
+        $m_new->startTrans();
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_cate');
+        $row_mew=$m_new->insertAll($data);
+        
+        $m_new->where($this->where_corrects)->update($this->corrects);
+        
+        echo '<h2>已添加产品分类'.$row_mew.'</h2>';
+        
+        //根据分类编码修正
+        
+        $m_new->commit();
+        
+        // ...其他代码段
+        debug('end');
+        // ...也许这里还有其他代码
+        // 进行统计区间
+        echo debug('begin','end').'s';
+        echo debug('begin','end','m').'kb';
+        exit;
+    }
+    //清空库存
     public function store_clear(){
         set_time_limit(300);
-       
-        //订单主体
-        $m_new=Db::name('store_goods');
-       
+        $m_old=Db::connect($this->db_old);
+        
+        $sql='select id,sto_name as name'.
+            ' from sp_new_warehouse ';
+        
+        $data=$m_old->query($sql);
+        if(empty($data)){
+            $this->error('数据查询错误');
+        }
+        
+        $m_new=Db::name('store');
+        
+        //先截取旧数据
+        $m_new->execute('truncate table cmf_store');
+        $row_mew=$m_new->insertAll($data);
+        
+        $m_new->where($this->where_corrects)->update($this->corrects);
+        
+        echo '<h2>已添加仓库'.$row_mew.'</h2>';
+         
         //先截取旧数据
         $m_new->execute('truncate table cmf_store_goods');
         $m_new->execute('truncate table cmf_store_in');

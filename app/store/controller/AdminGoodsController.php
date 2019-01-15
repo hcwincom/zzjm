@@ -249,6 +249,8 @@ class AdminGoodsController extends AdminBaseController
                     $list[$k]['box_num']=count($box);
                 }
             }
+        }else{
+            $list=[];
         }
        
        
