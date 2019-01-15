@@ -1002,7 +1002,7 @@ class OldController extends AdminBaseController
         //先检查pay_status
         for($i=0;$i<$page;$i++){
             $sql='select '.$field.
-                ' from sp_order as p '. 
+                ' from sp_order as p '.  
                 ' left join sp_areas province on province.area_type=1 and p.province>0 and province.id=p.province '.
                 ' left join sp_areas city on city.area_type=2 and p.city>0 and city.id=p.city '.
                 ' left join sp_areas area on area.area_type=3 and p.area>0 and area.id=p.area '.
@@ -1086,14 +1086,19 @@ class OldController extends AdminBaseController
                         }  
                         break;
                 }
-                //已发货
+                //已发货,就是收获完成
                 if($v['distribution_status']>0 &&  $v['status']<30){
-                    $v['status']=24; 
+                    
+                    $v['status']=26; 
                 }
                 if($v['pay_status']==0){
                     $v['pay_status']=1;
                 }else{ 
                     $v['pay_status']=($v['status']==10)?2:3;
+                }
+                //订单完成
+                if($v['pay_status']==3 && $v['status']==26){
+                    $v['status']=30;
                 }
                 //排序
                 $v['sort']=$m_order->get_sort($v);

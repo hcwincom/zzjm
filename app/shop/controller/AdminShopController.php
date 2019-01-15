@@ -18,7 +18,7 @@ class AdminShopController extends AdminInfo0Controller
         $this->m=Db::name('shop');
         //没有店铺区分
         $this->isshop=0;
-        
+        $this->edit=['name','dsc','sort','is_review','tel','address','url','logo','print_img'];
         $this->assign('flag',$this->flag);
         $this->assign('table',$this->table);
         $this->assign('is_review',[1=>'二次审核',2=>'直接审核']);

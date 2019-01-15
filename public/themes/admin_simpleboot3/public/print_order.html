@@ -1,0 +1,310 @@
+<include file="public@header" />
+<style media="print" type="text/css">
+    .noprint {
+        display: none
+    }
+</style>
+
+<style>
+    body {
+        font: 14px/1.5 "宋体", Arial, Helvetica, sans-serif;
+        color: #404040;
+        background-color: #fff;
+    }
+
+    p {
+        margin: 0;
+        padding: 0;
+    }
+
+    .print {
+        width: 98%;
+        margin: 0 auto;
+        margin-bottom: 20px;
+    }
+
+    .print_head {
+        display: flex;
+        display: -webkit-flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .print_head>div {
+        line-height: 1.5;
+    }
+
+    .print_head>div:nth-child(2)>p {
+        font-size: 18px;
+    }
+
+    .print_head>div:nth-child(3){
+       padding-top: 20px;
+    }
+    .print_head>div:nth-child(3)>span{
+        margin-right: 10px;
+    }
+    .tableBorder,.tableNone{
+        margin-bottom: 3px;
+    }
+    .tableBorder tr th,
+    .tableBorder tr td {
+        text-align: center;
+    }
+
+    .tableBorder tr td.textLeft {
+        text-align: left;
+    }
+
+    .tableBorder tr td{
+        font-size: 16px;
+    }
+    .tableBorder tr td>span {
+        font-size: 16px;
+        margin-right: 3px;
+    }
+
+    .tableBorder>thead>tr>th,
+    .tableBorder>tbody>tr>th,
+    .tableBorder>thead>tr>td,
+    .tableBorder>tbody>tr>td,
+    .tableBorder>tfoot>tr>td {
+        border: 1px dashed #666 !important;
+    }
+
+    .tableNone>thead>tr>th,
+    .tableNone>tbody>tr>th,
+    .tableNone>tfoot>tr>th,
+    .tableNone>thead>tr>td,
+    .tableNone>tbody>tr>td,
+    .tableNone>tfoot>tr>td {
+        border: none;
+        padding: 2px;
+    }
+    .tableInfo{
+        margin-bottom: 20px
+    }
+    .tableInfo>p{
+        font-weight: 600;
+    }
+    .tableInfo>p>span{
+        float: right;
+    }
+    .tableBorder>tbody>tr>td.totalInfo>span{
+        text-align:center;
+        margin: 0 10px;
+    }
+
+
+
+    .signature {
+        text-align: left;
+        border-top: 1px dashed #666;
+        line-height: 1.5;
+    }
+
+    .signature>p {
+        font-size: 16px;
+    }
+    .signature>p>span{
+        margin-left: 20px
+    }
+    .btn_print {
+        width: 112px;
+        height: 31px;
+        margin: 20px auto;
+        border: 0;
+    }
+    .order_logo{
+        width: 140px;
+        height: 140px;
+        text-align: center;
+    }
+    .order_logo img{
+        vertical-align: middle;
+        width: 100%;
+        height: 100%;
+    }
+    .order_head>.row>div{
+        float: left;
+    }
+    .order_div1,.order_div2{
+        width: 100%;
+    }
+    .order_div1>h3{
+        padding-left: 20px;
+    }
+    .order_div1>.order_num,.order_div2>.fadate{
+        height: 60px;
+    }
+    .order_div1>.order_num>span{
+        display: inline-block;
+        width: 34.5px;
+        font-size: 16px;
+        line-height: 30px;
+    }
+    .order_div1>.order_num>p{
+        width: 80%;
+        display: inline-block;
+        line-height: 60px;
+    }
+    .order_div1>.order_addr{
+        font-size: 16px;
+        line-height: 28px;
+    }
+    .order_div2{
+        text-align: center;
+    }
+    .order_div2>h3{
+        font-size: 24px;
+    }
+    .order_div2>.fadate{
+        font-size: 18px;
+        line-height: 60px;
+    }
+    .order_div2>.telSer{
+        font-size: 20px;
+        font-weight: 600;
+    }
+    .appraise_info{
+        width: 100%;
+        height: 300px;
+        margin-top: 20px;
+        text-align: center;
+    }
+    .appraise_info>img{
+        margin: 0 auto;
+        max-width: 100%;
+        max-height: 100%;
+    }
+  
+
+
+
+</style>
+<title>{$zzsite.name}配货单</title>
+</head>
+
+<body>
+   
+    
+    <div class="print">
+        <div class="order_head">
+            <table class="table tableNone">
+               <thead>
+                   <tr>
+                        <th width="140"></th>
+                        <th width="400"></th>
+                        <th width="260"></th>
+                   </tr>
+               </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="order_logo">
+                               <notempty name="shop.logo">
+                                <img src="{:cmf_get_image_url($shop.logo)}" alt="logo">
+                                </notempty>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="order_div1">
+                                <h3>{$shop.name}</h3>
+                                <div class="order_num">
+                                    <span>订单编码</span>
+                                    <p>{$info.name}</p>
+                                </div>
+                                <div class="order_addr">
+                                    <span>{$shop.address}</span> 
+                                    <span> {$shop.url} </span>
+                                </div>
+                            </div>
+                           
+                        </td>
+                        <td>
+                            <div class="order_div2">
+                                <h3>货品清单*收据</h3>
+                                <div class="fadate">
+                                    <span style=" vertical-align:bottom;">发货日期:{$date}</span>
+                                </div>
+                                <div class="telSer">
+                                    <span>服务热线:{$shop.tel}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+        <table class="table table-hover tableBorder">
+            <thead>
+                <tr>
+                    <th width="5%"></th>
+                    <th width="30%">宝贝</th>
+                    <th>规格</th>
+                    <th>商家编码</th>  
+                    <th>商家料位</th>                 
+                    <th>数量</th>
+                    <th>金额</th>
+                </tr>
+            </thead>
+            <tbody>
+            <php>$i=0;</php>
+             <foreach name="goods" item="vo">
+              	<php>$i++;</php>
+                <tr>
+                	<td>{$i}</td>
+                    <td class="textLeft">
+                    <empty name="vo.goods_uname">
+                    	<empty name="vo.print_name">
+                    	 {$vo.goods_name}
+                    	<else/>
+                    	 {$vo.print_name}
+                    	</empty>
+                    <else/>
+                    	{$vo.goods_uname}
+                    </empty>
+                   </td>   
+                    <td>{$vo.goods_ucate}</td>  
+                    <td>{$vo.goods_code}</td>  
+                     <td>{$vo.box}</td>  
+                   
+                    <td>{$vo.num}</td>
+                    <td>￥<span>{$vo.pay}</span></td>
+                </tr>
+             </foreach>
+                
+                <tr>
+                    <td colspan="7" class="totalInfo">
+                        合计:<span>数量:{$info.goods_num} </span><span>运费:{$info.pay_freight}</span><span>优惠:{$info.discount_money}</span><span>实付金额: {$info.order_amount}</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tableInfo">
+            <p>加盖{$shop.name}发票专用章，可作收据使用; 退货请附此清单！ <span>沿以下横线剪开</span></p>
+        </div>
+        <div class="signature">
+            <p>客户收货信息: <span>{$info.accept_name}</span><span>{$info.mobile} {$info.phone}</span><span>{$info.addressinfo}{$info.address}</span></p>
+        </div>
+        <notempty name="shop.print_img">
+        	 <div class="appraise_info">
+	            <img src="{:cmf_get_image_url($shop.print_img)}" alt="">
+	        </div>
+        </notempty>
+       
+
+        <div class="mimeograph" style="text-align:center;margin-top: 20px;">
+            <input type="submit" class="btn_print noprint" onclick="window.print();" value="打印">
+        </div>
+    
+
+    </div>
+
+   
+
+</body>
+</html>

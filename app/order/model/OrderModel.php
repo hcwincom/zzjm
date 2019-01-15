@@ -715,6 +715,7 @@ class OrderModel extends Model
           // sort排序，线下订单待发货10，准备发货9，线下待确认货款8，线下待付款7，待确认和待提交6，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排
         
           $order=$this->where('id',$id)->find();
+          $order=$order->data;
          /*  'order_status' =>
           array (
               1 => '未提交',
@@ -729,8 +730,15 @@ class OrderModel extends Model
               80 => '已取消',
               81 => '已废弃',
           ), */
-          
-         switch ($order['status']){
+          //线下发货就收获
+          $status=$order['status']; 
+          if($order['order_type']==1 && $status==24){
+              $status=26;
+          }
+          if($order['pay_status']==3 && $status==26){
+              $status=30;
+          }
+          switch ($status){
              case 20:
                  $sort=10; 
                  break;
@@ -761,8 +769,16 @@ class OrderModel extends Model
          if($order['order_type']==3 && $sort >5){
              $sort=$sort-5;
          }
-         if($order['sort']!=$sort){ 
-             $this->where('id',$id)->setField('sort',$sort);
+         //有状态和排序变化就更新
+         $update=[];
+         if($status!=$order['status']){ 
+             $update['status']=$status;
+         }
+         if($order['sort']!=$sort){
+             $update['sort']=$sort;
+         }
+         if(!empty($update)){
+             $this->where('id',$order['id'])->update($update);
          }
         //检查是否更新父级,且订单完成
         if($order['fid']>0 && $order['status']>=30){

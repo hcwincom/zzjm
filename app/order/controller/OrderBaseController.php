@@ -1465,7 +1465,7 @@ class OrderBaseController extends AdminBaseController
         if($info['status']<22){
             $this->error('请先准备发货');
         }
-        
+        $shop=Db::name('shop')->where('id',$info['shop'])->find();
         $goods=Db::name('order_goods')->where('oid',$id)->column('*','goods');
         $where=[
             'type'=>10,
@@ -1489,6 +1489,7 @@ class OrderBaseController extends AdminBaseController
             }
         }
         $this->assign('info',$info);
+        $this->assign('shop',$shop);
        
         $this->assign('goods',$goods);
         $this->assign('date',date('Y-m-d'));
