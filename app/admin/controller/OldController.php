@@ -1002,7 +1002,7 @@ class OldController extends AdminBaseController
         //先检查pay_status
         for($i=0;$i<$page;$i++){
             $sql='select '.$field.
-                ' from sp_order as p '.
+                ' from sp_order as p '. 
                 ' left join sp_areas province on province.area_type=1 and p.province>0 and province.id=p.province '.
                 ' left join sp_areas city on city.area_type=2 and p.city>0 and city.id=p.city '.
                 ' left join sp_areas area on area.area_type=3 and p.area>0 and area.id=p.area '.
@@ -1157,7 +1157,8 @@ class OldController extends AdminBaseController
         //kc_type1上海库存2为合肥库存,3,仓库三库存
         //sta0为未结算1为已结算
         //putin_admin入库操作管理员-暂时不管
-        //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4为已完成
+        //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4供应商以发货,5确认收货入库，完成采购
+     
         //examin_time审核时间
         $field='p.id,p.purchase_no as name,concat(p.wuname,p.order_no) as express_no,p.supplier_id as uid,'.
             'p.kc_type as store,p.sta as pay_status, p.state as status,'. 
@@ -1197,7 +1198,9 @@ class OldController extends AdminBaseController
                 
                
                 $v['order_type']=1;
-                //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4为已完成
+             
+                //state当前状态1为未审核，2为已审核待财务付款，3财务已付款待发货4供应商以发货,5确认收货入库，完成采购
+                //pay_status好像没用
                 switch ($v['status']){
                     case 1:
                         $v['status']=2; 
@@ -1212,8 +1215,13 @@ class OldController extends AdminBaseController
                         $v['pay_status']=3;
                         break;
                     case 4:
+                        $v['status']=22;
+                        $v['pay_status']=3;
+                        break;
+                    case 5:
+                        $v['pay_status']=3;
                         $v['status']=30;
-                        break; 
+                        break;
                     default:
                         $v['status']=2; 
                         $v['pay_status']=1;
