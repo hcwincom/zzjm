@@ -351,6 +351,7 @@ class OrderbackBaseController extends AdminInfo0Controller
             'about'=>$order['id'],
             'about_name'=>$order['name'], 
             'pics'=>'',
+            'files'=>'',
             
         ]; 
         $fields_int=['store1','store2','express1','express2','province','city','area','freight','pay_type'];
