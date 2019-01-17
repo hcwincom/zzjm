@@ -139,7 +139,7 @@ class StoreajaxController extends AdminBase0Controller
             'status'=>2,
             'goods'=>0,
         ];
-        $list=Db::name('store_box')->where($where)->order('sort asc')>column('id,name');
+        $list=Db::name('store_box')->where($where)->order('sort asc')->column('id,name');
         $this->success('ok','',$list);
     }
     
