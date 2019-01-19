@@ -2459,7 +2459,13 @@ class AdminGoodsController extends AdminBaseController
     { 
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
-        $info=$m->where('id',$id)->find();
+        $info=$m
+        ->field('p.*,concat(cate1.name,"-",cate2.name) as cate_name')
+        ->alias('p')
+        ->join('cmf_cate cate2','cate2.id=p.cid','left')
+        ->join('cmf_cate cate1','cate1.id=p.cid0','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info)){
             $this->error('数据不存在');
         }
@@ -2795,7 +2801,13 @@ class AdminGoodsController extends AdminBaseController
     {
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
-        $info=$m->where('id',$id)->find();
+        $info=$m
+        ->field('p.*,concat(cate1.name,"-",cate2.name) as cate_name')
+        ->alias('p')
+        ->join('cmf_cate cate2','cate2.id=p.cid','left')
+        ->join('cmf_cate cate1','cate1.id=p.cid0','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info)){
             $this->error('数据不存在');
         }
@@ -3132,7 +3144,13 @@ class AdminGoodsController extends AdminBaseController
     {
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
-        $info=$m->where('id',$id)->find();
+        $info=$m
+        ->field('p.*,concat(cate1.name,"-",cate2.name) as cate_name')
+        ->alias('p')
+        ->join('cmf_cate cate2','cate2.id=p.cid','left')
+        ->join('cmf_cate cate1','cate1.id=p.cid0','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info)){
             $this->error('数据不存在');
         }
@@ -3583,7 +3601,13 @@ class AdminGoodsController extends AdminBaseController
     {
         $m=$this->m;
         $id=$this->request->param('id',0,'intval');
-        $info=$m->where('id',$id)->find();
+        $info=$m
+        ->field('p.*,concat(cate1.name,"-",cate2.name) as cate_name')
+        ->alias('p')
+        ->join('cmf_cate cate2','cate2.id=p.cid','left')
+        ->join('cmf_cate cate1','cate1.id=p.cid0','left')
+        ->where('p.id',$id)
+        ->find();
         if(empty($info)){
             $this->error('数据不存在');
         }

@@ -67,10 +67,10 @@
 				<present name="change.ucode"> 
 			   		<input type="text"  class="form-control red"  value="{$change.ucode}"/>
 			   	</present>  
-			   	地址：
-					<input type="text" class="form-control" name="tel" value="{$info.tel}"/>
-				<present name="change.tel"> 
-			   		<input type="text"  class="form-control red"  value="{$change.tel}"/>
+			   	地址电话：
+					<input type="text" class="form-control" name="address" value="{$info.address}"/>
+				<present name="change.address"> 
+			   		<input type="text"  class="form-control red"  value="{$change.address}"/>
 			   	</present>  
 			   	银行：
 			   	<select name="bank" class="form-control">
@@ -81,16 +81,12 @@
 				<present name="change.bank"> 
 			   		<input type="text"  class="form-control red"  value="{$banks[$change.bank]|default='--'}"/>
 			   	</present>  
-			   	开户行：
+			   	开户行账号：
 					<input type="text" class="form-control" name="bank_location" value="{$info.bank_location}"/>
 				<present name="change.bank_location"> 
 			   		<input type="text"  class="form-control red"  value="{$change.bank_location}"/>
 			   	</present>  
-			   		卡号：
-					<input type="text" class="form-control" name="bank_num" value="{$info.bank_num}"/>
-				<present name="change.bank_num"> 
-			   		<input type="text"  class="form-control red"  value="{$change.bank_num}"/>
-			   	</present>  
+			   	 
 			   		 
 				</div>
 			</div>
@@ -107,10 +103,10 @@
 				<present name="change.company_code"> 
 			   		<input type="text"  class="form-control red"  value="{$change.company_code}"/>
 			   	</present>  
-			   	地址：
-					<input type="text" class="form-control" name="company_tel" value="{$info.company_tel}"/>
-				<present name="change.company_tel"> 
-			   		<input type="text"  class="form-control red"  value="{$change.company_tel}"/>
+			   	地址电话：
+					<input type="text" class="form-control" name="company_address" value="{$info.company_address}"/>
+				<present name="change.company_address"> 
+			   		<input type="text"  class="form-control red"  value="{$change.company_address}"/>
 			   	</present>  
 			   	银行：
 			   	<select name="bank" class="form-control">
@@ -121,16 +117,12 @@
 				<present name="change.company_bank"> 
 			   		<input type="text"  class="form-control red"  value="{$banks[$change.company_bank]|default='--'}"/>
 			   	</present>  
-			   	开户行：
+			   	开户行账号：
 					<input type="text" class="form-control" name="company_bank_location" value="{$info.company_bank_location}"/>
 				<present name="change.company_bank_location"> 
 			   		<input type="text"  class="form-control red"  value="{$change.company_bank_location}"/>
 			   	</present>  
-			   		卡号：
-					<input type="text" class="form-control" name="company_bank_num" value="{$info.company_bank_num}"/>
-				<present name="change.company_bank_num"> 
-			   		<input type="text"  class="form-control red"  value="{$change.company_bank_num}"/>
-			   	</present>  
+			   	 
 			   		 
 				</div>
 			</div>

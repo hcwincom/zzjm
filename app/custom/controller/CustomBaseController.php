@@ -662,6 +662,7 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        
         //直接审核
         $rule='edit_review';
         $res=$this->check_review($admin,$rule);
@@ -850,9 +851,10 @@ class CustomBaseController extends AdminInfo0Controller
             ];
             $m_account=Db::name('account');
             $accounts=$m_account->where($where)->column('site,id');
-       
+          
             if(isset($change['account1'])){
                 $data_account=$where;
+                $data_account['site']=1;
                 foreach($change['account1'] as $k=>$v){
                     $data_account[$k]=$v;
                 }
@@ -867,6 +869,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
             if(isset($change['account2'])){
                 $data_account=$where;
+                $data_account['site']=2;
                 foreach($change['account2'] as $k=>$v){
                     $data_account[$k]=$v;
                 }
@@ -880,6 +883,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
             if(isset($change['account3'])){
                 $data_account=$where;
+                $data_account['site']=3;
                 foreach($change['account3'] as $k=>$v){
                     $data_account[$k]=$v;
                 }
@@ -924,7 +928,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         zz_action($data_action ,['aid'=>$info['aid']]);
         
-        $m->commit();
+        $m->commit(); 
         $this->success('审核成功');
     }
    
@@ -1028,6 +1032,7 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('数据不存在');
         }
+       
         $time=time();
         $admin=$this->admin;
         //其他店铺的审核判断
@@ -1134,7 +1139,7 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
-        
+       
         //直接审核
         $rule='tel_edit_review';
         $res=$this->check_review($admin,$rule);

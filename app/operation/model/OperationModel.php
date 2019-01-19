@@ -98,6 +98,7 @@ class OperationModel extends Model
                 $update['foreign_num']++;
             }
         }
+        $update['goods_num']=Db::name('operation_goods')->where($where)->count('id');
         $this->where('id',$id)->update($update);
     }
 }

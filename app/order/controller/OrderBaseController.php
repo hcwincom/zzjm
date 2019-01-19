@@ -489,11 +489,8 @@ class OrderBaseController extends AdminBaseController
                 'company'=>$company['id'], 
                 'paytype'=>$data_order['paytype'], 
                 
-                'address'=>$data['invoice_address'],
-                'tel'=>$data['invoice_tel'],
-                'bank'=>$data['account_bank'],
-                'bank_num'=>$data['account_num'], 
-                'bank_location'=>$data['account_location'],
+                'address'=>$data['invoice_address'],  
+                'bank_location'=>$data['invoice_bank_location'],
                  
             ];
             $m_invoice=new OrdersInvoiceModel();

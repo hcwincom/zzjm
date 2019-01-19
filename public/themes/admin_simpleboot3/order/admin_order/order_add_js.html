@@ -145,6 +145,8 @@ function custom_change(custom){
 				 $('#invoice_type').val(info.invoice_type); 
 				 $('#invoice_title').val(info.invoice_title); 
 				 $('#invoice_ucode').val(info.invoice_ucode); 
+				 $('#invoice_address').val(info.invoice_address+' '+info.invoice_tel); 
+				 $('#invoice_bank_location').val(info.invoice_location+' '+info.invoice_num); 
 				 invoice_type_change();
 				 $('#tax_point').val(info.tax_point); 
 				/* 旧系统paytype和custom绑定，所以暂时还用info.paytype,否则应用付款账号绑定的paytype2 */

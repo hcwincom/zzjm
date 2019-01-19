@@ -205,7 +205,8 @@ class OrderModel extends Model
          //主订单才有发票和付款信息
          if($info['fid']==0 ){
              //发票信息
-             $edit_invoice=['uname','ucode','point','invoice_money','tax_money','dsc','address','tel'];
+             $edit_invoice=['uname','ucode','point','invoice_money','tax_money','dsc','address','bank_location'];
+           
              //已有发票或写了发票抬头的要判断发票信息
              if(!empty($info['invoice_id']) || (!empty($data['invoice_uname']) && !empty($data['invoice_type']))){
                  $data['invoice_id']=$info['invoice_id'];

@@ -211,23 +211,34 @@
 				<present name="change.announcement">
 					<input type="text" class="form-control red"  value="{$change.announcement}" />
 				</present>
+				<label class="checkbox-inline  ">
+					<input type="checkbox" name="freight_pay" value="1" <eq name="info.freight_pay" value="1">checked</eq> />包邮
+					<present name="change.freight_pay">
+						<span class="red">
+							<eq name="change.freight_pay" value="1">
+								包邮
+							<else/>
+								不包邮
+							</eq>
+						</span>
+					</present>
+				</label>
+				<label class="checkbox-inline  ">
+					<input type="checkbox" name="print_send" value="1" <eq name="info.print_send" value="1">checked</eq> />随货附清单
+					<present name="change.print_send">
+						<span class="red">
+							<eq name="change.print_send" value="1">
+								随货附清单
+							<else/>
+								不随货附清单
+							</eq>
+						</span>
+					</present>
+				</label>
+				
 				</div>
 			</div>
 			<div style="clear:both"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">店铺付款账号</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="paytype" id="" required> 
-					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				<present name="change.paytype">
-					<input type="text" class="form-control red" value="{$paytypes[$change.paytype]|default='--'}" />
-					 
-				</present>
-				</div>
-			</div>
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">货款结算类型</label>
 				<div class="col-md-6 col-sm-10">
@@ -242,6 +253,21 @@
 				</present>
 				</div>
 			</div>
+			<div class="form-group fleft">
+				<label  class="col-sm-2 control-label">店铺付款账号</label>
+				<div class="col-md-6 col-sm-10">
+				   <select  class="form-control" name="paytype" id="" required> 
+					<foreach name="paytypes" item="vo">
+						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo}</option>
+					</foreach>
+					</select>
+				<present name="change.paytype">
+					<input type="text" class="form-control red" value="{$paytypes[$change.paytype]|default='--'}" />
+					 
+				</present>
+				</div>
+			</div>
+			
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">常用物流</label>
 				<div class="col-md-6 col-sm-10">
@@ -288,9 +314,9 @@
 			<div class="form-group fleft-all">
 				<label class="col-sm-2 control-label">发票银行卡号</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="invoice_ucode" value="{$info.invoice_ucode}" />
-				 <present name="change.invoice_ucode">
-					 <input type="text" class="form-control red" value="{$change.invoice_ucode}" />
+					<input type="text" class="form-control" name="invoice_num" value="{$info.invoice_num}" />
+				 <present name="change.invoice_num">
+					 <input type="text" class="form-control red" value="{$change.invoice_num}" />
 				</present>  
 				</div>
 			</div>

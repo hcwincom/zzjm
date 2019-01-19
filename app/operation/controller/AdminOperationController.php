@@ -7,7 +7,7 @@ use app\common\controller\AdminInfo0Controller;
 use think\Db; 
 use Qiniu\Processing\Operation;
 use app\operation\model\OperationModel;
-  
+use app\admin\model\UserModel;
 class AdminOperationController extends AdminInfo0Controller
 {
     
@@ -49,53 +49,45 @@ class AdminOperationController extends AdminInfo0Controller
         
         $data=$this->request->param();
         $where=[];
-        //判断是否有店铺
-        $join=[
-            ['cmf_user a','a.id=p.aid','left'],
-            ['cmf_user r','r.id=p.rid','left'],
-            
-        ];
-        $field='p.*,a.user_nickname as aname,r.user_nickname as rname';
+        $where_goods=[];
+       
         //店铺,分店只能看到自己的数据，总店可以选择店铺
-        if($this->isshop){
-            $join[]= ['cmf_shop shop','p.shop=shop.id','left'];
-            $field.=',shop.name as sname';
-            //店铺,分店只能看到自己的数据，总店可以选择店铺
-            if($admin['shop']==1){
-                if(empty($data['shop'])){
-                    $data['shop']=0;
-                    $this->where_shop=2;
-                }else{
-                    $where['p.shop']=['eq',$data['shop']];
-                    $this->where_shop=$data['shop'];
-                }
+        if($admin['shop']==1){
+            if(empty($data['shop'])){
+                $data['shop']=0;
+                $this->where_shop=2;
             }else{
-                $where['p.shop']=['eq',$admin['shop']];
-                $this->where_shop=$admin['shop'];
+                $where['p.shop']=['eq',$data['shop']]; 
+                $this->where_shop=$data['shop'];
             }
-        }
-        
-        
-        
+        }else{
+            $where['p.shop']=['eq',$admin['shop']];
+            $this->where_shop=$admin['shop'];
+        } 
         //状态
         if(empty($data['status'])){
             $data['status']=0;
         }else{
             $where['p.status']=['eq',$data['status']];
         }
-        //分类
-        if(empty($data['cid'])){
-            $data['cid']=0;
+        //平台
+        if(empty($data['company'])){
+            $data['company']=0;
         }else{
-            $where['p.cid']=['eq',$data['cid']];
+            $where['op.company']=['eq',$data['company']];
         }
-        //分类
-        if(empty($data['cid0'])){
-            $data['cid0']=0;
+        //运营分类
+        if(empty($data['operation_cid0'])){
+            $data['operation_cid0']=0;
         }else{
-            $where['p.cid0']=['eq',$data['cid0']];
+            $where['p.cid0']=['eq',$data['operation_cid0']];
+        } 
+        if(empty($data['operation_cid'])){
+            $data['operation_cid']=0;
+        }else{
+            $where['p.cid']=['eq',$data['operation_cid']];
         }
-        
+       
         //添加人
         if(empty($data['aid'])){
             $data['aid']=0;
@@ -117,9 +109,11 @@ class AdminOperationController extends AdminInfo0Controller
         }
         //查询字段 
         $types=[
-            'name' => '名称',
-            'id' => 'id',
-            'keywords' => '关键字',
+         
+            'p.name' => '运营名称',
+            'p.id' => '运营id',
+            'p.keywords' => '运营关键字',
+          
         ];
         //选择查询字段
         if(empty($data['type1'])){
@@ -133,7 +127,40 @@ class AdminOperationController extends AdminInfo0Controller
         if(!isset($data['name']) || $data['name']==''){
             $data['name']='';
         }else{
-            $where['p.'.$data['type1']]=zz_search($data['type2'],$data['name']);
+            $where[$data['type1']]=zz_search($data['type2'],$data['name']);
+        }
+        //产品分类
+        if(empty($data['cid'])){
+            $data['cid']=0;
+        }else{
+            $where_goods['goods.cid']=['eq',$data['cid']];
+        }
+        //分类
+        if(empty($data['cid0'])){
+            $data['cid0']=0;
+        }else{
+            $where_goods['goods.cid0']=['eq',$data['cid0']];
+        }
+        
+        //查询字段
+        $goods_types=[
+            'goods.name' => '产品名称',
+            'goods.id' => '产品id',
+            'goods.code' => '产品编码',
+            
+        ];
+        //选择查询字段
+        if(empty($data['goods_type1'])){
+            $data['goods_type1']=key($goods_types);
+        }
+       
+        if(empty($data['goods_type2'])){
+            $data['goods_type2']=key($search_types);
+        }
+        if(!isset($data['goods_name']) || $data['goods_name']==''){
+            $data['goods_name']='';
+        }else{
+            $where_goods[$data['goods_type1']]=zz_search($data['goods_type2'],$data['name']);
         }
         
         //时间类别
@@ -171,25 +198,137 @@ class AdminOperationController extends AdminInfo0Controller
                 }
             }
         }
-        $list=$m
+        //有产品查询
+        if(!empty($where_goods)){
+            $join=[ 
+                ['cmf_goods goods','goods.id=og.goods','left'], 
+            ];
+            if(!empty($where['p.shop'])){
+                $join=[
+                    ['cmf_goods goods','goods.shop='.$where['p.shop'].' and goods.id=og.goods','left'],
+                ];
+                $where_goods['p.shop']=$where['p.shop'];
+            }
+            $ids=Db::name('operation_goods')->alias('og')->join($join)->where($where_goods)->column('og.operation');
+            if(empty($ids)){
+                $where['p.id']=0;
+            }else{
+                $where['p.id']=['in',$ids];
+            } 
+        }
+        //关联产品和平台数
+        $goods_nums=[1=>1,2=>2,3=>3,4=>4,5=>5,100=>'5个以上'];
+        $company_nums=[1=>1,2=>2,3=>3,4=>4,5=>5,100=>'5个以上'];
+        $this->assign("goods_nums", $goods_nums);
+        $this->assign("company_nums", $company_nums);
+      
+        if(empty($data['goods_num'])){
+            $data['goods_num']=0;
+        }else{
+            $data['goods_num']=intval($data['goods_num']);
+            if(isset($goods_nums[$data['goods_num']])){
+                if($data['goods_num']==100){
+                    $where['p.goods_num']=['gt',5];
+                }else{
+                    $where['p.goods_num']=$goods_nums[$data['goods_num']];
+                }
+            }else{
+                $data['goods_num']=0;
+            } 
+        }
+        if(empty($data['company_num'])){
+            $data['company_num']=0;
+        }else{
+            $data['company_num']=intval($data['company_num']);
+            if(isset($company_nums[$data['company_num']])){
+                if($data['company_num']==100){
+                    $where['p.company_num']=['gt',5];
+                }else{
+                    $where['p.company_num']=$company_nums[$data['company_num']];
+                }
+            }else{
+                $data['company_num']=0;
+            }
+        }
+        //后期应优化为先按产品找到运营id
+        $join=[ 
+            ['cmf_operation_company op','op.operation=p.id','left'], 
+        ];
+        $ids0=$m
         ->alias('p')
-        ->field($field)
+        ->field('p.id')
         ->join($join)
         ->where($where)
         ->order('p.status asc,p.sort asc,p.time desc')
         ->paginate();
         
         // 获取分页显示
-        $page = $list->appends($data)->render();
+        $page = $ids0->appends($data)->render();
+        $ids=[];
+        foreach($ids0 as $k=>$v){
+            $ids[]=$v['id'];
+        }
+        if(empty($ids)){
+            $list=[];
+        }else{
+            $join=[
+                ['cmf_user a','a.id=p.aid','left'],
+                ['cmf_user r','r.id=p.rid','left'],
+                ['cmf_shop shop','p.shop=shop.id','left'], 
+                ['cmf_operation_cate cate2','p.cid=cate2.id','left'], 
+                ['cmf_operation_cate cate1','p.cid0=cate1.id','left'],  
+            ];
+            $field='p.*,a.user_nickname as aname,r.user_nickname as rname,shop.name as sname'.
+            ',concat(cate1.name,cate2.name) as cate_name';
+            $list=$m
+            ->alias('p')
+            ->join($join)
+            ->where('p.id','in',$ids)
+            ->order('p.status asc,p.sort asc,p.time desc')
+            ->column($field);
+            $goods_list=Db::name('operation_goods')
+            ->alias('og')
+            ->join('cmf_goods goods','goods.id=og.goods','left')
+            ->where('og.operation','in',$ids)
+            ->order('og.sort asc')
+            ->column('og.*,goods.name,goods.code');
+             $tmp=[];
+            foreach($goods_list as $k=>$v){
+                $tmp[$v['operation']][$v['code']]=[
+                    'goods'=> $v['goods'],
+                    'name'=> $v['name'],
+                    'code'=> $v['code'],
+                ];
+            }
+            foreach($list as $k=>$v){
+                if(empty($tmp[$k])){
+                    $list[$k]['codes']='';
+                    $list[$k]['goods']=[];
+                    continue;
+                }
+                $list[$k]['goods']=$tmp[$k];
+                $list[$k]['codes']=implode(',', array_keys($tmp[$k]));
+                
+            }
+        }
+       
+       
         
         $this->assign('page',$page);
         $this->assign('list',$list);
         
         $this->assign('data',$data);
+        $this->assign('cid',$data['cid']);
+        $this->assign('cid0',$data['cid0']);
+        $this->assign('operation_cid',$data['operation_cid']);
+        $this->assign('operation_cid0',$data['operation_cid0']);
+      
         $this->assign('types',$types);
+        $this->assign('goods_types',$goods_types);
         $this->assign('times',$times);
         $this->assign("search_types", $search_types);
         
+       
         $this->cates(1);
         return $this->fetch();
     }
@@ -245,16 +384,16 @@ class AdminOperationController extends AdminInfo0Controller
         $table=$this->table;
         $time=time();
         $admin=$this->admin;
-        $data_add0=$this->param_check($data);
-        if(!is_array($data_add0)){
-            $this->error($data_add0);
+        $data=$this->param_check($data);
+        if(!is_array($data)){
+            $this->error($data);
         }
         $data_add=[ 
-            'name'=>$data_add0['name'],
-            'dsc'=>$data_add0['dsc'],
-            'keywords'=>$data_add0['keywords'],
-            'cid'=>$data_add0['cid'],
-            'cid0'=>$data_add0['cid0'],
+            'name'=>$data['name'],
+            'dsc'=>$data['dsc'],
+            'keywords'=>$data['keywords'],
+            'cid'=>$data['cid'],
+            'cid0'=>$data['cid0'],
            
         ];
         //判断是否有店铺
@@ -325,6 +464,8 @@ class AdminOperationController extends AdminInfo0Controller
         ];
         
         zz_action($data_action,$admin);
+        $m_user=new UserModel();
+        $m_user->aid_add($admin['id'], $id, $table.'_aid');
         $m->commit();
         //直接审核
         $rule='review';
@@ -382,6 +523,13 @@ class AdminOperationController extends AdminInfo0Controller
         $this->assign("operation_cid0", $info['cid0']); 
         //对应分类数据
         $this->cates(); 
+        $m_user=new UserModel();
+        $table=$this->table;
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
         return $this->fetch();  
     }
     /**
@@ -589,7 +737,7 @@ class AdminOperationController extends AdminInfo0Controller
         foreach($data['web_id'] as $k=>$v){
             if(isset($operation_webs[$k])){
                 foreach($field_web as $kk=>$vv){
-                    if($operation_webs[$k][$vv] != $data[$vv][$k]){
+                    if($operation_webs[$k][$vv] != $data['web_'.$vv][$k]){
                         $content['web']['edit'][$k][$vv]=$data['web_'.$vv][$k];
                     }
                 } 
@@ -611,7 +759,14 @@ class AdminOperationController extends AdminInfo0Controller
             }
         }
         
-        
+        //检测是否有授权变化
+        if(!empty($data['aids'])){
+            $m_user=new UserModel();
+            $res=$m_user->aid_edit($admin,$info['aid'],$data['aids'],$info['id'],$table.'_aid');
+            if($res==1){
+                $content['aids']=$data['aids'];
+            }
+        }
         if(empty($content)){
             $this->error('未修改');
         }
@@ -756,7 +911,13 @@ class AdminOperationController extends AdminInfo0Controller
         //分类
         $this->assign("operation_cid", $info['cid']);
         $this->assign("operation_cid0", $info['cid0']); 
-       
+        $m_user=new UserModel();
+        $table=$this->table;
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
         return $this->fetch();  
     }
     /**
@@ -786,7 +947,7 @@ class AdminOperationController extends AdminInfo0Controller
         $table=$this->table;
         $m_edit=Db::name('edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,a.user_nickname as aname')
+        ->field('e.*,p.name as pname,a.user_nickname as aname,p.aid as paid')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
@@ -938,7 +1099,12 @@ class AdminOperationController extends AdminInfo0Controller
             if(isset($change['web'])){
                 unset($change['web']);
             }
-            
+            //检测是否有授权变化
+            if(isset($change['aids'])){
+                $m_user=new UserModel();
+                $m_user->aid_edit_do($admin,$info['paid'],$change['aids'],$info['pid'],$table.'_aid');
+                unset($change['aids']);
+            }
             foreach($change as $k=>$v){
                 $update_info[$k]=$v;
             }
@@ -1020,6 +1186,7 @@ class AdminOperationController extends AdminInfo0Controller
          
         $this->assign('companys',$companys);
         $this->assign('webs',$webs);
+        $this->assign('goods_url',url('goods/AdminGoods/edit','',false,false));
     }
     /**
      * 检查参数
