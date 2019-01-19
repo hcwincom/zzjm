@@ -278,7 +278,7 @@ class GoodsajaxController extends AdminBase0Controller
      * 获取分类 */
     public function get_cates()
     {
-        
+       
         $where1=[
             'status'=>2, 
             'fid'=>0,

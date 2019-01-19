@@ -13,6 +13,9 @@ class AdminCompany1Controller extends CompanyBaseController
         $this->flag='线下子公司';
          
         $this->company_type=1;
+        $this->edit=['name','sort','dsc','code','allname','account_name','account_bank','account_num',
+            'contact','address','store','paytype', 
+        ];
         $this->assign('flag',$this->flag);
         
     }

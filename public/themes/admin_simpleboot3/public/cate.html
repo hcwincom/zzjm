@@ -13,7 +13,8 @@ $(function(){
 	var cid0="{$cid0|default=0}";
 	var cid="{$cid|default=0}";
 	var url_get_cates="{:url('goods/Goodsajax/get_cates')}";
-	$.post(get_cates_url,{'cid0':cid0},function(data){
+	$.post(url_get_cates,{'cid0':cid0},function(data){
+	 
 		if(data.code!=1){ 
 			return false;
 		} 

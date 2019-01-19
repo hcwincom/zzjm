@@ -19,7 +19,7 @@
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
-			 <notempty name="shops">
+		  <notempty name="shops">
 				 店铺:<select class="form-control" id="shop" name="shop" >
 				 <option value='0'>全部</option>
 				 <foreach name="shops" item="vo" k="key">
@@ -73,6 +73,7 @@
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
 			<div class="table-actions">
+				 
 
 				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
 			 
@@ -93,12 +94,11 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
-						<notempty name="shops">
+					 	<notempty name="shops">
 						 <th>所属店铺</th> 
 						 </notempty>
 						<th>{$flag}名</th> 
-						 <th>{$flag}编码</th> 
-					 
+						 <th>{$flag}网址</th> 
 						<th>创建人</th>
 						<th>创建时间</th>
 						<th>审核人</th>
@@ -121,12 +121,10 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<notempty name="shops">
-						<td>{$shops[$vo.shop]|default=$vo.shop}</td>
-						</notempty>
+					 
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
-						 <td>{$vo.code}</td>
-						 
+					  <td><a href="{$vo.company_url}"  target="{$zztarget['other']}">{$vo.company_url}</a></td>
+					  
 						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">

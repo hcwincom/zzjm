@@ -15,9 +15,7 @@ class CompanyBaseController extends AdminInfo0Controller
         
         $this->table='company';
         $this->m=Db::name('company');
-        $this->edit=['name','sort','dsc','code','allname','account_name','account_bank','account_num',
-             'contact','address','key_account','key_key','store','paytype'
-        ];
+        
         $this->search=[
             'name' => '公司名称',
             'code' => '公司代码',

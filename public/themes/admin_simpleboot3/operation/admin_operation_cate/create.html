@@ -5,12 +5,12 @@
 
 	<div class="wrap js-check-wrap">
 		<ul class="nav nav-tabs"> 
-		<include file="public@nav" />
-	 
+			<include file="operation@admin_operation_cate::nav" />
 		</ul>
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
-			状态:  <input type="hidden" name="page" value="1"/>
+			 <input type="hidden" name="page" value="1"/>
+			状态: 
 			<select class="form-control" name="status" >
 				<option value='0'>全部</option> 
 				 <foreach name="statuss" item="vo" k="key">
@@ -18,18 +18,7 @@
 				 {$vo}
 				</option>
 				</foreach>
-			</select> &nbsp;&nbsp;
-			 <notempty name="shops">
-				 店铺:<select class="form-control" id="shop" name="shop" >
-				 <option value='0'>全部</option>
-				 <foreach name="shops" item="vo" k="key">
-					 <option value="{$key}" <if condition="$key eq $data.shop">selected</if>>
-					 {$vo}
-					 </option>
-				 </foreach>
-			 </select> &nbsp;&nbsp;
-			 </notempty>
-		  
+			</select> &nbsp;&nbsp;  
 			 创建人: 
 			<select class="form-control" name="aid"  >
 				<option value='0'>全部</option> 
@@ -43,6 +32,14 @@
 				<option value='0'>全部</option> 
 				 <foreach name="rids" item="vo" k="key">
 				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			一级分类: 
+			<select class="form-control" name="fid" >
+				<option value='0'>全部</option> 
+				 <foreach name="cates" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.fid">selected</if>>{$vo.name}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -92,13 +89,10 @@
 								data-checklist="js-check-x">
 						</label>
 						</th>
-						<th width="100">{$flag}ID</th>
-						<notempty name="shops">
-						 <th>所属店铺</th> 
-						 </notempty>
-						<th>{$flag}名</th> 
-						 <th>{$flag}编码</th> 
-					 
+						<th width="100">ID</th>
+						 
+						<th>分类名</th> 
+						<th>父级分类</th>  
 						<th>创建人</th>
 						<th>创建时间</th>
 						<th>审核人</th>
@@ -112,7 +106,7 @@
 				<tbody>
 					<foreach name="list" item="vo">
 				 
-					<tr class="status{$vo.status}">
+					<tr class="cate cate{$vo.fid}">
 						<td>
 							<input type="checkbox" class="js-check"
 							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
@@ -121,19 +115,22 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<notempty name="shops">
-						<td>{$shops[$vo.shop]|default=$vo.shop}</td>
-						</notempty>
-						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
-						 <td>{$vo.code}</td>
-						 
-						<td>{$vo.aname|default=$vo.aid}</td>
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
+						<td>
+						<eq name="vo.fid" value="0">
+						一级分类
+						<else/>
+						<a href="{:url('edit',['id'=>$vo.fid])}"  target="{$zztarget['edit']}">{$cates[$vo.fid]['name']|default='未找到父类'}</a>
+						</eq> 
+						</td>
+					 
+						<td>{$aids[$vo.aid]|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">
 						<td>-</td>
 						<td>-</td>
 						<else/>
-						<td>{$vo.rname|default=$vo.rid}</td>
+						<td>{$rids[$vo.rid]|default=$vo.rid}</td>
 						<td>{$vo.rtime|date='Y-m-d H:i',###}</td>
 						</eq>
 						
@@ -150,26 +147,23 @@
 
 		</form>
 	 	<div class="pagination">{$page}</div>
+	 	 
 	</div>
+	 
 	<script src="__STATIC__/js/admin.js"></script>
 <script>
-
-    $('.ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('ban')}");
-        return is_check('批量禁用');
-    });
-    $('.cancel_ban').click(function(){
-        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
-        return is_check('批量恢复');
-    });
-    $('.review_all').click(function(){
-        $(this).parents('form').attr('action',"{:url('review_all')}");
-        return is_check('批量同意');
-    });
-    $('.del_all').click(function(){
-        $(this).parents('form').attr('action',"{:url('del_all')}");
-        return is_check('批量删除');
-    });
+$('.ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('ban')}");
+});
+$('.cancel_ban').click(function(){
+	$(this).parents('form').attr('action',"{:url('cancel_ban')}");
+});
+$('.review_all').click(function(){
+	$(this).parents('form').attr('action',"{:url('review_all')}");
+});
+$('.del_all').click(function(){
+	$(this).parents('form').attr('action',"{:url('del_all')}");
+});
 </script>
 </body>
 </html>

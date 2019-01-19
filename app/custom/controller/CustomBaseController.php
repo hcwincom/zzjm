@@ -19,8 +19,9 @@ class CustomBaseController extends AdminInfo0Controller
         $this->isshop=1;
         $this->edit=['name','company','cid','city_code','code_num','postcode','paytype','pay_type',
             'email','mobile','level','url','shopurl','wechat','qq','fax',
-            'province','city','area','street','other','announcement','invoice_type','invoice_title',
-            'invoice_ucode','tax_point','freight','payer','dsc','sort',
+            'province','city','area','street','other','announcement','freight','payer','dsc','sort',
+            'invoice_type','invoice_title','invoice_ucode','tax_point','invoice_address',
+            'invoice_tel','invoice_location','invoice_num','print_send','freight_pay'
         ];
         $this->search=[
             'p.name'=>'客户名称', 
@@ -293,6 +294,16 @@ class CustomBaseController extends AdminInfo0Controller
         } elseif($admin['shop']!=1){
             $this->error('店铺不能添加系统数据');
         }
+        if(empty($data['freight_pay'])){
+            $data['freight_pay']=2;
+        }else{
+            $data['freight_pay']=1;
+        }
+        if(empty($data['print_send'])){
+            $data['print_send']=2;
+        }else{
+            $data['print_send']=1;
+        }
         //循环的到参数
         $edit=$this->edit;
         $data_add=[];
@@ -480,6 +491,16 @@ class CustomBaseController extends AdminInfo0Controller
             if(empty($info['shop']) || $info['shop']!=$admin['shop']){
                 $this->error('不能编辑其他店铺的信息');
             }
+        }
+        if(empty($data['freight_pay'])){
+            $data['freight_pay']=2;
+        }else{
+            $data['freight_pay']=1;
+        }
+        if(empty($data['print_send'])){
+            $data['print_send']=2;
+        }else{
+            $data['print_send']=1;
         }
         $update=[
             'pid'=>$info['id'],
@@ -1027,7 +1048,7 @@ class CustomBaseController extends AdminInfo0Controller
             'shop'=>$admin['shop'],
         ];
         $update['adsc']=(empty($data['adsc']))?'联系人信息编辑':$data['adsc'];
-        $fields=['contacter','receiver','checker','invoice_tel'];
+        $fields=['contacter','receiver','checker'];
         
         $content=[];
         //检测改变了哪些字段

@@ -1248,10 +1248,7 @@ class OrderBaseController extends AdminBaseController
           $this->assign('statuss',config('ordersup_status'));
           $this->assign('order_types',config('ordersup_type')); 
       }
-          
-          
-        $this->assign('order_url',url('order/AdminOrder/edit',false,false));
-        $this->assign('order_user_url',url('custom/AdminCustom/edit',false,false));
+        
         $this->assign('edit_url',url('edit_list',['type1'=>'id','type2'=>1],false));
        
     }

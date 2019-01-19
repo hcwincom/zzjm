@@ -97,7 +97,7 @@
 				 	<input type="hidden" id="custom" value="{$info.uid}"/>
 					 <input type="text"  class="form-control " value="{$custom.name|default=$info.uname}"/>
 					 <notempty name="info.uid">
-					  	<a href="{$order_user_url}/id{$info.uid}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
+					  	<a href="{$order_user_url}/id/{$info.uid}" target="{$zztarget['other']}" id="custom_link">{$uflag}详情</a>
 		  			 </notempty>
 					
 				</div>
