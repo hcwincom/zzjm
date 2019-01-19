@@ -186,7 +186,7 @@ buyer_nick	String	我在测试	买家昵称
                     $update_order=[];
                     $old_status=1;
                     if(isset($oids[$vv['tid']])){
-                        $oid=$oids[$vv['tid']]['id'];
+                        $oid=$oids[$vv['tid']]['id']; 
                         $old_status=$oids[$vv['tid']]['status'];
                         //要比较订单状态和产品
                         //根据订单状态比较
@@ -297,6 +297,7 @@ buyer_nick	String	我在测试	买家昵称
                 if($order['is_back']==0){
                     $update_order['pay_status']=3;
                     $update_order['is_back']=1;
+                    
                     $update_order['status']=70;
                 } 
                 break;
@@ -314,6 +315,9 @@ buyer_nick	String	我在测试	买家昵称
         }
         $m->where('id',$order['id'])->update($update_order); 
             
+        if(!empty($update_order['is_back'])){
+            $this->orderback_add($order['id']);
+        }
        
         return 1;
     }
@@ -327,8 +331,7 @@ buyer_nick	String	我在测试	买家昵称
      */
     public function order_add($taobao,$company,$shop=2,$aid=1){
         if(empty($taobao['receiver_district'])){
-            $taobao['receiver_district']='';
-            zz_log('receiver_district'.json_encode($taobao));
+            $taobao['receiver_district']=''; 
         }
         //新增
         $update_order=[
@@ -513,8 +516,98 @@ buyer_nick	String	我在测试	买家昵称
             $update['sort']=$sort; 
         }
         $m->where('id',$oid)->update($update);
+        if(!empty($update_order['is_back'])){
+          $this->orderback_add($oid);
+        }
         return $oid;
     }
-    
+    //自动添加售后
+    public function orderback_add($oid){
+        //淘宝同步售后都由超管添加
+        $aid=1;
+        //都定为退货退款
+        $type=2;
+        $order_type=1;  
+        $m_order=Db::name('order');
+        $m_ogoods=Db::name('order_goods'); 
+        $where_order=[
+            'id'=>$oid
+        ];
+       
+        $order=$m_order->where($where_order)->find();
+        if(empty($order)){
+            $this->error('未找到订单');
+        }
+         
+        //店铺
+        $shop=$order['shop'];
+       
+        //原订单产品
+        $infos=$m_ogoods->where('oid',$oid)->column('*','goods');
+         
+        $time=time();
+        $data_orderback=[
+            'name'=>date('Ymd').substr($time,-6).$aid,
+            'aid'=>$aid,
+            'atime'=>$time,
+            'create_time'=>$time,
+            'time'=>$time,
+            'type'=>$type,
+            'order_type'=>$order_type,
+            'shop'=>$order['shop'],
+            'company'=>$order['company'],
+            'uid'=>$order['uid'],
+            'uname'=>$order['uname'],
+            'about'=>$order['id'],
+            'about_name'=>$order['name'],
+            'store1'=>$order['store'],
+            'back_money'=>$order['order_amount'],
+            'goods_money'=>$order['goods_money'],
+        ];
+        /* $fields_int=['store1','store2','express1','express2','province','city','area','freight','pay_type'];
+        foreach($fields_int as $v){
+            $data_orderback[$v]=intval($data[$v]);
+        }
+        $fields_round=['goods_money','back_money','weight','size','real_freight','pay_freight'];
+        foreach($fields_round as $v){
+            $data_orderback[$v]=round($data[$v],2);
+        }
+        $fields_str=['express_no1','express_no2','postcode','accept_name','mobile','phone','address','addressinfo'];
+        foreach($fields_str as $v){
+            $data_orderback[$v]=$data[$v];
+        } */
+        $fields_str=['accept_name','mobile','phone','address','addressinfo',
+            'province','city','area','size','weight'];
+        foreach($fields_str as $v){
+            $data_orderback[$v]=$order[$v];
+        }
+        $m=Db::name('orderback');
+        $m_info=Db::name('orderback_goods');
+      
+        $oid= $m->insertGetId($data_orderback);
+       
+        //产品数据
+        if(!empty($infos)){ 
+            foreach($infos as $k=>$v){
+                $data_goods[]=[
+                    'oid'=>$oid,
+                    'goods'=>$k,
+                    'goods_name'=>$v['goods_name'],
+                    'print_name'=>$v['print_name'],
+                    'goods_uname'=>$v['goods_uname'],
+                    'goods_ucate'=>$v['goods_ucate'],
+                    'goods_code'=>$v['goods_code'],
+                    'goods_pic'=>$v['goods_pic'],
+                    'price_real'=>$v['price_real'],
+                    'price_sale'=>$v['price_sale'],
+                    'num'=>$v['num'],
+                    'pay'=>$v['pay'],
+                    'dsc'=>$v['dsc'],
+                ];
+            }
+            $m_info->insertAll($data_goods);
+        }
+         
+    }
 }
        
