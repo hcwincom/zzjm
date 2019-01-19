@@ -674,15 +674,15 @@ class AdminGoodsController extends AdminBaseController
         return $this->fetch();
     }
     /**
-     * 设备列表
+     * 设备关联
      * @adminMenu(
-     *     'name'   => '设备列表',
+     *     'name'   => '设备关联',
      *     'parent' => 'goods/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 5,
      *     'icon'   => '',
-     *     'remark' => '设备列表',
+     *     'remark' => '设备关联',
      *     'param'  => ''
      * )
      */
