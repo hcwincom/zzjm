@@ -77,7 +77,61 @@ class AdminShopController extends AdminInfo0Controller
      */
     public function add_do()
     {
-        parent::add_do();
+       
+        $m=$this->m;
+        $data=$this->request->param();
+        
+        $url=url('index');
+        
+        $table=$this->table;
+        $time=time();
+        $admin=$this->admin;
+        $data_add=$this->param_check($data);
+        if(!is_array($data_add)){
+            $this->error($data_add);
+        }
+        //判断是否有店铺
+        if($this->isshop){
+            $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
+        }
+        $data_add['sort']=intval($data['sort']);
+        $data_add['status']=1;
+        
+        $data_add['aid']=$admin['id'];
+        $data_add['atime']=$time;
+        $data_add['time']=$time;
+        
+        $m->startTrans();
+        $id=$m->insertGetId($data_add);
+        $path='upload/';
+        $pathid='seller'.$id.'/';
+        //新店铺要创建目录
+        if(!is_dir($path.$pathid)){
+            mkdir($path.$pathid);
+        }
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'添加'.($this->flag).$id.'-'.$data['name'],
+            'table'=>($this->table),
+            'type'=>'add',
+            'pid'=>$id,
+            'link'=>url('edit',['id'=>$id]),
+            'shop'=>$admin['shop'],
+            
+        ];
+        
+        zz_action($data_action,$admin);
+        $m->commit();
+        //直接审核
+        $rule='review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$id,'status'=>2]);
+        }
+        $this->success('添加成功',$url);
         
     }
     /**
