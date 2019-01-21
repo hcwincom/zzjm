@@ -973,10 +973,11 @@ class CustomBaseController extends AdminInfo0Controller
             $this->assign('invoice_types',$invoice_types);
             $this->assign('banks',$banks);
         }
-        $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field);
         
         //付款类型  
         $paytypes=Db::name('paytype')->where($where)->order('shop asc,sort asc')->column($field);
+        $where['type']=1;
+        $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field);
         
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes);
