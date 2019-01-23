@@ -684,6 +684,7 @@ class OldController extends AdminBaseController
                     'site'=>1,
                     'uid'=>$v['id'],
                     'type'=>1,
+                    'paytype2'=>$tmp['paytype'],
                 ];
                 $m_account->update($account);
             }
@@ -693,6 +694,7 @@ class OldController extends AdminBaseController
                     'site'=>2,
                     'uid'=>$v['id'],
                     'type'=>1,
+                    'paytype2'=>$tmp['paytype'],
                 ];
                 $m_account->update($account);
             }
@@ -702,6 +704,7 @@ class OldController extends AdminBaseController
                     'site'=>3,
                     'uid'=>$v['id'],
                     'type'=>1,
+                    'paytype2'=>$tmp['paytype'],
                 ];
                 $m_account->update($account);
             }
@@ -872,6 +875,7 @@ class OldController extends AdminBaseController
                     'site'=>1,
                     'uid'=>$v['id'],
                     'type'=>2,
+                    'paytype2'=>$tmp['paytype'],
                 ];
                 $m_account->update($account);
             }
@@ -881,6 +885,7 @@ class OldController extends AdminBaseController
                     'site'=>2,
                     'uid'=>$v['id'],
                     'type'=>2,
+                    'paytype2'=>$tmp['paytype'],
                 ];
                 $m_account->update($account);
             }
@@ -890,6 +895,7 @@ class OldController extends AdminBaseController
                     'site'=>3,
                     'uid'=>$v['id'],
                     'type'=>2,
+                    'paytype2'=>$tmp['paytype'],
                 ];
                 $m_account->update($account);
             }

@@ -212,7 +212,7 @@
 				</div>
 			</div>
 	  		 <div class="form-group fleft-all accept">
-				<label  class="col-sm-2 control-label">是否允许拆分订单</label>
+				<label  class="col-sm-2 control-label">是否允许拆分订单{$info.ok_break}</label>
 				<div class="col-md-6 col-sm-10"> 
 				 	<label class="radio-inline"> 
 				 		<input type="radio" name="ok_break" value="1" id="ok_break" checked/>允许
@@ -359,8 +359,7 @@
 			  <foreach name="infos[$kk]" item="vo" key="key">
 			   
      	     	<tr class="goods{$key}" id="goods{$key}"> 
-     	     		<td>
-     	     		   
+     	     		<td> 
      	     			<a href="{$goods_url}/id/{$key}" target="{$zztarget.other}">{$vo.goods_name}</a> 
      	     		</td> 
      	    		<td>{$vo.goods_code}</td> 
@@ -1050,6 +1049,7 @@
 					   若快递规则未设置请到配送管理->店铺合作快递中添加快递或给已有快递设置关联仓库，然后再联系人和付款中添加快递区域和对应的费用。
 					   运费计算结果赋给实际运费，若用户支付运费为空，则同样赋给用户支付运费 。
 			   </p> 
+			
 			   <p class="notice">用户付款=产品总金额+用户支付运费-优惠金额+税费+其它费用。
 			   	计算税费后用户付款金额会重置，产品总金额、优惠金额、税费、其它费用变动后用户付款金额也会改变
 				  订单付款或发货后则不能修改用户付款</p> 
@@ -1060,7 +1060,7 @@
 	  <div class="form-group fleft-all "  >
 			<label class="col-sm-2 control-label">订单确认</label>
 			<div class="col-md-6 col-sm-10">
-				<button id="break_ok" type="button">订单确认</button>
+				<button id="break_ok" type="button">订单拆分完成确认</button>
 			    <p class="notice">拆分订单后点击确认，继续拆分则会产生新订单 </p> 
 			   <p class="notice">订单生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
 			</div>

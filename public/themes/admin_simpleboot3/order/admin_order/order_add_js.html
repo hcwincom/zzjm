@@ -121,6 +121,7 @@ function custom_change(custom){
 				 $('#accept').html(options); 
 				 $('#freight').val(info.freight);
 				 $('#order_company').val(info.company);
+				 /*  应用付款账号绑定的paytype2 */
 				 accept_change(); 
 				 list=info.accounts;
 				  options='<option value="0">选择付款账号</option>'; 
@@ -149,10 +150,8 @@ function custom_change(custom){
 				 $('#invoice_bank_location').val(info.invoice_location+' '+info.invoice_num); 
 				 invoice_type_change();
 				 $('#tax_point').val(info.tax_point); 
-				/* 旧系统paytype和custom绑定，所以暂时还用info.paytype,否则应用付款账号绑定的paytype2 */
-				if(info.paytype>0){
-					 $('#paytype').val(info.paytype); 
-				}
+				
+				 
 				if(info.payt_ype>0){
 					 $('#pay_type').val(info.pay_type); 
 				}else{

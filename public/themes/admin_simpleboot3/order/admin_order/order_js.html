@@ -1,4 +1,4 @@
- 
+  
 <script>
 var price_count=0;
 var num_count=0; 
@@ -14,6 +14,7 @@ var $tmp_tr;
 var weight0=0;
 var size0=0;
 var ok_break="{$ok_break|default=2}";
+
 var ok_add="{$ok_add|default=2}";
 var utype="{$utype|default=1}";
 var flag="{$flag}";
@@ -121,9 +122,7 @@ $('#goods_add').click(function(){
 		 if($(this).prop('checked')){
 			 goods_add($(this).val());
 		 }
-	 });
-	 
-	 
+	 }); 
 });
 $('#goods_add1').click(function(){
 	 
@@ -218,6 +217,7 @@ function goods_add(goods){
 		    	button_break= '<input type="text" class="form-control input-order break" value="0"/>'+
 				'<button class="order_break" type="button">拆分</button>';
 		    }
+		   
 		    var button_del='<button type="button" class="goods_del">删除</button>';
 		     
     	    tr+='<tr class="goods'+info['id']+'">'+

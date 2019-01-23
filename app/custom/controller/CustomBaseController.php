@@ -17,7 +17,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         //没有店铺区分
         $this->isshop=1;
-        $this->edit=['name','company','cid','city_code','code_num','postcode','paytype','pay_type',
+        $this->edit=['name','company','cid','city_code','code_num','postcode','pay_type',
             'email','mobile','level','url','shopurl','wechat','qq','fax',
             'province','city','area','street','other','announcement','freight','payer','dsc','sort',
             'invoice_type','invoice_title','invoice_ucode','tax_point','invoice_address',
@@ -121,7 +121,21 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($data['paytype'])){
             $data['paytype']=0;
         }else{
-            $where['p.paytype']=['eq',$data['paytype']];
+            //检测有该付款账号的客户
+            $where_paytype=[
+                'type'=>$tel_type,
+                'paytype2'=>$data['paytype'],
+            ];
+            if(!empty($where['p.shop'])){
+                $where_paytype['shop']=$where['p.shop'];
+            }
+            $uids=Db::name('account')->where($where_paytype)->column('uid');
+            if(empty($uids)){
+                $where['p.id']=['eq',0];
+            }else{
+                $where['p.id']=['in',$uids];
+            } 
+           
         }
         //客户类型
         if(empty($data['cid'])){
@@ -443,10 +457,11 @@ class CustomBaseController extends AdminInfo0Controller
             'uid'=>$id,
             'type'=>$tel_type, 
         ];
-        $accounts=Db::name('account')->where($where)->column('site,id,bank1,name1,num1,location1,paytype2');
+        $accounts=Db::name('account')->where($where)->column('site,id,uid,bank1,name1,num1,location1,paytype2','site');
         $account1=(isset($accounts[1]))?$accounts[1]:null;
         $account2=(isset($accounts[2]))?$accounts[2]:null;
         $account3=(isset($accounts[3]))?$accounts[3]:null;
+      
         //客户分类信息
         $this->cates();
         $m_user=new UserModel();

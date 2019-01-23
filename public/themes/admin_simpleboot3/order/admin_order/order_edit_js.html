@@ -118,8 +118,13 @@ $(document).on('click','.order_break',function(){
 		$order_new.find('.order_pay select').val(0);
 		$order_new.find('.order_pay dsc').val('');
 		is_end=0;
+	} else{
+		 var oid_now=$tmp_tr.parents('.order').find('.oid').val();
+		  if(oid==oid_now){
+			  msg('新拆分未确认完成的子'+flag+'不能拆分');
+			  return 0;
+		  }
 	} 
-	  
 	if($order_new.find('.goods'+goods_id).length>0){
 		$order_new.find('.goods'+goods_id+' .num input').val(parseInt($order_new.find('.goods'+goods_id+' .num input').val())+num);
 	}else{

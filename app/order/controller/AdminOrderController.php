@@ -76,8 +76,7 @@ class AdminOrderController extends OrderBaseController
      */
     public function add()
     {
-       parent::add();
-       $this->assign('ok_break',1);
+       parent::add(); 
        return $this->fetch();  
     }
     /**

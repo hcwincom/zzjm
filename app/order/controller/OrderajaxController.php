@@ -5,6 +5,7 @@ namespace app\order\controller;
 use app\common\controller\AdminBase0Controller;  
 use think\Db; 
 use app\order\model\OrderModel;
+use barcode\Barcode;
   
 class OrderajaxController extends AdminBase0Controller
 {
@@ -318,6 +319,13 @@ class OrderajaxController extends AdminBase0Controller
        
         
         $this->success('ok','',$nums);
+    }
+    //订单条码
+    public function barcode(){
+        $barcode = new Barcode();
+        $data=$this->request->param();
+        //第一个参数为用来生成条形码的字符串，第二个参数为条形码下面显示的字符内容，第三个为生成的路径文件名称
+        $barcode->createBarCode($data['sn'],$data['sn']);
     }
     
 }

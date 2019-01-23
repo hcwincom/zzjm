@@ -338,6 +338,7 @@ buyer_nick	String	我在测试	买家昵称
             'name'=>$taobao['tid'],
             'uname'=>$taobao['buyer_nick'],
             'order_type'=>$this->order_type,
+            'ok_break'=>2,
             'company'=>$company['id'],
             'store'=>$company['store'],
             'uid'=>0,

@@ -253,20 +253,7 @@
 				</present>
 				</div>
 			</div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">店铺收款账号</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="paytype" id="" required> 
-					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				<present name="change.paytype">
-					<input type="text" class="form-control red" value="{$paytypes[$change.paytype]|default='--'}" />
-					 
-				</present>
-				</div>
-			</div>
+		 
 			
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">常用物流</label>

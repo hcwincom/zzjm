@@ -9,6 +9,7 @@ use app\admin\model\UserModel;
 use cmf\controller\AdminBaseController; 
 use app\money\model\OrdersInvoiceModel;
 use app\money\model\OrdersPayModel;
+use barcode\Barcode;
 class OrderBaseController extends AdminBaseController
 {
     protected $m;
@@ -41,7 +42,10 @@ class OrderBaseController extends AdminBaseController
     }
     
     public function index()
-    {
+    { 
+        
+      
+        
         
         $table=$this->table;
         $m=$this->m;
@@ -582,8 +586,7 @@ class OrderBaseController extends AdminBaseController
              ->join('cmf_goods goods','goods.id=p.goods')
              ->where('p.uid',$custom['id']) 
              ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
-             $this->assign('ugoods',$ugoods);
-            
+             $this->assign('ugoods',$ugoods); 
          }
         //支付信息 
         if(empty($info['pay_id'])){

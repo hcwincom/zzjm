@@ -272,6 +272,20 @@ class StoreGoodsModel extends Model
         }   
         flock($fp,LOCK_UN);
         fclose($fp);
+        //出库操作要检查安全库存
+        if($info['num']<0 ){
+            $where=[
+                'goods'=>$info['goods'],
+                'shop'=>$info['shop'],
+                'store'=>['in',[0,$info['store']]],
+            ];
+            $safes=$this
+            ->alias('sg')
+            ->join('cmf_store store','store.id=sg.store')
+            ->join('cmf_goods goods','goods.id=sg.goods')
+            ->where($where)
+            ->column('sg.id,sg.safe,sg.num,store.name as store_name,goods.name as goods_name,goods.code as goods_code');
+        }
         if($row===2){
             //返回料位
             if($num_ok==1){ 
