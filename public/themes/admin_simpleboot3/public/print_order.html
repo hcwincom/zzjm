@@ -127,7 +127,8 @@
     .order_div1>h3{
         padding-left: 20px;
     }
-    .order_div1>.order_num,.order_div2>.fadate{
+     .order_div1>.order_num,.order_div2>.fadate{
+        height: 60px;
         height: 80px;
     }
     .order_div1>.order_num>span{
@@ -138,16 +139,16 @@
         vertical-align: top
     }
     .order_div1>.order_num>p{
+        width: 80%;
         width: 478px;
         display: inline-block;
+        line-height: 60px;
         height: 80px;
         line-height: 80px;
         vertical-align: top;
     }
-    .order_div1>.order_num>p>img{
-        width: 100%;
-        height: 100%;
-    }
+    
+     
     .order_div1>.order_addr{
         font-size: 16px;
         line-height: 28px;
@@ -208,9 +209,11 @@
                                 <h3>{$shop.name}</h3>
                                 <div class="order_num">
                                     <span>订单编码</span>
+                                    
                                     <p>
                                        <img src="{:url('order/Orderajax/barcode',['sn'=>$info.name])}" alt="" /> 
                                     </p>
+                                    
                                 </div>
                                 <div class="order_addr">
                                     <span>{$shop.address}</span> 
@@ -287,11 +290,14 @@
         <div class="signature">
             <p>客户收货信息: <span>{$info.accept_name}</span><span>{$info.mobile} {$info.phone}</span><span>{$info.addressinfo}{$info.address}</span></p>
         </div>
-        <notempty name="shop.print_img">
+        <notempty name="shop.print_img2">
         	 <div class="appraise_info">
 	            <img src="{:cmf_get_image_url($shop.print_img)}" alt="">
 	        </div>
         </notempty>
+        
+ 
+                                
         <div class="mimeograph" style="text-align:center;margin-top: 20px;">
             <input type="submit" class="btn_print noprint" onclick="window.print();" value="打印">
         </div>

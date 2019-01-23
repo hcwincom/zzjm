@@ -277,14 +277,18 @@ class StoreGoodsModel extends Model
             $where=[
                 'goods'=>$info['goods'],
                 'shop'=>$info['shop'],
-                'store'=>['in',[0,$info['store']]],
+                'store'=>['eq',$info['store']],
             ];
-            $safes=$this
+            $safe=$this
             ->alias('sg')
             ->join('cmf_store store','store.id=sg.store')
             ->join('cmf_goods goods','goods.id=sg.goods')
             ->where($where)
-            ->column('sg.id,sg.safe,sg.num,store.name as store_name,goods.name as goods_name,goods.code as goods_code');
+            ->field('sg.id,sg.safe,sg.num,store.name as store_name,goods.name as goods_name,goods.code as goods_code')
+            ->find();
+            if($safe['safe']<=$safe['num']){
+                
+            }
         }
         if($row===2){
             //返回料位
