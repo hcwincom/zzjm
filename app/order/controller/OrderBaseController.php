@@ -10,6 +10,7 @@ use cmf\controller\AdminBaseController;
 use app\money\model\OrdersInvoiceModel;
 use app\money\model\OrdersPayModel;
 use barcode\Barcode;
+use app\msg\model\MsgModel;
 class OrderBaseController extends AdminBaseController
 {
     protected $m;
@@ -43,10 +44,7 @@ class OrderBaseController extends AdminBaseController
     
     public function index()
     { 
-        
-      
-        
-        
+         
         $table=$this->table;
         $m=$this->m;
         $admin=$this->admin;
@@ -684,11 +682,16 @@ class OrderBaseController extends AdminBaseController
         if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
            $this->error('不能编辑其他店铺的信息'); 
         }
-         //是否有权查看
-        $res=$m->order_edit_auth($info,$admin);
-        if($res!==1){
-            $this->error($res); 
+        //有还原权限的为最高权限
+        $res=$this->check_review($admin,'status_do0');
+        if(!$res){
+            //是否有权查看
+            $res=$m->order_edit_auth($info,$admin);
+            if($res!==1){
+                $this->error($res);
+            }
         }
+        
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
@@ -1111,29 +1114,88 @@ class OrderBaseController extends AdminBaseController
             
             //排序
             $m->order_sort($order['id']);
+            $order1=$m->get_one(['id'=>$info['pid']]); 
+            $m_msg=new MsgModel();
+            if($table=='order'){
+                $pay_do2='order/AdminOrder/pay_do2';
+                $order_name='订单'.$order1['id'].'--'.$order1['name'];
+            }else{
+                $pay_do2='ordersup/AdminOrdersup/pay_do2';
+                $order_name='采购单'.$order1['id'].'--'.$order1['name'];
+            }
+           
+            $msg_data=[ 
+                'link'=>url('edit',['id'=>$order1['id']]),
+                'shop'=>$info['shop'],
+                'aid'=>$admin['id']
+            ];
+            $msg_dsc=$order_name.'需要准备发货 ';
+            $msg_auth='order/AdminOrder/status_do20';
             //判断是否需要出库
-            if(isset($change['status'])){
-               
+            if(isset($change['status'])){ 
+                //先根据状态出入库
                 $res=$m->status_change($order['id'],$order['status']);
                 if(!($res>0)){
                     $m->rollback();
                     $this->error($res);
                 }
-            }
-            //判断是否需要付款
-            if(isset($change['pay_status']) && $change['pay_status']==3){ 
+                //根据状态通知
+                if($table=='order'){
+                    switch($change['status']){
+                        case 20:
+                            //准备发货 5
+                            $msg_dsc=$order_name.'需要准备发货 ';
+                            $msg_auth='order/AdminOrder/status_do20';
+                            $msg_data['dsc']=$msg_dsc;
+                            $m_msg->auth_send($msg_auth,$msg_data);
+                            break;
+                    }
+                }else{
+                    switch($change['status']){
+                        case 10:
+                            //采购待付款 
+                            $msg_dsc=$order_name.'需要付款 ';
+                            $msg_auth='ordersup/AdminOrdersup/pay_do1';
+                            $msg_data['dsc']=$msg_dsc;
+                            $m_msg->auth_send($msg_auth,$msg_data);
+                            break;
+                        case 20:
+                            //采购待付款
+                            $msg_dsc=$order_name.'等待发货，请关注';
+                            $msg_auth='ordersup/AdminOrdersup/status_do20';
+                            $msg_data['dsc']=$msg_dsc;
+                            $m_msg->auth_send($msg_auth,$msg_data);
+                            break;
+                    }
+                }
                 
-                $order1=$m->get_one(['id'=>$info['pid']]); 
-                if(!empty($order1['invoice_id'])){
-                    $m_invoice=new OrdersInvoiceModel();
-                    $where=[
-                        'id'=>$order['invoice_id'],
-                        'status'=>1
-                    ];
-                    $m_invoice->where($where)->update(['status'=>2]);
-                } 
             }
-           
+            //判断付款更新
+            if(isset($change['pay_status']) ){ 
+                
+                if($change['pay_status']==3){
+                    //付款成功后更新发票
+                    if(!empty($order1['invoice_id'])){
+                        $m_invoice=new OrdersInvoiceModel();
+                        $where=[
+                            'id'=>$order['invoice_id'],
+                            'status'=>1
+                        ];
+                        $m_invoice->where($where)->update(['status'=>2]);
+                    } 
+                }elseif($change['pay_status']==2){ 
+                    //提示财务确认付款  
+                    if($table=='order'){
+                        $msg_dsc=$order_name.'已提交付款，请确认';
+                        $msg_auth='order/AdminOrder/pay_do2';
+                        $msg_data['dsc']=$msg_dsc;
+                        $m_msg->auth_send($msg_auth,$msg_data);
+                    }
+                   
+               }
+               
+            }
+            
         }
         
         //审核成功，记录操作记录,发送审核信息

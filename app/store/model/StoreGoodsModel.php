@@ -4,6 +4,8 @@ namespace app\store\model;
 
 use think\Model;
 use think\Db;
+use app\admin\model\UserModel;
+use app\msg\model\MsgModel;
 class StoreGoodsModel extends Model
 {
     /**
@@ -287,7 +289,14 @@ class StoreGoodsModel extends Model
             ->field('sg.id,sg.safe,sg.num,store.name as store_name,goods.name as goods_name,goods.code as goods_code')
             ->find();
             if($safe['safe']<=$safe['num']){
-                
+                //提示库存不足,采购添加权限 
+                $m_msg=new MsgModel();
+                $data=[
+                    'dsc'=>'仓库'.$safe['store_name'].'产品'.$safe['good_code'].$safe['good_name'].'库存要补充', 
+                    'link'=>url('store/AdminGoods/index',['type1'=>'code','name'=>$safe['good_code'],'shop'=>$info['shop']]),
+                    'shop'=>$info['shop'],
+                ];
+                $m_msg->auth_send('ordersup/AdminOrdersup/add_do',$data);
             }
         }
         if($row===2){

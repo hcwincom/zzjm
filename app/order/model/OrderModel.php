@@ -609,6 +609,7 @@ class OrderModel extends Model
          foreach($change as $k=>$v){
              $update_info[$k]=$v;
          }
+         //状态更新
          if(isset($change['is_real'])){
              $order['is_real']=$change['is_real'];
          }
@@ -659,7 +660,8 @@ class OrderModel extends Model
                  }
              } 
          } 
-        
+       
+        //通知各级发货
          ///$order
          //更新用户数据 
          $this->custom_update($order['uid']);
@@ -668,6 +670,7 @@ class OrderModel extends Model
      /* 订单是否可以编辑 */
      public function order_edit_auth($order,$admin){
          if($order['status']==1 && $order['aid']!=$admin['id']){
+             //超管可以修改
              return '不能修改他人的未提交订单的';
          }
          //是否有待审核
@@ -702,7 +705,7 @@ class OrderModel extends Model
          $where=[
              'oid'=>$order['id'],
              'aid'=>$admin['id'],
-             'type'=>1,5
+             'type'=>1
          ];
          $tmp=Db::name('order_aid')->where($where)->find();
          if(!empty($tmp)){

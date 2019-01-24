@@ -243,5 +243,5 @@ class UserModel extends Model
         return 1;
        
     }
-
+   
 }

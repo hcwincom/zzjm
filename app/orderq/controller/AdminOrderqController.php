@@ -585,11 +585,14 @@ class AdminOrderqController extends AdminInfo0Controller
         ->join('cmf_area area','area.id=c.area','left') 
         ->where('c.id',$info['uid'])
         ->find();
+        //公司信息
+        $company=Db::name('company')->field('id,name,code,shop')->where('id',$info['company'])->find();
         
+        $ccode=(empty($company['code']))?'':$company['code'];
         $data_order=[
             'shop'=>$info['shop'],
             'company'=>$info['company'],
-            'name'=>$info['name'],
+            'name'=>order_sn($admin['id'],$ccode),
             'aid'=>$admin['id'],
             'uid'=>$custom0['uid'],
             'accept_name'=>$custom0['name'],
