@@ -11,6 +11,8 @@ use app\money\model\OrdersInvoiceModel;
 use app\money\model\OrdersPayModel;
 use barcode\Barcode;
 use app\msg\model\MsgModel;
+use app\order\model\OrderModel;
+use app\ordersup\model\OrdersupModel;
 class OrderBaseController extends AdminBaseController
 {
     protected $m;
@@ -236,6 +238,7 @@ class OrderBaseController extends AdminBaseController
             $custom=Db::name($utable)->where('id',$uid)->find();
             
         }
+       
         //公司
         $where=[
             'shop'=>($admin['shop']==1)?2:$admin['shop'],
@@ -254,6 +257,12 @@ class OrderBaseController extends AdminBaseController
         $this->assign('invoice',null);
         $this->assign('ok_break',2); 
         $this->assign('ok_add',1); 
+        $utype=$this->utype;
+        if($utype==1){
+            $this->assign('ok_freight',1); 
+        }else{
+            $this->assign('ok_freight',2); 
+        }
         return $this->fetch();  
         
     }
@@ -270,9 +279,12 @@ class OrderBaseController extends AdminBaseController
         $ptype=$this->ptype;
         
         $data=$this->request->param();
-       
+       /*?不知道为什么添加页面单选按钮无法提交值*/
+        if(empty($data['ok_break'])){
+            $data['ok_break']=2;
+        }
         $fields_int=[
-            'company','uid','store','freight','accept','paytype','pay_type','goods_num',
+            'company','uid','store','freight','accept','paytype','pay_type','goods_num','ok_break'
         ];
         foreach($fields_int as $v){
             $data[$v]=intval($data[$v]);
@@ -281,8 +293,9 @@ class OrderBaseController extends AdminBaseController
             }
         }
         $fields_round=[
-            'pay_freight','real_freight','tax_money','order_amount',
-            'goods_money','other_money','discount_money','weight','size'
+            'pay_freight','real_freight','order_amount',
+            'goods_money','other_money','discount_money','weight','size',
+            'weight_box','weight_real',
         ];
         foreach($fields_round as $v){
             $data[$v]=round($data[$v],2); 
@@ -306,17 +319,19 @@ class OrderBaseController extends AdminBaseController
             'goods_num'=>$data['goods_num'],
             
             'pay_freight'=>$data['pay_freight'],
-            'real_freight'=>$data['real_freight'],
-            'tax_money'=>$data['tax_money'],
+            'real_freight'=>$data['real_freight'], 
             'order_amount'=>$data['order_amount'],
             'other_money'=>$data['other_money'],
             'goods_money'=>$data['goods_money'],
             'discount_money'=>$data['discount_money'],
             'weight'=>$data['weight'],
             'size'=>$data['size'],
-            
+            'box_out'=>$data['box_out'],
+            'weight_box'=>$data['weight_box'],
+            'weight_real'=>$data['weight_real'],
             'udsc'=>$data['udsc'],
             'dsc'=>$data['dsc'],
+            'express_no'=>$data['express_no'],
             'create_time'=>$time,
             'sort'=>5,
             'ok_break'=>$data['ok_break'],
@@ -462,6 +477,7 @@ class OrderBaseController extends AdminBaseController
                     $tmp_order['size']+=$vv['size'];
                 }
                 $tmp_order['order_amount']= $tmp_order['goods_money'];
+                $tmp_order['invoice0_money']= $tmp_order['goods_money'];
                 $tmp_oid=$m->insertGetId($tmp_order);
                 foreach($v as $kk=>$vv){
                     $v[$kk]['oid']=$tmp_oid;
@@ -470,8 +486,8 @@ class OrderBaseController extends AdminBaseController
             }
         }
         $update=[];
-        //发票信息,要开发票，有抬头的保存
-        if(!empty($data['invoice_title']) && !empty($data['invoice_type'])){
+        //发票信息,要开发票，有税费金额的保存
+        if(!empty($data['invoice_tax_money'])){
             $data_invoice=[
                 'name'=>'fp'.$data_order['name'], 
                 'oid'=>$oid,
@@ -647,7 +663,11 @@ class OrderBaseController extends AdminBaseController
         $this->assign('pay',$pay);
         
         $this->assign('invoice',$invoice);
-        
+        if($utype==1){
+            $this->assign('ok_freight',1);
+        }else{
+            $this->assign('ok_freight',2);
+        }
         
         return $this->fetch();  
     }
@@ -670,7 +690,7 @@ class OrderBaseController extends AdminBaseController
         $table=$this->table;
         $flag=$this->flag;
         $data=$this->request->param();  
-       
+      
         $info=$m->get_one(['id'=>$data['id']]);
       
         if(empty($info)){
@@ -705,10 +725,11 @@ class OrderBaseController extends AdminBaseController
         ];
         $update['adsc']=(empty($data['adsc']))?('修改了'.$flag.'信息'):$data['adsc'];
        
-        $content=$m->order_edit($info, $data);
+        $content=$this->m_order_edit($info, $data,$table);
         if(!is_array($content)){
             $this->error($content);
         }  
+       
         //检测是否有授权变化
         if(!empty($data['aids'])){
             $m_user=new UserModel();
@@ -729,7 +750,7 @@ class OrderBaseController extends AdminBaseController
             if($data['status']==2){
                 $content['status']=2;
             }
-            $res=$m->order_edit_review($info,$content);
+            $res=$this->m_order_edit_review($info,$content,$table);
             if(!($res>0)){
                 $m_edit->rollback();
                 $this->error($res);
@@ -1019,6 +1040,9 @@ class OrderBaseController extends AdminBaseController
         //是否允许拆分,添加，删除
         $this->assign('ok_break',2); 
         $this->assign('ok_add',2); 
+       //不允许计算运费
+        $this->assign('ok_freight',2);
+        
         return $this->fetch();  
         
     }
@@ -1104,9 +1128,8 @@ class OrderBaseController extends AdminBaseController
                 $m_user->aid_edit_do($admin,$order['aid'],$change['aids'],$order['id'],$table.'_aid');
                 unset($change['aids']);
             }
-            
-            $row=$m->order_edit_review($order, $change);
-           
+             
+            $row=$this->m_order_edit_review($order,$change,$table);
             if($row!==1){
                 $m->rollback();
                 $this->error($row);
@@ -1554,5 +1577,542 @@ class OrderBaseController extends AdminBaseController
         $this->assign('date',date('Y-m-d'));
         return $this->fetch();
     }
-    
+    /* 订单编辑 */
+    public function m_order_edit($info,$data,$table='order')
+    {
+        $m_order=$this->m;
+        //订单和采购单区分
+        if($table=='order'){
+            $otype=1;
+            $ptype=1; 
+            $m_ogoods=Db::name('order_goods');
+        }else{
+            $otype=2;
+            $ptype=2; 
+            $m_ogoods=Db::name('ordersup_goods');
+        }
+        $content=[];
+        //检测改变了哪些字段
+        //所有订单都有,都能修改
+        $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
+            'goods_num','goods_money','discount_money','other_money','express_no',
+            'weight_box','weight_real','box_out','invoice0_money','order_amount'
+        ];
+        //收货信息，子订单可以单独修改，总订单修改后同步到子订单
+        $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','addressinfo'];
+        
+        //总订单信息系
+        $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','ok_break'];
+        //组装需要判断的字段,子订单没有总订单信息
+        if($info['fid']==0){
+            $fields=array_merge($edit_accept,$edit_base,$edit_fid0);
+        }else{
+            //子订单能修改的字段
+            $fields=array_merge($edit_accept,$edit_base);
+        }
+        //先比较总信息
+        foreach($fields as $k=>$v){
+            //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+            if(isset($data[$v]) && $info[$v]!=$data[$v]){
+                $content[$v]=$data[$v];
+            }
+        }
+        //子订单不能改修改产品和费用，所以到此结束
+        if($info['fid']>0){
+            return $content;
+        }
+        //主订单才有发票和付款信息
+        if($info['fid']==0 ){
+            //发票信息
+            $edit_invoice=['uname','ucode','point','invoice_money','tax_money','dsc','address','bank_location'];
+            
+            //已有发票或有税费金额的要判断发票信息
+            if(!empty($info['invoice_id']) || !empty($data['invoice_tax_money']) ){
+                $data['invoice_id']=$info['invoice_id'];
+                $data['invoice_point']=round( $data['invoice_point'],2);
+                $data['invoice_invoice_money']=round( $data['invoice_invoice_money'],2);
+                $data['invoice_tax_money']=round( $data['invoice_tax_money'],2);
+                if($data['invoice_id']==0){
+                    $invoice=null;
+                }else{
+                    //发票
+                    $where=[
+                        'id'=>$info['invoice_id'],
+                    ];
+                    $m_invoice=new OrdersInvoiceModel();
+                    $invoice=$m_invoice->where($where)->find();
+                    if(empty($invoice)){
+                        $invoice=null;
+                        $data['invoice_id']=0;
+                    }
+                }
+                
+                $content['invoice']=[];
+                foreach($edit_invoice as $k=>$v){
+                    $field_tmp='invoice_'.$v;
+                    //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+                    if(isset($data[$field_tmp]) && $invoice[$v]!=$data[$field_tmp]){
+                        $content['invoice'][$v]=$data[$field_tmp];
+                    }
+                }
+                //支付账号
+                if($data['paytype'] != $invoice['paytype']){
+                    $content['invoice']['paytype']=$data['paytype'];
+                }
+                
+                //没有改变清除
+                if(empty($content['invoice'])){
+                    unset($content['invoice']);
+                }else{
+                    $content['invoice']['id']= $data['invoice_id'];
+                    $content['invoice']['oid']= $info['id'];
+                    $content['invoice']['oid_type']= $otype;
+                }
+            }
+            //同步订单信息
+            if(isset( $content['invoice']['tax_money'])){
+                $content['tax_money']=$content['invoice']['tax_money'];
+            }
+            if(isset( $content['invoice']['invoice_money'])){
+                $content['invoice_money']=$content['invoice']['invoice_money'];
+            }
+            //支付信息
+            $edit_account=['bank','name','num','location'];
+            //已有付款账号信息和付款账户名
+            if(!empty($info['pay_id']) || !empty($data['account_name']) ){
+                $data['account_id']=$info['pay_id'];
+                if($data['account_id']==0){
+                    $pay=null;
+                }else{
+                    //发票
+                    $where=[
+                        'id'=>$data['account_id'],
+                    ];
+                    $m_pay=new OrdersPayModel();
+                    $pay=$m_pay->where($where)->find();
+                    if(empty($pay)){
+                        $data['account_id']=0;
+                    }
+                }
+                
+                $content['pay']=[];
+                foreach($edit_account as $k=>$v){
+                    $field_tmp='account_'.$v;
+                    //如果原信息和$data信息相同就未改变，不为空就记录，？null测试
+                    if(isset($data[$field_tmp]) && $pay[$v]!=$data[$field_tmp]){
+                        $content['pay'][$v]=$data[$field_tmp];
+                    }
+                }
+                //店铺支付账号
+                if($pay['paytype']!=$data['paytype']){
+                    $content['pay']['paytype']=$data['paytype'];
+                }
+                //没有改变清除
+                if(empty($content['pay'])){
+                    unset($content['pay']);
+                }else{
+                    //记录id,review时检测
+                    $content['pay']['id']= $data['account_id'];
+                    $content['pay']['oid']= $info['id'];
+                    $content['pay']['oid_type']= $otype;
+                    $content['pay']['ptype']= $ptype;
+                    
+                }
+            }
+        }
+        
+        //获取原订单和订单产品
+        $where_goods=[];
+        if($info['is_real']==1 ){
+            $where_goods['oid']=['eq',$info['id']];
+            $orders=[$info['id']=>$info];
+            $order_ids=[$info['id']];
+        }else{
+            $fields='id,name,'.(implode(',',$edit_base));
+            /*   $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight'.
+             ',real_freight,other_money,tax_money,order_amount,dsc'; */
+            $orders=$m_order->where('fid',$info['id'])->column($fields);
+            
+            $order_ids=array_keys($orders);
+            
+            $where_goods['oid']=['in',$order_ids];
+        }
+        
+        //全部订单产品
+        $order_goods=$m_ogoods
+        ->where($where_goods)
+        ->column('');
+        //数据转化，按订单分组
+        $infos=[];
+        //先组装所有订单，防止有的订单没有产品
+        foreach($order_ids as $v){
+            $infos[$v]=[];
+        }
+        $goods_info=[];
+        
+        foreach($order_goods as $k=>$v){
+            /*  if($v['goods']<=0){
+             return '产品'.$v['goods_code'].$v['goods_uname'].'不存在，要调整';
+             } */
+            $infos[$v['oid']][$v['goods']]=$v;
+            $goods_info[$v['goods']]=$v;
+        }
+        //得到原有产品
+        $goods_ids0=array_keys($goods_info);
+        
+        $goods_ids1=$data['goods_ids'];
+        $ids_add=array_diff($goods_ids1,$goods_ids0);
+        if(!empty($ids_add)){
+            //有新增产品
+            $goods_add=Db::name('goods')->where('id','in',$ids_add)->column('id as goods,name as goods_name,name3 as print_name,code as goods_code,pic as goods_pic,price_in,price_sale,type,weight1,size1');
+            foreach($goods_add as $k=>$v){
+                //判断产品重量体积单位,统一转化为kg,cm3
+                $v=$m_order->unit_change($v);
+                unset($v['type']);
+                $goods_info[$k]=$v;
+            }
+        }
+        
+        //子订单nums-{$kk}[{$key}],只有在主订单下才能拆分订单
+        
+        /*  $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
+         'goods_num','goods_money','discount_money','tax_money','other_money','order_amount',
+         ]; */
+        $edit_goods=['num','pay','weight','size','dsc','price_real','pay_discount','goods_uname','goods_ucate'];
+        
+        
+        //多个要一个个比较,先比较是否存在
+        foreach($data['oids'] as $k=>$void){
+            
+            if($void==$info['id']){
+                $data['order_amount0'][$void]= $data['order_amount'];
+            }else{
+                $data['order_amount0'][$void]= $data['invoice0_money0'][$void];
+            }
+            if(in_array($void,$order_ids)){
+                //编辑订单信息
+                foreach($edit_base as $kk=>$vv){
+                    if(isset($data[$vv.'0'][$void]) && $orders[$void][$vv]!=$data[$vv.'0'][$void]){
+                        $content['edit'][$void][$vv]=$data[$vv.'0'][$void];
+                    }
+                }
+                
+                //一个个比较产品，是否有删除或编辑
+                foreach ($infos[$void] as $kgoodsid=>$kv){
+                    //data不存在就是没有该产品了,删除
+                    if(!isset($data['nums-'.$void][$kgoodsid]) ){
+                        $content['edit'][$void]['goods_del'][$kgoodsid]=$kv;
+                        continue;
+                    }
+                    if($kgoodsid<=0){
+                        return '产品不存在，请重新选择产品';
+                    }
+                    //循环商品信息
+                    foreach($edit_goods as $vv){
+                        if($data[$vv.'s-'.$void][$kgoodsid] !=  $kv[$vv]){
+                            $content['edit'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
+                        }
+                    }
+                }
+                if(isset($data['nums-'.$void])){
+                    //再用data数据循环，检查是否有新增，没有继续向下
+                    foreach ($data['nums-'.$void] as $kgoodsid=>$kv){
+                        if($kgoodsid<=0){
+                            return '产品不存在，请重新选择产品';
+                        }
+                        if(isset($infos[$void][$kgoodsid])){
+                            continue;
+                        }
+                        $content['edit'][$void]['goods_add'][$kgoodsid]=[];
+                        //保存订单号
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['oid']=$void;
+                        //添加商品id
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['goods']=$kgoodsid;
+                        //循环商品信息
+                        foreach($edit_goods as $vv){
+                            $content['edit'][$void]['goods_add'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
+                        }
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['goods_name']=$goods_info[$kgoodsid]['goods_name'];
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['print_name']=$goods_info[$kgoodsid]['print_name'];
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['goods_code']=$goods_info[$kgoodsid]['goods_code'];
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['goods_pic']=$goods_info[$kgoodsid]['goods_pic'];
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['price_in']=$goods_info[$kgoodsid]['price_in'];
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['price_sale']=$goods_info[$kgoodsid]['price_sale'];
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['weight1']=$goods_info[$kgoodsid]['weight1'];
+                        $content['edit'][$void]['goods_add'][$kgoodsid]['size1']=$goods_info[$kgoodsid]['size1'];
+                        
+                    }
+                }
+            }else{
+                //不存在新增
+                $content['add'][$void]=[];
+                //添加订单信息
+                
+                foreach($edit_base as $kk=>$vv){
+                    $content['add'][$void][$vv]=$data[$vv.'0'][$void];
+                }
+                if(isset($data['nums-'.$void])){
+                    foreach ($data['nums-'.$void] as $kgoodsid=>$kv){
+                        $content['add'][$void]['goods'][$kgoodsid]=[];
+                        $content['add'][$void]['goods'][$kgoodsid]['oid']=0;
+                        //添加商品id
+                        $content['add'][$void]['goods'][$kgoodsid]['goods']=$kgoodsid;
+                        
+                        //循环商品信息
+                        foreach($edit_goods as $vv){
+                            $content['add'][$void]['goods'][$kgoodsid][$vv]=$data[$vv.'s-'.$void][$kgoodsid];
+                        }
+                        $content['add'][$void]['goods'][$kgoodsid]['goods_name']=$goods_info[$kgoodsid]['goods_name'];
+                        $content['add'][$void]['goods'][$kgoodsid]['print_name']=$goods_info[$kgoodsid]['print_name'];
+                        $content['add'][$void]['goods'][$kgoodsid]['goods_code']=$goods_info[$kgoodsid]['goods_code'];
+                        $content['add'][$void]['goods'][$kgoodsid]['goods_pic']=$goods_info[$kgoodsid]['goods_pic'];
+                        $content['add'][$void]['goods'][$kgoodsid]['price_in']=$goods_info[$kgoodsid]['price_in'];
+                        $content['add'][$void]['goods'][$kgoodsid]['price_sale']=$goods_info[$kgoodsid]['price_sale'];
+                        $content['add'][$void]['goods'][$kgoodsid]['weight1']=$goods_info[$kgoodsid]['weight1'];
+                        $content['add'][$void]['goods'][$kgoodsid]['size1']=$goods_info[$kgoodsid]['size1'];
+                    }
+                }else{
+                    $content['add'][$void]['goods']=[];
+                }
+                
+            }
+        }
+        return $content;
+        
+    }
+    /**
+     * 审核订单编辑
+     * @param array $order
+     * @param array $change
+     * @return number|string
+     */
+    public function m_order_edit_review($order,$change,$table='order')
+    {
+        $m_order=$this->m;
+        //订单和采购单区分
+        if($table=='order'){
+            $otype=1;
+            $ptype=1; 
+            $m_ogoods=Db::name('order_goods');
+        }else{
+            $otype=2;
+            $ptype=2; 
+            $m_ogoods=Db::name('ordersup_goods');
+        }
+      
+        //获取订单状态信息
+        if($order['is_real']==1 ){
+            $orders=[$order['id']=>$order];
+        }else{
+            $orders=$m_order->where('fid',$order['id'])->column('id,is_real,pay_status,status,sort');
+            $orders[$order['id']]=$order;
+        }
+        $time=time();
+        
+        //所有订单都有,都能修改
+        $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
+            'goods_num','goods_money','discount_money','other_money','express_no',
+            'weight_box','weight_real','box_out','invoice0_money','order_amount'
+        ];
+        //收货信息，状态信息，子订单可以单独修改，总订单修改后同步到子订单
+        $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','addressinfo','status'];
+        
+        //总订单信息系，子订单不能单独修改，总订单修改后同步到子订单
+        $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','pay_status','ok_break'];
+        
+        
+        //记录有订单变化，需要废弃原出入库的订单id,重新添加
+        $instore_oids=[];
+        //新添加订单号
+        $instore_add_oids=[];
+        //依次处理change的信息，处理后unset
+        
+        //先处理字订单产品，再处理订单信息
+        if(isset($change['edit'])){
+            foreach($change['edit'] as $koid=>$vo){
+                $where=['oid'=>$koid];
+                //先处理已删除的产品
+                if(isset($vo['goods_del'])){
+                    $instore_oids[]=$koid;
+                    $where['goods']=['in',array_keys($vo['goods_del'])];
+                    $m_ogoods->where($where)->delete();
+                    unset($vo['goods_del']);
+                }
+                //编辑产品
+                if(isset($vo['goods'])){
+                    foreach($vo['goods'] as $kgoods_id=>$vgoods){
+                        $where['goods']=$kgoods_id;
+                        //产品数量变化要重新出入库
+                        if(isset($vgoods['num'])){
+                            $instore_oids[]=$koid;
+                        }
+                        $m_ogoods->where($where)->update($vgoods);
+                    }
+                    unset($vo['goods']);
+                }
+                //添加产品
+                if(isset($vo['goods_add'])){
+                    $instore_oids[]=$koid;
+                    $m_ogoods->insertAll($vo['goods_add']);
+                    unset($vo['goods_add']);
+                }
+                $where=['id'=>$koid];
+                $m_order->where($where)->update($vo);
+            }
+            unset($change['edit']);
+        }
+        //新增订单信息只能先保存产品信息，新增订单，才有单号给产品保存
+        if(isset($change['add'])){
+            //有新增一定是虚拟主单号了,拆分单号,删除原产品
+            if($order['is_real']==1){
+                $change['is_real']=2;
+                $instore_oids[]=$order['id'];
+                $m_ogoods->where('oid',$order['id'])->delete();
+            }
+            
+            //得到子订单的序号
+            $tmp=$m_order->where('fid',$order['id'])->count();
+            
+            if(empty($tmp)){
+                $tmp=0;
+            }
+            $goods_adds=[];
+            $goods_ids=[];
+            foreach($change['add'] as $koid=>$vo){
+                //订单信息,状态待定,跟随主订单
+                $tmp++;
+                $data_order=[
+                    'order_type'=>$order['order_type'],
+                    'aid'=>$order['aid'],
+                    'shop'=>$order['shop'],
+                    'company'=>$order['company'],
+                    'uid'=>$order['uid'],
+                    'udsc'=>$order['udsc'],
+                    'create_time'=>$time,
+                    'time'=>$time,
+                    'sort'=>$order['sort'],
+                    'status'=>$order['status'],
+                    'fid'=>$order['id'],
+                    'name'=>$order['name'].'_'.$tmp,
+                ];
+                //收货人信息
+                foreach ($edit_accept as $v){
+                    $data_order[$v]=(isset($change[$v]))?$change[$v]:$order[$v];
+                }
+                //总单信息
+                foreach ($edit_fid0 as $v){
+                    $data_order[$v]=(isset($change[$v]))?$change[$v]:$order[$v];
+                }
+                //子单信息
+                foreach ($edit_base as $v){
+                    $data_order[$v]=$vo[$v];
+                }
+                $tmp_oid=$m_order->insertGetId($data_order);
+                $instore_add_oids[]=$tmp_oid;
+                //产品新增
+                if(isset($vo['goods'])){
+                    foreach($vo['goods'] as $kgoods_id=>$vgoods){
+                        $vgoods['oid']=$tmp_oid;
+                        $goods_adds[]=$vgoods;
+                    }
+                }
+            }
+            if(!empty($goods_adds)){
+                //最后统一新增产品
+                $m_ogoods->insertAll($goods_adds);
+            }
+            
+            unset($change['add']);
+        }
+        //支付账号信息
+        if(isset($change['pay'])){
+            $m_pay=new OrdersPayModel();
+            if(empty($order['pay_id'])){
+                $change['pay_id']=$m_pay->pay_add($change['pay']);
+            }else{
+                $change['pay']['id']=$order['pay_id'];
+                $m_pay->pay_update($change['pay']);
+                
+            }
+            unset($change['pay']);
+        }
+        //发票信息
+        if(isset($change['invoice'])){
+            $m_invoice=new OrdersInvoiceModel();
+            if(empty($order['invoice_id'])){
+                $change['invoice_id']=$m_invoice->invoice_add($change['invoice']);
+            }else{
+                $change['invoice']['id']=$order['invoice_id'];
+                $m_invoice->invoice_update($change['invoice']);
+                
+            }
+            unset($change['invoice']);
+        }
+        $update_info=['time'=>$time];
+        
+        foreach($change as $k=>$v){
+            $update_info[$k]=$v;
+        }
+        //状态更新
+        if(isset($change['is_real'])){
+            $order['is_real']=$change['is_real'];
+        }
+        if(isset($change['status'])){
+            $order['status']=$change['status'];
+        }
+        if(isset($change['pay_status'])){
+            $order['pay_status']=$change['pay_status'];
+        }
+        if($order['status']==26 && $order['pay_status']==3){
+            $update_info['status']=30;
+        }
+        
+        $m_order->where('id',$order['id'])->update($update_info);
+        //有子订单,同步
+        if($order['is_real']==2 || isset($change['add']) ){
+            //只有总订单才有的信息和总订单同步的信息
+            $filed_child=array_merge($edit_fid0,$edit_accept);
+            $update_child=['time'=>$time];
+            
+            foreach($filed_child as  $v){
+                if(isset($update_info[$v])){
+                    $update_child[$v]=$update_info[$v];
+                }
+            }
+            if(isset($update_child['is_real'])){
+                unset($update_child['is_real']);
+            }
+            if(isset($update_child['ok_break'])){
+                unset($update_child['ok_break']);
+            }
+            if(!empty($update_child)){
+                $m_order->where('fid',$order['id'])->update($update_child);
+            }
+        }
+        //检查库存,删除旧出库，添加新出库
+        if(!empty($instore_oids) && $order['status']>20 ){
+            //有产品数量变化的
+            $instore_oids=array_unique($instore_oids);
+            foreach($instore_oids as $v){
+                $res=$m_order->order_storein5($v);
+                if($res!==1){
+                    return $res;
+                }
+            }
+            //新添加订单号
+            $instore_add_oids=array_merge($instore_add_oids,$instore_oids);
+            foreach($instore_add_oids as $v){
+                $res=$m_order->order_storein0($v);
+                if($res!==1){
+                    return $res;
+                }
+            }
+        }
+        
+        //通知各级发货
+        ///$order
+        //更新用户数据
+        $m_order->custom_update($order['uid']);
+        return 1;
+    }
 }

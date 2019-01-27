@@ -1,0 +1,179 @@
+ 
+
+<div class="form-group fleft-all order_pay" id="order_pay" >
+		 
+	<label class="col-sm-2 control-label">{$flag}总计</label>
+	<div class="col-md-6 col-sm-10">
+	 <neq name="info.is_real" value="2">
+		<label class="input-inline"> 
+			仓库： 
+		 	<select  class="form-control store short-auto" name="store" id="store" required > 
+		    	<option value="0">选择仓库</option>
+			<foreach name="stores" item="vo">
+				<option value="{$key}" <if condition="$key eq $info['store']">selected</if> >{$vo}</option>
+			</foreach>
+			</select> 
+			
+			<present name="change['store']">
+			 <select  class="form-control short-auto red"  >
+		    	<option value="0">请选择</option>
+			<foreach name="stores" item="vo">
+				<option value="{$key}" <if condition="$key eq $change['store']">selected</if>>{$vo}</option>
+			</foreach>
+			</select>
+			</present>
+		 </label>
+		 
+		 <label class="input-inline"> 
+			 物流：
+			 <select  class="form-control freight short-auto" name="freight" id="freight" required > 
+		    	<option value="0">选择物流</option>
+			<foreach name="freights" item="vo">
+				<option value="{$key}" class="freight{$vo.store}"  <if condition="$key eq $info['freight']">selected</if> >{$vo.name}</option>
+			</foreach>
+			</select> 
+			 <present name="change['freight']">
+			 <select  class="form-control short-auto red"  >
+		    	<option value="0">请选择</option>
+			<foreach name="freights" item="vo">
+				<option value="{$key}" <if condition="$key eq $change['freight']">selected</if>>{$vo.name}</option>
+			</foreach>
+			</select>
+			</present>
+		 </label> 
+	 
+		<label class="input-inline"> 
+		 总重：<input type="number" class="form-control short order_weight" name="weight" id="weight" value="{$info.weight}" readonly/> 
+		 <present name="change.weight">
+			<input type="text" class="form-control short red"  value="{$change.weight}"/> 
+		</present>
+		</label>
+	 	 <label class="input-inline"> 
+		 总体积：<input  type="number"  class="form-control short order_size" name="size" id="size" value="{$info.size}" readonly/> 
+		  <present name="change.size">
+			<input type="text" class="form-control short red"  value="{$change.size}"/> 
+		</present>
+		 </label> 
+		  <label class="input-inline"> 
+		 外箱号：<input type="text"  class="form-control short box_out" name="box_out" value="{$info.box_out}"  /> 
+		   <present name="change.box_out">
+			<input type="text" class="form-control short red"  value="{$change.box_out}"/> 
+		</present>
+		</label>
+		 <label class="input-inline"> 
+		 外箱重：<input type="text"  class="form-control short weight_box" name="weight_box" value="{$info.weight_box}"  /> 
+		  <present name="change.weight_box">
+			<input type="text" class="form-control short red"  value="{$change.weight_box}"/> 
+		</present>
+		</label>
+		 <label class="input-inline"> 
+		实际重量：<input type="text"  class="form-control short weight_real" name="weight_real" value="{$info.weight_real|default=0}"  /> 
+		   <present name="change.weight_real">
+			<input type="text" class="form-control short red"  value="{$change.weight_real}"/> 
+		</present>
+		 	<button class="weight_count" type="button">重量计算</button> 
+		</label> 
+	 </neq>
+	 	<label class="input-inline">
+		 产品总数量：<input type="number" class="form-control short goods_num" id="goods_num" name="goods_num" value="{$info.goods_num}" readonly/> 
+		<present name="change.goods_num">
+			<input type="text" class="form-control short red"  value="{$change.goods_num}"/> 
+		</present>
+		</label>
+	 	 <label class="input-inline">
+		 产品总金额：<input type="number" step="0.01" class="form-control short goods_money" id="goods_money" name="goods_money" value="{$info.goods_money}" readonly/> 
+		<present name="change.goods_money">
+			<input type="text" class="form-control short red"  value="{$change.goods_money}"/> 
+		</present>
+		</label>
+		<label class="input-inline"> 
+		 支付运费：<input type="number" step="0.01" class="form-control short pay_freight" name="pay_freight" id="pay_freight" value="{$info.pay_freight}" required/> 
+		 <present name="change.pay_freight">
+		 	<input type="text" class="form-control short red"  value="{$change.pay_freight}"  />  
+		 </present>
+		</label>
+	 <neq name="info.is_real" value="2">
+	 	 <label class="input-inline"> 
+		 实际运费：<input type="number" step="0.01" class="form-control short real_freight" name="real_freight" id="real_freight" value="{$info.real_freight}" required/> 
+		 <present name="change.real_freight">
+		 	<input type="text" class="form-control short red"  value="{$change.real_freight}"  />  
+		 </present>  
+		   <eq name="ok_freight" value="1">
+		 	<button class="freight_count" type="button">运费计算</button> 
+		 	</eq>
+		 </label>
+	 </neq>
+	 	 
+	 	 <label class="input-inline">
+		 优惠金额：<input type="number" step="0.01" class="form-control short discount_money" id="discount_money" name="discount_money" value="{$info.discount_money}" /> 
+		<present name="change.discount_money">
+			<input type="text" class="form-control short red"  value="{$change.discount_money}"/> 
+		</present>
+		</label>
+		 <label class="input-inline">
+		 其它费用：<input type="number" step="0.01" class="form-control short other_money" id="other_money" name="other_money" value="{$info.other_money}" /> 
+		<present name="change.other_money">
+			<input type="text" class="form-control short red"  value="{$change.other_money}"/> 
+		</present>
+		</label>
+		 
+		  <label class="input-inline">
+		 未税金额：<input type="number" step="0.01" class="form-control short invoice0_money"  name="invoice0_money" value="{$info.invoice0_money}" readonly/> 
+		<present name="change.invoice0_money">
+			<input type="text" class="form-control short red"  value="{$change.invoice0_money}" />
+		</present>
+		</label>
+	 
+	 	 <label class="input-inline"> 
+		开票金额：<input type="number" step="0.01" class="form-control short invoice_invoice_money" id="invoice_invoice_money" name="invoice_invoice_money" value="{$invoice.invoice_money}"/>
+		<present name="change.invoice.invoice_money">
+			<input type="text" class="form-control short red"  value="{$change.invoice.invoice_money}"/> 
+		</present>
+		 </label>
+		  <label class="input-inline"> 
+		税点%：<input type="number" step="0.01" class="form-control short invoice_point" id="invoice_point" name="invoice_point" value="{$invoice.point}"/>
+		<present name="change.invoice.point">
+			<input type="text" class="form-control short  red"  value="{$change.invoice.point}"/> 
+		</present>
+		</label>
+		  <label class="input-inline"> 
+		税费：<input type="number" step="0.01" class="form-control short invoice_tax_money" id="invoice_tax_money" name="invoice_tax_money" value="{$invoice.tax_money|default=0}" readonly/>
+		<present name="change.invoice.tax_money">
+			<input type="text" class="form-control short red"  value="{$change.invoice.tax_money}"/> 
+		</present>
+		<empty name="info1">
+		 	<button id="invoice_count" class="invoice_count" type="button">税费计算</button>
+		 </empty>
+		 </label>
+	   
+	 	 <label class="input-inline"> 
+		 总付款：<input type="number" step="0.01" class="form-control short order_amount" id="order_amount" name="order_amount" value="{$info.order_amount}" required/> 
+		 
+		  <present name="change.order_amount">
+			<input type="text" class="form-control short red"  value="{$change.order_amount}"/> 
+		</present>
+	 	</label> 
+	 	 <label class="input-inline"> 
+		 快递单号：<input type="text" class="form-control short2 express_no" id="express_no" name="express_no" value="{$info.express_no}" /> 
+		 
+		  <present name="change.express_no">
+			<input type="text" class="form-control short2 red"  value="{$change.express_no}"/> 
+		</present>
+		<notempty name="info.express_no">
+			<a href="{:url('express/AdminFreight/express_query',['freight'=>$info.freight,'no'=>$info.express_no])}" target="{$zztarget.other}">查快递</a> 
+	 		&nbsp;&nbsp;&nbsp;&nbsp;
+	 	</notempty>
+	 	</label> 
+	 	 
+	 	<gt name="info.status" value="22">
+	 		 <label class="input-inline"> 
+		 	<a href="{:url('print_order',['id'=>$info.id])}" target="{$zztarget.other}">配货单</a> 
+		 	&nbsp;&nbsp;&nbsp;&nbsp; 
+			<a href="{:url('store/AdminStorein/index',['type'=>10,'type1'=>6,'type2'=>1,'name'=>$info.id])}" target="{$zztarget.other}">查看出库记录</a>
+	   		&nbsp;&nbsp;&nbsp;&nbsp;  
+	   		</label>
+	   	</gt>
+	</div>
+ 
+</div> 
+ 

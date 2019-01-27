@@ -59,23 +59,28 @@ class OrderajaxController extends AdminBase0Controller
              ]; 
          }
          if($type==1){
-             //添加客户用名
-             if(empty($uid)){
-                 $tmp=null;
-             }else{
-                 $where=['uid'=>$uid,'goods'=>$id];
-                 $tmp=Db::name('custom_goods')->where($where)->find();
-             }
-             if(empty($tmp)){
-                 $goods['goods_uname']='';
-                 $goods['goods_ucate']='';
-                 $goods['price_pay']=$goods['price_sale'];
-             }else{
-                 $goods['goods_uname']=$tmp['name'];
-                 $goods['goods_ucate']=$tmp['cate'];
-                 $goods['price_pay']=$tmp['price'];
-                 $goods['dsc']=$tmp['dsc'];
-             }
+            
+             $m_ugoods=Db::name('custom_goods');
+         }else{
+             $m_ugoods=Db::name('supplier_goods');
+         }
+         //添加客户用名
+         if(empty($uid)){
+             $tmp=null;
+         }else{
+             $where=['uid'=>$uid,'goods'=>$id];
+             $tmp=$m_ugoods->where($where)->find();
+            
+         }
+         if(empty($tmp)){
+             $goods['goods_uname']='';
+             $goods['goods_ucate']='';
+             $goods['price_pay']=$goods['price_sale'];
+         }else{
+             $goods['goods_uname']=$tmp['name'];
+             $goods['goods_ucate']=$tmp['cate'];
+             $goods['price_pay']=$tmp['price'];
+             $goods['dsc']=$tmp['dsc'];
          }
          
         $this->success('ok','',$goods);

@@ -30,7 +30,7 @@ class AdminInvoiceController extends AdminInfo0Controller
         $this->invoice_status=config('invoice_status');
         $this->assign('invoice_status',$this->invoice_status);
         $this->assign('invoice_type',config('invoice_type'));
-        $this->edit=['name','dsc','sn','real_tax_money','company_name','company_code','company_address',
+        $this->edit=['name','dsc','sn','company_name','company_code','company_address',
             'company_bank','company_bank_location',
             'uname','ucode','address','bank','bank_location',
         ];

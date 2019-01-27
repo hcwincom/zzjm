@@ -1,0 +1,111 @@
+ 
+<if condition="empty($info1) && $ok_break eq 1">
+  
+	<div class="form-group fleft-all "  >
+		<label class="col-sm-2 control-label">{$flag}确认</label>
+		<div class="col-md-6 col-sm-10">
+			<button id="break_ok" type="button">{$flag}拆分完成确认</button>
+		    <p class="notice">拆分{$flag}后点击确认，继续拆分则会产生新{$flag}。 
+		  {$flag}生成后就无法删除，只能废弃，请谨慎操作，拆分错误请刷新页面重试</p> 
+		   
+		</div>
+	</div>
+</if>   
+	  <include file="order@public:order_fee0" />
+	 
+<div class="form-group fleft-all">
+	<label  class="col-sm-2 control-label">付款和发票</label>
+	<div class="col-md-6 col-sm-10">
+	  货款结算方式：
+	   <select  class="form-control short-auto" name="pay_type" id="pay_type"   > 
+		<foreach name="pay_types" item="vo">
+			<option value="{$key}" <if condition="$key eq $info.pay_type">selected</if>>{$vo}</option>
+		</foreach>
+		</select>  
+		
+	 <present name="change.pay_type">
+	 	 <select  class="form-control short-auto red" >
+	   		<option value="{$change.pay_type}">{$pay_types[$change.pay_type]|default='未知'}</option>
+		 
+		</select>   
+	 </present>
+	        付款账号：
+	   <select  class="form-control short-auto" name="paytype" id="paytype"  required >
+	   		<option value="0">请选择</option>
+		<foreach name="paytypes" item="vo">
+			<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
+		</foreach>
+		</select> 
+		 
+		
+	 <present name="change.paytype">
+	 	 <select  class="form-control short-auto red" >
+	   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option>
+		 
+		</select>   
+	 </present>
+	
+		开票类型：
+		 <select  class="form-control short-auto" name="invoice_type" id="invoice_type">
+		<foreach name="invoice_types" item="vo">
+		<option value="{$key}" point="{$vo[1]}" <if condition="$key eq $info.invoice_type">selected</if>>{$vo[0]}</option>
+		</foreach>
+		</select>
+	 <present name="change.invoice_type">
+	 	 <select  class="form-control short-auto red" >
+	   		<option value="{$change.invoice_type}">{$invoice_types[$change.invoice_type][0]|default='未知'}</option> 
+		</select>   
+	 </present>	 
+	</div>
+</div>
+		 
+<include file="order@public:invoice" />
+	  
+<div class="form-group fleft-all">
+	<label  class="col-sm-2 control-label">{$uflag}账号</label>
+	<div class="col-md-6 col-sm-10">
+	账号选择：
+		<select  class="form-control" id="account">
+	    	<option value="0">请选择</option> 
+	    <foreach name="accounts" item="vo">
+	    	<option value="{$vo.site}" bank1="{$vo.bank1}" paytype2="{$vo.paytype2}"
+	    	  name1="{$vo.name1}" num1="{$vo.num1}" location1="{$vo.location1}" >
+	    	{$vo.location1}-{$vo.name1}-{$vo.num1}
+	    	</option>
+	    </foreach>
+		</select> 
+		<input type="hidden" name="account_id" value="{$pay.id}"/>
+		 
+		银行：
+		<select  class="form-control" name="account_bank" id="account_bank1">
+	    	<option value="0">请选择</option>
+		<foreach name="banks" item="vo">
+			<option value="{$key}" <if condition="$key eq $pay.bank">selected</if> >{$vo}</option>
+		</foreach>
+		</select>
+	<present name="change.pay.bank">
+		<select  class="form-control red" >
+	    	<option value="0">请选择</option>
+		<foreach name="banks" item="vo">
+			<option value="{$key}" <if condition="$key eq $change.pay.bank">selected</if> >{$vo}</option>
+		</foreach>
+		</select>
+	</present>
+	 
+	   账户名：<input type="text"  class="form-control" name="account_name" id="account_name1" value="{$pay.name}"/>
+	   	<present name="change.pay.name"> 
+	   		<input type="text"  class="form-control red"  value="{$change.pay.name}"/>
+	   	</present>
+	    <p class="notice">账户名为空则不保存付款信息</p>  
+	   账号：<input type="text"  class="form-control" name="account_num" id="account_num1"  value="{$pay.num}"/>
+	 	<present name="change.pay.num"> 
+	   		<input type="text"  class="form-control red"  value="{$change.pay.num}"/>
+	   	</present> 
+	  开户行：<input type="text"  class="form-control" name="account_location" id="account_location1"  value="{$pay.location}"/>
+	 	<present name="change.pay.location"> 
+	   		<input type="text"  class="form-control red"  value="{$change.pay.location}"/>
+	   	</present>  
+	 
+	 
+	</div>
+</div> 

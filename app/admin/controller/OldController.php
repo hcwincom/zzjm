@@ -1023,7 +1023,7 @@ class OldController extends AdminBaseController
                 } 
                 $v['time']=max($v['create_time'],$v['send_time'],$v['pay_time'],$v['completion_time']);
                 $v['goods_num']=isset($nums[$v['id']])?$nums[$v['id']]:0;
-                
+                $v['invoice0_money']=$v['order_amount']; 
                 //如果company为空就是上海极敏
                 if(empty($v['company'])){
                     $v['company']=5;

@@ -277,26 +277,28 @@ class StoreGoodsModel extends Model
         //出库操作要检查安全库存
         if($info['num']<0 ){
             $where=[
-                'goods'=>$info['goods'],
-                'shop'=>$info['shop'],
-                'store'=>['eq',$info['store']],
+                'sg.goods'=>$info['goods'],
+                'sg.shop'=>$info['shop'],
+                'sg.store'=>['eq',$info['store']],
             ];
             $safe=$this
             ->alias('sg')
-            ->join('cmf_store store','store.id=sg.store')
-            ->join('cmf_goods goods','goods.id=sg.goods')
             ->where($where)
-            ->field('sg.id,sg.safe,sg.num,store.name as store_name,goods.name as goods_name,goods.code as goods_code')
+            ->field('sg.id,sg.safe,sg.num')
             ->find();
             if($safe['safe']<=$safe['num']){
-                //提示库存不足,采购添加权限 
-                $m_msg=new MsgModel();
-                $data=[
-                    'dsc'=>'仓库'.$safe['store_name'].'产品'.$safe['good_code'].$safe['good_name'].'库存要补充', 
-                    'link'=>url('store/AdminGoods/index',['type1'=>'code','name'=>$safe['good_code'],'shop'=>$info['shop']]),
-                    'shop'=>$info['shop'],
-                ];
-                $m_msg->auth_send('ordersup/AdminOrdersup/add_do',$data);
+                $store_name=Db::name('store')->where('id',$info['store'])->value('name');
+                $goods=Db::name('goods')->where('id',$info['goods'])->field('id,name,code')->find();
+                if(!empty($goods) && !empty($store_name)){ 
+                    //提示库存不足,采购添加权限 
+                    $m_msg=new MsgModel();
+                    $data=[
+                        'dsc'=>'仓库'.$store_name.'产品'.$goods['code'].$goods['name'].'库存要补充', 
+                        'link'=>url('store/AdminGoods/index',['type1'=>'code','name'=>$goods['code'],'shop'=>$info['shop']]),
+                        'shop'=>$info['shop'],
+                    ];
+                    $m_msg->auth_send('ordersup/AdminOrdersup/add_do',$data);
+                }
             }
         }
         if($row===2){

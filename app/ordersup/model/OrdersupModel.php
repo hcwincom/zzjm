@@ -145,9 +145,12 @@ class OrdersupModel extends Model
         
         $content=[];
         //检测改变了哪些字段
+       
+        
         //所有采购单都有,都能修改
         $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight','order_type',
-            'goods_num','goods_money','discount_money','tax_money','other_money','order_amount','express_no'
+            'goods_num','goods_money','discount_money', 'other_money', 'express_no',
+            'weight_box','weight_real','box_out','invoice0_money','order_amount'
             
         ];
         //收货信息，子采购单可以单独修改，总采购单修改后同步到子采购单
@@ -219,7 +222,13 @@ class OrdersupModel extends Model
                     $content['invoice']['oid_type']= 1;
                 }
             }
-            
+            //同步订单信息
+            if(isset( $content['invoice']['tax_money'])){
+                $content['tax_money']=$content['invoice']['tax_money'];
+            }
+            if(isset( $content['invoice']['invoice_money'])){
+                $content['invoice_money']=$content['invoice']['invoice_money'];
+            }
             //支付信息
             $edit_account=['bank','name','num','location'];
             //已有付款账号信息和付款账户名
@@ -258,8 +267,8 @@ class OrdersupModel extends Model
                     //记录id,review时检测
                     $content['pay']['id']= $data['account_id'];
                     $content['pay']['oid']= $info['id'];
-                    $content['pay']['oid_type']= 1;
-                    $content['pay']['ptype']= 1;
+                    $content['pay']['oid_type']= 2;
+                    $content['pay']['ptype']= 2;
                     
                 }
             }
@@ -327,6 +336,11 @@ class OrdersupModel extends Model
         
         //多个要一个个比较,先比较是否存在
         foreach($data['oids'] as $k=>$void){
+            if($void==$info['id']){
+                $data['order_amount0'][$void]= $data['order_amount'];
+            }else{
+                $data['order_amount0'][$void]= $data['invoice0_money0'][$void];
+            }
             if(in_array($void,$order_ids)){
                 //编辑采购单信息
                 foreach($edit_base as $kk=>$vv){
@@ -437,15 +451,17 @@ class OrdersupModel extends Model
         }
         $time=time();
         $m_ogoods=Db::name('ordersup_goods');
-        $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
-            'goods_num','goods_money','discount_money','tax_money','other_money','order_amount','express_no'
-            
-        ];
-        //收货信息，状态信息，子采购单可以单独修改，总采购单修改后同步到子采购单
-        $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','status','pay_status'];
         
-        //总采购单信息系，子采购单不能单独修改，总采购单修改后同步到子采购单
-        $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','ok_break'];
+        $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
+            'goods_num','goods_money','discount_money','other_money','express_no',
+            'weight_box','weight_real','box_out','invoice0_money','order_amount'
+        ];
+        //收货信息，状态信息，子订单可以单独修改，总订单修改后同步到子订单
+        $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','addressinfo','status'];
+        
+        //总订单信息系，子订单不能单独修改，总订单修改后同步到子订单
+        $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','pay_status','ok_break'];
+        
         //记录有采购单变化，需要废弃原出入库的采购单id,重新添加
         $instore_oids=[];
         //新添加采购单号
@@ -593,17 +609,25 @@ class OrdersupModel extends Model
         $this->where('id',$order['id'])->update($update_info);
         //有子采购单,同步
         if($order['is_real']==2 || isset($change['add']) ){
-            foreach($update_info as $k=>$v){
-                if(in_array($k,$edit_base)){
-                    unset($update_info[$k]);
+            //只有总订单才有的信息和总订单同步的信息
+            $filed_child=array_merge($edit_fid0,$edit_accept);
+            $update_child=['time'=>$time];
+            
+            foreach($filed_child as  $v){
+                if(isset($update_info[$v])){
+                    $update_child[$v]=$update_info[$v];
                 }
             }
-            if(isset($change['is_real'])){
-                unset($update_info['is_real']);
+            if(isset($update_child['is_real'])){
+                unset($update_child['is_real']);
             }
-            if(!empty($update_info)){
-                $this->where('fid',$order['id'])->update($update_info);
+            if(isset($update_child['ok_break'])){
+                unset($update_child['ok_break']);
             }
+            if(!empty($update_child)){
+                $this->where('fid',$order['id'])->update($update_child);
+            } 
+           
             
         }
         

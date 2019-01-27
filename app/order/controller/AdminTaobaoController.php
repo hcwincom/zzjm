@@ -345,6 +345,7 @@ buyer_nick	String	我在测试	买家昵称
             'aid'=>$aid,
             'shop'=>$shop,
             'order_amount'=>$taobao['payment'],
+            'invoice0_money'=>$taobao['payment'],
             'pay_freight'=>$taobao['post_fee'], 
             'addressinfo'=>$taobao['receiver_state'].'-'.$taobao['receiver_city'].'-'.$taobao['receiver_district'],
             'address'=>$taobao['receiver_address'],
