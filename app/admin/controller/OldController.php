@@ -60,6 +60,7 @@ class OldController extends AdminBaseController
             '产品分类同步'=>url('cate'),
             '产品分类数据更正'=>url('cate_correct'),
             '产品数据(基本数据和技术详情，图片，文档)'=>url('goods'),
+            '产品数据更正(图片数量)'=>url('goods_correct'),
             '付款银行+付款类型'=>url('sys'),
             '地区信息'=>url('area'), 
             
@@ -194,6 +195,38 @@ class OldController extends AdminBaseController
         $data_tech=[];
         $time=time();
         foreach ($res as $k=>$tmp){ 
+            $tmp['count_tech']=0;
+            $tmp['file_instructions']=0; 
+           
+            if(!empty($tmp['content'])){
+                $data_info[]=[
+                    'pid'=>$tmp['id'],
+                    'content'=>$tmp['content']
+                ];
+                //详情用于商城，不统计
+            }
+            if(!empty($tmp['content2'])){
+                $data_tech[]=[
+                    'pid'=>$tmp['id'],
+                    'content'=>$tmp['content2']
+                ];
+              
+                //统计资料字数
+                $content_02 = htmlspecialchars_decode($tmp['content2']); //把一些预定义的 HTML 实体转换为字符
+                $content_03 = str_replace("&nbsp;","",$content_02);//将空格替换成空
+                $contents = strip_tags($content_03);//函数剥去字符串中的 HTML、XML 以及 PHP 的标签,获取纯文本内容
+                
+                $tmp['count_tech']=mb_strlen($contents); 
+            }
+            if(!empty($tmp['wd'])){
+                $data_file[]=[
+                    'pid'=>$tmp['id'],
+                    'file'=>$tmp['wd'],
+                    'name'=>'技术文档'.$tmp['id'],
+                    'type'=>7,
+                ];
+                $tmp['file_instructions']=1;
+            } 
             $data_goods[]=[
                 'id'=>$tmp['id'],
                 'name'=>$tmp['name'],
@@ -201,8 +234,8 @@ class OldController extends AdminBaseController
                 'code'=>$tmp['goods_no'],
                 'sn'=>$tmp['tiao'],
                 'code_name'=>$tmp['codename'],
-                'code_num'=>$tmp['codenum'], 
-                'price_sale'=>$tmp['sell_price'], 
+                'code_num'=>$tmp['codenum'],
+                'price_sale'=>$tmp['sell_price'],
                 'pic'=>$tmp['img'],
                 'weight0'=>$tmp['weight'],
                 'weight1'=>$tmp['weight'],
@@ -214,28 +247,9 @@ class OldController extends AdminBaseController
                 'rtime'=>$time,
                 'time'=>$time,
                 'status'=>2,
+                'count_tech'=>$tmp['count_tech'],
+                'file_instructions'=>$tmp['file_instructions'], 
             ];
-           
-            if(!empty($tmp['content'])){
-                $data_info[]=[
-                    'pid'=>$tmp['id'],
-                    'content'=>$tmp['content']
-                ];
-            }
-            if(!empty($tmp['content2'])){
-                $data_tech[]=[
-                    'pid'=>$tmp['id'],
-                    'content'=>$tmp['content2']
-                ];
-            }
-            if(!empty($tmp['wd'])){
-                $data_file[]=[
-                    'pid'=>$tmp['id'],
-                    'file'=>$tmp['wd'],
-                    'name'=>'技术文档'.$tmp['id'],
-                    'type'=>7,
-                ];
-            } 
          }  
         
         $m_goods=Db::name('goods');
@@ -344,7 +358,20 @@ class OldController extends AdminBaseController
         exit;
         $this->success('已同步数据数'.$row_mew);
     }
-     
+    /* 产品数据调整 */
+    public function goods_correct()
+    {
+        debug('begin');
+        //产品图片数量
+        $nums=Db::name('goods_file')->where( 'type',1)->group('pid')->column('pid,count(id)');
+        $m_goods=Db::name('goods');
+        foreach($nums as $k=>$v){
+            $m_goods->where('id',$k)->setField('pic_jm',$v);
+        }
+        echo debug('begin','end').'s';
+        echo debug('begin','end','m');
+        exit;
+    }
     // '所属公司+付款银行+付款类型
     public function sys()
     {
