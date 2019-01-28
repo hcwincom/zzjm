@@ -702,7 +702,7 @@ class AdminGoodsController extends AdminBaseController
         $data=$tmp['data'];
         //关联设备数
         $goods_links=[
-            '-1'=>'关联设备',
+            '-1'=>'关联数量',
             '0'=>'0个',
             '1'=>'1个',
             '2'=>'2个',
@@ -2396,14 +2396,7 @@ class AdminGoodsController extends AdminBaseController
                 'time'=>$time,
             ];
            
-                //统计图片文件数量
-                //$update_info[$file_type[$k][0]]=count($v);
-          
-            $row=$m->where('id',$info['pid'])->update($update_info);
-            if($row!==1){
-                $m->rollback();
-                $this->error('信息更新失败，请刷新后重试');
-            }
+            
             $content=Db::name('edit_info')->where('eid',$id)->value('content');
             $where_delete=['pid'=>$info['pid']];
             $data_add=[
@@ -2418,6 +2411,18 @@ class AdminGoodsController extends AdminBaseController
                 $m_content->insert($data_add);
             }else{
                 $m_content->where($where_delete)->update($data_add);
+            }
+            //统计资料字数
+            $content_02 = htmlspecialchars_decode($content); //把一些预定义的 HTML 实体转换为字符
+            $content_03 = str_replace("&nbsp;","",$content_02);//将空格替换成空
+            $contents = strip_tags($content_03);//函数剥去字符串中的 HTML、XML 以及 PHP 的标签,获取纯文本内容
+           
+            $update_info['count_tech']=mb_strlen($contents); 
+            
+            $row=$m->where('id',$info['pid'])->update($update_info);
+            if($row!==1){
+                $m->rollback();
+                $this->error('信息更新失败，请刷新后重试');
             }
         }
         
@@ -3585,15 +3590,15 @@ class AdminGoodsController extends AdminBaseController
         $this->success('审核成功');
     }
     /**
-     * 设备详情
+     * 设备关联产品详情
      * @adminMenu(
-     *     'name'   => '设备详情',
+     *     'name'   => '设备关联产品详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 80,
      *     'icon'   => '',
-     *     'remark' => '设备详情',
+     *     'remark' => '设备关联产品详情',
      *     'param'  => ''
      * )
      */
@@ -3627,15 +3632,15 @@ class AdminGoodsController extends AdminBaseController
         return $this->fetch();
     }
     /**
-     * 设备编辑提交
+     * 设备关联产品编辑提交
      * @adminMenu(
-     *     'name'   => '设备编辑提交',
+     *     'name'   => '设备关联产品编辑提交',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 81,
      *     'icon'   => '',
-     *     'remark' => '设备编辑提交',
+     *     'remark' => '设备关联产品编辑提交',
      *     'param'  => ''
      * )
      */
@@ -3731,15 +3736,15 @@ class AdminGoodsController extends AdminBaseController
         
     }
     /**
-     * 设备修改详情
+     * 设备关联产品修改详情
      * @adminMenu(
-     *     'name'   => '设备修改详情',
+     *     'name'   => '设备关联产品修改详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 82,
      *     'icon'   => '',
-     *     'remark' => '设备修改详情',
+     *     'remark' => '设备关联产品修改详情',
      *     'param'  => ''
      * )
      */
@@ -3916,6 +3921,376 @@ class AdminGoodsController extends AdminBaseController
             'shop'=>$admin['shop'],
         ];
         zz_action($data_action,['aid'=>$info['aid']]); 
+        
+        $m->commit();
+        //添加收藏关联
+        $this->goods_collect($info['pid'],$admin['id'],3);
+        $this->success('审核成功');
+    }
+    /**
+     * 产品关联设备详情
+     * @adminMenu(
+     *     'name'   => '产品关联设备详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 80,
+     *     'icon'   => '',
+     *     'remark' => '产品关联设备详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type0()
+    {
+        $m=$this->m;
+        $id=$this->request->param('id',0,'intval');
+        $info=$m
+        ->field('p.*,concat(cate1.name,"-",cate2.name) as cate_name')
+        ->alias('p')
+        ->join('cmf_cate cate2','cate2.id=p.cid','left')
+        ->join('cmf_cate cate1','cate1.id=p.cid0','left')
+        ->where('p.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        //获取分类
+        $this->cates();
+        //产品与设备的关联
+        $where=[
+            'gl.pid1'=>$id,
+            'gl.type'=>5,
+        ];
+        //关联产品
+        $id_links=Db::name('goods_link')
+        ->alias('gl')
+        ->join('cmf_goods p','p.id=gl.pid0')
+        ->where($where)
+        ->column('gl.pid0,gl.num,p.name');
+        
+        $this->assign('id_links',$id_links);
+        $this->assign('info',$info);
+        $this->assign('ctype',2);
+        $this->assign('gtype',5);
+        return $this->fetch();
+    }
+    /**
+     * 产品关联设备编辑提交
+     * @adminMenu(
+     *     'name'   => '产品关联设备编辑提交',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 81,
+     *     'icon'   => '',
+     *     'remark' => '产品关联设备编辑提交',
+     *     'param'  => ''
+     * )
+     */
+    public function type0_edit_do()
+    {
+        $m=$this->m;
+        $data=$this->request->param();
+        $id=intval($data['id']);
+        $info=$m->where('id',$id)->find();
+        if(empty($info)){
+            $this->error('数据不存在');
+        }
+        $table=$this->table;
+        
+        $table0='type0';
+        $flag='产品';
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能编辑其他店铺的信息');
+            }
+        }
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>'goods',
+            'url'=>url($table0.'_edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($data['adsc']))?'修改了'.$flag:$data['adsc'];
+        $content=[]; 
+        //产品与设备的关联
+        $where=[
+            'pid1'=>$id,
+            'type'=>5,
+        ];
+        $links0=Db::name('goods_link')->where($where)->column('pid0,num');
+        $links1=empty($data['id_links'])?[]:$data['id_links'];
+        //配件数量格式
+        foreach($links1 as $k=>$v){
+            $links1[$k]=intval($v);
+            if($links1[$k]<=0){
+                $this->error('关联产品数量错误');
+            }
+        }
+        //关联产品比较
+        if(!empty(array_diff_assoc($links0,$links1)) ||  !empty(array_diff_assoc($links1,$links0))){
+            $content['id_links']=json_encode($links1);
+        }
+        if(empty($content)){
+            $this->error('未修改');
+        }
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试');
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'编辑了'.$flag.$info['id'].'-'.$info['name'].'的对应设备',
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url($table0.'_edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        zz_action($data_action,['department'=>$admin['department']]);
+        $m_edit->commit();
+        //添加收藏关联
+        $this->goods_collect($info['id'],$admin['id'],2);
+        //直接审核
+        $rule='type0_edit_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
+        
+    }
+    /**
+     * 产品关联设备修改详情
+     * @adminMenu(
+     *     'name'   => '产品关联设备修改详情',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 82,
+     *     'icon'   => '',
+     *     'remark' => '产品关联设备修改详情',
+     *     'param'  => ''
+     * )
+     */
+    public function type0_edit_info()
+    {
+        $m=$this->m;
+        $eid=$this->request->param('id',0,'intval');
+        $info1=Db::name('edit')
+        ->field('e.*,p.name as pname,p.status as pstatus,p.type as ptype')
+        ->alias('e')
+        ->join('cmf_goods p','p.id=e.pid')
+        ->where('e.id',$eid)
+        ->find();
+        if(empty($info1)){
+            $this->error('数据不存在');
+        }
+        
+        //获取改变的信息
+        $change=Db::name('edit_info')->where('eid',$eid)->value('content');
+        $change=json_decode($change,true);
+        
+        $m_link=Db::name('goods_link');
+        //产品与设备的关联
+        $where=[
+            'gl.pid1'=>$info1['pid'],
+            'gl.type'=>5,
+        ];
+        //关联产品
+        $links0=Db::name('goods_link')
+        ->alias('gl')
+        ->join('cmf_goods p','p.id=gl.pid0')
+        ->where($where)
+        ->column('gl.pid0,gl.num,p.name');
+         
+        $links1=[];
+        $links10=[];
+        if(isset($change['id_links'])){
+            $links1=json_decode($change['id_links'],true);
+            if(!empty($links1)){
+                $ids=array_keys($links1);
+                $links10=$m->where('id','in',$ids)->column('id,name');
+            }
+        }
+        $this->assign('links0',$links0);
+        $this->assign('links1',$links1);
+        $this->assign('links10',$links10);
+        $this->assign('info1',$info1);
+        
+        $this->assign('change',$change);
+        return $this->fetch();
+    }
+    /**
+     * 产品关联设备审核
+     * @adminMenu(
+     *     'name'   => '产品关联设备审核',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 83,
+     *     'icon'   => '',
+     *     'remark' => '产品关联设备审核',
+     *     'param'  => ''
+     * )
+     */
+    public function type0_edit_review()
+    {
+        //审核编辑的信息
+        $status=$this->request->param('rstatus',0,'intval');
+        $id=$this->request->param('id',0,'intval');
+        if(($status!=2 && $status!=3) || $id<=0){
+            $this->error('信息错误');
+        }
+        $m=$this->m;
+        $table=$this->table;
+        $type=5;
+        $m_edit=Db::name('edit');
+        $info=$m_edit
+        ->field('e.*,p.name as pname,p.type,p.shop as pshop,a.user_nickname as aname')
+        ->alias('e')
+        ->join('cmf_'.$table.' p','p.id=e.pid')
+        ->join('cmf_user a','a.id=e.aid')
+        ->where('e.id',$id)
+        ->find();
+        if(empty($info)){
+            $this->error('无效信息');
+        }
+        if($info['rstatus']!=1){
+            $this->error('编辑信息已被审核！不能重复审核');
+        }
+        
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1){
+            if(empty($info['shop']) || $info['shop']!=$admin['shop']){
+                $this->error('不能审核其他店铺的信息');
+            }
+        }
+        $time=time();
+        
+        $m->startTrans();
+        
+        $update=[
+            'rid'=>$admin['id'],
+            'rtime'=>$time,
+            'rstatus'=>$status,
+        ];
+        $review_status=$this->review_status;
+        $rdsc=$this->request->param('rdsc');
+        $update['rdsc']=(empty($rdsc))?$review_status[$status]:$rdsc;
+        //只有未审核的才能更新
+        $where=[
+            'id'=>$id,
+            'rstatus'=>1,
+        ];
+        $row=$m_edit->where($where)->update($update);
+        if($row!==1){
+            $m->rollback();
+            $this->error('审核失败，请刷新后重试');
+        }
+        //是否更新,2同意，3不同意
+        if($status==2){
+            //组装更新数据
+            $update_info=[
+                'time'=>$time,
+            ];
+            //得到修改的字段
+            $change=Db::name('edit_info')->where('eid',$id)->value('content');
+            $change=json_decode($change,true);
+            
+            foreach($change as $k=>$v){
+                $update_info[$k]=$v;
+            }
+            //处理关联产品
+            if(isset($update_info['id_links'])){
+                //先得到旧的关联id
+                $m_link= Db::name('goods_link');
+               
+                //先得到旧数据
+                $where=[
+                    'pid1'=>$info['pid'],
+                    'type'=>$type,
+                    'shop'=>$info['pshop'],
+                ];
+                $pid0s= $m_link->where($where)->column('pid0','pid0');
+                //删除旧数据
+                $m_link->where($where)->delete();
+                
+                $links=json_decode($update_info['id_links'],true);
+              
+                unset($update_info['id_links']);
+                $links_add=[]; 
+                foreach($links as $k=>$v){
+                    $links_add[]=[
+                        'pid1'=>$info['pid'],
+                        'pid0'=>$k,
+                        'num'=>$v,
+                        'type'=>$type,
+                        'shop'=>$info['pshop'],
+                    ];
+                    $pid0s[$k]=$k;
+                }
+               
+                if(!empty($links_add)){
+                    $m_link->insertAll($links_add);
+                } 
+            }
+            //有关联更新要重新统计关联数
+            foreach($pid0s as $k=>$v){
+                $where=[
+                    'pid0'=>$v,
+                    'type'=>$type,
+                    'shop'=>$info['pshop'],
+                ];
+                $num=$m_link->where($where)->sum('num');
+                if(empty($num)){
+                    $num=0;
+                }
+                $m->where('id',$v)->setField('goods_link',$num);
+            }
+           
+             
+        }
+        
+        //审核成功，记录操作记录,发送审核信息
+        
+        $flag='产品';
+        $table0='type0';
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].'审核'.$info['aid'].'-'.$info['aname'].'对'.($flag).$info['pid'].'-'.$info['pname'].'的对应设备编辑为'.$review_status[$status],
+            'table'=>$table,
+            'type'=>'edit_review',
+            'pid'=>$info['pid'],
+            'link'=>url($table0.'_edit_info',['id'=>$info['id']]),
+            'shop'=>$admin['shop'],
+        ];
+        zz_action($data_action,['aid'=>$info['aid']]);
         
         $m->commit();
         //添加收藏关联
@@ -4902,6 +5277,7 @@ class AdminGoodsController extends AdminBaseController
         $brands=Db::name('brand')->where($where_brand)->order('char asc,sort asc')->column('id,name,char');
         $this->assign('bcates',$bcates);
         $this->assign('brands',$brands);
+        $this->assign('url_goods',url('edit','',false,false));
          
     }
      

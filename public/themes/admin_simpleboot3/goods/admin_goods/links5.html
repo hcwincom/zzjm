@@ -12,7 +12,7 @@
 			   <include file="goods@admin_goods/search" />
 			   
 			<select name="is_link" class="form-control" id="">
-				<option value="0" <eq name="data.is_link" value="0">selected</eq>>主产品</option>
+				<option value="0" <eq name="data.is_link" value="0">selected</eq>>设备</option>
 				<option value="1" <eq name="data.is_link" value="1">selected</eq>>相关联产品</option>
 			</select>
 			<input type="submit" class="btn btn-primary" value="搜索" />
@@ -45,9 +45,9 @@
 						 <notempty name="shops">
 						 <th>店铺</th>
 				    	</notempty> 
-						<th>产品名</th> 
+						<th>设备名</th> 
 						<th>产品编码</th> 
-					 	<th>设备数量</th> 
+					 	<th>关联产品总数量</th> 
 						<th>关联产品</th>
 						<th>组合数量</th> 
 						<th>备注</th> 

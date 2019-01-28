@@ -98,7 +98,7 @@ function custom_change(custom){
 	        dataType: 'json', 
 	        data:{'uid':custom,'type':utype},
 	        success: function (data) {
-	        	 console.log(data);
+	        	 
 	     	    if(data.code!=1){
 	     	    	msg(data.msg);
 	     	    	return false;

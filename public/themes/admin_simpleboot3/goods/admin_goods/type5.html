@@ -5,10 +5,8 @@
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
 			 <include file="goods@admin_goods/nav" />
-			<li class=""><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
-			<li class=""><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
-			<li class=""><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li> 
-			<li class="active"><a href="{:url('type5',['id'=>$info.id])}">{$goods_type[$info.type]}</a></li>   
+		 
+			  <include file="goods@admin_goods/nav_edit" /> 
 		</ul>
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type5_edit_do')}">
 		 
@@ -45,7 +43,7 @@
 					 	<tr><td>产品</td><td>配件数量</td><td>操作</td></tr>
 					 <foreach name="id_links" item="link" key="pid1">
 					 	<tr class="">
-					 		<td>{$link.name}</td>
+					 		<td><a href="{$url_goods}/id/{$link.pid1}" target="{$zztarget.other}">{$link.name}</a></td>
 					 		<td><input type="text" name="id_links[{$link.pid1}]" value="{$link.num}"/></td>
 					 		<td><button class="del_link" type="button">删除</button></td>
 					 	</tr>

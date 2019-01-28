@@ -5,9 +5,9 @@
 	<div class="wrap">
 		<ul class="nav nav-tabs"> 
 			 <include file="goods@admin_goods/nav" />
-		 <include file="goods@admin_goods/nav_edit" />
+			 <include file="goods@admin_goods/nav_edit" />
 		</ul>
-		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type2_edit_do')}">
+		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('type0_edit_do')}">
 		 
 			<div class="form-group">
 				<label  class="col-sm-2 control-label">产品id</label>
@@ -19,7 +19,7 @@
 					<a href="{:url('edit_list',['type1'=>'id','name'=>$info.id])}" target="{$zztarget['edit']}">查看编辑记录</a>
 				</div>
 			</div>
-			<div class="form-group">
+		 <div class="form-group">
 				<label  class="col-sm-2 control-label">产品名称</label>
 				<div class="col-md-6 col-sm-10">
 					<input type="text" class="form-control"  value="{$info.name}" readonly/>
@@ -33,19 +33,18 @@
 					 
 				</div>
 			</div>
-		 
 			<div class="form-group goods_link">
-				<label for="" class="col-sm-2 control-label">产品关联</label>
+				<label for="" class="col-sm-2 control-label">作为配件与设备关联</label>
 				<div class="col-md-6 col-sm-10">
 					 <include file="public@cate_goods" />  
 					 <button type="button" id="goods_link">确定</button>
 					 <table class="table table-hover table-bordered table-list">
-					 	<tr><td>产品</td><td>组合数量</td><td>操作</td></tr>
+					 	<tr><td>设备</td><td>配件数量</td><td>操作</td></tr>
 					 <foreach name="id_links" item="link" key="pid1">
 					 	<tr class="">
-					 		<td><a href="{$url_goods}/id/{$link.pid1}"  target="{$zztarget.other}">{$link.name}</a></td>
+					 		<td><a href="{$url_goods}/id/{$link.pid0}" target="{$zztarget.other}">{$link.name}</a></td>
 					 	 
-					 		<td><input type="text" name="id_links[{$link.pid1}]" value="{$link.num}"/></td>
+					 		<td><input type="text" name="id_links[{$link.pid0}]" value="{$link.num}"/></td>
 					 		<td><button class="del_link" type="button">删除</button></td>
 					 	</tr>
 					 </foreach>
