@@ -31,7 +31,7 @@ class OrderajaxController extends AdminBase0Controller
         $name       = strtolower('goods/AdminGoodsauth/price_in_get'); 
         $is_auth=$authObj->check($admin['id'], $name);
         
-        $goods=Db::name('goods')->field('id,name,code,pic,price_in,price_sale,type,weight1,size1')->where($where)->find();
+        $goods=Db::name('goods')->field('id,name,code,pic,price_in,price_sale,type,weight1,size1,shop')->where($where)->find();
         if($is_auth==false){
             $goods['price_in']='--';
         }
@@ -76,6 +76,16 @@ class OrderajaxController extends AdminBase0Controller
              $goods['goods_uname']='';
              $goods['goods_ucate']='';
              $goods['price_pay']=$goods['price_sale'];
+             //添加对应产品
+             if($uid>0){
+                 $data_uadd=[
+                     'uid'=>$uid,
+                     'goods'=>$id,
+                     'shop'=>$goods['shop'],
+                     'price'=>$goods['price_sale']
+                 ];
+                 $m_ugoods->insert($data_uadd);
+             }
          }else{
              $goods['goods_uname']=$tmp['name'];
              $goods['goods_ucate']=$tmp['cate'];
