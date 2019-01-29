@@ -216,28 +216,6 @@ class OrderBaseController extends AdminBaseController
         $this->assign("search_types", $search_types);
         
         $this->cates(1);
-        if($table=='order'){
-            $url_status=[
-                1=>['提交下单 ',url('status_do1','',false,false)],
-                2=>['确认订单 ',url('status_do2','',false,false)],
-                10=>['手动转为待发货 ',url('status_do10','',false,false)],
-                20=>['准备发货 ',url('status_do20','',false,false)],
-                22=>['仓库发货 ',url('status_do22','',false,false)],
-                24=>['确认收货 ',url('status_do24','',false,false)],
-            ];
-        }else{
-            $url_status=[
-                1=>['提交下单 ',url('status_do1','',false,false)],
-                2=>['确认订单 ',url('status_do2','',false,false)],
-                10=>['手动转为待收货 ',url('status_do10','',false,false)],
-                20=>['供货商已发货',url('status_do20','',false,false)],
-                22=>['准备收货 ',url('status_do22','',false,false)],
-                24=>['收货完成 ',url('status_do24','',false,false)],
-            ];
-        
-        }
-        
-        $this->assign('url_status',$url_status);
         
         return $this->fetch();
     }
@@ -726,8 +704,8 @@ class OrderBaseController extends AdminBaseController
            $this->error('不能编辑其他店铺的信息'); 
         }
         //有还原权限的为最高权限
-        $res=$this->check_review($admin,'status_do0');
-        if(!$res){
+        $res=$this->check_review($admin,'status_do0'); 
+        if(!$res){ 
             //是否有权查看
             $res=$m->order_edit_auth($info,$admin);
             if($res!==1){
@@ -1241,7 +1219,7 @@ class OrderBaseController extends AdminBaseController
                }
                
             }
-            
+           
         }
         
         //审核成功，记录操作记录,发送审核信息
@@ -1350,15 +1328,32 @@ class OrderBaseController extends AdminBaseController
             $this->assign('order_user_url',url('custom/AdminCustom/edit',false,false));
             $this->assign('order_types',config('order_type'));
             $this->assign('statuss',config('order_status'));
+            $url_status=[
+                1=>['提交下单 ',url('status_do1','',false,false)],
+                2=>['确认订单 ',url('status_do2','',false,false)],
+                10=>['手动转为待发货 ',url('status_do10','',false,false)],
+                20=>['准备发货 ',url('status_do20','',false,false)],
+                22=>['仓库发货 ',url('status_do22','',false,false)],
+                24=>['确认收货 ',url('status_do24','',false,false)],
+            ];
       }else{
           $this->assign('order_url',url('ordersup/AdminOrdersup/edit',false,false));
           $this->assign('order_user_url',url('custom/AdminSupplier/edit',false,false));
           $this->assign('statuss',config('ordersup_status'));
           $this->assign('order_types',config('ordersup_type')); 
+          $url_status=[
+              1=>['提交下单 ',url('status_do1','',false,false)],
+              2=>['确认订单 ',url('status_do2','',false,false)],
+              10=>['手动转为待收货 ',url('status_do10','',false,false)],
+              20=>['供货商已发货',url('status_do20','',false,false)],
+              22=>['准备收货 ',url('status_do22','',false,false)],
+              24=>['收货完成 ',url('status_do24','',false,false)],
+          ];
       }
         
         $this->assign('edit_url',url('edit_list',['type1'=>'id','type2'=>1],false));
-       
+        $this->assign('url_status',$url_status);
+        
     }
     
    
@@ -1384,11 +1379,16 @@ class OrderBaseController extends AdminBaseController
         if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
             $this->error('不能编辑其他店铺的信息');
         }
-        //是否有权查看
-        $res=$m->order_edit_auth($info,$admin);
-        if($res!==1){
-            $this->error($res);
+        //有还原权限的为最高权限
+        $res=$this->check_review($admin,'pay_do0');
+        if(!$res){
+            //是否有权查看
+            $res=$m->order_edit_auth($info,$admin);
+            if($res!==1){
+                $this->error($res);
+            }
         }
+       
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],

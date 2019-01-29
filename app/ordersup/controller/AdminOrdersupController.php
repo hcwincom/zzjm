@@ -407,11 +407,17 @@ class AdminOrdersupController extends OrderBaseController
         if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
             $this->error('不能编辑其他店铺的信息');
         }
-        //是否有权查看
-        $res=$m->order_edit_auth($info,$admin);
-        if($res!==1){
-            $this->error($res);
+        //有还原权限的为最高权限
+        $res=$this->check_review($admin,'status_do0');
+       
+        if(!$res){ 
+            //是否有权查看
+            $res=$m->order_edit_auth($info,$admin);
+            if($res!==1){
+                $this->error($res);
+            }
         }
+       
         $update=[
             'pid'=>$info['id'],
             'aid'=>$admin['id'],
@@ -526,21 +532,21 @@ class AdminOrdersupController extends OrderBaseController
         $this->success('已提交修改');
     }
     /**
-     * 超管直接修改采购单支付状态
+     * 超管还原采购单支付状态
      * @adminMenu(
-     *     'name'   => '超管直接修改采购单支付状态',
+     *     'name'   => '超管还原采购单支付状态',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '超管直接修改采购单支付状态',
+     *     'remark' => '超管还原采购单支付状态',
      *     'param'  => ''
      * )
      */
     public function pay_do0(){
         
-        $flag='超管直接修改采购单支付状态';
+        $flag='超管还原采购单支付状态';
         $data=$this->request->param();
         $this->pay_do($data,0,$flag);
         

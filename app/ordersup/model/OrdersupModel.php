@@ -1007,8 +1007,7 @@ class OrdersupModel extends Model
             $where_goods['oid']=['eq',$info['id']];
             $orders=[$info['id']=>$info];
         }else{
-            $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight,order_type'.
-                ',real_freight,other_money,tax_money,order_amount,dsc,express_no,status,pay_status';
+            $fields='*';
             $orders=$this->where('fid',$info['id'])->column($fields);
             
             $order_ids=array_keys($orders);

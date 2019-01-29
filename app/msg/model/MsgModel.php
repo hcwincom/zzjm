@@ -38,11 +38,13 @@ class MsgModel extends Model
          //检测权限
           $auth=strtolower($auth);
           $role_ids=Db::name('auth_access')->where('rule_name',$auth)->column('role_id');
+         
           if(empty($role_ids)){
               return 0;
           }
           //获取接收者
           $uids=Db::name('role_user')->where('role_id','in',$role_ids)->column('user_id');
+         
           if(empty($uids)){
               return 0;
           }
@@ -76,6 +78,7 @@ class MsgModel extends Model
               ];
           }
           $this->insertAll($data_msg);
+          
           return 1;
       }
 }

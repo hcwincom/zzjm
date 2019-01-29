@@ -62,6 +62,8 @@
 					 </switch> 
 					  
 					 <button type="submit" action="{:url('status_do0')}" class="save btn btn-primary js-ajax-submit" >超管还原采购单状态</button>
+					 
+					</eq>
 					<else/>
 					 	<eq name="info.status" value="1"> 
 						 	<button type="submit" action="{:url('status_do1')}" class="save btn btn-primary js-ajax-submit" >提交下单</button>
@@ -69,7 +71,6 @@
 					 	<eq name="info.status" value="2">  
 						 	<button type="submit" action="{:url('status_do2')}" class="save btn btn-primary js-ajax-submit" >确认下单</button>
 						 </eq>
-					</eq>
 					</eq>
 					</p>
 			 	<lt name="info.status" value="80">
