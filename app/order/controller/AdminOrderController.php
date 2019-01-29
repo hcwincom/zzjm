@@ -56,6 +56,16 @@ class AdminOrderController extends OrderBaseController
     public function index()
     {
         parent::index();
+       
+        $url_status=[
+            1=>['提交下单 ',url('status_do1','',false,false)], 
+            2=>['确认订单 ',url('status_do2','',false,false)],
+            10=>['手动转为待发货 ',url('status_do10','',false,false)],
+            20=>['准备发货 ',url('status_do20','',false,false)],
+            22=>['仓库发货 ',url('status_do22','',false,false)],
+            24=>['确认收货 ',url('status_do24','',false,false)],
+        ];
+        $this->assign('url_status',$url_status);
         return $this->fetch();
         
     }
@@ -367,18 +377,18 @@ class AdminOrderController extends OrderBaseController
         
         $m=$this->m;
         $table=$this->table;
-        
+      
         $id=intval($data['id']);
-        
+        $url_error=url('edit',['id'=>$id]); 
         $info=$m->get_one(['id'=>$id]);
         if(empty($info)){
-            $this->error('数据不存在');
+            $this->error('数据不存在',$url_error);
         }
         $time=time();
         $admin=$this->admin;
         //其他店铺的审核判断
         if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
-            $this->error('不能编辑其他店铺的信息');
+            $this->error('不能编辑其他店铺的信息',$url_error);
         }
         //是否有权查看
         $res=$m->order_edit_auth($info,$admin);
@@ -399,7 +409,7 @@ class AdminOrderController extends OrderBaseController
         $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
         
         if($status>0 && $info['status']!=$status){
-            $this->error('状态信息错误');
+            $this->error('状态信息错误',$url_error);
         }
        /*  $content=$m->order_edit($info, $data);
         if(!is_array($content)){
@@ -430,7 +440,7 @@ class AdminOrderController extends OrderBaseController
                 //检查库存
                 $res=$m->order_store($id);
                 if($res!==1){
-                    $this->error($res);
+                    $this->error($res,$url_error);
                 }
                 break;
             case 22:
@@ -440,7 +450,7 @@ class AdminOrderController extends OrderBaseController
                 //检查库存
                 $res=$m->order_store($id);
                 if($res!==1){
-                    $this->error($res);
+                    $this->error($res,$url_error);
                 }
                 break;
             case 24:
@@ -461,7 +471,7 @@ class AdminOrderController extends OrderBaseController
                 $content['status']=1;
                 break;
             default:
-                $this->error('操作错误');
+                $this->error('操作错误',$url_error);
         }
         //淘宝订单的不能线下先收款，和到货
         if(isset($content['status']) && $info['order_type']==3){
@@ -480,7 +490,7 @@ class AdminOrderController extends OrderBaseController
             Db::name('edit_info')->insert($data_content);
         }else{
             $m_edit->rollback();
-            $this->error('保存数据错误，请重试');
+            $this->error('保存数据错误，请重试',$url_error);
         }
         
         //记录操作记录
@@ -496,7 +506,7 @@ class AdminOrderController extends OrderBaseController
             'shop'=>$admin['shop'],
         ];
         
-        zz_action($data_action,['department'=>$admin['department']]);
+        zz_action($data_action,$admin);
         
         $m_edit->commit();
         $rule='edit_review';

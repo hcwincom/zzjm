@@ -216,6 +216,29 @@ class OrderBaseController extends AdminBaseController
         $this->assign("search_types", $search_types);
         
         $this->cates(1);
+        if($table=='order'){
+            $url_status=[
+                1=>['提交下单 ',url('status_do1','',false,false)],
+                2=>['确认订单 ',url('status_do2','',false,false)],
+                10=>['手动转为待发货 ',url('status_do10','',false,false)],
+                20=>['准备发货 ',url('status_do20','',false,false)],
+                22=>['仓库发货 ',url('status_do22','',false,false)],
+                24=>['确认收货 ',url('status_do24','',false,false)],
+            ];
+        }else{
+            $url_status=[
+                1=>['提交下单 ',url('status_do1','',false,false)],
+                2=>['确认订单 ',url('status_do2','',false,false)],
+                10=>['手动转为待收货 ',url('status_do10','',false,false)],
+                20=>['供货商已发货',url('status_do20','',false,false)],
+                22=>['准备收货 ',url('status_do22','',false,false)],
+                24=>['收货完成 ',url('status_do24','',false,false)],
+            ];
+        
+        }
+        
+        $this->assign('url_status',$url_status);
+        
         return $this->fetch();
     }
      
@@ -1378,7 +1401,9 @@ class OrderBaseController extends AdminBaseController
             'shop'=>$admin['shop'],
         ];
         $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
-        
+        if($info['status']<10){
+            $this->error('先提交确认才能付款');
+        }
         if($pay_status!=0 && $info['pay_status']!=$pay_status){
             $this->error('状态信息错误');
         }

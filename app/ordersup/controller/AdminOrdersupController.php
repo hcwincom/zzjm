@@ -428,10 +428,10 @@ class AdminOrdersupController extends OrderBaseController
         if($status>0 && $info['status']!=$status){
             $this->error('状态信息错误');
         }
-        $content=$m->order_edit($info, $data);
+      /*   $content=$m->order_edit($info, $data);
         if(!is_array($content)){
             $this->error($content);
-        }
+        } */
         switch ($status){
             case 1: 
                 $content['status']=2; 
@@ -515,7 +515,7 @@ class AdminOrdersupController extends OrderBaseController
             'shop'=>$admin['shop'],
         ];
         
-        zz_action($data_action,['department'=>$admin['department']]);
+        zz_action($data_action,$admin);
         
         $m_edit->commit();
         $rule='edit_review';

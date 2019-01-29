@@ -265,56 +265,40 @@
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
 					 
 						<td>{$statuss[$vo.status]|default=$vo.status}
-							<a href="{$order_url}/id/{$vo.id}" target="{$zztarget['list']}" >
-						<eq name="vo.is_real" value="1">
-					<eq name="vo.order_type" value="1">
-				 	
-					   <switch name="vo.status">
-					    <case value="1">
-						 	 提交下单 
-						 </case>
-						 <case value="2">
-						 	 确认下单 
-						 </case>
-						 <case value="10"> 
-						  手动转为待收货 
-						 	 
-						 </case>
-						  <case value="20"> 
-						 	 供货商已发货 
-						 	 
-						 </case>
-						  <case value="22"> 
-						 	 准备收货 
-						 	 
-						 </case>
-						  <case value="24"> 
-						  确认收货 
-						 	 
-						 </case>
-						  
-						  <case value="26"> 
-						 	 订单售后关闭 
-						 	 
-						 </case>
-						  <case value="30"> 
-						  订单售后关闭 
-						 	 
-						 </case>
-					 </switch> 
-					   
-					<else/>
-					 	<eq name="vo.status" value="2"> 
-					  
-						 	 确认下单 
-						 </eq>
-					</eq>
-					<else/>
-					-已拆分
-					</eq>
-					 </a>	 
-						</td>
 						 
+						<eq name="vo.is_real" value="1">
+						<eq name="vo.order_type" value="1">
+					 	 <present name="url_status[$vo.status][1]">
+							 &nbsp;&nbsp;&nbsp;
+								<a class="js-ajax-dialog-btn btn btn-primary" data-msg="{$url_status[$vo.status][0]}吗？" href="{$url_status[$vo.status][1]}/id/{$vo.id}" target="{$zztarget['list']}" >
+								 	{$url_status[$vo.status][0]}
+								 </a>
+							</present>
+						   
+						<else/>
+						 	 <lt name="vo.status" value="10"> 
+							 	 <present name="url_status[$vo.status][1]">
+							 	 &nbsp;&nbsp;&nbsp;
+							 	 <a class="js-ajax-dialog-btn btn btn-primary" data-msg="{$url_status[$vo.status][0]}吗？" href="{$url_status[$vo.status][1]}/id/{$vo.id}" target="{$zztarget['list']}" >
+								 	{$url_status[$vo.status][0]}
+								 </a>
+								  </present>
+						 	 </lt>
+						</eq>
+						<else/>
+						 &nbsp;&nbsp;&nbsp;已拆分
+							 <lt name="vo.status" value="10"> 
+							 	 <present name="url_status[$vo.status][1]">
+							 	 &nbsp;&nbsp;&nbsp;
+							 	 <a class="js-ajax-dialog-btn btn btn-primary" data-msg="{$url_status[$vo.status][0]}吗？" href="{$url_status[$vo.status][1]}/id/{$vo.id}" target="{$zztarget['list']}" >
+								 	{$url_status[$vo.status][0]}
+								 </a>
+								  </present>
+							 </lt>
+						</eq>
+					 
+						</td>
+					  
 					</tr>
 				 
 					</foreach>
