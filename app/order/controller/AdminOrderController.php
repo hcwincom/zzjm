@@ -517,14 +517,12 @@ class AdminOrderController extends OrderBaseController
         zz_action($data_action,$admin);
         
         $m_edit->commit();
-        $rule='edit_review';
-        $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'无需审核，直接通过']);
-      
-        /*  $rule='edit_review';
+        $this->redirect('edit_review',['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        $rule='status_review';
         $res=$this->check_review($admin,$rule);
         if($res){
-            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
-        }  */
+            $this->redirect('edit_review',['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        } 
         $this->success('已提交修改');
     }
     /**
@@ -621,6 +619,21 @@ class AdminOrderController extends OrderBaseController
     public function print_order(){ 
         parent::print_order(); 
         return $this->fetch();
+    }
+    /**
+     * 状态更新直接确认
+     * @adminMenu(
+     *     'name'   => '状态更新直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '状态更新直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function status_review(){ 
     }
     
 }

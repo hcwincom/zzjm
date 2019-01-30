@@ -432,10 +432,23 @@ class AdminOrdersupController extends OrderBaseController
         if($status>0 && $info['status']!=$status){
             $this->error('状态信息错误');
         }
-      /*   $content=$m->order_edit($info, $data);
-        if(!is_array($content)){
-            $this->error($content);
-        } */
+        if(isset($data['express_no'])){
+            $dsc=$data['dsc'];
+            $express_no=$data['express_no'];
+        }elseif(isset($data['dsc0'][$info['id']])){
+            $dsc=$data['dsc0'][$info['id']];
+            $express_no=$data['express_no0'][$info['id']];
+        }
+        
+        if(isset($express_no)){
+            if($info['dsc']!=$dsc){
+                $content['dsc']=$dsc;
+            }
+            if($info['express_no']!=$dsc){
+                $content['express_no']=$dsc;
+            }
+        }
+        
         switch ($status){
             case 1: 
                 $content['status']=2; 
@@ -522,13 +535,12 @@ class AdminOrdersupController extends OrderBaseController
         zz_action($data_action,$admin);
         
         $m_edit->commit();
-        $rule='edit_review';
-        $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'无需审核，直接通过']);
-       /*  $rule='edit_review';
+        $this->redirect('edit_review',['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+         $rule='status_review';
         $res=$this->check_review($admin,$rule);
         if($res){
-            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
-        } */
+            $this->redirect('edit_review',['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        } 
         $this->success('已提交修改');
     }
     /**
@@ -625,5 +637,20 @@ class AdminOrdersupController extends OrderBaseController
         parent::print_order();
         return $this->fetch();
     }
-    
+    /**
+     * 状态更新直接确认
+     * @adminMenu(
+     *     'name'   => '状态更新直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 20,
+     *     'icon'   => '',
+     *     'remark' => '状态更新直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function status_review(){
+        
+    }
 }
