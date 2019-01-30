@@ -133,7 +133,7 @@ class PublicController extends AdminBaseController
         return redirect(url('/', [], false, true));
     }
     /**
-     * 消息提醒
+     * 消息提醒,废弃不用，用msg/msgajax/msg_new
      */
     public function msg_new()
     {

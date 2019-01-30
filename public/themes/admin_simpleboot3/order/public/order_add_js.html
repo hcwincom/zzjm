@@ -1,15 +1,28 @@
 <script>
  
 $('form').submit(function(){
-	if($('#order_company').val()=='0'){
-		$('#order_company').focus();
-		return false;
+	 
+	var not0=['order_company','accept','store','freight','paytype','pay_type','goods_num'];
+	var tmp=0;
+	for(var i in not0){
+		tmp=parseInt($('#'+not0[i]).val());
+		if(!(tmp>0)){
+			$('#'+not0[i]).focus();
+			return false;
+		}
 	}
-	if($('#paytype').val()=='0'){
-		$('#paytype').focus();
-		return false;
+	var not_null=[
+			'pay_freight','real_freight','order_amount',
+	         'goods_money','other_money','discount_money','weight','size','weight_real'
+	];
+         
+	for(var j in not0){
+		tmp=parseFloat($('#'+not0[j]).val());
+		if(!(tmp>=0)){
+			$('#'+not0[j]).focus();
+			return false;
+		}
 	}
-	
 	return true;
 });
 
@@ -151,11 +164,10 @@ function custom_change(custom){
 				 $('#invoice_bank_location').val(info.invoice_location+' '+info.invoice_num); 
 				 invoice_type_change();
 				 $('#tax_point').val(info.tax_point); 
-				
 				 
-				if(info.payt_ype>0){
+				if(info.pay_type>0){ 
 					 $('#pay_type').val(info.pay_type); 
-				}else{
+				}else{ 
 					 $('#pay_type').val(1); 
 				} 
 				 ugoods_add(info.ugoods); 

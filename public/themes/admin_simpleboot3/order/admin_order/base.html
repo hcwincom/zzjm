@@ -202,15 +202,7 @@
 				</present>
 				</div>
 			</div>
-			<div class="form-group fleft-all accept">
-				<label  class="col-sm-2 control-label">订单备注</label>
-				<div class="col-md-6 col-sm-10"> 
-					<input type="text" class="form-control " name="dsc" value="{$info.dsc}" id="dsc"/> 
-				<present name="change.dsc">
-					<input type="text" class="form-control red"  value="{$change.dsc}" />
-				</present>
-				</div>
-			</div>
+			 
 			<empty name="info">
 				<input type="hidden" name="ok_break" value="2"/>
 			<else/>
@@ -234,41 +226,9 @@
 			</div>
 			</empty>
 			<div style="clear:both"></div>
-			 
+				<include file="order@public:goods_add"/> 
 		
-		<eq name="ok_add" value="1"> 
-	 		<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">添加产品</label>
-				<div class="col-md-6 col-sm-10">
-				   <include file="public@cate_goods_mul" /> 
-				   
-					 <button type="button" id="goods_add">添加</button>
-					 <p class="notice">确定添加前要选中产品添加</p> 
-				</div>
-			</div>
-			<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">订购产品</label>
-				<div class="col-md-6 col-sm-10">
-					<div class="goods_mul" id="goods_mul1">
-						<empty name="ugoods">
-				     		没有订购产品
-					     <else/>
-					     <foreach name="ugoods" item="vo"> 
-					     	<label class="checkbox-line">
-					 			<input type="checkbox"  value="{$vo['goods']}" />{$vo.goods_code},{$vo.goods_name},{$vo.cate},{$vo.name},{$vo.num},{$vo.price}
-					 		</label>
-					     </foreach>
-					     </empty>  
-					</div>
-				 	 <input type="text" class="form-control short" value="" id="search_value1"/> 
-  					<button type="button" id="goods_search1">查找</button>
-  					 
-					 <button type="button" id="goods_add1">添加</button> 
-				 
-				</div>
-			</div>
-			 
-		</eq>
+		
 			 
 			<div style="clear:both"></div>
 		<empty name="info.id">

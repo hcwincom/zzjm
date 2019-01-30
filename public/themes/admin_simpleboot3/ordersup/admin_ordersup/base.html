@@ -234,32 +234,8 @@
 			<div style="clear:both"></div>
 			 
 	  		
-	 
-		<eq name="ok_add" value="1"> 
-	 		 
-			<div class="form-group fleft-all">
-				<label  class="col-sm-2 control-label">订购产品</label>
-				<div class="col-md-6 col-sm-10">
-					<div class="goods_mul" id="goods_mul1">
-						<empty name="ugoods">
-				     		没有订购产品
-					     <else/>
-					     <foreach name="ugoods" item="vo"> 
-					     	<label class="checkbox-line">
-					 			<input type="checkbox"  value="{$vo['goods']}" />{$vo.goods_code},{$vo.goods_name},{$vo.cate},{$vo.name},{$vo.num},{$vo.price}
-					 		</label>
-					     </foreach>
-					     </empty>  
-					</div>
-				 	 <input type="text" class="form-control short" value="" id="search_value1"/> 
-  					<button type="button" id="goods_search1">查找</button>
-  					 
-					 <button type="button" id="goods_add1">添加</button> 
-				 
-				</div>
-			</div>
-			 
-		</eq>
+	 	<include file="order@public:goods_add"/>
+		 
 		<div style="clear:both"></div>
 		<empty name="info.id"> 
 			<div class="order" id="order_add"> 

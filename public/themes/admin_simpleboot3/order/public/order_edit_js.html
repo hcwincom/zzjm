@@ -188,4 +188,15 @@ $('.save').click(function(){
 	$('#addressinfo').val(c1+'-'+c2+'-'+c3);
 	$(this).parents('form').attr('action',$(this).attr('action'));
 });
+$(document).on('click','.status_click',function(){ 
+	var $div=$(this).parent().parent();
+	var express_no=$div.find('.express_no').val();
+	var dsc=$div.find('.dsc').val();
+	var href=$(this).attr('href0');
+	href=href+'/express_no/'+express_no+'/dsc/'+dsc;
+	$(this).attr('href',href);
+	console.log(href);
+	location.href=href;
+	 //return false;
+});
 </script>

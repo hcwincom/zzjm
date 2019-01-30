@@ -466,9 +466,10 @@
  
 </script>
 <script>
-     var msg_url = "{:url('admin/Public/msg_new')}";
+     var msg_url = "{:url('msg/Msgajax/msg_new')}";
+     console.log(msg_url);
      setInterval(function(){
-
+    	// $(".pageCont").show();   
          $.ajax({
             type: 'POST',
             url: msg_url,
@@ -476,37 +477,44 @@
             data: {},
             success: function (data) {               
                 if (data.code != 1) {
-                    $(".pageList").remove(); 
-                    $(".pageCont").hide();
+                    //$(".pageList").remove(); 
+                    //$(".pageCont").hide();
                     return false;
                 }
                 var list = data.data;
+                console.log(list);
                  var tchtml = "";  
                $.each(list,function (index,item) {
                  var timer = timestampToTime(item.time);
                  var lookHref;
-                var look = "";
-                if(item.link= ""){
+                 var look = "";
+                 if(item.link== ""){
                     lookHref = "";
                     look = "";
-                }else{
+                 }else{
                     lookHref = item.link; 
                     look = "点击查看";
-                }
+                 }
                  tchtml += '<div class="pageList"><div class="pageList_first"><p><span>发送人：</span>' + item.aname +'</p><p>'+timer+'</p></div><p>'+ item.dsc +'</p><div class="pageList_a"><a href="'+ lookHref+'">'+look+'</a></div></div>';
                });
+               if(tchtml==''){
+            	   return false;
+               }
                 $(".pageCont").show();                
-                $(".pagecontainer").append(tchtml);           
+                $(".pagecontainer").append(tchtml);  
+                $("#pageWin").show();
             },
             error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
                 $('body').append(event.responseText);
             }
         });
-         $("#pageWin").stop().slideToggle("fast");
+         //$("#pageWin").stop().slideToggle("fast"); 
     }, 6000);
 
     $(".pageHead span").click(function () {
-         $("#pageWin").stop().slideToggle("slow");
+         //$("#pageWin").stop().slideToggle("slow");
+         $(".pageList").remove(); 
+    	 $("#pageWin").hide();
     });
    function timestampToTime(timestamp) {
         var date = new Date(timestamp * 1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000

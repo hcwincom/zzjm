@@ -1123,14 +1123,19 @@ class OrderBaseController extends AdminBaseController
             //得到修改的字段
             $change=Db::name('edit_info')->where('eid',$id)->value('content');
             $change=json_decode($change,true);
-            //检测是否有授权变化
-            if(isset($change['aids'])){
-                $m_user=new UserModel();
-                $m_user->aid_edit_do($admin,$order['aid'],$change['aids'],$order['id'],$table.'_aid');
-                unset($change['aids']);
+            if(isset($change['status']) || isset($change['pay_status'])){
+               
+                $row=$this->m_status_edit_review($order,$change,$table); 
+            }else{
+                //检测是否有授权变化
+                if(isset($change['aids'])){
+                    $m_user=new UserModel();
+                    $m_user->aid_edit_do($admin,$order['aid'],$change['aids'],$order['id'],$table.'_aid');
+                    unset($change['aids']);
+                } 
+                $row=$this->m_order_edit_review($order,$change,$table);
             }
-             
-            $row=$this->m_order_edit_review($order,$change,$table);
+            
             if($row!==1){
                 $m->rollback();
                 $this->error($row);
@@ -1238,6 +1243,8 @@ class OrderBaseController extends AdminBaseController
         zz_action($data_action,['aid'=>$info['aid']]);
         
         $m->commit();
+        //订单准备发货后直接发货，采购单准备收货后直接收货,暂时不做
+        
         $this->success('审核成功');
     }
     
@@ -1462,10 +1469,12 @@ class OrderBaseController extends AdminBaseController
         
         $m_edit->commit();
         $rule='edit_review';
+        $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'无需审核，直接通过']);
+        /* $rule='edit_review';
         $res=$this->check_review($admin,$rule);
         if($res){
             $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
-        }
+        } */
         $this->success('已提交修改');
     }
     
@@ -2134,6 +2143,82 @@ class OrderBaseController extends AdminBaseController
             }
         }
         
+        //通知各级发货
+        ///$order
+        //更新用户数据
+        $m_order->custom_update($order['uid']);
+        return 1;
+    }
+    /**
+     * 审核订单状态编辑
+     * @param array $order
+     * @param array $change
+     * @return number|string
+     */
+    public function m_status_edit_review($order,$change,$table='order')
+    {
+        $m_order=$this->m;
+        //订单和采购单区分
+        if($table=='order'){
+            $otype=1;
+            $ptype=1;
+          
+        }else{
+            $otype=2;
+            $ptype=2;
+           
+        }
+         
+        $time=time();
+        
+        //所有订单都有,都能修改
+        $edit_base=['dsc', 'express_no'];
+        //收货信息，状态信息，子订单可以单独修改，总订单修改后同步到子订单
+        $edit_accept=['status'];
+        
+        //总订单信息系，子订单不能单独修改，总订单修改后同步到子订单
+        $edit_fid0=['pay_status'];
+         
+        //依次处理change的信息，处理后unset
+         
+        $update_info=['time'=>$time];
+        
+        foreach($change as $k=>$v){
+            $update_info[$k]=$v;
+        }
+        //状态更新
+       
+        if(isset($change['status'])){
+            $order['status']=$change['status'];
+        }
+        if(isset($change['pay_status'])){
+            $order['pay_status']=$change['pay_status'];
+        }
+        if($order['status']==26 && $order['pay_status']==3){
+            $update_info['status']=30;
+        }
+        
+        $m_order->where('id',$order['id'])->update($update_info);
+        //有子订单,同步
+        if($order['is_real']==2  ){
+            //只有总订单才有的信息和总订单同步的信息
+            $filed_child=array_merge($edit_fid0,$edit_accept);
+            $update_child=['time'=>$time];
+            
+            foreach($filed_child as  $v){
+                if(isset($update_info[$v])){
+                    $update_child[$v]=$update_info[$v];
+                }
+            } 
+            if(!empty($update_child)){
+                $where_child=[
+                    'fid'=>$order['id'],
+                    'status'=>['elt',$order['status']]
+                ];
+                $m_order->where('fid',$order['id'])->update($update_child);
+            }
+        }
+         
         //通知各级发货
         ///$order
         //更新用户数据

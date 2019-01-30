@@ -8,7 +8,7 @@ use think\Db;
 
 class MsgajaxController extends AdminBase0Controller
 {
-    
+    /* 发信息页面，搜索用户 */
     function user_search(){
         $data=$this->request->param();
         $types=config('user_search');
@@ -33,6 +33,32 @@ class MsgajaxController extends AdminBase0Controller
         $users = Db::name('user')->where($where)->order('shop asc,department asc,user_type asc,id asc')->column('id,user_nickname');
         
         $this->success('ok','',$users);
+    }
+    /**
+     * 消息提醒, 
+     */
+    public function msg_new()
+    {
+        $uid=session('ADMIN_ID');
+        $m=Db::name('msg');
+        $where=[
+            'm.uid'=>$uid,
+            'm.status'=>1,
+        ];
+        $list=$m
+        ->alias('m')
+        ->join('cmf_user a','a.id=m.aid')
+        ->join('cmf_msg_txt mt','mt.id=m.msg')
+        ->where($where)
+        ->column('m.id,a.user_nickname as aname,mt.link,mt.dsc,mt.time');
+        if(empty($list)){
+            $this->error('没有未接收消息');
+        }else{
+            $ids=array_keys($list);
+            $m->where('id','in',$ids)->setField('status',2);
+            $this->success('ok','',$list);
+        }
+        
     }
      
 }

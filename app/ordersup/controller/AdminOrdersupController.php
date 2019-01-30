@@ -111,9 +111,7 @@ class AdminOrdersupController extends OrderBaseController
      */
     public function edit()
     {
-        parent::edit();
-        //是否允许添加，删除 
-        $this->assign('ok_add',2); 
+        parent::edit(); 
         return $this->fetch();  
     }
     /**
@@ -525,10 +523,12 @@ class AdminOrdersupController extends OrderBaseController
         
         $m_edit->commit();
         $rule='edit_review';
+        $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'无需审核，直接通过']);
+       /*  $rule='edit_review';
         $res=$this->check_review($admin,$rule);
         if($res){
             $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
-        }
+        } */
         $this->success('已提交修改');
     }
     /**
