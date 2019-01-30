@@ -495,13 +495,13 @@
                     lookHref = item.link; 
                     look = "点击查看";
                  }
-                 tchtml += '<div class="pageList"><div class="pageList_first"><p><span>发送人：</span>' + item.aname +'</p><p>'+timer+'</p></div><p>'+ item.dsc +'</p><div class="pageList_a"><a href="'+ lookHref+'">'+look+'</a></div></div>';
+                 tchtml += '<div class="pageList"><div class="pageList_first"><p><span>发送人：</span>' + item.aname +'</p><p>'+timer+'</p></div><p>'+ item.dsc +'</p><div class="pageList_a"><a href="'+ lookHref+'" target="_blank">'+look+'</a></div></div>';
                });
                if(tchtml==''){
             	   return false;
                }
                 $(".pageCont").show();                
-                $(".pagecontainer").append(tchtml);  
+                $(".pagecontainer").prepend(tchtml);  
                 $("#pageWin").show();
             },
             error: function (event, XMLHttpRequest, ajaxOptions, thrownError) {
