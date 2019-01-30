@@ -516,6 +516,21 @@ class AdminOrderController extends OrderBaseController
      */
     public function status20_22(){
     }
+    /**
+     * 付款后直接确认
+     * @adminMenu(
+     *     'name'   => '付款后直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '付款后直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function pay1_2(){
+    }
     
     
 }

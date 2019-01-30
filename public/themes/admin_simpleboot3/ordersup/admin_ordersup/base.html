@@ -814,7 +814,9 @@
 			 
 			 <foreach name="statuss" item="vo">
 			  	<label class="radio-inline">
-			 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>{$vo}
+			 		<input type="radio" value="{$key}" name="status" <if condition="$key eq $info.status">checked</if>/>
+			 		<eq name="info.pay_type" value="3">{$pay_types[$info.pay_type]|default=$info.pay_type}</eq>
+			 		{$vo}
 			 		<if condition="isset($change.status) && ($key eq $change.status)">
 			 		<span class="red">新状态</span>
 			 		</if>

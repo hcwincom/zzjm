@@ -73,21 +73,23 @@
 						 </eq>
 					</eq>
 					</p>
-			 	<lt name="info.status" value="80">
-					<p>  
-					  <switch name="info.pay_status">
-						 <case value="1">
-						 	<button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >付款提交</button> 
-						 </case>
-						 <case value="2">
-						 	<button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >确认付款</button>
-						 </case>
-						 
-					 </switch> 
-				 
-					 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管还原支付状态</button>
-					</p>
-			 	</lt>	
+					<neq name="info.pay_type" value="3">
+				 	<lt name="info.status" value="80">
+						<p>  
+						  <switch name="info.pay_status">
+							 <case value="1">
+							 	<button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >付款提交</button> 
+							 </case>
+							 <case value="2">
+							 	<button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >确认付款</button>
+							 </case>
+							 
+						 </switch> 
+					 
+						 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管还原支付状态</button>
+						</p>
+				 	</lt>	
+				 	</neq>
 					 
 			 
 					 <p class="notice">不同仓库收货的必须拆分采购单。 已付款和已收货的采购单不能再修改，只能拆分采购单收货。

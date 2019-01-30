@@ -246,20 +246,23 @@
 					  	<td><a href="{$order_user_url}/id/{$vo.uid}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
 						<td>{$vo.order_amount}</td>
 						<td>{$pay_status[$vo.pay_status]|default=$vo.pay_status}
-						
-						<lt name="vo.status" value="80">
-					 
-					  <switch name="vo.pay_status">
-						 <case value="1">
-						 <a class="js-ajax-dialog-btn  btn btn-primary" data-msg="提交付款吗？" href="{:url('pay_do1',['id'=>$vo.id])}">提交付款</a>
-						  
-						 </case>
-						 <case value="2">
-						  <a class="js-ajax-dialog-btn btn btn-primary" data-msg="确认付款吗？" href="{:url('pay_do2',['id'=>$vo.id])}">确认付款</a> 
-						 </case> 
-					 </switch> 
-				 		 
-			 		</lt>
+						 <eq name="vo.pay_type" value="3">
+						 {$pay_types[$vo.pay_type]|default=$vo.pay_type}
+						 <else/> 
+							<lt name="vo.status" value="80">
+						 
+							  <switch name="vo.pay_status">
+								 <case value="1">
+								 <a class="js-ajax-dialog-btn  btn btn-primary" data-msg="提交付款吗？" href="{:url('pay_do1',['id'=>$vo.id])}">提交付款</a>
+								  
+								 </case>
+								 <case value="2">
+								  <a class="js-ajax-dialog-btn btn btn-primary" data-msg="确认付款吗？" href="{:url('pay_do2',['id'=>$vo.id])}">确认付款</a> 
+								 </case> 
+							 </switch> 
+						 		 
+					 		</lt>
+				 		</eq>
 						</td>
 					 
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>

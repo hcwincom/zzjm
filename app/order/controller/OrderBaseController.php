@@ -1457,6 +1457,16 @@ class OrderBaseController extends AdminBaseController
                 } 
             }
         }
+        if(isset($change['pay_status']) && $change['pay_status']==2){
+            //付款后直接确认 
+            $auth='pay1_2'; 
+            $flag='付款直接确认';
+            $status=2;
+            $res=$this->check_review($admin,$auth);
+            if($res){
+                $this->pay_do(['id'=>$info['pid']],$status,$flag);
+            } 
+        }
         $this->success('审核成功');
     }
     

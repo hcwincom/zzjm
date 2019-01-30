@@ -533,18 +533,33 @@ class AdminOrdersupController extends OrderBaseController
     public function status1_2(){
     }
     /**
-     * 采购单准备收货后直接发货完成
+     * 采购单准备收货后直接收货完成
      * @adminMenu(
-     *     'name'   => '采购单准备收货后直接发货完成',
+     *     'name'   => '采购单准备收货后直接收货完成',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 40,
      *     'icon'   => '',
-     *     'remark' => '采购单准备收货后直接发货完成',
+     *     'remark' => '采购单准备收货后直接收货完成',
      *     'param'  => ''
      * )
      */
     public function status22_24(){
+    }
+    /**
+     * 付款后直接确认
+     * @adminMenu(
+     *     'name'   => '付款后直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '付款后直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function pay1_2(){
     }
 }

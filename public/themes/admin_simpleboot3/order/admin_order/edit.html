@@ -73,8 +73,10 @@
 						 </eq>
 					</eq>
 					</p>
+					<neq name="info.pay_type" value="3">
 			 	<lt name="info.status" value="80">
 					<p>  
+					
 					  <switch name="info.pay_status">
 						 <case value="1">
 						 	<button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >用户付款提交</button> 
@@ -84,10 +86,12 @@
 						 </case>
 						 
 					 </switch> 
-				 
+				  
 					 <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >超管还原支付状态</button>
+					
 					</p>
 			 	</lt>
+			 	</neq>
 					 <p class="notice">不同仓库发货的必须拆分订单。 已付款和已发货的订单不能再修改，只能拆分订单发货。
 					 <br/>用户在未发货前可以取消订单，管理员在用户未付款且未发货前可以废弃订单 。
 					 <br/>新添加的订单未提交前视为草稿，只有创建人本人可以编辑，编辑即时生效。若要提交订单，先选择订单状态为提交待审核再编辑保存。其他点击按钮均需审核
