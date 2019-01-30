@@ -466,10 +466,8 @@
  
 </script>
 <script>
-     var msg_url = "{:url('msg/Msgajax/msg_new')}";
-     console.log(msg_url);
-     setInterval(function(){
-    	// $(".pageCont").show();   
+     var msg_url = "{:url('msg/Msgajax/msg_new')}"; 
+     setInterval(function(){    
          $.ajax({
             type: 'POST',
             url: msg_url,
@@ -477,12 +475,10 @@
             data: {},
             success: function (data) {               
                 if (data.code != 1) {
-                    //$(".pageList").remove(); 
-                    //$(".pageCont").hide();
+                   
                     return false;
                 }
-                var list = data.data;
-                console.log(list);
+                var list = data.data; 
                  var tchtml = "";  
                $.each(list,function (index,item) {
                  var timer = timestampToTime(item.time);

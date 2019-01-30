@@ -57,7 +57,27 @@ class AdminOrdersupController extends OrderBaseController
         parent::index();
         return $this->fetch();
     }
-     
+    /**
+     * 我的采购单
+     * @adminMenu(
+     *     'name'   => '我的采购单',
+     *     'parent' => 'index',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 1,
+     *     'icon'   => '',
+     *     'remark' => '我的采购单',
+     *     'param'  => ''
+     * )
+     */
+    public function myorder()
+    {
+        parent::myorder();
+        
+        return $this->fetch();
+        
+    }
+    
    
     /**
      * 采购单添加
@@ -488,7 +508,7 @@ class AdminOrdersupController extends OrderBaseController
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
-     *     'order'  => 20,
+     *     'order'  => 40,
      *     'icon'   => '',
      *     'remark' => '状态更新直接确认',
      *     'param'  => ''
@@ -496,5 +516,35 @@ class AdminOrdersupController extends OrderBaseController
      */
     public function status_review(){
         
+    }
+    /**
+     * 采购单提交直接确认
+     * @adminMenu(
+     *     'name'   => '采购单提交直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '采购单提交直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function status1_2(){
+    }
+    /**
+     * 采购单准备收货后直接发货完成
+     * @adminMenu(
+     *     'name'   => '采购单准备收货后直接发货完成',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '采购单准备收货后直接发货完成',
+     *     'param'  => ''
+     * )
+     */
+    public function status22_24(){
     }
 }

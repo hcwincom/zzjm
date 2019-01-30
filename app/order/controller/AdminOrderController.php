@@ -1,13 +1,9 @@
 <?php
  
 namespace app\order\controller;
-
  
-use think\Db; 
 use app\order\model\OrderModel;
  
-use app\money\model\OrdersInvoiceModel;
-use app\money\model\OrdersPayModel;
 class AdminOrderController extends OrderBaseController
 {
    
@@ -56,6 +52,26 @@ class AdminOrderController extends OrderBaseController
     public function index()
     {
         parent::index();
+        
+        return $this->fetch();
+        
+    }
+    /**
+     * 我的订单
+     * @adminMenu(
+     *     'name'   => '我的订单',
+     *     'parent' => 'index',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 1,
+     *     'icon'   => '',
+     *     'remark' => '我的订单',
+     *     'param'  => ''
+     * )
+     */
+    public function myorder()
+    {
+        parent::myorder();
         
         return $this->fetch();
         
@@ -293,10 +309,7 @@ class AdminOrderController extends OrderBaseController
         
         $flag='仓库发货';
         $data=$this->request->param();
-      
-        if(empty($data['express_no0'][$data['id']])){
-            $this->error('发货前请填写快递单号');
-        }
+       
         $this->status_do($data,22,$flag);
         
     }
@@ -465,7 +478,7 @@ class AdminOrderController extends OrderBaseController
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
-     *     'order'  => 20,
+     *     'order'  => 40,
      *     'icon'   => '',
      *     'remark' => '状态更新直接确认',
      *     'param'  => ''
@@ -473,5 +486,36 @@ class AdminOrderController extends OrderBaseController
      */
     public function status_review(){ 
     }
+    /**
+     * 订单提交直接确认
+     * @adminMenu(
+     *     'name'   => '订单提交直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '订单提交直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function status1_2(){
+    }
+    /**
+     * 订单准备发货后直接仓库发货
+     * @adminMenu(
+     *     'name'   => '订单准备发货后直接仓库发货',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '订单准备发货后直接仓库发货',
+     *     'param'  => ''
+     * )
+     */
+    public function status20_22(){
+    }
+    
     
 }

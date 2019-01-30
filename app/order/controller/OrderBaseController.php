@@ -43,7 +43,7 @@ class OrderBaseController extends AdminBaseController
         //is_back
 //         0无售后，1需要售后，2有售后，3售后结束
     }
-    
+    //订单列表
     public function index()
     { 
          
@@ -219,7 +219,181 @@ class OrderBaseController extends AdminBaseController
         
         return $this->fetch();
     }
-     
+    //我的订单列表
+    public function myorder()
+    {
+        
+        $table=$this->table;
+        $m=$this->m;
+        $admin=$this->admin;
+        $data=$this->request->param();
+        $where=[];
+         
+        //店铺,分店只能看到自己的数据，总店可以选择店铺
+        if($admin['shop']==1){
+            if(empty($data['shop'])){
+                $data['shop']=0;
+            }else{
+                $where['p.shop']=['eq',$data['shop']];
+            }
+        }else{
+            $where['p.shop']=['eq',$admin['shop']];
+            $this->where_shop=$admin['shop']; 
+        }
+        $res=zz_shop($admin, $data, $where,'p.shop');
+        $data=$res['data'];
+        $where=$res['where'];
+        $this->where_shop=$res['where_shop'];
+        
+        //状态
+        if(empty($data['status'])){
+            $data['status']=0;
+        }else{
+            $where['p.status']=['eq',$data['status']];
+        }
+        //订单类型
+        if(empty($data['order_type'])){
+            $data['order_type']=0;
+        }else{
+            $where['p.order_type']=['eq',$data['order_type']];
+        }
+        //分类
+        if(empty($data['order_type'])){
+            $data['order_type']=0;
+        }else{
+            $where['p.order_type']=['eq',$data['order_type']];
+        }
+        
+        //添加人
+        if(empty($data['aid'])){
+            $data['aid']=0;
+        }else{
+            $where['p.aid']=['eq',$data['aid']];
+        }
+        
+        //所属公司
+        if(empty($data['company'])){
+            $data['company']=0;
+        }else{
+            $where['p.company']=['eq',$data['company']];
+        }
+        //付款方式
+        if(empty($data['paytype'])){
+            $data['paytype']=0;
+        }else{
+            $where['p.paytype']=['eq',$data['paytype']];
+        }
+        //付款类型
+        if(empty($data['pay_type'])){
+            $data['pay_type']=0;
+        }else{
+            $where['p.pay_type']=['eq',$data['pay_type']];
+        }
+        
+        //省
+        if(empty($data['province'])){
+            $data['province']=0;
+        }else{
+            $where['p.province']=['eq',$data['province']];
+        }
+        //市
+        if(empty($data['city'])){
+            $data['city']=0;
+        }else{
+            $where['p.city']=['eq',$data['city']];
+        }
+        
+        //类型
+        if(empty($data['type'])){
+            $data['type']=0;
+        }else{
+            $where['p.type']=['eq',$data['type']];
+        }
+        //查询字段
+        $types=$this->search;
+        //搜索类型
+        $search_types=config('search_types');
+        $res=zz_search_param($types, $search_types,$data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
+        
+        //时间类别
+        $times=config('order_time');
+        $res=zz_search_time($times, $data, $where);
+        $data=$res['data'];
+        $where=$res['where'];
+        //客户类型
+        if(empty($data['cid'])){
+            $data['cid']=0;
+        }else{
+            $where['custom.cid']=['eq',$data['cid']];
+        }
+        $utable=$this->utable;
+        //关联表
+        $join=[
+            ['cmf_'.$utable.' custom','p.uid=custom.id','left'],
+            ['cmf_'.$table.'_aid oaid','p.id=oaid.pid and oaid.aid='.$admin['id']],
+            
+        ];
+        $where['oaid.aid']=$admin['id'];
+        $field='p.*,custom.name as custom_name';
+         
+        $list0=$m
+        ->alias('p')
+        ->field('p.id')
+        ->join($join)
+        ->where($where)
+        ->order('p.sort desc,p.time desc')
+        ->paginate();
+        
+        // 获取分页显示
+        $page = $list0->appends($data)->render();
+        
+        $ids=[];
+        foreach($list0 as $k=>$v){
+            $ids[$v['id']]=$v['id'];
+            
+        }
+        $list=$m
+        ->alias('p')
+        ->join($join)
+        ->where('p.id','in',$ids)
+        ->order('p.sort desc,p.id asc')
+        ->column($field);
+        
+        if(!empty($list)){
+            $ogtable=$this->ogtable;
+            $goods=Db::name($ogtable)->where('oid','in',$ids)
+            ->column('id,oid,goods,goods_name,goods_code,goods_pic,price_sale,price_real,num,pay');
+            foreach($goods as $k=>$v){
+                $list[$v['oid']]['infos'][]=$v;
+            }
+        }
+        
+        //公司
+        $where=[
+            'status'=>2,
+        ];
+        if(empty($data['shop'])){
+            $where['shop']=($admin['shop']==1)?2:$admin['shop'];
+        }else{
+            $where['shop']=$data['shop'];
+        }
+        $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column('id,name');
+        $this->assign('companys',$companys);
+        
+        $this->assign('page',$page);
+        $this->assign('list',$list);
+        
+        $this->assign('data',$data);
+        $this->assign('types',$types);
+        $this->assign('times',$times);
+        $this->assign("search_types", $search_types);
+        
+        $this->cates(1);
+        
+        return $this->fetch();
+    }
    
     /**
      * 订单添加 
@@ -1244,8 +1418,45 @@ class OrderBaseController extends AdminBaseController
         zz_action($data_action,['aid'=>$info['aid']]);
         
         $m->commit();
-        //订单准备发货后直接发货，采购单准备收货后直接收货,暂时不做
-        
+        //订单准备发货后直接发货，采购单准备收货后直接收货 
+       
+        if(isset($change['status'])){
+            $status=0;
+            switch($change['status']){
+                case 2:
+                    //提交直接确认
+                    $auth='status1_2';
+                    $action='status_do2';
+                    $flag='直接确认';
+                    $status=2;
+                    break;
+                case 22:
+                    //准备发货直接仓库发货
+                    if($table=='order'){
+                        $auth='status20_22';
+                        $action='status_do22';
+                        $flag='直接仓库发货';
+                        $status=22;
+                    }
+                   
+                    break;
+                case 24:
+                    //准备收货直接收货完成
+                    if($table=='ordersup'){
+                        $auth='status22_24';
+                        $action='status_do24';
+                        $flag='直接收货完成';
+                        $status=24;
+                    }
+                    break;
+            }
+            if(!empty($status)){ 
+                $res=$this->check_review($admin,$auth);
+                if($res){
+                    $this->status_do(['id'=>$info['pid']],$status,$flag);
+                } 
+            }
+        }
         $this->success('审核成功');
     }
     
@@ -1535,17 +1746,18 @@ class OrderBaseController extends AdminBaseController
             if($info['dsc']!=$dsc){
                 $content['dsc']=$dsc;
             }
-            if($info['express_no']!=$dsc){
-                $content['express_no']=$dsc;
+            if($info['express_no']!=$express_no){
+                $content['express_no']=$express_no;
             }
         }
         
         switch ($status){
             case 1:
-                //手动待发货
+                //提交订单
                 $content['status']=2;
                 break;
             case 2:
+                //确认订单
                 //判断是先付款后发货还是先发货
                 $pay_type=isset($content['pay_type'])?$content['pay_type']:$info['pay_type'];
                 if($pay_type==1){
@@ -1563,6 +1775,7 @@ class OrderBaseController extends AdminBaseController
                 $content['status']=22;
                 //检查库存
                 if($table=='order'){
+                    
                     $res=$m->order_store($id);
                     if($res!==1){
                         $this->error($res,$url_error);
@@ -1576,6 +1789,9 @@ class OrderBaseController extends AdminBaseController
                 $content['send_time']=$time;
                 //检查库存
                 if($table=='order'){
+                    if(empty($info['express_no']) && empty($content['express_no'])){
+                        $this->error('快递单号未填写',$url_error);
+                    }
                     $res=$m->order_store($id);
                     if($res!==1){
                         $this->error($res,$url_error);
@@ -1639,7 +1855,7 @@ class OrderBaseController extends AdminBaseController
         zz_action($data_action,$admin);
         
         $m_edit->commit();
-        $this->redirect('edit_review',['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+       
         $rule='status_review';
         $res=$this->check_review($admin,$rule);
         if($res){
