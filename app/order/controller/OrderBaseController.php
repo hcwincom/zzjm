@@ -334,6 +334,7 @@ class OrderBaseController extends AdminBaseController
             'dsc'=>$data['dsc'],
             'express_no'=>$data['express_no'],
             'create_time'=>$time,
+            'time'=>$time,
             'sort'=>5,
             'ok_break'=>$data['ok_break'],
         ];
@@ -1477,7 +1478,175 @@ class OrderBaseController extends AdminBaseController
         } */
         $this->success('已提交修改');
     }
-    
+    /* 改变订单状态 */
+    public function status_do($data,$status,$flag){
+        
+        
+        $m=$this->m;
+        $table=$this->table;
+        
+        $id=intval($data['id']);
+        $url_error=url('edit',['id'=>$id]);
+        $info=$m->get_one(['id'=>$id]);
+        if(empty($info)){
+            $this->error('数据不存在',$url_error);
+        }
+        $time=time();
+        $admin=$this->admin;
+        //其他店铺的审核判断
+        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
+            $this->error('不能编辑其他店铺的信息',$url_error);
+        }
+        //有还原权限的为最高权限
+        $res=$this->check_review($admin,'status_do0');
+        if(!$res){
+            //是否有权查看
+            $res=$m->order_edit_auth($info,$admin);
+            if($res!==1){
+                $this->error($res);
+            }
+        }
+        
+        $update=[
+            'pid'=>$info['id'],
+            'aid'=>$admin['id'],
+            'atime'=>$time,
+            'table'=>$table,
+            'url'=>url('edit_info','',false,false),
+            'rstatus'=>1,
+            'rid'=>0,
+            'rtime'=>0,
+            'shop'=>$admin['shop'],
+        ];
+        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
+        
+        if($status>0 && $info['status']!=$status){
+            $this->error('状态信息错误',$url_error);
+        }
+        if(isset($data['express_no'])){
+            $dsc=$data['dsc'];
+            $express_no=$data['express_no'];
+        }elseif(isset($data['dsc0'][$info['id']])){
+            $dsc=$data['dsc0'][$info['id']];
+            $express_no=$data['express_no0'][$info['id']];
+        }
+        
+        if(isset($express_no)){
+            if($info['dsc']!=$dsc){
+                $content['dsc']=$dsc;
+            }
+            if($info['express_no']!=$dsc){
+                $content['express_no']=$dsc;
+            }
+        }
+        
+        switch ($status){
+            case 1:
+                //手动待发货
+                $content['status']=2;
+                break;
+            case 2:
+                //判断是先付款后发货还是先发货
+                $pay_type=isset($content['pay_type'])?$content['pay_type']:$info['pay_type'];
+                if($pay_type==1){
+                    $content['status']=10;
+                }else{
+                    $content['status']=20;
+                }
+                break;
+            case 10:
+                //手动待发货
+                $content['status']=20;
+                break;
+            case 20:
+                //准备发货
+                $content['status']=22;
+                //检查库存
+                if($table=='order'){
+                    $res=$m->order_store($id);
+                    if($res!==1){
+                        $this->error($res,$url_error);
+                    }
+                }
+                
+                break;
+            case 22:
+                //仓库发货
+                $content['status']=24;
+                $content['send_time']=$time;
+                //检查库存
+                if($table=='order'){
+                    $res=$m->order_store($id);
+                    if($res!==1){
+                        $this->error($res,$url_error);
+                    }
+                }
+               
+                break;
+            case 24:
+                // 点击“确认收货”，订单状态为已收货，若已支付，则订单状态为已完成。
+                $content['accept_time']=$time;
+                $content['status']=26;
+                if($info['pay_status']==3){
+                    $content['completion_time']=$time;
+                    $content['status']=30;
+                }
+                break;
+            case 30:
+                //退货
+                $content['status']=70;
+                break;
+            case 0:
+                //超管编辑
+                $content['status']=1;
+                break;
+            default:
+                $this->error('操作错误',$url_error);
+        }
+        //淘宝订单的不能线下先收款，和到货
+        if(isset($content['status']) && $info['order_type']==3){
+            //淘宝订单只能点击准备发货和确认发货，暂时不做
+        }
+        
+        //保存更改
+        $m_edit=Db::name('edit');
+        $m_edit->startTrans();
+        $eid=$m_edit->insertGetId($update);
+        if($eid>0){
+            $data_content=[
+                'eid'=>$eid,
+                'content'=>json_encode($content),
+            ];
+            Db::name('edit_info')->insert($data_content);
+        }else{
+            $m_edit->rollback();
+            $this->error('保存数据错误，请重试',$url_error);
+        }
+        
+        //记录操作记录
+        $data_action=[
+            'aid'=>$admin['id'],
+            'time'=>$time,
+            'ip'=>get_client_ip(),
+            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
+            'table'=>($this->table),
+            'type'=>'edit',
+            'pid'=>$info['id'],
+            'link'=>url('edit_info',['id'=>$eid]),
+            'shop'=>$admin['shop'],
+        ];
+        
+        zz_action($data_action,$admin);
+        
+        $m_edit->commit();
+        $this->redirect('edit_review',['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        $rule='status_review';
+        $res=$this->check_review($admin,$rule);
+        if($res){
+            $this->redirect('edit_review',['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
+        }
+        $this->success('已提交修改');
+    }
     /**
      * 废弃 
      */
