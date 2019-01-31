@@ -1560,7 +1560,7 @@ class CustomBaseController extends AdminInfo0Controller
             'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>url('tel_edit_info',['id'=>$eid]),
+            'link'=>url('goods_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
         
