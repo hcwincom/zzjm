@@ -70,6 +70,7 @@ class OldController extends AdminBaseController
             '订单'=>url('order'), 
             '采购单'=>url('ordersup'),  
             '仓库还原,清空库存，出入库记录，料位，编辑记录,售后单,考勤和事件'=>url('store_clear'),
+            '清除所有客户和供货商的数据,订单采购单数据，出入库记录(基本信息，联系人，付款账号,和管理员的关联)'=>url('custom_clear'),
             '清空菜单和权限'=>url('menu_clear'),
            
         ];
@@ -1429,6 +1430,69 @@ class OldController extends AdminBaseController
          
         //产品关联数据
         
+        echo ('end');
+    }
+    /**
+     *出入库记录，订单采购单相关数据，客户供应商相关数据都清空。
+     */
+    public function custom_clear(){
+        set_time_limit(300);
+        
+        //订单主体
+        $m_new=Db::name('custom');
+        
+        //客户数据
+        $m_new->execute('truncate table cmf_custom');
+        $m_new->execute('truncate table cmf_custom_aid');
+        $m_new->execute('truncate table cmf_custom_goods');
+        //供应商数据
+        $m_new->execute('truncate table cmf_supplier');
+        $m_new->execute('truncate table cmf_supplier_aid');
+        $m_new->execute('truncate table cmf_supplier_goods');
+        //付款和联系人
+        $m_new->execute('truncate table cmf_tel');
+        $m_new->execute('truncate table cmf_account');
+        //仓库出入库记录数据 
+        $m_new->execute('truncate table cmf_store_in'); 
+      
+        //订单的
+        $m_new->execute('truncate table cmf_order');
+        $m_new->execute('truncate table cmf_order_aid');
+        $m_new->execute('truncate table cmf_order_goods'); 
+        //售后
+        $m_new->execute('truncate table cmf_orderback');
+        $m_new->execute('truncate table cmf_orderback_goods');
+      
+        //询盘
+        $m_new->execute('truncate table cmf_orderq');
+        $m_new->execute('truncate table cmf_orderq_custom');
+        $m_new->execute('truncate table cmf_orderq_goods'); 
+        //采购订单的
+        $m_new->execute('truncate table cmf_ordersup');
+        $m_new->execute('truncate table cmf_ordersup_aid');
+        $m_new->execute('truncate table cmf_ordersup_goods'); 
+        //采购和订单一起,发票和付款
+        $m_new->execute('truncate table cmf_orders_invoice');
+        $m_new->execute('truncate table cmf_orders_pay');
+        //订单结算
+        $m_new->execute('truncate table cmf_orderpays');
+        $m_new->execute('truncate table cmf_orderpays_oid');
+        $m_new->execute('truncate table cmf_orderpays_pay');
+        //运费结算
+        $m_new->execute('truncate table cmf_freightpays');
+        $m_new->execute('truncate table cmf_freightpays_oid');
+        $m_new->execute('truncate table cmf_freightpays_pay');
+        //编辑和信息
+        $m_new->execute('truncate table cmf_edit');
+        $m_new->execute('truncate table cmf_edit_info');
+        $m_new->execute('truncate table cmf_msg');
+        $m_new->execute('truncate table cmf_msg_txt');
+        
+        $m_new->execute('truncate table cmf_action');
+        $m_new->execute('truncate table cmf_attendance_day');
+        $m_new->execute('truncate table cmf_attendance_apply'); 
+        $m_new->execute('truncate table cmf_event');
+        $m_new->execute('truncate table cmf_event_uid'); 
         echo ('end');
     }
     /**
