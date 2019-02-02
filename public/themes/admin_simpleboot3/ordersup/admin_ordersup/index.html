@@ -1,32 +1,36 @@
 <include file="public@header" />
 <style>
 .order10 {
-	background: #f21534;
+	background: #f81233;
 }
 .order9 {
-	background: #999;
+	background: rgba(248,18,51,0.9);
 }
 .order8 {
-	background: #2057f4;
-	color: #fff;
+	background: rgba(0,128,0,0.9);
+}
+.order7 {
+	background: rgba(234,242,22,0.9);
 }
 .order6{
-	background: #ff7733;
+	background: rgba(27,76,237,0.9);
+	color: #121212;
 }
 .order5 {
-	background: #ebe41f;
+	background: rgba(27,76,237,0.8);
 }
 .order4 {
-	background: #3deb2b;
+	background: rgba(248,18,51,0.8);
 }
 .order3{
-	background: #26e9ab;
+	background: rgba(248,18,51,0.7);
 }
 .order2{
-	background: #f62c74;
+	background: rgba(234,242,22,0.6);
 }
 .order1{
-	background: #020202;
+	background: rgba(27,76,237,0.4);
+	
 }
 </style>
 </head>
@@ -36,12 +40,12 @@
 		<ul class="nav nav-tabs"> 
 		 
 		<include file="public@nav" />
-	  
+	 
 		</ul>
 		
 		 <form class="well form-inline margin-top-20" method="post"
 			action="">
-			 <input type="hidden" name="page" value="1"/>
+			<input type="hidden" name="page" value="1"/>
 			状态: 
 			<select class="form-control" name="status" >
 				<option value='0'>全部</option> 
@@ -74,7 +78,7 @@
 			<select class="form-control" name="aid" id="aid">
 				<option value='0'>全部</option> 
 				 <foreach name="aids" item="vo" k="key">
-				<option class="shop shop{$vo.shop}" value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo.name}
+				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp; 
@@ -83,15 +87,22 @@
 			<select class="form-control" name="company" id="company">
 				<option value='0'>所属公司</option> 
 				 <foreach name="companys" item="vo" k="key">
-				<option class="shop shop{$vo.shop}" value="{$key}" <if condition="$key eq $data.company">selected</if>>{$vo.name}
+				<option value="{$key}" <if condition="$key eq $data.company">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
 			
-			<select class="form-control" name="paytype" id="paytype">
+			<select class="form-control" name="pay_type" id="pay_type">
 				<option value='0'>付款类型</option> 
+				 <foreach name="pay_types" item="vo" k="key">
+				<option value="{$key} " <if condition="$key eq $data.pay_type">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<select class="form-control" name="paytype" id="paytype">
+				<option value='0'>付款账号</option> 
 				 <foreach name="paytypes" item="vo" k="key">
-				<option class="shop shop{$vo.shop}" value="{$key} " <if condition="$key eq $data.paytype">selected</if>>{$vo.name}
+				<option value="{$key} " <if condition="$key eq $data.paytype">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -103,9 +114,9 @@
 				  </select>	 
 			<br/>
 			<select class="form-control" name="cid" >
-				<option value='0'>客户类型</option> 
+				<option value='0'>{$uflag}类型</option> 
 				 <foreach name="custom_cates" item="vo" k="key">
-				<option value="{$key}" <if condition="$key eq $data.custom_cate">selected</if>>{$vo}
+				<option value="{$key}" <if condition="$key eq $data.cid">selected</if>>{$vo}
 				</option>
 				</foreach>
 			</select> &nbsp;&nbsp;
@@ -130,8 +141,7 @@
 			--
 			<input class="js-datetime form-control" type="text" id="datetime2" name="datetime2" value="{$data.datetime2}">
 			
-			<input type="submit" class="btn btn-primary" value="搜索" />
-				 
+			<input type="submit" class="btn btn-primary" value="搜索" /> 
 		</form>
 		 
 		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
@@ -178,7 +188,7 @@
 						<td class='id'> 
 						{$vo.id} 
 						<if condition="$vo.status eq 30 ||  $vo.status eq 26"> 
-						<a href="{:url('orderback/AdminOrderback/add',['oid'=>$vo.id,'order_type'=>1])}">申请售后</a>
+						<a href="{:url('orderback/AdminOrderback2/add',['oid'=>$vo.id])}">申请售后</a>
 						</if>
 						</td>
 						<td > 
@@ -195,7 +205,7 @@
 					 	
 					 	<td>{$vo.express_no}</td>
 					  	<td>{$aids[$vo['aid']]['name']|default=$vo['aid']}</td>
-					  	<td>{$companys[$vo['company']]['name']|default=$vo['company']}</td>
+					   	<td>{$companys[$vo['company']]|default=$vo['company']}</td>
 					  	<td  class="clickInfo"> 
 							<div style="position:relative;" class="goInfo" data-width="0">
 								{$vo.goods_num}
@@ -231,18 +241,67 @@
 							</div>
 						</notempty>
 						</td>
-					  	<td>{$paytypes[$vo['paytype']]['name']|default=$vo['paytype']}</td>
+					  	<td>{$paytypes[$vo['paytype']]|default=$vo['paytype']}</td>
 					   
 					  	<td><a href="{$order_user_url}/id/{$vo.uid}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
 						<td>{$vo.order_amount}</td>
-						<td>{$pay_status[$vo.pay_status]|default=$vo.pay_status}</td>
+						<td>{$pay_status[$vo.pay_status]|default=$vo.pay_status}
+						 <eq name="vo.pay_type" value="3">
+						 {$pay_types[$vo.pay_type]|default=$vo.pay_type}
+						 <else/> 
+							<lt name="vo.status" value="80">
+						 
+							  <switch name="vo.pay_status">
+								 <case value="1">
+								 <a class="js-ajax-dialog-btn  btn btn-primary" data-msg="提交付款吗？" href="{:url('pay_do1',['id'=>$vo.id])}">提交付款</a>
+								  
+								 </case>
+								 <case value="2">
+								  <a class="js-ajax-dialog-btn btn btn-primary" data-msg="确认付款吗？" href="{:url('pay_do2',['id'=>$vo.id])}">确认付款</a> 
+								 </case> 
+							 </switch> 
+						 		 
+					 		</lt>
+				 		</eq>
+						</td>
 					 
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
 					 
 						<td>{$statuss[$vo.status]|default=$vo.status}
-							<eq name="vo.is_real" value="2">-已拆分</eq> 
-						</td>
 						 
+						<eq name="vo.is_real" value="1">
+						<eq name="vo.order_type" value="1">
+					 	 <present name="url_status[$vo.status][1]">
+							 &nbsp;&nbsp;&nbsp;
+								<a class="js-ajax-dialog-btn btn btn-primary" data-msg="{$url_status[$vo.status][0]}吗？" href="{$url_status[$vo.status][1]}/id/{$vo.id}" target="{$zztarget['list']}" >
+								 	{$url_status[$vo.status][0]}
+								 </a>
+							</present>
+						   
+						<else/>
+						 	 <lt name="vo.status" value="10"> 
+							 	 <present name="url_status[$vo.status][1]">
+							 	 &nbsp;&nbsp;&nbsp;
+							 	 <a class="js-ajax-dialog-btn btn btn-primary" data-msg="{$url_status[$vo.status][0]}吗？" href="{$url_status[$vo.status][1]}/id/{$vo.id}" target="{$zztarget['list']}" >
+								 	{$url_status[$vo.status][0]}
+								 </a>
+								  </present>
+						 	 </lt>
+						</eq>
+						<else/>
+						 &nbsp;&nbsp;&nbsp;已拆分
+							 <lt name="vo.status" value="10"> 
+							 	 <present name="url_status[$vo.status][1]">
+							 	 &nbsp;&nbsp;&nbsp;
+							 	 <a class="js-ajax-dialog-btn btn btn-primary" data-msg="{$url_status[$vo.status][0]}吗？" href="{$url_status[$vo.status][1]}/id/{$vo.id}" target="{$zztarget['list']}" >
+								 	{$url_status[$vo.status][0]}
+								 </a>
+								  </present>
+							 </lt>
+						</eq>
+					 
+						</td>
+					  
 					</tr>
 				 
 					</foreach>
@@ -253,7 +312,7 @@
 		</form>
 	 	<div class="pagination">{$page}</div>
 	 	<p class="notice">
-	 	 sort排序，待发货10，已准备发货9，管理员有改动8，员工有改动7，待确认货款5，待付款4，退货退款中3，提交待确认2，未提交1，其他0 
+	 	sort排序，转运营10，已准备收货9，已发货8，待发货7，待确认和待提交6，付款待确认3，待付款2，其他按时间顺序排
 	 	</p>
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>

@@ -4,6 +4,8 @@ namespace app\store\model;
 
 use think\Model;
 use think\Db;
+use app\admin\model\UserModel;
+use app\msg\model\MsgModel;
 class StoreGoodsModel extends Model
 {
     /**
@@ -272,6 +274,33 @@ class StoreGoodsModel extends Model
         }   
         flock($fp,LOCK_UN);
         fclose($fp);
+        //出库操作要检查安全库存
+        if($info['num']<0 ){
+            $where=[
+                'sg.goods'=>$info['goods'],
+                'sg.shop'=>$info['shop'],
+                'sg.store'=>['eq',$info['store']],
+            ];
+            $safe=$this
+            ->alias('sg')
+            ->where($where)
+            ->field('sg.id,sg.safe,sg.num')
+            ->find();
+            if($safe['safe']<=$safe['num']){
+                $store_name=Db::name('store')->where('id',$info['store'])->value('name');
+                $goods=Db::name('goods')->where('id',$info['goods'])->field('id,name,code')->find();
+                if(!empty($goods) && !empty($store_name)){ 
+                    //提示库存不足,采购添加权限 
+                    $m_msg=new MsgModel();
+                    $data=[
+                        'dsc'=>'仓库'.$store_name.'产品'.$goods['code'].$goods['name'].'库存要补充', 
+                        'link'=>url('store/AdminGoods/index',['type1'=>'code','name'=>$goods['code'],'shop'=>$info['shop']]),
+                        'shop'=>$info['shop'],
+                    ];
+                    $m_msg->auth_send('ordersup/AdminOrdersup/add_do',$data);
+                }
+            }
+        }
         if($row===2){
             //返回料位
             if($num_ok==1){ 
@@ -443,12 +472,14 @@ class StoreGoodsModel extends Model
     public function box_num($store,$goods,$shop){
         $m_box=Db::name('store_box');
         $time=time();
+        //先得到更新的仓库的料位数
         $where_box=[
             'status'=>2,
             'store'=>$store,
             'goods'=>$goods
         ]; 
         $box_num=$m_box->where($where_box)->count();
+        //更新仓库的料位数
         $where_sg=[
             'store'=>$store,
             'goods'=>$goods 
@@ -458,16 +489,18 @@ class StoreGoodsModel extends Model
             'time'=>$time,
         ];
         $this->where($where_sg)->update($update);
-        //总库存料位
+        //总库存料位更新
         $where_box=[
             'status'=>2,
             'shop'=>$shop,
-            'goods'=>$goods
+            'goods'=>$goods,
+            'store'=>['gt',0],
         ];
         $box_num=$m_box->where($where_box)->count();
         $where_sg=[
             'shop'=>$shop,
-            'goods'=>$goods
+            'goods'=>$goods,
+            'store'=>0,
         ];
         $update=[
             'box_num'=>$box_num,

@@ -93,10 +93,12 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
+						<notempty name="shops">
 						 <th>所属店铺</th> 
+						 </notempty>
 						<th>{$flag}名</th> 
 						 <th>{$flag}编码</th> 
-						 <th>{$flag}类型</th> 
+					 
 						<th>创建人</th>
 						<th>创建时间</th>
 						<th>审核人</th>
@@ -119,10 +121,12 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td>{$vo.sname|default=$vo.shop}</td>
+						<notempty name="shops">
+						<td>{$shops[$vo.shop]|default=$vo.shop}</td>
+						</notempty>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 						 <td>{$vo.code}</td>
-						 <td>{$company_type[$vo.type]}</td>
+						 
 						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">

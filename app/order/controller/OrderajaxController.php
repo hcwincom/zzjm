@@ -5,6 +5,7 @@ namespace app\order\controller;
 use app\common\controller\AdminBase0Controller;  
 use think\Db; 
 use app\order\model\OrderModel;
+use barcode\Barcode;
   
 class OrderajaxController extends AdminBase0Controller
 {
@@ -30,7 +31,7 @@ class OrderajaxController extends AdminBase0Controller
         $name       = strtolower('goods/AdminGoodsauth/price_in_get'); 
         $is_auth=$authObj->check($admin['id'], $name);
         
-        $goods=Db::name('goods')->field('id,name,code,pic,price_in,price_sale,type,weight1,size1')->where($where)->find();
+        $goods=Db::name('goods')->field('id,name,code,pic,price_in,price_sale,type,weight1,size1,shop')->where($where)->find();
         if($is_auth==false){
             $goods['price_in']='--';
         }
@@ -58,23 +59,38 @@ class OrderajaxController extends AdminBase0Controller
              ]; 
          }
          if($type==1){
-             //添加客户用名
-             if(empty($uid)){
-                 $tmp=null;
-             }else{
-                 $where=['uid'=>$uid,'goods'=>$id];
-                 $tmp=Db::name('custom_goods')->where($where)->find();
+            
+             $m_ugoods=Db::name('custom_goods');
+         }else{
+             $m_ugoods=Db::name('supplier_goods');
+         }
+         //添加客户用名
+         if(empty($uid)){
+             $tmp=null;
+         }else{
+             $where=['uid'=>$uid,'goods'=>$id];
+             $tmp=$m_ugoods->where($where)->find();
+            
+         }
+         if(empty($tmp)){
+             $goods['goods_uname']='';
+             $goods['goods_ucate']='';
+             $goods['price_pay']=$goods['price_sale'];
+             //添加对应产品
+             if($uid>0){
+                 $data_uadd=[
+                     'uid'=>$uid,
+                     'goods'=>$id,
+                     'shop'=>$goods['shop'],
+                     'price'=>$goods['price_sale']
+                 ];
+                 $m_ugoods->insert($data_uadd);
              }
-             if(empty($tmp)){
-                 $goods['goods_uname']='';
-                 $goods['goods_ucate']='';
-                 $goods['price_pay']=$goods['price_sale'];
-             }else{
-                 $goods['goods_uname']=$tmp['name'];
-                 $goods['goods_ucate']=$tmp['cate'];
-                 $goods['price_pay']=$tmp['price'];
-                 $goods['dsc']=$tmp['dsc'];
-             }
+         }else{
+             $goods['goods_uname']=$tmp['name'];
+             $goods['goods_ucate']=$tmp['cate'];
+             $goods['price_pay']=$tmp['price'];
+             $goods['dsc']=$tmp['dsc'];
          }
          
         $this->success('ok','',$goods);
@@ -135,8 +151,8 @@ class OrderajaxController extends AdminBase0Controller
             $m=Db::name('supplier');
             $m_ugoods=Db::name('supplier_goods'); 
         }
-        $field='invoice_type,tax_point,freight,announcement,paytype,pay_type,receiver,payer';
-        $info=$m->field($field)->where($where_custom)->find();
+        
+        $info=$m->where($where_custom)->find();
         //联系人 
         $field='p.site,p.id,p.name,p.mobile,p.phone,p.street,p.postcode'.
             ',p.province,p.city,p.area'.
@@ -162,6 +178,36 @@ class OrderajaxController extends AdminBase0Controller
         ->alias('p')
         ->join('cmf_goods goods','goods.id=p.goods')
         ->where('p.uid',$uid)
+        ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
+        $this->success('ok','',$info);
+    }
+    //根据客户得到联系人
+    public function get_ugoods(){
+        
+        $admin=$this->admin;
+        $uid=$this->request->param('uid',0,'intval');
+        $type=$this->request->param('type',1,'intval');
+        $name=$this->request->param('name','');
+        
+        $where=['p.uid'=>$uid]; 
+        if($admin['shop']>1){ 
+            $where['p.shop']=$admin['shop'];
+        }
+        if(!empty($name)){
+            $where['p.name|goods.name']=['like','%'.$name.'%']; 
+        }
+        //付款方式,发票信息
+        if($type==1){ 
+            $m_ugoods=Db::name('custom_goods');
+        }else{ 
+            $m_ugoods=Db::name('supplier_goods');
+        } 
+        //供应产品 
+        $info=$m_ugoods
+        ->alias('p')
+        ->join('cmf_goods goods','goods.id=p.goods')
+        ->where($where)
+        ->order('goods.code asc')
         ->column('p.goods,p.name,p.cate,p.num,p.price,goods.name as goods_name,goods.code as goods_code');
         $this->success('ok','',$info);
     }
@@ -288,6 +334,55 @@ class OrderajaxController extends AdminBase0Controller
        
         
         $this->success('ok','',$nums);
+    }
+    //订单条码
+    public function barcode(){
+      
+        $text=$this->request->param('sn','');
+        
+        require_once(EXTEND_PATH.'barcode/class/BCGFontFile.php');
+        require_once(EXTEND_PATH.'barcode/class/BCGColor.php');
+        require_once(EXTEND_PATH.'barcode/class/BCGDrawing.php');
+        
+        // Including the barcode technology
+        require_once(EXTEND_PATH.'barcode/class/BCGcode39.barcode.php');
+        
+        // Loading Font
+        $font = new \BCGFontFile(EXTEND_PATH.'barcode/font/Arial.ttf', 12);
+        
+        
+        // The arguments are R, G, B for color.
+        $color_black = new \BCGColor(0, 0, 0);
+        $color_white = new \BCGColor(255, 255, 255);
+        
+        $drawException = null;
+        try {
+            $code = new \BCGcode39();
+            $code->setScale(1); // Resolution
+            $code->setThickness(30); // Thickness
+            $code->setForegroundColor($color_black); // Color of bars
+            $code->setBackgroundColor($color_white); // Color of spaces
+            $code->setFont($font); // Font (or 0)
+            $code->parse($text); // Text
+        } catch(\Exception $exception) {
+            $drawException = $exception;
+        }
+         
+        $drawing = new \BCGDrawing('', $color_white);
+        if($drawException) {
+            $drawing->drawException($drawException);
+        } else {
+            $drawing->setBarcode($code);
+            $drawing->draw();
+        }
+        
+        // Header that says it is an image (remove it if you save the barcode to a file)
+        header('Content-Type: image/png');
+        header('Content-Disposition: inline; filename="barcode.png"');
+        
+        // Draw (or save) the image into PNG format.
+        $drawing->finish(\BCGDrawing::IMG_FORMAT_PNG);
+        
     }
     
 }

@@ -1,0 +1,133 @@
+<include file="public@header" />
+  
+</head>
+<body>
+
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs"> 
+			<include file="operation@admin_operation_cate:nav" />
+		</ul>
+		 
+		 
+		<form method="post" class="js-ajax-form margin-top-20" action="">
+			<div class="table-actions">
+				<button type="button" class="hideall btn-sm btn-primary ">全部收起</button>
+				<button type="button" class="edit btn-sm btn-primary  ">查看详情</button>
+				<button type="button" class="add btn-sm btn-primary  ">添加子类</button>
+			 	<p class='error'></p>
+			</div>
+
+			<table class="table table-hover table-bordered table-list">
+				<thead>
+					<tr>
+					 	<th width="15">
+					 	<label> <input type="checkbox"
+								class="js-check-all" data-direction="x"
+								data-checklist="js-check-x">
+						</label>
+						</th>
+						<th width="100">ID</th>
+						 
+						<th>分类名</th> 
+					 
+						<th>排序</th>
+						<th>状态</th>
+						 
+					</tr>
+				</thead>
+				<tbody>
+					<foreach name="list" item="vv">
+					<foreach name="vv" item="vo">
+					<tr class="cate cate{$vo.fid}">
+						<td>
+							<input type="checkbox" class="js-check"
+							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+							value="{$vo.id}">
+						</td>
+						<td class='id'>
+						<eq name='vo.fid' value='0'>
+						<i class='fa fa-chevron-down'></i>
+						<else/>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						</eq>
+						{$vo.id}
+						</td>
+						<td>{$vo.name}</td>
+					 
+						<td>{$vo.sort}</td>
+						<td>{$statuss[$vo.status]}</td>
+						 
+					</tr>
+					</foreach>
+					</foreach>
+				</tbody>
+
+			</table>
+
+		</form>
+	 <p class="info">本页数据按一级分类排序</p>
+	</div>
+	 
+	<script src="__STATIC__/js/admin.js"></script>
+<script>
+ var id=0;
+ var fid=0;
+ var hideall=0;
+ 
+$('.cate0 .id').click(function(){
+ 
+	var fid=$(this).parents('tr').find('.js-check').val();
+	var $fa=$(this).children('.fa');
+	if($fa.hasClass('fa-chevron-down')){ 
+		$('.cate'+fid).hide();
+		$fa.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+	}else{
+		$('.cate'+fid).show();
+		$fa.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+	}  
+	return false;
+});
+ 
+$('.hideall').click(function(){
+	var $fa;
+	 if(hideall==0){
+		 hideall=1;
+		 $('.cate').hide();
+		 $('.cate0').show();
+		 $('.cate0 .id').each(function(){
+			 $fa=$(this).children('.fa'); 
+			 $fa.removeClass('fa-chevron-down').addClass('fa-chevron-right'); 
+		 });
+		 $(this).text('全部展开');
+	 }else{
+		 hideall=0;
+		 $('.cate').show(); 
+		 $('.cate0 .id').each(function(){
+			 $fa=$(this).children('.fa'); 
+			 $fa.removeClass('fa-chevron-right').addClass('fa-chevron-down'); 
+		 });
+		 $(this).text('全部收起');
+	 }
+	return false;
+});  
+ 
+$('.edit').click(function(){
+	id=check_one();
+	if(id){
+		$('.error').text('');
+		location.href="{:url('edit','',false,false)}"+'/id/'+id;
+	} 
+	 
+});
+$('.add').click(function(){
+	id=check_one();
+	if(id){
+		$('.error').text('');
+		location.href="{:url('add','',false,false)}"+'/id/'+id;
+	} 
+	return false;
+});
+ 
+</script>
+</body>
+</html>

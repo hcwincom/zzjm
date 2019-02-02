@@ -1,0 +1,8 @@
+	<li class="<eq name='html' value='edit'>active</eq>"><a href="{:url('edit',['id'=>$info.id])}">编辑{$flag}</a></li>  
+	<li class="<eq name='html' value='image'>active</eq>"><a href="{:url('image',['id'=>$info.id])}">{$flag}图片文档</a></li>  
+	<li class="<eq name='html' value='content'>active</eq>"><a href="{:url('content',['id'=>$info.id])}">{$flag}技术资料</a></li>  
+    <li class="<eq name='html' value='type0'>active</eq>"><a href="{:url('type0',['id'=>$info.id])}">对应设备</a></li>  
+<neq name="info.type" value="1">
+<php>$html_type='type'.$info['type'];</php>
+	<li class="<if condition='$html eq $html_type'>active</if>"><a href="{:url('type'.$info['type'],['id'=>$info.id])}">{$goods_type[$info.type]}</a></li>  
+</neq>

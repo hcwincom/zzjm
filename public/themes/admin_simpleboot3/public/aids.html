@@ -1,0 +1,22 @@
+<notempty name="users">
+		<div class="form-group fleft">
+		<label  class="col-sm-2 control-label">所属管理员</label>
+		<div class="col-md-6 col-sm-10">
+			<div class="aids">
+			<foreach name="users" item="vo"> 
+				 <label class="checkbox-line"> 
+				 <input type="checkbox" name="aids[{$key}]" value="{$key}" <if condition="in_array($key,$aids)">checked</if>/>
+				 
+				 {$vo}
+				 <present name="change.aids">
+				 <span class="red">
+				 	<if condition="in_array($key,$change.aids)">选中<else/>未选中</if>
+				 </span>
+				 </present>
+				 </label>
+			 
+			</foreach> 
+	 		</div> 
+		</div>
+	</div>
+</notempty>

@@ -240,15 +240,31 @@ class GoodsajaxController extends AdminBase0Controller
     }
     //获取分类下所有产品
     public function goods(){
-        $cid=$this->request->param('cid');
+        $cid=$this->request->param('cid',0,'intval');
+        $cid0=$this->request->param('cid0',0,'intval');
+        $name=$this->request->param('name','');
+        $goods_type=$this->request->param('gtype',0,'intval');
+        
+       
         $where=[
-            'cid'=>$cid,
             'status'=>2,
         ];
+        if($goods_type>0){
+            $where['type']=$goods_type;
+        }
+        if($cid0>0){
+            $where['cid0']=$cid0;
+        }
+        if($cid>0){
+            $where['cid']=$cid;
+        }
+        if(!empty($name)){
+            $where['name']=['like','%'.$name.'%'];
+        }
         $admin=$this->admin; 
         $where['shop']=($admin['shop']==1)?2:$admin['shop'];
         
-        $goods=Db::name('goods')->where($where)->column('id,name,code');
+        $goods=Db::name('goods')->where($where)->order('code asc')->column('id,name,code');
         $this->success('ok','',$goods);
     }
     //获取产品的参数值
@@ -268,17 +284,18 @@ class GoodsajaxController extends AdminBase0Controller
      * 获取分类 */
     public function get_cates()
     {
-        
-        $where1=[
+       $cate_type=$this->request->param('ctype',0,'intval');
+        $where=[
             'status'=>2, 
             'fid'=>0,
         ]; 
-        $list1=Db::name('cate')->where($where1)->order('code_num asc')->column('id,name,code,type,fid','code_num');
-        $where2=[
-            'status'=>2,
-            'fid'=>['gt',0],
-        ];
-        $list2=Db::name('cate')->where($where2)->order('code asc')->column('id,name,code,type,fid','code');
+        if($cate_type>0){
+            $where['type']=$cate_type;
+        }
+        $list1=Db::name('cate')->where($where)->order('code_num asc')->column('id,name,code,type,fid','code_num');
+       
+        $where['fid']=['gt',0];
+        $list2=Db::name('cate')->where($where)->order('code asc')->column('id,name,code,type,fid','code');
         $this->success('ok','',['list1'=>$list1,'list2'=>$list2]);
     }
     /*
@@ -286,10 +303,14 @@ class GoodsajaxController extends AdminBase0Controller
     public function get_goods()
     {
         $cid=$this->request->param('cid');
+        $goods_type=$this->request->param('gtype',0,'intval');
         $where=[
             'cid'=>$cid,
             'status'=>2,
         ];
+        if($goods_type>0){
+            $where['type']=$goods_type;
+        }
         $admin=$this->admin;
         $where['shop']=($admin['shop']==1)?2:$admin['shop']; 
         $goods=Db::name('goods')->where($where)->column('id,name');

@@ -8,13 +8,13 @@
 $(function(){ 
  	 
  	var url="{:url('goods/Goodsajax/goods')}";
-	 
+ 	var gtype="{$gtype|default=0}";
 	$('#cate2').change(function(){
 		var cid=parseInt($(this).val()); 
 		 if(cid<=0){ 
 			 return false;
 		 }
-		 $.post(url,{'cid':cid},function(data){
+		 $.post(url,{'cid':cid,'gtype':gtype},function(data){
 			 
 			 if(data.code!=1){
 				 return false;

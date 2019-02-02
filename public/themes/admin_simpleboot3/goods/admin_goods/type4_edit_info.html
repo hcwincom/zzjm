@@ -29,7 +29,8 @@
 					 	<tr><td>产品</td><td>配件数量</td> </tr>
 					 <foreach name="links0" item="link" key="pid1">
 					 	<tr >
-					 		<td>{$link.name|default=$pid1}</td>
+					 		<td><a href="{$url_goods}/id/{$link.pid1}" target="{$zztarget.other}">{$link.name|default=$pid1}</a></td>
+					 	  
 					 		<td>{$link.num}</td> 
 					 	</tr>
 					 </foreach>
@@ -46,7 +47,10 @@
 					 	<tr><td>产品</td><td>配件数量</td> </tr>
 					 <foreach name="links1" item="link" key="pid1">
 					 	<tr >
-					 		<td>{$links10[$pid1]}</td>
+					 		<td>
+					 			<a href="{$url_goods}/id/{$pid1}" target="{$zztarget.other}">{$links10[$pid1]|default=$pid1}</a>
+					 		</td>
+					 	 
 					 		<td>{$link}</td> 
 					 	</tr>
 					 </foreach>

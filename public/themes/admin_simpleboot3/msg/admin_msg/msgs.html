@@ -41,7 +41,9 @@
 				<thead>
 					<tr>
 						<th width="50">ID</th>
-						 
+						<notempty name="shops">
+						<th>所属店铺</th> 
+						</notempty>	 
 						<th>信息类型</th> 
 						<th>发送人</th>
 						<th>接收人</th>
@@ -58,6 +60,9 @@
 					<tr>
 
 						<td>{$vo.id}</td>
+						<notempty name="shops">
+							<td>{$shops[$vo.shop]}</td>
+						</notempty>	 
 						<td>{$types[$vo.type]}</td>
 						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.uname|default=$vo.uid}</td>

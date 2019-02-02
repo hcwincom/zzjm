@@ -118,15 +118,34 @@
 				 
 						<td><a href="{$ourl}/id/{$vo.id}" target="{$zztarget['other']}" >{$vo.name}</a></td>
 					  
-					  	<td>{$vo.order_amount}</td>
+					  	<td>
+					  	<switch name="otype">
+					  		<case value="1">{$vo.order_amount}</case>
+					  		<case value="2">{$vo.back_money}</case>
+					  		<case value="3">{$vo.back_money}</case>
+					  	</switch>
+					  	</td>
 					  	<td>{$pay_types[$vo.pay_type]|default='--'}</td>
 					  	<td>{$pay_status[$vo.pay_status]|default='--'}</td>
-					    <th>{$vo.express_no}</th>
+					    <th>
+					    <switch name="otype">
+					  		<case value="1">{$vo.express_no}</case>
+					  		<case value="2">{$vo.express_no2}</case>
+					  		<case value="3">{$vo.express_no1}</case>
+					  	</switch>
+					     </th>
 						 <th>{$freight_pay_status[$vo.is_freight_pay]|default='--'}</th>
 						 <th>{$vo.pay_freight}</th>
 						 <th>{$vo.real_freight}</th>
 						 <th>{$order_status[$vo.status]|default='--'}</th>
-						<td>{$vo.send_time|date='Y-m-d H:i',###}</td>
+						<td> 
+						<eq name="vo.send_time" value="0"> 
+						--
+						<else/>
+						{$vo.send_time|date='Y-m-d H:i',###}
+						</eq>
+					 
+						</td>
 						<td>{$vo.time|date='Y-m-d H:i',###}</td>
 						 
 					</tr>
@@ -138,7 +157,7 @@
 
 		</form>
 		<div class="pagination">{$page}</div>
-	  <p class="notice">显示所有已发货订单</p>
+	  
 	</div>
 	<script src="__STATIC__/js/admin.js"></script>
  

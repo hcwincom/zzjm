@@ -1,4 +1,5 @@
 <script>
+var url_goods="{$url_goods}";
 $('.cid .cate').change(function(){ 
 	var cid=parseInt($('.cid .cate').val()); 
 	cid_change(cid);
@@ -10,13 +11,13 @@ $('#add').click(function(){
 	var code_num=parseInt($('#code_num').val());
 	var id=parseInt($('#id').val());
 	if(cid<=0 || name=='' || code_num<=0){
-		alert('先选择分类，输入三级名称,三级编码为大于0的整数');
+		msg('先选择分类，输入三级名称,三级编码为大于0的整数');
 		return false;
 	}
 	$.post("{:url('goods/Goodsajax/add_code')}",{'cid':cid,'name':name,'code_num':code_num,'id':id},function(data){
 		 
 		if(data.code!=1){
-			alert(data.msg);
+			msg(data.msg);
 			return false;
 		} 
 		$('#name').val(data.msg);
@@ -33,7 +34,7 @@ function cid_change(cid){
 	$.post("{:url('goods/Goodsajax/cid_change')}",{'cid':cid},function(data){
 		
 		if(data.code!=1){
-			alert(data.msg);
+			msg(data.msg);
 			return false;
 		}
 		
@@ -133,8 +134,8 @@ $('#goods_link').click(function(){
 	 if(!(id>0)){
 		 return false;
 	 }
-	var tr='<tr class=""><td>'+name+
-	'</td><td><input type="text" name="id_links['+id+
+	var tr='<tr class=""><td><a href="'+url_goods+'/id/'+id+'" target="_blank">'+name+
+	'</a></td><td><input type="text" name="id_links['+id+
 		']" value="1"/></td><td><button class="del_link" type="button">删除</button></td></tr>';
 	$div.find('table').append(tr);
 	return false;
@@ -148,22 +149,22 @@ $('#set_price').click(function(){
 	var t_id=parseInt($('#price').val()); 
 	var price_in=parseFloat($('#price_in input').val()); 
 	if(t_id<=0){
-		alert('还未选择价格模板');
+		msg('还未选择价格模板');
 		return false;
 	}
 	if(!(price_in>0)){
-		alert('请填写有效的出厂价');
+		msg('请填写有效的出厂价');
 		$('#price_in input').focus();
 		return false;
 	}
 	$.post("{:url('goods/goodsajax/price_set')}",{'t_id':t_id,'price_in':price_in},function(data){
 		  
 		if(data.code!=1){
-			alert(data.msg);
+			msg(data.msg);
 			return false;
 		}
 		if(data.msg=='no'){
-			alert('参数错误');
+			msg('参数错误');
 			return false;
 		} 
 		var fees=data.data;
@@ -223,7 +224,7 @@ function template_set(cid){
 	 
 	$.post("{:url('goods/goodsajax/template_set')}",{'cid':cid},function(data){
 		if(data.code!=1){
-			alert(data.msg);
+			msg(data.msg);
 			return false;
 		}
 		
@@ -249,11 +250,11 @@ $('#set_template').click(function(){
 	$.post("{:url('goods/goodsajax/param_set')}",{'t_id':t_id},function(data){
 	  
 		if(data.code!=1){
-			alert(data.msg);
+			msg(data.msg);
 			return false;
 		}
 		if(data.msg=='no'){
-			alert('该模板还未选择参数');
+			msg('该模板还未选择参数');
 			return false;
 		}
 		 $('#template_t').val(t_id);

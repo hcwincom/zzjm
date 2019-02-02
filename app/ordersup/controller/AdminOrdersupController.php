@@ -57,7 +57,27 @@ class AdminOrdersupController extends OrderBaseController
         parent::index();
         return $this->fetch();
     }
-     
+    /**
+     * 我的采购单
+     * @adminMenu(
+     *     'name'   => '我的采购单',
+     *     'parent' => 'index',
+     *     'display'=> true,
+     *     'hasView'=> true,
+     *     'order'  => 1,
+     *     'icon'   => '',
+     *     'remark' => '我的采购单',
+     *     'param'  => ''
+     * )
+     */
+    public function myorder()
+    {
+        parent::myorder();
+        
+        return $this->fetch();
+        
+    }
+    
    
     /**
      * 采购单添加
@@ -111,9 +131,7 @@ class AdminOrdersupController extends OrderBaseController
      */
     public function edit()
     {
-        parent::edit();
-        //是否允许添加，删除 
-        $this->assign('ok_add',2); 
+        parent::edit(); 
         return $this->fetch();  
     }
     /**
@@ -189,18 +207,7 @@ class AdminOrdersupController extends OrderBaseController
     {
         parent::edit_review();
     }
-    
-    //分类
-    public function cates($type=3){
-        
-        parent::cates($type);
-      
-        $this->assign('statuss',config('ordersup_status')); 
-        $this->assign('order_types',config('ordersup_type')); 
-        $this->assign('order_url',url('ordersup/AdminOrdersup/edit',false,false)); 
-        $this->assign('order_user_url',url('custom/AdminSupplier/edit',false,false)); 
-       
-    }
+     
     /**
      * 采购单提交
      * @adminMenu(
@@ -399,159 +406,23 @@ class AdminOrdersupController extends OrderBaseController
         $this->status_do($data,0,$flag);
         
     }
-    /* 改变采购单状态 */
-    public function status_do($data,$status,$flag){
-        
-        
-        $m=$this->m;
-        $table=$this->table;
-        
-        $id=intval($data['id']);
-        
-        $info=$m->where('id',$id)->find();
-        if(empty($info)){
-            $this->error('数据不存在');
-        }
-        $time=time();
-        $admin=$this->admin;
-        //其他店铺的审核判断
-        if($admin['shop']!=1 && $info['shop']!=$admin['shop']){
-            $this->error('不能编辑其他店铺的信息');
-        }
-        //是否有权查看
-        $res=$m->order_edit_auth($info,$admin);
-        if($res!==1){
-            $this->error($res);
-        }
-        $update=[
-            'pid'=>$info['id'],
-            'aid'=>$admin['id'],
-            'atime'=>$time,
-            'table'=>$table,
-            'url'=>url('edit_info','',false,false),
-            'rstatus'=>1,
-            'rid'=>0,
-            'rtime'=>0,
-            'shop'=>$admin['shop'],
-        ];
-        $update['adsc']=(empty($adsc))?$flag:$data['adsc'];
-        
-        if($status>0 && $info['status']!=$status){
-            $this->error('状态信息错误');
-        }
-        $content=$m->order_edit($info, $data);
-        if(!is_array($content)){
-            $this->error($content);
-        }
-        switch ($status){
-            case 1: 
-                $content['status']=2; 
-                break;
-            case 2:
-                //判断是先付款后收货还是先收货
-                $pay_type=isset($content['pay_type'])?$content['pay_type']:$info['pay_type'];
-                if($pay_type==1){
-                    $content['status']=10;
-                }else{
-                    $content['status']=20;
-                }
-                break;
-            case 10:
-                //手动待收货
-                $content['status']=20;
-                break;
-            case 20:
-                //供货商发货
-                $content['status']=22;
-                $content['send_time']=$time;
-                break;
-            case 22:
-                //准备收货
-                $content['status']=24;
-               
-                break;
-            case 24:
-              
-                // 点击“确认收货”，订单状态为已收货，若已支付，则订单状态为已完成。
-                $content['accept_time']=$time;
-                $content['status']=26;
-                if($info['pay_status']==3){
-                    $content['completion_time']=$time;
-                    $content['status']=30;
-                }  
-                break;
-            case 26:
-                //退货
-                $content['status']=70;
-                break;
-            case 30:
-                //退货
-                $content['status']=70;
-                break;
-            
-            case 0:
-                //超管编辑
-                $content['status']=1;
-                break;
-            default:
-                $this->error('操作错误');
-        }
-          
-        
-        //保存更改
-        $m_edit=Db::name('edit');
-        $m_edit->startTrans();
-        $eid=$m_edit->insertGetId($update);
-        if($eid>0){
-            $data_content=[
-                'eid'=>$eid,
-                'content'=>json_encode($content),
-            ];
-            Db::name('edit_info')->insert($data_content);
-        }else{
-            $m_edit->rollback();
-            $this->error('保存数据错误，请重试');
-        }
-        
-        //记录操作记录
-        $data_action=[
-            'aid'=>$admin['id'],
-            'time'=>$time,
-            'ip'=>get_client_ip(),
-            'action'=>$admin['user_nickname'].$flag.$info['id'].'-单号'.$info['name'],
-            'table'=>($this->table),
-            'type'=>'edit',
-            'pid'=>$info['id'],
-            'link'=>url('edit_info',['id'=>$eid]),
-            'shop'=>$admin['shop'],
-        ];
-        
-        zz_action($data_action,['department'=>$admin['department']]);
-        
-        $m_edit->commit();
-        $rule='edit_review';
-        $res=$this->check_review($admin,$rule);
-        if($res){
-            $this->redirect($rule,['id'=>$eid,'rstatus'=>2,'rdsc'=>'直接审核']);
-        }
-        $this->success('已提交修改');
-    }
+   
     /**
-     * 超管直接修改采购单支付状态
+     * 超管还原采购单支付状态
      * @adminMenu(
-     *     'name'   => '超管直接修改采购单支付状态',
+     *     'name'   => '超管还原采购单支付状态',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 20,
      *     'icon'   => '',
-     *     'remark' => '超管直接修改采购单支付状态',
+     *     'remark' => '超管还原采购单支付状态',
      *     'param'  => ''
      * )
      */
     public function pay_do0(){
         
-        $flag='超管直接修改采购单支付状态';
+        $flag='超管还原采购单支付状态';
         $data=$this->request->param();
         $this->pay_do($data,0,$flag);
         
@@ -630,5 +501,65 @@ class AdminOrdersupController extends OrderBaseController
         parent::print_order();
         return $this->fetch();
     }
-    
+    /**
+     * 状态更新直接确认
+     * @adminMenu(
+     *     'name'   => '状态更新直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '状态更新直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function status_review(){
+        
+    }
+    /**
+     * 采购单提交直接确认
+     * @adminMenu(
+     *     'name'   => '采购单提交直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '采购单提交直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function status1_2(){
+    }
+    /**
+     * 采购单准备收货后直接收货完成
+     * @adminMenu(
+     *     'name'   => '采购单准备收货后直接收货完成',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '采购单准备收货后直接收货完成',
+     *     'param'  => ''
+     * )
+     */
+    public function status22_24(){
+    }
+    /**
+     * 付款后直接确认
+     * @adminMenu(
+     *     'name'   => '付款后直接确认',
+     *     'parent' => 'index',
+     *     'display'=> false,
+     *     'hasView'=> true,
+     *     'order'  => 40,
+     *     'icon'   => '',
+     *     'remark' => '付款后直接确认',
+     *     'param'  => ''
+     * )
+     */
+    public function pay1_2(){
+    }
 }

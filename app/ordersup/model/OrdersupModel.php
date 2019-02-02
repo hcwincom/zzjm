@@ -145,9 +145,12 @@ class OrdersupModel extends Model
         
         $content=[];
         //检测改变了哪些字段
+       
+        
         //所有采购单都有,都能修改
         $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight','order_type',
-            'goods_num','goods_money','discount_money','tax_money','other_money','order_amount','express_no'
+            'goods_num','goods_money','discount_money', 'other_money', 'express_no',
+            'weight_box','weight_real','box_out','invoice0_money','order_amount'
             
         ];
         //收货信息，子采购单可以单独修改，总采购单修改后同步到子采购单
@@ -219,7 +222,13 @@ class OrdersupModel extends Model
                     $content['invoice']['oid_type']= 1;
                 }
             }
-            
+            //同步订单信息
+            if(isset( $content['invoice']['tax_money'])){
+                $content['tax_money']=$content['invoice']['tax_money'];
+            }
+            if(isset( $content['invoice']['invoice_money'])){
+                $content['invoice_money']=$content['invoice']['invoice_money'];
+            }
             //支付信息
             $edit_account=['bank','name','num','location'];
             //已有付款账号信息和付款账户名
@@ -258,8 +267,8 @@ class OrdersupModel extends Model
                     //记录id,review时检测
                     $content['pay']['id']= $data['account_id'];
                     $content['pay']['oid']= $info['id'];
-                    $content['pay']['oid_type']= 1;
-                    $content['pay']['ptype']= 1;
+                    $content['pay']['oid_type']= 2;
+                    $content['pay']['ptype']= 2;
                     
                 }
             }
@@ -327,6 +336,11 @@ class OrdersupModel extends Model
         
         //多个要一个个比较,先比较是否存在
         foreach($data['oids'] as $k=>$void){
+            if($void==$info['id']){
+                $data['order_amount0'][$void]= $data['order_amount'];
+            }else{
+                $data['order_amount0'][$void]= $data['invoice0_money0'][$void];
+            }
             if(in_array($void,$order_ids)){
                 //编辑采购单信息
                 foreach($edit_base as $kk=>$vv){
@@ -437,15 +451,17 @@ class OrdersupModel extends Model
         }
         $time=time();
         $m_ogoods=Db::name('ordersup_goods');
-        $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
-            'goods_num','goods_money','discount_money','tax_money','other_money','order_amount','express_no'
-            
-        ];
-        //收货信息，状态信息，子采购单可以单独修改，总采购单修改后同步到子采购单
-        $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','status','pay_status'];
         
-        //总采购单信息系，子采购单不能单独修改，总采购单修改后同步到子采购单
-        $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','ok_break'];
+        $edit_base=['dsc','store','freight','weight','size','pay_freight','real_freight',
+            'goods_num','goods_money','discount_money','other_money','express_no',
+            'weight_box','weight_real','box_out','invoice0_money','order_amount'
+        ];
+        //收货信息，状态信息，子订单可以单独修改，总订单修改后同步到子订单
+        $edit_accept=['accept_name','mobile','phone','province','city','area','address','postcode','addressinfo','status'];
+        
+        //总订单信息系，子订单不能单独修改，总订单修改后同步到子订单
+        $edit_fid0=['company','udsc','paytype','pay_type','invoice_type','order_type','pay_status','ok_break'];
+        
         //记录有采购单变化，需要废弃原出入库的采购单id,重新添加
         $instore_oids=[];
         //新添加采购单号
@@ -593,17 +609,25 @@ class OrdersupModel extends Model
         $this->where('id',$order['id'])->update($update_info);
         //有子采购单,同步
         if($order['is_real']==2 || isset($change['add']) ){
-            foreach($update_info as $k=>$v){
-                if(in_array($k,$edit_base)){
-                    unset($update_info[$k]);
+            //只有总订单才有的信息和总订单同步的信息
+            $filed_child=array_merge($edit_fid0,$edit_accept);
+            $update_child=['time'=>$time];
+            
+            foreach($filed_child as  $v){
+                if(isset($update_info[$v])){
+                    $update_child[$v]=$update_info[$v];
                 }
             }
-            if(isset($change['is_real'])){
-                unset($update_info['is_real']);
+            if(isset($update_child['is_real'])){
+                unset($update_child['is_real']);
             }
-            if(!empty($update_info)){
-                $this->where('fid',$order['id'])->update($update_info);
+            if(isset($update_child['ok_break'])){
+                unset($update_child['ok_break']);
             }
+            if(!empty($update_child)){
+                $this->where('fid',$order['id'])->update($update_child);
+            } 
+           
             
         }
         
@@ -679,70 +703,91 @@ class OrdersupModel extends Model
         }
         return '无权限查看该定采购单';
     }
+   
     /* 采购单排序 */
     public function order_sort($id){
-        //   sort专门排序，待收货10，仓库收货9，管理员有改动8，员工有改动7，待付款4，待确认货款5，退货退款中3，未提交2，其他0
-        //pay_status
-        //是否有待审核
-        $where=[
-            'edit.pid'=>['eq',$id],
-            'edit.table'=>['eq','ordersup'],
-            'edit.rstatus'=>['eq',1],
-        ];
-        $aids=Db::name('edit')
-        ->alias('edit')
-        ->join('cmf_user user','user.id=edit.aid')
-        ->where($where)
-        ->column('user.job,edit.aid');
-        $sort=0;
-        //管理员有改动8，员工有改动7，
-        if(isset($aids[1])){
-            $sort=8;
-        }elseif(isset($aids[2])){
-            $sort=7;
+       
+        // sort排序，转运营10，准备发货9，线下待确认货款8，线下待付款7，待确认和待提交6，淘宝待发货5，淘宝准备发货4，淘宝待确认货款3，淘宝待付款2，淘宝错误1，其他按时间顺序排
+        // sort排序，转运营10，已准备收货9，已发货8，待发货7，待确认和待提交6，付款待确认3，待付款2，其他按时间顺序排
+        
+        $order=$this->where('id',$id)->find();
+        
+        /*  
+        'ordersup_status' => 
+  array (
+    1 => '未提交',
+    2 => '提交待确认',
+    10 => '待付款',
+    20 => '待发货',
+    22 => '已发货',
+    24 => '已准备收货',
+    26 => '已收货',
+    30 => '订单完成',
+    70 => '订单关闭',
+    80 => '已取消',
+    81 => '已废弃',
+  ),  // sort排序，转运营10，已准备收货9，已发货8，待发货7，待确认和待提交6，付款待确认3，待付款2，其他按时间顺序排
+         ), */
+        if($order['order_type']==2){
+            $sort=10;
         }else{
-            $ordersup=$this->where('id',$id)->find();
-            if($ordersup['order_type']==2){
-                $sort=11;
-            }else{
-                switch ($ordersup['status']){
-                    case 22:
-                        $sort=10;
-                        break;
-                    case 24:
-                        $sort=9;
-                        break;
-                    case 10:
-                        switch ($ordersup['pay_status']){
-                            case 1:
-                                $sort=4;
-                                break;
-                            case 2:
-                                $sort=5;
-                                break;
-                            case 4:
-                                $sort=3;
-                                break;
-                            default:
-                                break;
-                        }
-                        break;
-                    case 40:
-                        $sort=3;
-                        break;
-                    case 2:
-                        $sort=2;
-                        break;
-                    case 1:
-                        $sort=1;
-                        break;
-                    default:
-                        break;
-                }
+            switch ($order['status']){
+                
+                case 24:
+                    $sort=9;
+                    break;
+                case 22:
+                    $sort=8;
+                    break;
+                case 20:
+                    $sort=7;
+                    break;
+                case 2: 
+                case 1:
+                    $sort=6;
+                    break;
+                case 10:
+                    switch ($order['pay_status']){
+                        case 1:
+                            $sort=3;
+                            break;
+                        case 2:
+                            $sort=2;
+                            break;
+                        default:
+                            break;
+                    }
+                    break; 
+                default:
+                    $sort=0;
+                    break;
             }
-            
+        } 
+        if($order['sort']!=$sort){
+            $this->where('id',$id)->setField('sort',$sort);
         }
-        $this->where('id',$id)->setField('sort',$sort);
+        //检查是否更新父级,且订单完成
+        if($order['fid']>0 && $order['status']>=30){
+            //如果子订单全部完成，则父级完成
+            $where_child=[
+                'fid'=>$order['fid'],
+                'status'=>['lt',30],
+            ];
+            $tmp=$this->where($where_child)->find();
+            if(empty($tmp)){
+                $update=[
+                    'sort'=>0,
+                    'time'=>time(),
+                    'status'=>30,
+                ];
+                $where=[
+                    'id'=>$order['fid'],
+                    'status'=>['lt',30]
+                ];
+                $this->where($where)->update($update);
+            }
+        }
+        return 1;
         
     }
     /* 采购单产品数量检查 */
@@ -962,8 +1007,7 @@ class OrdersupModel extends Model
             $where_goods['oid']=['eq',$info['id']];
             $orders=[$info['id']=>$info];
         }else{
-            $fields='id,name,freight,store,weight,size,discount_money,goods_num,goods_money,pay_freight,order_type'.
-                ',real_freight,other_money,tax_money,order_amount,dsc,express_no,status,pay_status';
+            $fields='*';
             $orders=$this->where('fid',$info['id'])->column($fields);
             
             $order_ids=array_keys($orders);

@@ -1,0 +1,55 @@
+
+<select class=" operation_cate0 form-control short-auto" name="operation_cid0" id="operation_cate1">
+	<option value='0'>全部一级分类</option>
+</select>  
+<select class=" operation_cate form-control short-auto" name="operation_cid" id="operation_cate2">
+	<option class="operation_cate230" value='0'>未选择二级分类</option> 
+</select> &nbsp;&nbsp; 
+ 
+<script>
+ 
+$(function(){ 
+	 
+	var operation_cid0="{$operation_cid0|default=0}";
+	var operation_cid="{$operation_cid|default=0}";
+	var url_get_operation_cates="{:url('operation/Operationajax/get_operation_cates')}";
+	$.post(url_get_operation_cates,{'operation_cid0':operation_cid0},function(data){
+		if(data.code!=1){ 
+			return false;
+		} 
+		var list1=data.data.list1; 
+		var list2=data.data.list2; 
+		var options1='<option value="0">全部一级分类</option>';
+		var options2='<option class="operation_cate230" value="0">未选择二级分类</option> ';
+		for(var i in list1){
+			options1+='<option value="'+list1[i]['id']+'" >'+list1[i]['name']+'</option>'; 
+		} 
+		for(var j in list2){
+			options2+='<option ttype="'+list2[j]['type']+'" class="operation_cate20 operation_cate21'+list2[j]['fid']+' operation_cate23'+list2[j]['id']+'" value="'+list2[j]['id']+'" >'+list2[j]['name']+'</option>';
+	    } 
+		$('#operation_cate1').html(options1); 
+		$('#operation_cate2').html(options2); 
+		if(operation_cid0>0){
+			$('#operation_cate1').val(operation_cid0);  
+		}
+		if(operation_cid>0){
+			$('#operation_cate2').val(operation_cid);  
+		} 
+	},'json'); 
+	$('#operation_cate1').change(function(){
+		operation_cid0=$(this).val(); 
+		operation_cate(operation_cid0,$(this).parent(),0);
+	});
+	function operation_cate(operation_cid0,$dir,operation_cid){
+		if(operation_cid0==0){
+			$dir.find('.operation_cate .operation_cate20').show(); 
+		}else{
+			$dir.find('.operation_cate .operation_cate20').hide();
+			$dir.find('.operation_cate .operation_cate21'+operation_cid0).show();
+		} 
+		$dir.find('.operation_cate .operation_cate23'+operation_cid).prop('selected','selected');
+	}
+});
+
+
+</script>

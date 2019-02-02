@@ -22,7 +22,7 @@ class FreightpaysBaseController extends AdminBaseController
     //列表页中分店铺查询
     protected $where_shop; 
     /**
-     * 订单类型，1订单
+     * 订单类型，1订单,2客户售后，3采购售后
      */
     protected $otype;
     /**
@@ -42,7 +42,7 @@ class FreightpaysBaseController extends AdminBaseController
         $this->table='freightpays';
         $this->uflag='合作物流';
         $this->utable='freight'; 
-       
+        $this->ptype=2;
         $this->assign('uflag',$this->uflag);
         
         //付款方式
@@ -159,6 +159,7 @@ class FreightpaysBaseController extends AdminBaseController
         $utable=$this->utable;
         $otable=$this->otable;
         $uflag=$this->uflag;
+        $otype=$this->otype;
         $m=$this->m;
         $admin=$this->admin;
         $data=$this->request->param();
@@ -175,9 +176,16 @@ class FreightpaysBaseController extends AdminBaseController
         
         $where=[
             'p.freight'=>$data['freight'],
-            'p.status'=>['between',[24,70]]
-            
+            'p.shop'=>$freight['shop'], 
         ];
+        switch($otype){
+            case 2:
+                $where['p.order_type']=1;
+                break;
+            case 3:
+                $where['p.order_type']=2;
+                break;
+        }
         $this->where_shop=$freight['shop'];
         $where_shop=$freight['shop'];
        
@@ -197,7 +205,7 @@ class FreightpaysBaseController extends AdminBaseController
         if(empty($data['freight_pay_status'])){
             $data['freight_pay_status']=0;
         }else{
-            $where['p.freight_pay_status']=['eq',$data['freight_pay_status']];
+            $where['p.is_freight_pay']=['eq',$data['freight_pay_status']];
         }
         
         //支付方式
@@ -215,7 +223,7 @@ class FreightpaysBaseController extends AdminBaseController
         }
         //查询字段
         $types=[
-            1=>['p.name','订单号'],
+            1=>['p.name','单号'],
             2=>['p.id','订单id'],
         ]; 
         $search_types=config('search_types');
@@ -232,7 +240,7 @@ class FreightpaysBaseController extends AdminBaseController
         }else{
             $this->error($res);
         }
-         
+      
       
         //先查询得到id再关联得到数据，否则sql查询太慢
         $list0=Db::name($otable)
@@ -241,7 +249,7 @@ class FreightpaysBaseController extends AdminBaseController
         ->where($where)
         ->order('p.id desc')
         ->paginate();
-        
+      
         $page = $list0->appends($data)->render();
         $ids=[]; 
         foreach($list0 as $k=>$v){
@@ -256,11 +264,11 @@ class FreightpaysBaseController extends AdminBaseController
             $list=Db::name($otable)
             ->alias('p') 
             ->where('p.id','in',$ids)
-            ->order('p.sort asc,p.time desc')
+            ->order('p.time desc')
             ->column($field);
             
         }
-        
+       
         $this->assign('list',$list);
         $this->assign('page',$page);
         $this->assign('freight',$freight);
@@ -293,11 +301,13 @@ class FreightpaysBaseController extends AdminBaseController
          $otable=$this->otable;
          $utable=$this->utable;
          $ogtable=$this->ogtable;
+         $otype=$this->otype;
+         
         
          $m=$this->m;
          $freight_id=$this->request->param('freight',0,'intval');
          //得到相关信息
-         $res=$m->pays_addinfo($freight_id,$utable,$oids,$otable,$ogtable);
+         $res=$m->pays_addinfo($freight_id,$utable,$oids,$otable,$ogtable,$otype);
          if(is_array($res)){
              $freight=$res['freight'];
              $orders=$res['orders'];
@@ -366,18 +376,48 @@ class FreightpaysBaseController extends AdminBaseController
             $this->error('店铺数据错误',$url_error);
         }
         //订单状态检测
+        $oids=array_keys($data['oids']);
         $where_order=[ 
-            'id'=>['in',$data['oids']], 
-            'is_real'=>1,
+            'id'=>['in',$oids],  
         ];
-        $orders=Db::name($otable)->where($where_order)->column('id,name,express_no,real_freight,is_freight_pay,freight,status');
+        switch($otype){
+            case 1:
+                $where_oids['is_real']=1;
+                $ofileds=[
+                    'id','name','freight','express_no','weight','size','addressinfo','order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+            case 2:
+                $where_oids['order_type']=1;
+                $ofileds=[
+                    'id','name','freight','express_no2 as express_no','weight','size','addressinfo','back_money as order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+            case 3:
+                $where_oids['order_type']=2;
+                $ofileds=[
+                    'id','name','freight','express_no1 as express_no','weight','size','addressinfo','back_money as order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+        }
         
+        $ofileds=implode(',', $ofileds);
+        $orders=Db::name($otable)->where($where_order)->column($ofileds);
+        $oids=array_keys($orders);
         //统计订单结算数量和金额
         $money=0;
         $count=0; 
         //不是此物流或不是已付款的去掉或没有单号的去掉
         foreach($orders as $k=>$v){
             if($v['freight']!=$freight_id || $v['is_freight_pay']==3 || empty($v['express_no'])){
+                dump($v);
+                exit;
                 $this->error($oflag.$v['name'].'运费不可结算!',$url_error);
             }else{
                 $count++;
@@ -414,7 +454,8 @@ class FreightpaysBaseController extends AdminBaseController
             $data_oid[]=[
                 'pid'=>$id,
                 'oid'=>$k,
-                'money'=>$v['real_freight']
+                'money'=>$v['real_freight'],
+                'dsc'=>$data['oids'][$k],
             ];
         }
         Db::name($table.'_oid')->insertAll($data_oid);
@@ -446,7 +487,7 @@ class FreightpaysBaseController extends AdminBaseController
             'link'=>url('edit',['id'=>$id]),
             'shop'=>$admin['shop'], 
         ];
-        zz_action($data_action,['department'=>$admin['department']]); 
+        zz_action($data_action,$admin); 
         $m->commit();
         //财务数据暂不添加自动审核
         $this->success('添加成功',$url);
@@ -706,6 +747,7 @@ class FreightpaysBaseController extends AdminBaseController
     {
         $admin=$this->admin;
         $utable=$this->utable;
+        $otable=$this->otable;
         $shop=($admin['shop']==1)?2:$admin['shop'];
         $where=[
             'shop'=>$shop,
@@ -715,7 +757,7 @@ class FreightpaysBaseController extends AdminBaseController
         $freights=Db::name($utable)->where($where)->column('id');
         //更新物流结算费用
         foreach($freights as $v){
-            $m->freight_update($v);
+            $m->freight_update($v,0,0,$otable);
         }
         $this->redirect(url('index'));
         

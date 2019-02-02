@@ -30,9 +30,9 @@ class AdminInvoiceController extends AdminInfo0Controller
         $this->invoice_status=config('invoice_status');
         $this->assign('invoice_status',$this->invoice_status);
         $this->assign('invoice_type',config('invoice_type'));
-        $this->edit=['name','dsc','sn','real_tax_money','company_name','company_code','company_address',
-            'company_tel','company_bank','company_bank_num','company_bank_location',
-            'uname','ucode','address','tel','bank','bank_num','bank_location',
+        $this->edit=['name','dsc','sn','company_name','company_code','company_address',
+            'company_bank','company_bank_location',
+            'uname','ucode','address','bank','bank_location',
         ];
          
     }
@@ -43,7 +43,7 @@ class AdminInvoiceController extends AdminInfo0Controller
      *     'parent' => 'money/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 5,
      *     'icon'   => '',
      *     'remark' => '发票列表',
      *     'param'  => ''

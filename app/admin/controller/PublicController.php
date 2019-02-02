@@ -102,6 +102,7 @@ class PublicController extends AdminBaseController
                 //登入成功页面跳转
                 session('ADMIN_ID', $result["id"]);
                 session('name', $result["user_login"]);
+                session('admin',$result);
                 session('shop', $result["shop"]);
                 $is_review=Db::name('shop')->where('id',$result["shop"])->value('is_review');
                 session('shop_review', $is_review);
@@ -132,7 +133,7 @@ class PublicController extends AdminBaseController
         return redirect(url('/', [], false, true));
     }
     /**
-     * 消息提醒
+     * 消息提醒,废弃不用，用msg/msgajax/msg_new
      */
     public function msg_new()
     {

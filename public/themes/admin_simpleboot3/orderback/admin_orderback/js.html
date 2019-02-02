@@ -91,6 +91,40 @@ $(document).on('click','.goods_del',function(){
 	$(this).parents('tr').remove(); 
 	tr_change();
 });  
+
+var url_freight_count="{:url('order/Orderajax/freight_count')}";
+
+$('.freight_count').click(function(){
+	   
+	var freight=$('#freight').val();
+	var weight=$('.weight').val();
+	var size=$('.size').val();
+	 
+	if(!(weight>0) || !(size>0)){
+		msg('先填写重量和体积');
+		return false;
+	} 
+	 
+	var city=$('#city').val();
+	 
+	$.ajax({
+        type: 'POST',
+        url: url_freight_count,
+        dataType: 'json', 
+        data:{'freight':freight,'city':city,'size':size,'weight':weight},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    }  
+     	    $('.real_freight').val(data.data);
+     	  
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    }); 
+});
 </script>
 <script type="text/html" id="photos-item-pics"> 
 <li id="saved-imagepics{id}">
@@ -101,7 +135,18 @@ $(document).on('click','.goods_del',function(){
 	<div class="pic1" style="background-size:contain;background-image:url({url});"></div>
    
 &nbsp;&nbsp;&nbsp;
-    <a href="javascript:(function(){$('#saved-image{pics{id}').remove();})();">移除</a>
+    <a href="javascript:(function(){$('#saved-imagepics{id}').remove();})();">移除</a>
 </li>
+</script>
+
+<script type="text/html" id="files-item-files">
+    <li id="saved-filefiles{id}">
+        <input id="file-files{id}" type="hidden" name="files_urls[]" value="{filepath}">
+        <input class="form-control" id="file-files{id}-name" type="text" name="files_names[]" value="{name}"
+               style="width: 200px;" title="文件名称">
+        
+	&nbsp;&nbsp;&nbsp;
+        <a href="javascript:(function(){$('#saved-file{id}').remove();})();">移除</a>
+    </li>
 </script>
  

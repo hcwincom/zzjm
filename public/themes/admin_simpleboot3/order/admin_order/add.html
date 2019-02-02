@@ -8,14 +8,23 @@
 		<form class="form-horizontal js-ajax-form{$zzajax} margin-top-20" role="form" method="post" action="{:url('add_do')}">
 			 
 			 <include file="order@admin_order:base" />
-		 <div style="clear:both"></div>
- 
-			 
+		    <div style="clear:both"></div>
+  
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">
 					<button type="submit" class="btn btn-primary js-ajax-submit">{:lang('SAVE')}</button>
-					 <p class="notice">添加订单后需管理员审核后才能生效</p>
-					 <p class="notice">产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01</p>
+					 <p class="notice">添加{$flag}后，需要提交{$flag}，然后等待管理员审核</p>
+					 
+					  <p class="notice">{$flag}费用计算说明：
+				    	<br/>产品的重量和体积会被统计转化为千克和立方厘米的单位，最小为0.01。产品总重和产品体积由产品数据计算得到，外箱号和重量手动填写，实际重量手动填写，也可以点击“重量计算”，得到产品总重+外箱总重。
+				    	<br/>运费计算根据最终的实际重量，预先指定的快递规则和收货地点自动计算，也可以手动点击计算。
+						<br/>若快递规则未设置请到配送管理->店铺合作快递中添加快递或给已有快递设置关联仓库，然后再联系人和付款中添加快递区域和对应的费用。
+						 
+				 		<br/>未税金额=产品总金额+支付运费-优惠金额+其它费用，自动计算得到。  
+				 		<br/>开票金额= 未税金额*(1+税点/100)，也可以手动填写
+				 		<br/>税费=开票金额*(税点/100)/(1+税点/100)	
+				   		<br/>总付款= 未税金额+税费。 	 
+				  	 </p> 
 				</div>
 			</div>
 		</form>
@@ -23,264 +32,6 @@
 	<script src="__STATIC__/js/admin.js"></script>
 </body>
 </html>
-<script>
+ <include file="order@public:order_js" /> 
+ <include file="order@public:order_add_js" />
  
-$('form').submit(function(){
-	if($('#order_company').val()=='0'){
-		$('#order_company').focus();
-		return false;
-	}
-	if($('#paytype').val()=='0'){
-		$('#paytype').focus();
-		return false;
-	}
-	
-	return true;
-});
-//城市选择js初始化 
-get_citys($('#province'),1,0);
-var company=0;
-var cid=0;
-var province=0;
-var city=0;
- 
-var url_custom_get="{:url('order/Orderajax/get_customs')}";
-var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
-var url_custom="{:url('custom/AdminCustom/edit','',false,false)}"+'/id/';
-var arr;
-var store=0; 
- 
-
-$('#order_pay').show();
-custom_change("{$custom.id|default=0}");
-$('#invoice_type').val(2);
-$('#province').change(function(){
-	province=$('#province').val();
-	get_citys($('#city'),province,0);
-	
-	company=$('#company').val();
-	cid=$('#custom_cate').val(); 
-	city=0;
-	custom_get(company,cid,province,city);
-});
-$('#company,#custom_cate,#city').change(function(){
-	company=$('#company').val();
-	cid=$('#custom_cate').val();
-	province=$('#province').val();
-	city=$('#city').val();
-	custom_get(company,cid,province,city); 
-});
-function custom_get(company,cid,province,city){
-	if(province==0){
-		return false;
-	}
-	$.post(url_custom_get,{'company':company,'cid':cid,'type':utype,'province':province,'city':city},function(data){
-		if(data.code!=1){
-			return false;
-		} 
-		var list=data.data;
-		var options='<option value="0">请选择客户</option>';
-		for(var i in list){
-			options+='<option value="'+i+'" >'+list[i]+'</option>';
-		}
-		$('#custom').html(options); 
-		$('.accept input').val('');
-	},'json');
-}
-$('#custom').change(function(){
-	 var custom=$(this).val();
-	 custom_change(custom);
-});
-function custom_change(custom){ 
-	 
-	 if(custom==0){ 
-		 $('.accept select').val(0);
-		 $('#custom_link').attr('href',url_custom+custom);
-		 return false;
-	 } 
-	  $('#custom_link').attr('href',url_custom+custom);
-	  $.ajax({
-	        type: 'POST',
-	        url: url_custom_info,
-	        dataType: 'json', 
-	        data:{'uid':custom,'type':utype},
-	        success: function (data) {
-	        	 console.log(data);
-	     	    if(data.code!=1){
-	     	    	msg(data.msg);
-	     	    	return false;
-	     	    } 
-	     	   var info=data.data;
-				var list=info.tels;
-				var selected=''; 
-				 
-				var options='<option value="0">选择收货人</option>'; 
-				//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
-				for(var i in list){
-					if(info.receiver==i){
-						selected='selected';  
-					}else{
-						selected=''; 
-					} 
-					options+='<option value="'+list[i]['id']+'" city="'+list[i]['city']+'" '+selected+' >'+
-					list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
-					list[i]['province_name']+list[i]['city_name']+list[i]['area_name']+list[i]['street']+','+list[i]['postcode']+'</option>'; 
-				}
-				 $('#accept').html(options); 
-				 $('#freight').val(info.freight);
-				 accept_change(); 
-				 list=info.accounts;
-				  options='<option value="0">选择付款账号</option>'; 
-				 for(var j in list){
-					if(info.payer==j){
-						selected='selected';  
-					}else{
-						selected=''; 
-					} 
-					options+='<option value="'+list[j]['id']+
-					'" bank1="'+list[j]['bank1']+ 
-					'" name1="'+list[j]['name1']+
-					'" num1="'+list[j]['num1']+
-					'" location1="'+list[j]['location1']+ 
-					'" paytype2="'+list[j]['paytype2']+  
-					'" selected >'+
-					list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
-				}
-				 $('#account').html(options); 
-				 account_change(); 
-				 $('#dsc').val(info.announcement);
-				 $('#invoice_type').val(info.invoice_type); 
-				 invoice_type_change();
-				 $('#tax_point').val(info.tax_point); 
-				/* 旧系统paytype和custom绑定，所以暂时还用info.paytype,否则应用付款账号绑定的paytype2 */
-				 $('#paytype').val(info.paytype); 
-				 $('#pay_type').val(info.pay_type); 
-				 list=info.ugoods;
-				 options=''; 
-				for(var k in list){ 
-					options+='<option value="'+list[k]['goods']+'" >'+
-					list[k]['goods_code']+','+list[k]['goods_name']+','+list[k]['cate']+','+list[k]['name']+','+list[k]['num']+','+list[k]['price']+'</option>'; 
-				}
-				 $('#goods1').html(options); 
-	     	    
-	        }, 
-	        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-	            msg(event.responseText,1);
-	        }
-	    });
-	  
-	 
-}
-
- 
-var url_accept_change="{:url('order/Orderajax/accept_change')}";
-$('#accept').change(function(){
-	accept_change(); 
-});
-function accept_change(){
-	var freight= $('#freight').val(); 
-	var accept=parseInt( $('#accept').val()); 
-	if(!(accept>0)){
-		return false;
-	}
-	$.ajax({
-        type: 'POST',
-        url: url_accept_change,
-        dataType: 'json', 
-        data:{'freight':freight,'accept':accept},
-        success: function (data) {
-     	    if(data.code!=1){
-     	    	msg(data.msg);
-     	    	return false;
-     	    } 
-     	    
-     	    var info=data.data;
-     	   $('#freight').val(info.freight);
-     	   $('#store').val(info.store);
-     	   var freights=info.freights;
-     	 
-     	  $('#freight option').removeClass('red');
-     	  for( var i in freights){ 
-     		 $('#freight'+freights[i]).addClass('red');
-     	  }
-        }, 
-        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-            msg(event.responseText,1);
-        }
-    });
-}
- 
- 
-var url_freight_count="{:url('order/Orderajax/freight_count')}";
-$('#freight_count').click(function(){
-	var freight=$('#freight').val();
-	if(!(freight>0)){
-		msg('先选择合作快递公司');
-		return false;
-	}
-	if(!($('#accept').val()>0)){
-		msg('先选择收货人');
-		return false;
-	}
-	 
-	var city=$('#accept option:selected').attr('city');
-	var size=$('#size').val();
-	var weight=$('#weight').val();
-	$.ajax({
-        type: 'POST',
-        url: url_freight_count,
-        dataType: 'json', 
-        data:{'freight':freight,'city':city,'size':size,'weight':weight},
-        success: function (data) {
-     	    if(data.code!=1){
-     	    	msg(data.msg);
-     	    	return false;
-     	    } 
-     	    
-     	    $('#real_freight').val(data.data);
-     	    if(($.trim($('#pay_freight').val()))==''){
-    	    	$('#pay_freight').val(data.data);
-    	    }
-     	    
-        }, 
-        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
-            msg(event.responseText,1);
-        }
-    }); 
-});
- 
-
-$('#discount_money,#other_money,#pay_freight,#tax_money').change(function(){
-	order_account();
-});
-function order_account(){
-	var goods_money=parseFloat($('#goods_money').val());
-	var discount_money=parseFloat($('#discount_money').val());
-	var other_money=parseFloat($('#other_money').val());
-	var pay_freight=parseFloat($('#pay_freight').val());
-	var tax_money=parseFloat($('#tax_money').val()); 
-	if(!(goods_money>0)){
-		goods_money=0;
-		$('#goods_money').val(0);
-	}
-	if(!(discount_money>0)){
-		discount_money=0;
-		$('#discount_money').val(0);
-	}
-	if(!(other_money>0)){
-		other_money=0;
-		$('#other_money').val(0);
-	}
-	if(!(pay_freight>0)){
-		pay_freight=0;
-		$('#pay_freight').val(0);
-	}
-	if(!(tax_money>0)){
-		tax_money=0;
-		$('#tax_money').val(0);
-	}
-	order_amount=goods_money-discount_money+other_money+pay_freight+tax_money;
-	$('#order_amount').val(order_amount.toFixed(2));
-}
-</script>	 
-

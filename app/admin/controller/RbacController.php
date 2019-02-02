@@ -14,6 +14,7 @@ use cmf\controller\AdminBaseController;
 use think\Db;
 use tree\Tree;
 use app\admin\model\AdminMenuModel;
+use app\shop\model\DepartmentModel;
 
 class RbacController extends AdminBaseController
 {
@@ -35,6 +36,7 @@ class RbacController extends AdminBaseController
     {
         $data = Db::name('role')->order(["list_order" => "ASC", "id" => "DESC"])->select();
         $this->assign("roles", $data);
+        $this->cates();
         return $this->fetch();
     }
 
@@ -53,6 +55,7 @@ class RbacController extends AdminBaseController
      */
     public function roleAdd()
     {
+        $this->cates();
         return $this->fetch();
     }
 
@@ -113,7 +116,7 @@ class RbacController extends AdminBaseController
             $this->error("该角色不存在！");
         }
         $this->assign("data", $data);
-       
+        $this->cates();
         return $this->fetch();
     }
 
@@ -331,6 +334,15 @@ class RbacController extends AdminBaseController
     {
         //TODO 添加角色成员管理
 
+    }
+    //角色有部门
+    public function cates()
+    {
+        //部门 
+         $m_dt=new DepartmentModel();
+         $dts=$m_dt->get_all1();
+         $this->assign("dts", $dts);
+        
     }
 
 }

@@ -1,0 +1,269 @@
+<include file="public@header" />
+  
+</head>
+<body>
+
+	<div class="wrap js-check-wrap">
+		<ul class="nav nav-tabs"> 
+		<include file="public@nav" />
+	 
+		</ul>
+		 <form class="well form-inline margin-top-20" method="post"
+			action="">
+			状态:  <input type="hidden" name="page" value="1"/>
+			<select class="form-control" name="status" >
+				<option value='0'>全部</option> 
+				 <foreach name="statuss" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.status">selected</if>> 
+				 {$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+		  <notempty name="shops"> 
+	  	店铺:<select class="form-control" id="shop" name="shop" >
+				<option value='0'>全部</option> 
+			 <foreach name="shops" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.shop">selected</if>> 
+			 	{$vo}
+				</option>
+			</foreach>
+			</select> &nbsp;&nbsp; 
+		</notempty>
+		<select class="form-control" name="company" id="company">
+				<option value='0'>所属公司</option> 
+				 <foreach name="companys" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.company">selected</if>>{$vo.name}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			 运营分类<include file="public@operation_cate" /> 
+			<label class="input-line" >
+				 <select class="form-control" name="type1" id="">
+		        <foreach name="types" item="vo">
+		        	<option value="{$key}" <if condition="$key eq $data.type1">selected</if>>{$vo}</option>
+		        </foreach> 
+		        </select>
+		        <select class="form-control" name="type2" id=""> 
+		         <foreach name="search_types" item="vo">
+		        	<option value="{$key}" <if condition="$key eq $data.type2">selected</if>>{$vo}</option>
+		        </foreach>  
+		        </select> 
+		        
+	            <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
+            </label>
+            <label class="input-line" >
+			
+            <select class="form-control" name="time" id="">
+	        <foreach name="times" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.time">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+			<input class="js-datetime form-control" type="text" id="datetime1" name="datetime1" value="{$data.datetime1}">
+			--
+			<input class="js-datetime form-control" type="text" id="datetime2" name="datetime2" value="{$data.datetime2}">
+			</label>
+			<label class="input-line" >
+			sku数
+			<select name="goods_num" class="form-control" id="goods_num">
+				<option value="0">不限</option>
+				<foreach name="goods_nums" item="vo">
+				<option value="{$key}" <if condition="$key eq $data.goods_num">selected</if>>{$vo}</option>
+				</foreach>
+			</select>
+			</label>
+			<label class="input-line" >
+			平台数 
+			<select name="company_num" class="form-control" id="company_num">
+				<option value="0">不限</option>
+				<foreach name="company_nums" item="vo">
+				<option value="{$key}" <if condition="$key eq $data.company_num">selected</if>>{$vo}</option>
+				</foreach>
+			</select>
+			</label>
+			 创建人: 
+			<select class="form-control" name="aid"  >
+				<option value='0'>全部</option> 
+				 <foreach name="aids" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.aid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp; 
+			审核人: 
+			<select class="form-control" name="rid" >
+				<option value='0'>全部</option> 
+				 <foreach name="rids" item="vo" k="key">
+				<option value="{$key}" <if condition="$key eq $data.rid">selected</if>>{$vo}
+				</option>
+				</foreach>
+			</select> &nbsp;&nbsp;
+			<br/>
+			 产品分类<include file="public@cate" /> 
+			 <label class="input-line" >
+			<select class="form-control" name="goods_type1" id="">
+	        <foreach name="goods_types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.goods_type1">selected</if>>{$vo}</option>
+	        </foreach> 
+	        </select>
+	        <select class="form-control" name="goods_type2" id=""> 
+	         <foreach name="search_types" item="vo">
+	        	<option value="{$key}" <if condition="$key eq $data.goods_type2">selected</if>>{$vo}</option>
+	        </foreach>  
+	        </select> 
+	        
+            <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.goods_name}">
+            </label>
+			<input type="submit" class="btn btn-primary" value="搜索" />
+				 
+		</form>
+		 
+		<form method="post" class="js-ajax-form{$zzajax} margin-top-20" action="">
+			<div class="table-actions">
+				 
+
+				<button type="submit" class="ban btn-sm btn-primary  js-ajax-submit" >禁用</button> 
+			 
+			 	<button type="submit" class="cancel_ban btn-sm btn-primary  js-ajax-submit">恢复</button>
+			 	<button type="submit" class="review_all btn-sm btn-primary  js-ajax-submit" >批量同意</button>
+			 	 
+			 	<button type="submit" class="del_all btn-sm btn-primary  js-ajax-submit">批量删除</button>
+			 	<p class='error'></p>
+			</div>
+
+			<table class="table table-hover table-bordered table-list">
+				<thead>
+					<tr>
+					 	<th width="15">
+					 	<label> <input type="checkbox"
+								class="js-check-all" data-direction="x"
+								data-checklist="js-check-x">
+						</label>
+						</th>
+						<th width="100">{$flag}ID</th>
+					 
+						<th>{$flag}名</th> 
+						<th>分类名</th> 
+						<th>产品编码</th> 
+						<th>平台数</th> 
+						<th>是否推广</th> 
+						<th>推广平台</th> 
+						<th>外贸信息</th> 
+						<th>创建人</th>
+						<th>创建时间</th>
+						<th>审核人</th>
+						<th>审核时间</th>
+						<th>最近更新时间</th>
+						<th>排序</th>
+						<th>状态</th>
+						 
+					</tr>
+				</thead>
+				<tbody>
+					<foreach name="list" item="vo">
+				 
+					<tr class="status{$vo.status}">
+						<td>
+							<input type="checkbox" class="js-check"
+							data-yid="js-check-y" data-xid="js-check-x" name="ids[]"
+							value="{$vo.id}">
+						</td>
+						<td class='id'> 
+						{$vo.id}
+						</td>
+					 
+						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
+					  <td> 
+					  {$vo.cate_name|default=$vo.cid} 
+					  </td>
+					 
+					  	<td  class="clickInfo"> 
+							<div style="position:relative;" class="goInfo" data-width="0">
+								  {$vo.codes} 
+							</div>
+						<notempty name="vo.goods">
+							<div class="goodsInfo">
+								<table class="table table-hover table-bordered">
+									<thead>
+										<tr>
+											<th>编号</th>
+											<th >产品名称</th>
+											
+										 
+										</tr>
+									</thead>
+									<tbody>
+									<foreach name="vo.goods" item="vv" key="kk">
+										<tr>
+											<td>{$vv.code}</td>
+											<td><a href="{$goods_url}/id/{$vv.goods}" target="{$zztarget.other}">{$vv.name}</a></td>
+											
+											 
+										</tr>
+									</foreach>
+									</tbody>
+								</table>							
+							</div>
+						</notempty>
+						</td>
+						<td> {$vo.company_num}</td>
+						<td> 
+						<eq name="vo.propagate_num" value="0">
+							无
+						<else/>
+							有
+						</eq>
+						</td>
+						<td> {$vo.propagate_num}</td>
+						<td> 
+						<eq name="vo.foreign_num" value="0">
+							无
+						<else/>
+							有
+						</eq>
+						</td>
+					 
+						<td>{$vo.aname|default=$vo.aid}</td>
+						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
+						<eq name="vo.rid" value="0">
+						<td>-</td>
+						<td>-</td>
+						<else/>
+						<td>{$vo.rname|default=$vo.rid}</td>
+						<td>{$vo.rtime|date='Y-m-d H:i',###}</td>
+						</eq>
+						
+						<td>{$vo.time|date='Y-m-d H:i',###}</td>
+						<td>{$vo.sort}</td>
+						<td>{$statuss[$vo.status]}</td>
+						 
+					</tr>
+				 
+					</foreach>
+				</tbody>
+
+			</table>
+
+		</form>
+	 	<div class="pagination">{$page}</div>
+	</div>
+	<script src="__STATIC__/js/admin.js"></script>
+<script>
+
+    $('.ban').click(function(){
+        $(this).parents('form').attr('action',"{:url('ban')}");
+        return is_check('批量禁用');
+    });
+    $('.cancel_ban').click(function(){
+        $(this).parents('form').attr('action',"{:url('cancel_ban')}");
+        return is_check('批量恢复');
+    });
+    $('.review_all').click(function(){
+        $(this).parents('form').attr('action',"{:url('review_all')}");
+        return is_check('批量同意');
+    });
+    $('.del_all').click(function(){
+        $(this).parents('form').attr('action',"{:url('del_all')}");
+        return is_check('批量删除');
+    });
+</script>
+</body>
+</html>

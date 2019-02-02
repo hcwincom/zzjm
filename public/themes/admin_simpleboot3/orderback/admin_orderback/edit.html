@@ -26,57 +26,30 @@
 					<gt name="info.status" value="1"> 
 					 <button type="submit" action="{:url('status0_do')}" class="save btn btn-primary js-ajax-submit" >还原售后单</button>
 				    </gt>
-				<br/>
-					
-				 <if condition="$info.status gt 1 && $info.status lt 4">
-				 <switch name="info.status1">
-				 	<case value="1"> 
-				 	 <button type="submit" action="{:url('status1_do',['status1'=>2])}" class="save btn btn-primary js-ajax-submit" >{$status1[2]}</button>
-				 	 <present name="status1[5]"> 
-				 	 <button type="submit" action="{:url('status1_do',['status1'=>5])}" class="save btn btn-primary js-ajax-submit" >{$status1[5]}</button>
-				 	</present>
-				 	</case>
-				 	
-				 	<case value="2"> 
-				 	 <button type="submit" action="{:url('status1_do',['status1'=>3])}" class="save btn btn-primary js-ajax-submit" >{$status1[3]}</button>
-				 	</case>
-				 	<case value="3"> 
-				 	 <present name="status1[4]"> 
-				 	 <button type="submit" action="{:url('status1_do',['status1'=>4])}" class="save btn btn-primary js-ajax-submit" >{$status1[4]}</button>
-				 	</present>
-				 	</case> 
-				 </switch>
-				 </if>
-				 
-				 <eq name="info.status" value="4">
-				 <switch name="info.status2">
-				 	<case value="1"> 
-				 	 <button type="submit" action="{:url('status2_do',['status2'=>2])}" class="save btn btn-primary js-ajax-submit" >{$status2[2]}</button>
-				 	 <present name="status2[5]"> 
-				 	 <button type="submit" action="{:url('status2_do',['status2'=>5])}" class="save btn btn-primary js-ajax-submit" >{$status2[5]}</button>
-				 	</present>
-				 	</case>
-				 	
-				 	<case value="2"> 
-				 	 <button type="submit" action="{:url('status2_do',['status2'=>3])}" class="save btn btn-primary js-ajax-submit" >{$status2[3]}</button>
-				 	</case>
-				 	<case value="3"> 
-				 	 <present name="status2[4]"> 
-				 	 <button type="submit" action="{:url('status2_do',['status2'=>4])}" class="save btn btn-primary js-ajax-submit" >{$status2[4]}</button>
-				 	</present>
-				 	</case> 
-				 </switch>
-				  <if condition="$info.status2 eq 5 && ($info.type eq 1 || $info.pay_status eq 3)">
-				  	 <button type="submit" action="{:url('status_end')}" class="save btn btn-primary js-ajax-submit" >售后完成</button>
-				  </if>
-				    
-				</eq>
-				
-				<neq name="info.type" value="1">
-					<br/>
-					<gt name="pay_status" value="1">
+				    <gt name="info.pay_status" value="1">
 					  <button type="submit" action="{:url('pay_do0')}" class="save btn btn-primary js-ajax-submit" >货款还原</button>
 					</gt>
+				<br/>
+					
+				 <if condition="$info.status gt 1 && $info.status1 lt 4">
+				  <button type="submit" action="{:url('status1_do',['status1'=>($info.status1+1)])}" class="save btn btn-primary js-ajax-submit" >{$status1[($info.status1+1)]}</button>
+				 </if>
+				 
+				  <eq name="info.status" value="4">
+				  	<lt name="info.status2" value="4">
+				  		 <button type="submit" action="{:url('status2_do',['status2'=>($info.status2+1)])}" class="save btn btn-primary js-ajax-submit" >{$status2[($info.status2+1)]}</button>
+				  	</lt>
+				  	<eq name="info.status2" value="1">
+				  		 <button type="submit" action="{:url('status2_do',['status2'=>5])}" class="save btn btn-primary js-ajax-submit" >{$status2[5]}</button>
+				  	</eq>
+				  	
+				  	 <if condition="$info.status2 eq 5 && ($info.type eq 1 || $info.pay_status eq 3)">
+				  	 	<button type="submit" action="{:url('status_end')}" class="save btn btn-primary js-ajax-submit" >售后完成</button>
+				 	 </if>
+				  </eq>
+				 
+				<neq name="info.type" value="1">
+					
 					<switch name="info.pay_status">
 					<case value="1">
 					 <button type="submit" action="{:url('pay_do1')}" class="save btn btn-primary js-ajax-submit" >退款</button>
@@ -84,7 +57,7 @@
 					<case value="2">
 					 <button type="submit" action="{:url('pay_do2')}" class="save btn btn-primary js-ajax-submit" >退款确认</button>
 					</case> 
-					</switch>
+					</switch> 
 				</neq>	
 				</div>
 				

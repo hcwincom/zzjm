@@ -50,7 +50,9 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
+						<notempty name="shops"> 
 						 <th>店铺</th> 
+						 </notempty>
 						<th>产品名</th> 
 						 <th>产品编码</th> 
 						 <th>产品类型</th> 
@@ -77,7 +79,9 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td>{$vo.sname|default=$vo.shop}</td>
+						<notempty name="shops"> 
+						<td>{$shops[$vo.shop]|default=$vo.shop}</td>
+						</notempty>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
 						<td  > {$vo.code}</td>
 						<td >  {$goods_type[$vo.type]} </td>
@@ -112,7 +116,7 @@
 						</present>
 						
 						</td>
-						<td>{$vo.aname|default=$vo.aid}--<a href="{:url('print1')}">print1</a>--<a href="{:url('print2')}">print2</a>--<a href="{:url('print3')}">print3</a></td>
+						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
 						<eq name="vo.rid" value="0">
 						<td>-</td>

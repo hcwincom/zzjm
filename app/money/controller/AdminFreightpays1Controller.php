@@ -17,8 +17,7 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         $this->ogtable='order_goods';
        
         $this->flag='订单运费结算';
-        
-        $this->ptype=2;
+         
         $this->assign('flag',$this->flag); 
        
         $this->assign('oflag',$this->oflag); 
@@ -28,15 +27,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         
     }
     /**
-     * 运费结算客户列表
+     * 订单运费结算
      * @adminMenu(
-     *     'name'   => ' 运费结算客户列表',
+     *     'name'   => ' 订单运费结算',
      *     'parent' => 'money/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 1,
+     *     'order'  => 11,
      *     'icon'   => '',
-     *     'remark' => ' 运费结算客户列表',
+     *     'remark' => ' 订单运费结算',
      *     'param'  => ''
      * )
      */
@@ -66,15 +65,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         return $this->fetch('admin_freightpays/orders');
     }
     /**
-     * 运费结算添加页面
+     * 订单运费结算添加页面
      * @adminMenu(
-     *     'name'   => '运费结算添加页面',
+     *     'name'   => '订单运费结算添加页面',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '运费结算添加页面',
+     *     'remark' => '订单运费结算添加页面',
      *     'param'  => ''
      * )
      */
@@ -84,15 +83,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         return $this->fetch('admin_freightpays/add');
     }
     /**
-     * 运费结算添加
+     * 订单运费结算添加
      * @adminMenu(
-     *     'name'   => '运费结算添加',
+     *     'name'   => '订单运费结算添加',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> false,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '运费结算添加',
+     *     'remark' => '订单运费结算添加',
      *     'param'  => ''
      * )
      */
@@ -104,15 +103,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
     
      
     /**
-     * 运费结算列表
+     * 订单运费结算列表
      * @adminMenu(
-     *     'name'   => ' 运费结算列表',
+     *     'name'   => ' 订单运费结算列表',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '运费结算列表',
+     *     'remark' => '订单运费结算列表',
      *     'param'  => ''
      * )
      */
@@ -122,15 +121,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
         return $this->fetch('admin_freightpays/orderpays');
     }
     /**
-     * 运费结算详情
+     * 订单运费结算详情
      * @adminMenu(
-     *     'name'   => ' 运费结算详情',
+     *     'name'   => ' 订单运费结算详情',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '运费结算详情',
+     *     'remark' => '订单运费结算详情',
      *     'param'  => ''
      * )
      */
@@ -141,15 +140,15 @@ class AdminFreightpays1Controller extends FreightpaysBaseController
     }
     
     /**
-     * 运费结算审核
+     * 订单运费结算审核
      * @adminMenu(
-     *     'name'   => '运费结算审核',
+     *     'name'   => '订单运费结算审核',
      *     'parent' => 'index',
      *     'display'=> false,
      *     'hasView'=> true,
      *     'order'  => 10,
      *     'icon'   => '',
-     *     'remark' => '运费结算审核',
+     *     'remark' => '订单运费结算审核',
      *     'param'  => ''
      * )
      */

@@ -1,0 +1,46 @@
+ <div class="form-group fleft-all" id="invoice_info">
+	<label class="col-sm-2 control-label">发票信息</label>
+	<div class="col-md-6 col-sm-10">
+		<input type="hidden"  name="invoice_id" value="{$invoice.id}"/>
+		 
+		 <notempty name="invoice.id">
+		  <label class="input-inline"> 
+		发票状态： {$invoice_status[$invoice.status]}
+		 <a href="{:url('money/AdminInvoice/edit',['id'=>$invoice.id])}" target="{$zztarget.other}">发票详情</a>
+		 </label>
+		 </notempty>
+		 <br/>
+		 发票抬头：
+		<input type="text" class="form-control" name="invoice_uname" value="{$invoice.uname}" id="invoice_title"/>
+		<present name="change.invoice.uname">
+			<input type="text" class="form-control red"  value="{$change.invoice.uname}"/> 
+		</present> 
+	 
+	 	 
+		税号：<input type="text" class="form-control " name="invoice_ucode" value="{$invoice.ucode}" id="invoice_ucode"/>
+		<present name="change.invoice.ucode">
+			<input type="text" class="form-control red"  value="{$change.invoice.ucode}"/> 
+		</present>
+		地址电话：
+		<input type="text" class="form-control" id="invoice_address" name="invoice_address" value="{$invoice.address}"/>
+		<present name="change.invoice.address">
+			<input type="text" class="form-control short-auto red"  value="{$change.invoice.address}"/> 
+		</present>
+	 
+		 
+		开户行账号：
+		<input type="text" class="form-control" id="invoice_bank_location" name="invoice_bank_location" value="{$invoice.bank_location}"/>
+		<present name="change.invoice.bank_location">
+			<input type="text" class="form-control short-auto red"  value="{$change.invoice.bank_location}"/> 
+		</present>
+		 
+		   
+		开票说明：<input type="text" class="form-control" name="invoice_dsc" value="{$invoice.dsc}"/>
+		<present name="change.invoice.dsc">
+			<input type="text" class="form-control red"  value="{$change.invoice.dsc}"/> 
+		</present>
+		   <p class="notice">发票类型为不开票或发票抬头为空则不保存发票信息；
+													
+		   </p>  
+	</div>
+</div>

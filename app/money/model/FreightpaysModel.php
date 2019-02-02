@@ -69,12 +69,38 @@ class FreightpaysModel extends Model
         if(empty($info)){
             return '结算信息不存在';
         }
-        $ofileds=[
+       /*  $ofileds=[
              'name', 'express_no','weight','size','addressinfo','order_amount',
             'freight','pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
             'create_time','accept_time','send_time','status'
-        ];
-        $field='p.oid,p.money,order.'.implode(',order.',$ofileds);
+        ]; */
+        switch($info['type']){
+            case 1:
+               
+                $ofileds=[
+                    'id','name','freight','express_no','weight','size','addressinfo','order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+            case 2:
+               
+                $ofileds=[
+                    'id','name','freight','express_no2 as express_no','weight','size','addressinfo','back_money as order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+            case 3:
+                
+                $ofileds=[
+                    'id','name','freight','express_no1 as express_no','weight','size','addressinfo','back_money as order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+        }
+        $field='p.oid,p.money,p.dsc,order.'.implode(',order.',$ofileds);
         
         $orders=Db::name('freightpays_oid')
         ->alias('p')
@@ -94,9 +120,10 @@ class FreightpaysModel extends Model
      * @param $oids订单ids
      * @param $otable订单表
      * @param $ogtable订单产品表
+     * @param $otype订单类型
      * @return array ['freight'=>$freight,'orders'=>$orders,'accounts'=>$accounts]物流和订单信息
      */
-    public function pays_addinfo($freight_id,$utable,$oids,$otable,$ogtable){
+    public function pays_addinfo($freight_id,$utable,$oids,$otable,$ogtable,$otype=1){
          //合作物流和付款账号
         $freight=Db::name($utable)->where('id',$freight_id)->find();
        
@@ -119,13 +146,37 @@ class FreightpaysModel extends Model
         //关联订单
         $where_oids=[ 
             'id'=>['in',$oids],
-            'is_real'=>1,
+            'shop'=>$freight['shop'],
+            'is_freight_pay'=>2,
         ];
-        $ofileds=[
-            'id','name','freight','express_no','weight','size','addressinfo','order_amount', 
-            'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
-            'create_time','accept_time','send_time','status'
-        ];
+        
+        switch($otype){
+            case 1:
+                $where_oids['is_real']=1; 
+                $ofileds=[
+                    'id','name','freight','express_no','weight','size','addressinfo','order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+            case 2:
+                $where_oids['order_type']=1;
+                $ofileds=[
+                    'id','name','freight','express_no2 as express_no','weight','size','addressinfo','back_money as order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+            case 3:
+                $where_oids['order_type']=2;
+                $ofileds=[
+                    'id','name','freight','express_no1 as express_no','weight','size','addressinfo','back_money as order_amount',
+                    'pay_freight','real_freight','is_freight_pay','goods_money','pay_status',
+                    'create_time','accept_time','send_time','status'
+                ];
+                break;
+        }
+        
         $ofileds=implode(',', $ofileds);
         $orders=Db::name($otable) 
         ->where($where_oids)
@@ -147,9 +198,9 @@ class FreightpaysModel extends Model
      * $money 结算费用
      * $num 结算订单数
      */
-    public function freight_update($freight,$money=0,$num=0){
+    public function freight_update($freight,$money=0,$num=0,$otable='order'){
         
-        $m_order=Db::name('order');
+        $m_order=Db::name($otable);
        
         //已收货未付款订单
         $where=[
@@ -162,8 +213,12 @@ class FreightpaysModel extends Model
             'order_money0'=>empty($order_do0['moneys'])?0:$order_do0['moneys'],
             'time'=>time(),
         ];
-      
-        Db::name('freight')->where('id',$freight)->inc('order_num',$num)->inc('order_money',$money)->update($update);
+        if(empty($money) && empty($num)){
+            Db::name('freight')->where('id',$freight)->update($update);
+        }else{
+            Db::name('freight')->where('id',$freight)->inc('order_num',$num)->inc('order_money',$money)->update($update);
+        }
+        
     }
      
 }

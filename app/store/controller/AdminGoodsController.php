@@ -24,8 +24,7 @@ class AdminGoodsController extends AdminBaseController
     {
         parent::_initialize();
         $this->statuss=config('info_status');
-        
-       
+         
         $this->assign('statuss',$this->statuss);
       
         $this->assign('html',$this->request->action());
@@ -208,16 +207,54 @@ class AdminGoodsController extends AdminBaseController
         }else{
             $where['p.store']=['eq',$data['store']]; 
         }
-        $list=$m
+        $ids0=$m
         ->alias('p')
-        ->field($field)
+        ->field('p.id')
         ->join($join)
         ->where($where)
         ->order('shop.sort asc,shop.id asc,p.time desc')
         ->paginate();
-        
         // 获取分页显示
-        $page = $list->appends($data)->render();
+        $page = $ids0->appends($data)->render();
+        $ids=[];
+        foreach($ids0 as $k=>$v){
+            $ids[]=$v['id'];
+        }
+        if(!empty($ids)){
+            $list=$m
+            ->alias('p') 
+            ->join($join)
+            ->where('p.id','in',$ids)
+            ->order('shop.sort asc,shop.id asc,p.time desc')
+            ->column($field);
+            $m_box=Db::name('store_box');
+            
+            foreach($list as $k=>$v){
+                 
+                $where_box=[
+                    'status'=>2,
+                    'goods'=>$v['goods'],
+                ];
+                if($v['store']>0){
+                    $where_box['store']=$v['store'];
+                }
+                
+                $box=$m_box->where($where_box)->column('code');
+                if(empty($box)){
+                    $list[$k]['box']='';
+                    $list[$k]['box_num']=0;
+                }else{
+                    //implode(',', $box)
+                    $list[$k]['box']=implode(',', $box);
+                    $list[$k]['box_num']=count($box);
+                }
+            }
+        }else{
+            $list=[];
+        }
+       
+       
+       
       
         //仓库
         $where=[
@@ -349,38 +386,35 @@ class AdminGoodsController extends AdminBaseController
         $data=$this->request->param();
         
         $admin=$this->admin; 
-      
+        //没有库存调整就没有修改
         if(empty($data['safe'])){
             $this->error('数据错误',$back);
         }
         $safes=$data['safe'];
-        $id0=key($safes);
-        $info=$m->where('id',$id0)->find();
-        
-        if(empty($info)){
-            $this->error('数据错误',$back);
+        //得到原安全库存
+        $where=['id'=>['in',array_keys($safes)]];
+        if($admin['shop']>1 ){ 
+            $where['shop']=$admin['shop'];
         }
-       
-        if($admin['shop']!=1 ){ 
-            if($admin['shop']!=$info['shop']){
-                $this->error('店铺数据错误',$back);
-            } 
+        $safes_old=$m->where($where)->column('id,safe');
+        if(empty($safes_old)){
+            $this->error('没有可要修改的数据',$back);
         }
         $m->startTrans();
         $time=time();
         $ids=[];
         //循环设置所有输入的值
         foreach ($safes as $k=>$v){
-            if($v!==''){
+            if($v!=='' && isset($safes_old[$k]) && $safes_old[$k]!=$v){
+               
                 $ids[]=$k;
                 $update_info=[
                     'time'=>$time,
                     'safe'=>intval($v),
                 ];
                 $where=[
-                    'id'=>$k,
-                    'shop'=>$info['shop'], 
-                ]; 
+                    'id'=>$k, 
+                ];
                 $m->where($where)->update($update_info);
             }
            
@@ -390,17 +424,22 @@ class AdminGoodsController extends AdminBaseController
             $this->error('未修改',$back);
         }
         //先获取所有产品
-        $goods=$m->where('id','in',$ids)->column('goods');
-        //调整店铺总安全库存
-        $where_store=[
-            'shop'=>['eq',$info['shop']], 
-        ];
+        $goods=$m->where('id','in',$ids)->column('goods,shop');
+        //调整店铺总安全库存 
         //先得到总库存在更新
         foreach($goods as $k=>$v){
-            $where_store['store']=['gt',0];
-            $where_store['goods']=['eq',$v];
+            $where_store=[
+                'shop'=>['eq',$v],
+                'goods'=>['eq',$k],
+                'store'=>['gt',0],
+            ]; 
             $safe_sum=$m->where($where_store)->sum('safe');
-            $where_store['store']=['eq',0];
+           
+            $where_store=[
+                'shop'=>['eq',$v],
+                'goods'=>['eq',$k],
+                'store'=>['eq',0],
+            ];
             $m->where($where_store)->setField('safe',$safe_sum);
         }
         $ids=implode(',',$ids);

@@ -1,11 +1,26 @@
  <include file="public@back" />  
 <li class="<eq name='html' value='index'>active</eq>"><a href="{:url('index')}">{$flag}列表</a></li>  
-<li class="<eq name='html' value='links2'>active</eq>"><a href="{:url('links2')}">组合{$flag}列表</a></li>  
-<li class="<eq name='html' value='links3'>active</eq>"><a href="{:url('links3')}">标签{$flag}列表</a></li> 
-<li class="<eq name='html' value='links4'>active</eq>"><a href="{:url('links4')}">加工{$flag}列表</a></li> 
-<li class="<eq name='html' value='links5'>active</eq>"><a href="{:url('links5')}">设备列表</a></li> 
-<li class="<eq name='html' value='link_sn'>active</eq>"><a href="{:url('link_sn')}">条码出入库查询</a></li> 
-<li class="<eq name='html' value='params'>active</eq>"><a href="{:url('params')}">{$flag}技术参数表</a></li> 
+<switch name="html">
+	<case value="links2">
+		<li class="active"><a href="{:url('links2')}">组合{$flag}关联</a></li>  
+	</case>
+	<case value="links3">
+		<li class="active"><a href="{:url('links3')}">标签{$flag}关联</a></li>  
+	</case>
+	<case value="links4">
+		<li class="active"><a href="{:url('links4')}">加工{$flag}关联</a></li>  
+	</case>
+	<case value="links5">
+		<li class="active"><a href="{:url('links5')}">设备{$flag}关联</a></li>  
+	</case>
+	<case value="link_sn">
+		<li class="active"><a href="{:url('link_sn')}">条码出入库查询</a></li>  
+	</case>
+	<case value="params">
+		<li class="active"><a href="{:url('params')}">{$flag}技术参数表</a></li>  
+	</case>
+</switch>
+ 
 <li class="<eq name='html' value='edit_list'>active</eq>"><a href="{:url('edit_list')}">{$flag}编辑列表</a></li>  
 <li class="<eq name='html' value='add'>active</eq>"><a href="{:url('add')}">添加{$flag}</a></li>
  

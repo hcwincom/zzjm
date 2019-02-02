@@ -6,6 +6,7 @@ namespace app\custom\controller;
 use app\common\controller\AdminInfo0Controller; 
 use think\Db; 
 use app\goods\model\GoodsModel;
+use app\admin\model\UserModel;
   
 class CustomBaseController extends AdminInfo0Controller
 {
@@ -16,10 +17,11 @@ class CustomBaseController extends AdminInfo0Controller
         
         //没有店铺区分
         $this->isshop=1;
-        $this->edit=['name','company','cid','city_code','code_num','postcode','paytype','pay_type',
+        $this->edit=['name','company','cid','city_code','code_num','postcode','pay_type',
             'email','mobile','level','url','shopurl','wechat','qq','fax',
-            'province','city','area','street','other','announcement','invoice_type',
-            'tax_point','freight','payer','dsc','sort',
+            'province','city','area','street','other','announcement','freight','payer','dsc','sort',
+            'invoice_type','invoice_title','invoice_ucode','tax_point','invoice_address',
+            'invoice_tel','invoice_location','invoice_num','print_send','freight_pay'
         ];
         $this->search=[
             'p.name'=>'客户名称', 
@@ -84,6 +86,12 @@ class CustomBaseController extends AdminInfo0Controller
         }else{
             $where['p.status']=['eq',$data['status']];
         }
+        //付款类型
+        if(empty($data['pay_type'])){
+            $data['pay_type']=0;
+        }else{
+            $where['p.pay_type']=['eq',$data['pay_type']];
+        }
         //分类
         if(empty($data['cid'])){
             $data['cid']=0;
@@ -113,7 +121,21 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($data['paytype'])){
             $data['paytype']=0;
         }else{
-            $where['p.paytype']=['eq',$data['paytype']];
+            //检测有该付款账号的客户
+            $where_paytype=[
+                'type'=>$tel_type,
+                'paytype2'=>$data['paytype'],
+            ];
+            if(!empty($where['p.shop'])){
+                $where_paytype['shop']=$where['p.shop'];
+            }
+            $uids=Db::name('account')->where($where_paytype)->column('uid');
+            if(empty($uids)){
+                $where['p.id']=['eq',0];
+            }else{
+                $where['p.id']=['in',$uids];
+            } 
+           
         }
         //客户类型
         if(empty($data['cid'])){
@@ -252,7 +274,9 @@ class CustomBaseController extends AdminInfo0Controller
      */
     public function add()
     {
-        
+        $admin=$this->admin;
+        $this->where_shop=($admin['shop']==1)?2:$admin['shop'];
+            
         //客户分类信息
         $this->cates();
         $this->assign('info',null);
@@ -283,6 +307,16 @@ class CustomBaseController extends AdminInfo0Controller
             $data_add['shop']=($admin['shop']==1)?2:$admin['shop'];
         } elseif($admin['shop']!=1){
             $this->error('店铺不能添加系统数据');
+        }
+        if(empty($data['freight_pay'])){
+            $data['freight_pay']=2;
+        }else{
+            $data['freight_pay']=1;
+        }
+        if(empty($data['print_send'])){
+            $data['print_send']=2;
+        }else{
+            $data['print_send']=1;
         }
         //循环的到参数
         $edit=$this->edit;
@@ -377,7 +411,8 @@ class CustomBaseController extends AdminInfo0Controller
             
         ];
         zz_action($data_action,['department'=>$admin['department']]);
-        
+        $m_user=new UserModel(); 
+        $m_user->aid_add($admin['id'], $id, $table.'_aid');
         $m->commit();
         //直接审核
         $rule='review';
@@ -406,6 +441,11 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('数据不存在');
         } 
+        $this->where_shop=$info['shop'];
+        $admin=$this->admin;
+        if($admin['shop'] >1 && $admin['shop']!=$info['shop']){
+            $this->error('非法查看店铺信息');
+        }
         $table=$this->table;
         if($table=='custom'){ 
             $tel_type=1;
@@ -417,13 +457,19 @@ class CustomBaseController extends AdminInfo0Controller
             'uid'=>$id,
             'type'=>$tel_type, 
         ];
-        $accounts=Db::name('account')->where($where)->column('site,id,bank1,name1,num1,location1,paytype2');
+        $accounts=Db::name('account')->where($where)->column('site,id,uid,bank1,name1,num1,location1,paytype2','site');
         $account1=(isset($accounts[1]))?$accounts[1]:null;
         $account2=(isset($accounts[2]))?$accounts[2]:null;
         $account3=(isset($accounts[3]))?$accounts[3]:null;
+      
         //客户分类信息
         $this->cates();
-        
+        $m_user=new UserModel();
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
         $this->assign('info',$info);
         $this->assign('account1',$account1);
         $this->assign('account2',$account2);
@@ -460,6 +506,16 @@ class CustomBaseController extends AdminInfo0Controller
             if(empty($info['shop']) || $info['shop']!=$admin['shop']){
                 $this->error('不能编辑其他店铺的信息');
             }
+        }
+        if(empty($data['freight_pay'])){
+            $data['freight_pay']=2;
+        }else{
+            $data['freight_pay']=1;
+        }
+        if(empty($data['print_send'])){
+            $data['print_send']=2;
+        }else{
+            $data['print_send']=1;
         }
         $update=[
             'pid'=>$info['id'],
@@ -578,7 +634,15 @@ class CustomBaseController extends AdminInfo0Controller
             }
             
         }
-          
+        //检测是否有授权变化
+        if(!empty($data['aids'])){
+            $m_user=new UserModel();
+            $res=$m_user->aid_edit($admin,$info['aid'],$data['aids'],$info['id'],$table.'_aid');
+            if($res==1){
+                $content['aids']=$data['aids'];
+            }
+        }
+      
         if(empty($content)){
             $this->error('未修改');
         }
@@ -613,6 +677,7 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
+        
         //直接审核
         $rule='edit_review';
         $res=$this->check_review($admin,$rule);
@@ -657,6 +722,7 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('编辑关联的信息不存在');
         }
+        $this->where_shop=$info['shop'];
         //获取改变的信息
         $change=Db::name('edit_info')->where('eid',$id)->value('content');
         $change=json_decode($change,true);
@@ -702,7 +768,12 @@ class CustomBaseController extends AdminInfo0Controller
         $this->assign('account3',$account3);
         $this->assign('info1',$info1);
         $this->assign('change',$change);
-        
+        $m_user=new UserModel();
+        $users=$m_user->aid_check($admin,$info['aid'],$info['id'],$table.'_aid');
+        if($users['code']==1){
+            $this->assign('users',$users['users']);
+            $this->assign('aids',$users['aids']);
+        }
         unset($change);
         return $this->fetch();  
     }
@@ -721,7 +792,7 @@ class CustomBaseController extends AdminInfo0Controller
         $table=$this->table;
         $m_edit=Db::name('edit');
         $info=$m_edit
-        ->field('e.*,p.name as pname,a.user_nickname as aname')
+        ->field('e.*,p.name as pname,a.user_nickname as aname,p.aid as paid')
         ->alias('e')
         ->join('cmf_'.$table.' p','p.id=e.pid')
         ->join('cmf_user a','a.id=e.aid')
@@ -795,9 +866,10 @@ class CustomBaseController extends AdminInfo0Controller
             ];
             $m_account=Db::name('account');
             $accounts=$m_account->where($where)->column('site,id');
-       
+          
             if(isset($change['account1'])){
                 $data_account=$where;
+                $data_account['site']=1;
                 foreach($change['account1'] as $k=>$v){
                     $data_account[$k]=$v;
                 }
@@ -812,6 +884,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
             if(isset($change['account2'])){
                 $data_account=$where;
+                $data_account['site']=2;
                 foreach($change['account2'] as $k=>$v){
                     $data_account[$k]=$v;
                 }
@@ -825,6 +898,7 @@ class CustomBaseController extends AdminInfo0Controller
             }
             if(isset($change['account3'])){
                 $data_account=$where;
+                $data_account['site']=3;
                 foreach($change['account3'] as $k=>$v){
                     $data_account[$k]=$v;
                 }
@@ -836,6 +910,13 @@ class CustomBaseController extends AdminInfo0Controller
                 }
                 unset($change['account3']);
             }
+            //检测是否有授权变化
+            if(isset($change['aids'])){
+                $m_user=new UserModel();
+                $m_user->aid_edit_do($admin,$info['paid'],$change['aids'],$info['pid'],$table.'_aid');
+                unset($change['aids']);
+            }
+            
             foreach($change as $k=>$v){
                 $update_info[$k]=$v;
             }
@@ -862,7 +943,7 @@ class CustomBaseController extends AdminInfo0Controller
         
         zz_action($data_action ,['aid'=>$info['aid']]);
         
-        $m->commit();
+        $m->commit(); 
         $this->success('审核成功');
     }
    
@@ -894,7 +975,7 @@ class CustomBaseController extends AdminInfo0Controller
         if($type==3){  
             //可选物流
             $freights=Db::name('freight')->where($where)->order('shop asc,sort asc')->column($field);
-            
+          
             //开票类型
             $invoice_types=config('invoice_type');
             //付款银行
@@ -907,10 +988,11 @@ class CustomBaseController extends AdminInfo0Controller
             $this->assign('invoice_types',$invoice_types);
             $this->assign('banks',$banks);
         }
-        $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field);
         
         //付款类型  
         $paytypes=Db::name('paytype')->where($where)->order('shop asc,sort asc')->column($field);
+        $where['type']=1;
+        $companys=Db::name('company')->where($where)->order('shop asc,sort asc')->column($field);
         
         $this->assign('companys',$companys);
         $this->assign('paytypes',$paytypes);
@@ -966,6 +1048,7 @@ class CustomBaseController extends AdminInfo0Controller
         if(empty($info)){
             $this->error('数据不存在');
         }
+       
         $time=time();
         $admin=$this->admin;
         //其他店铺的审核判断
@@ -1072,7 +1155,7 @@ class CustomBaseController extends AdminInfo0Controller
         zz_action($data_action,['department'=>$admin['department']]);
         
         $m_edit->commit();
-        
+       
         //直接审核
         $rule='tel_edit_review';
         $res=$this->check_review($admin,$rule);
@@ -1477,7 +1560,7 @@ class CustomBaseController extends AdminInfo0Controller
             'table'=>($this->table),
             'type'=>'edit',
             'pid'=>$info['id'],
-            'link'=>url('tel_edit_info',['id'=>$eid]),
+            'link'=>url('goods_edit_info',['id'=>$eid]),
             'shop'=>$admin['shop'],
         ];
         

@@ -1,0 +1,222 @@
+<script>
+ 
+$('form').submit(function(){
+	 
+	var not0=['order_company','accept','store','freight','paytype','pay_type','goods_num'];
+	var tmp=0;
+	for(var i in not0){
+		tmp=parseInt($('#'+not0[i]).val());
+		if(!(tmp>0)){
+			$('#'+not0[i]).focus();
+			return false;
+		}
+	}
+	var not_null=[
+			'pay_freight','real_freight','order_amount',
+	         'goods_money','other_money','discount_money','weight','size','weight_real'
+	];
+         
+	for(var j in not0){
+		tmp=parseFloat($('#'+not0[j]).val());
+		if(!(tmp>=0)){
+			$('#'+not0[j]).focus();
+			return false;
+		}
+	}
+	return true;
+});
+
+var company="{$custom.company|default=0}";
+var cid="{$custom.cid|default=0}";
+var province="{$custom.province|default=0}";
+var city="{$custom.city|default=0}"; 
+//城市选择js初始化 
+get_citys($('#province'),1,province);
+if(province>0){
+	 
+	get_citys($('#city'),province,city);
+}
+var url_custom_get="{:url('order/Orderajax/get_customs')}";
+var url_custom_info="{:url('order/Orderajax/get_custom_info')}";
+var url_custom="{$order_user_url}/id/";
+var arr;
+var store=0; 
+ var accept_name='';
+ if(utype==1){
+	 accept_name='收货人';
+ }else{
+	 accept_name='发货人';
+ }
+
+$('#order_pay').show();
+var uid="{$custom.id|default=0}";
+if(uid>0){ 
+	custom_get(company,cid,province,city,uid);
+	
+	custom_change(uid); 
+}
+ 
+$('#invoice_type').val(2);
+$('#province').change(function(){
+	province=$('#province').val();
+	get_citys($('#city'),province,0);
+	
+	company=$('#company').val();
+	cid=$('#custom_cate').val(); 
+	city=0;
+	custom_get(company,cid,province,city);
+});
+$('#company,#custom_cate,#city').change(function(){
+	company=$('#company').val();
+	cid=$('#custom_cate').val();
+	province=$('#province').val();
+	city=$('#city').val();
+	custom_get(company,cid,province,city); 
+});
+function custom_get(company,cid,province,city,uid=0){
+	if(province==0){
+		return false;
+	}
+	$.post(url_custom_get,{'company':company,'cid':cid,'type':utype,'province':province,'city':city},function(data){
+		if(data.code!=1){
+			return false;
+		} 
+		var list=data.data;
+		var options='<option value="0">请选择</option>';
+		for(var i in list){
+			options+='<option value="'+i+'" >'+list[i]+'</option>';
+		}
+		$('#custom').html(options); 
+		if(uid>0){
+			$('#custom').val(uid);
+		}
+		$('.accept input').val('');
+	},'json');
+}
+$('#custom').change(function(){
+	 var custom=$(this).val();
+	 custom_change(custom);
+});
+function custom_change(custom){ 
+	 
+	 if(custom==0){ 
+		 $('.accept select').val(0);
+		 $('#custom_link').attr('href',url_custom+custom);
+		 return false;
+	 } 
+	  $('#custom_link').attr('href',url_custom+custom);
+	  $.ajax({
+	        type: 'POST',
+	        url: url_custom_info,
+	        dataType: 'json', 
+	        data:{'uid':custom,'type':utype},
+	        success: function (data) {
+	        	 
+	     	    if(data.code!=1){
+	     	    	msg(data.msg);
+	     	    	return false;
+	     	    } 
+	     	   var info=data.data;
+				var list=info.tels;
+				var selected=''; 
+				 
+				var options='<option value="0">选择'+accept_name+'</option>'; 
+				//options+='<option value="'+list[i]['province']+','+list[i]['city']+','+list[i]['area']+'" '+selected+' > 
+				for(var i in list){
+					if(info.receiver==i){
+						selected='selected';  
+					}else{
+						selected=''; 
+					} 
+					options+='<option value="'+list[i]['id']+'" city="'+list[i]['city']+'" '+selected+' >'+
+					list[i]['name']+','+list[i]['mobile']+','+list[i]['phone']+','+
+					list[i]['province_name']+list[i]['city_name']+list[i]['area_name']+list[i]['street']+','+list[i]['postcode']+'</option>'; 
+				}
+				 $('#accept').html(options); 
+				 $('#freight').val(info.freight);
+				 $('#order_company').val(info.company);
+				 /*  应用付款账号绑定的paytype2 */
+				 accept_change(); 
+				 list=info.accounts;
+				  options='<option value="0">选择付款账号</option>'; 
+				 for(var j in list){
+					if(info.payer==j){
+						selected='selected';  
+					}else{
+						selected=''; 
+					} 
+					options+='<option value="'+list[j]['id']+
+					'" bank1="'+list[j]['bank1']+ 
+					'" name1="'+list[j]['name1']+
+					'" num1="'+list[j]['num1']+
+					'" location1="'+list[j]['location1']+ 
+					'" paytype2="'+list[j]['paytype2']+  
+					'" selected >'+
+					list[j]['location1']+','+list[j]['name1']+','+list[j]['num1']+ '</option>'; 
+				}
+				 $('#account').html(options); 
+				 account_change(); 
+				 $('#dsc').val(info.announcement);
+				 $('#invoice_type').val(info.invoice_type); 
+				 $('#invoice_title').val(info.invoice_title); 
+				 $('#invoice_ucode').val(info.invoice_ucode); 
+				 $('#invoice_address').val(info.invoice_address+' '+info.invoice_tel); 
+				 $('#invoice_bank_location').val(info.invoice_location+' '+info.invoice_num); 
+				 invoice_type_change();
+				 $('#tax_point').val(info.tax_point); 
+				 
+				if(info.pay_type>0){ 
+					 $('#pay_type').val(info.pay_type); 
+				}else{ 
+					 $('#pay_type').val(1); 
+				} 
+				 ugoods_add(info.ugoods); 
+	        }, 
+	        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+	            msg(event.responseText,1);
+	        }
+	    });
+	  
+	 
+}
+
+ 
+var url_accept_change="{:url('order/Orderajax/accept_change')}";
+$('#accept').change(function(){
+	accept_change(); 
+});
+function accept_change(){
+	var freight= $('#freight').val(); 
+	var accept=parseInt( $('#accept').val()); 
+	if(!(accept>0)){
+		return false;
+	}
+	$.ajax({
+        type: 'POST',
+        url: url_accept_change,
+        dataType: 'json', 
+        data:{'freight':freight,'accept':accept},
+        success: function (data) {
+     	    if(data.code!=1){
+     	    	msg(data.msg);
+     	    	return false;
+     	    } 
+     	    
+     	    var info=data.data;
+     	   $('#freight').val(info.freight);
+     	   $('#store').val(info.store);
+     	   var freights=info.freights;
+     	 
+     	  $('#freight option').removeClass('red');
+     	  for( var i in freights){ 
+     		 $('#freight'+freights[i]).addClass('red');
+     	  }
+        }, 
+        error: function (event, XMLHttpRequest, ajaxOptions, thrownError) { 
+            msg(event.responseText,1);
+        }
+    });
+}
+ 
+ 
+</script>	 

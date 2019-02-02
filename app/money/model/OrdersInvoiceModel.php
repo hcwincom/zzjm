@@ -13,11 +13,15 @@ class OrdersInvoiceModel extends Model
             $paytype=Db::name('paytype')->where('id',$data['paytype'])->find(); 
             $data['company_name']=$paytype['company_name']; 
             $data['company_code']=$paytype['feenum'];
-            $data['company_address']=$paytype['address'];
-            $data['company_tel']=$paytype['tel'];
-            $data['company_bank']=$paytype['bank'];
-            $data['company_bank_num']=$paytype['num'];  
-            $data['company_bank_location']=$paytype['location']; 
+            $data['company_address']=$paytype['address'].' '.$paytype['tel']; 
+            $data['company_bank']=$paytype['bank'];  
+            $data['company_bank_location']=$paytype['location'].' '.$paytype['num']; 
+        }
+       
+        if(empty($data['atime'])){
+            $time=time();
+            $data['atime']=$time;
+            $data['time']=$time;
         }
         if(isset($data['id'])){
             unset($data['id']);
@@ -42,13 +46,14 @@ class OrdersInvoiceModel extends Model
         if(!empty($data['paytype'])){
             $paytype=Db::name('paytype')->where('id',$data['paytype'])->find();
             $data['company_name']=$paytype['company_name'];
-            $data['company_code']=$paytype['feenum'];
-            $data['company_address']=$paytype['address'];
-            $data['company_tel']=$paytype['tel'];
+            $data['company_code']=$paytype['feenum']; 
             $data['company_bank']=$paytype['bank'];
-            $data['company_bank_num']=$paytype['num'];
-            $data['company_bank_location']=$paytype['location'];
+            
+            $data['company_address']=$paytype['address'].' '.$paytype['tel'];
+            $data['company_bank']=$paytype['bank'];
+            $data['company_bank_location']=$paytype['location'].' '.$paytype['num']; 
         }
+       $data['time']=time();
         $res=$this->where('id',$id)->update($data);
         return 1; 
     }

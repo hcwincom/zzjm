@@ -27,10 +27,10 @@ class AdminOrderqController extends AdminInfo0Controller
      * 询盘列表
      * @adminMenu(
      *     'name'   => '询盘列表',
-     *     'parent' => 'orderq/AdminIndex/default',
+     *     'parent' => 'order/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 1,
+     *     'order'  => 2,
      *     'icon'   => '',
      *     'remark' => '询盘列表',
      *     'param'  => ''
@@ -585,11 +585,14 @@ class AdminOrderqController extends AdminInfo0Controller
         ->join('cmf_area area','area.id=c.area','left') 
         ->where('c.id',$info['uid'])
         ->find();
+        //公司信息
+        $company=Db::name('company')->field('id,name,code,shop')->where('id',$info['company'])->find();
         
+        $ccode=(empty($company['code']))?'':$company['code'];
         $data_order=[
             'shop'=>$info['shop'],
             'company'=>$info['company'],
-            'name'=>$info['name'],
+            'name'=>order_sn($admin['id'],$ccode),
             'aid'=>$admin['id'],
             'uid'=>$custom0['uid'],
             'accept_name'=>$custom0['name'],

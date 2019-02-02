@@ -11,76 +11,69 @@
 
     </div>
 </div>
-<div class="form-group">
-    <label for="" class="col-sm-2 control-label">编码</label>
-    <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="code" value="{$info.code}" />
-
-        <present name='change.code'>
-            <input type="text" class="red form-control" name="code" value="{$change.code}" />
-        </present>
-
-    </div>
-</div>
-
-<div class="form-group">
-    <label class="col-sm-2 control-label">简介</label>
-    <div class="col-md-6 col-sm-10">
-        <textarea class="form-control"  rows="5" >{$info.dsc}</textarea>
-        <present name='change.dsc'>
-            <textarea class="red form-control" rows="5" >{$change.dsc}</textarea>
-        </present>
-    </div>
-</div>
-<div class="form-group">
-    <label for="" class="col-sm-2 control-label">排序</label>
-    <div class="col-md-6 col-sm-10">
-        <input type="text" class="form-control" name="sort" value="{$info.sort}" />
-        <present name='change.sort'>
-            <input type="text" class="red form-control"  name="sort" value="{$change.sort}" />
-        </present>
-    </div>
-</div>
-<empty name="info.id">
+  
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">级别</label>
     <div class="col-md-6 col-sm-10">
-        <label class="radio-inline" id="type1">
-            <input type="radio" value="1" name="type" />省
+    <foreach name="rates" item="vo">
+    	 <label class="radio-inline" id="type{$key}">
+            <input type="radio" value="{$key}" name="type" <if condition="$key eq $info.type">checked</if>/>{$vo}
         </label>
-        <label class="radio-inline" id="type2">
-            <input type="radio" value="2" name="type" />市
-        </label>
-        <label class="radio-inline" id="type3">
-            <input type="radio" value="3" name="type" />县/区
-        </label>
+    </foreach> 
     </div>
 </div>
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">上级地区</label>
     <div class="col-md-6 col-sm-10">
-        <select name="city1" id="city1" name="fid" required>
-
-        </select>
-        <select name="city2" id="city2"  >
-
-        </select>
+     	<empty name="info.id">
+	        <select name="city1" class="form-control short-auto" id="city1" required>
+	
+	        </select>
+	       
+	        <select name="city2"  class="form-control short-auto"  id="city2"  >
+	
+	        </select>
+        
+        <else/>
+	         <select name="fid"  class="form-control short-auto" id="city1">
+				<option value="1">作为省</option>
+	        </select>
+        <present name="change.fid">
+        	 <select  class="form-control short-auto red" id="city2">
+				 
+	        </select>
+        </present>
+        </empty>
     </div>
 </div>
-</empty>
+  
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">区号</label>
     <div class="col-md-6 col-sm-10">
         <input type="text" class="form-control" name="code" value="{$info.code}" required/>
+        <present name='change.code'>
+            <input type="text" class="red form-control"  name="code" value="{$change.code}" />
+        </present>
     </div>
 </div>
 <div class="form-group">
     <label for="" class="col-sm-2 control-label">邮编</label>
     <div class="col-md-6 col-sm-10">
         <input type="text" class="form-control" name="postcode" value="{$info.postcode}" required/>
+        <present name='change.postcode'>
+            <input type="text" class="red form-control"  name="postcode" value="{$change.postcode}" />
+        </present>
     </div>
 </div>
-
+<div class="form-group">
+    <label for="" class="col-sm-2 control-label">排序</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" class="form-control" name="sort" value="{$info.sort|default=1000}" />
+        <present name='change.sort'>
+            <input type="text" class="red form-control"  name="sort" value="{$change.sort}" />
+        </present>
+    </div>
+</div>
 <div class="form-group " >
     <label class="col-sm-2 control-label">备注</label>
     <div class="col-md-6 col-sm-10">
@@ -92,3 +85,36 @@
 </div>
 
 <include file="public@adsc" />
+<script>
+var fid="{$info.fid|default=0}";
+var change_fid="{$change.fid|default=0}";
+var url_fid="{:url('express/Areaajax/city_fid')}";
+if(fid>1){
+	$.post(url_fid,{'id':fid},function(data){
+		console.log(data);
+		if(data.code==1){
+			var options='';
+			var list=data.data;
+			for(var i in list){
+				options+='<option value="'+i+'">'+list[i]['name']+'</option>';
+			}
+			$('#city1').html(options);
+			$('#city1').val(fid);
+		}
+	},'json');
+}
+if(change_fid>1){
+	$.post(url_fid,{'id':change_fid},function(data){
+		if(data.code==1){
+			var options='';
+			var list=data.data;
+			for(var i in list){
+				options+='<option value="'+i+'">'+list[i]['name']+'</option>';
+			}
+			$('#city2').html(options);
+			$('#city2').val(change_fid);
+		}
+	},'json');
+}
+
+</script>

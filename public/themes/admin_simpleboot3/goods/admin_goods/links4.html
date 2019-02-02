@@ -41,12 +41,15 @@
 						</label>
 						</th>
 						<th width="100">{$flag}ID</th>
+						<notempty name="shops">
 						 <th>店铺</th> 
-						<th>产品名</th> 
+						 </notempty>
+						<th>加工产品名</th> 
 						<th>产品编码</th> 
-					 	<th>设备数量</th> 
+					 	<th>关联产品总数量</th> 
 						<th>关联产品</th>
 						<th>组合数量</th> 
+						<th>备注</th> 
 						<th>产品更新时间</th>
 						<th>产品排序</th>
 						<th>产品状态</th>
@@ -65,14 +68,16 @@
 						<td class='id'> 
 						{$vo.id}
 						</td>
-						<td>{$vo.sname|default=$vo.shop}</td>
+						<notempty name="shops">
+						 <td>{$shops[$vo.shop]|default=$vo.shop}</td> 
+				    	</notempty>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['edit']}">{$vo.name}</a></td>
 						 <td  > {$vo.code}</td>
 						  <td  > {$vo.goods_link}</td>
 						 
 						 <td><a href="{:url('edit',['id'=>$vo.pid1])}"  target="{$zztarget['edit']}">{$vo.link_name}</a></td>
 						<td>{$vo.link_num}</td> 
-						
+						<td>{$vo.dsc}</td> 
 						<td>{$vo.time|date='Y-m-d H:i',###}</td>
 						<td>{$vo.sort}</td>
 						<td>{$statuss[$vo.status]}</td>

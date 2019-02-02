@@ -14,7 +14,7 @@
 				</div>
 			</div>
 		</notempty>
-	 
+		 <include file="public@aids" /> 
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">名称</label>
 				<div class="col-md-6 col-sm-10">
@@ -203,7 +203,7 @@
 			</div>
 			
 			<div style="clear:both"></div>
-			<div class="form-group fleft"  style="width:100%">
+			<div class="form-group fleft-all"  >
 				<label  class="col-sm-2 control-label">发货注意事项</label>
 				<div class="col-md-6 col-sm-10" >
 				  
@@ -211,23 +211,34 @@
 				<present name="change.announcement">
 					<input type="text" class="form-control red"  value="{$change.announcement}" />
 				</present>
+				<label class="checkbox-inline  ">
+					<input type="checkbox" name="freight_pay" value="1" <eq name="info.freight_pay" value="1">checked</eq> />包邮
+					<present name="change.freight_pay">
+						<span class="red">
+							<eq name="change.freight_pay" value="1">
+								包邮
+							<else/>
+								不包邮
+							</eq>
+						</span>
+					</present>
+				</label>
+				<label class="checkbox-inline  ">
+					<input type="checkbox" name="print_send" value="1" <eq name="info.print_send" value="1">checked</eq> />随货附清单
+					<present name="change.print_send">
+						<span class="red">
+							<eq name="change.print_send" value="1">
+								随货附清单
+							<else/>
+								不随货附清单
+							</eq>
+						</span>
+					</present>
+				</label>
+				 
 				</div>
 			</div>
 			<div style="clear:both"></div>
-			<div class="form-group fleft">
-				<label  class="col-sm-2 control-label">店铺收款账号</label>
-				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="paytype" id="" required> 
-					<foreach name="paytypes" item="vo">
-						<option value="{$key}" <if condition="$key eq $info.paytype" >selected</if>>{$vo}</option>
-					</foreach>
-					</select>
-				<present name="change.paytype">
-					<input type="text" class="form-control red" value="{$paytypes[$change.paytype]|default='--'}" />
-					 
-				</present>
-				</div>
-			</div>
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">货款结算类型</label>
 				<div class="col-md-6 col-sm-10">
@@ -242,6 +253,8 @@
 				</present>
 				</div>
 			</div>
+		 
+			
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">常用物流</label>
 				<div class="col-md-6 col-sm-10">
@@ -257,12 +270,68 @@
 				</present>  
 				 </div>
 			</div>
+			
+			 <div class="form-group fleft-all">
+				<label class="col-sm-2 control-label">公司发票抬头</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="invoice_title" value="{$info.invoice_title}" />
+				 <present name="change.invoice_title">
+					 <input type="text" class="form-control red" value="{$change.invoice_title}" />
+				</present>  
+				</div>
+			</div>
+			 
+			 <div class="form-group fleft-all">
+				<label class="col-sm-2 control-label">发票税号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="invoice_ucode" value="{$info.invoice_ucode}" />
+				 <present name="change.invoice_ucode">
+					 <input type="text" class="form-control red" value="{$change.invoice_ucode}" />
+				</present>  
+				</div>
+			</div>
+			<div class="form-group fleft-all">
+				<label class="col-sm-2 control-label">发票开户行</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="invoice_location" value="{$info.invoice_location}" />
+				 <present name="change.invoice_location">
+					 <input type="text" class="form-control red" value="{$change.invoice_location}" />
+				</present>  
+				</div>
+			</div>
+			<div class="form-group fleft-all">
+				<label class="col-sm-2 control-label">发票银行卡号</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="invoice_num" value="{$info.invoice_num}" />
+				 <present name="change.invoice_num">
+					 <input type="text" class="form-control red" value="{$change.invoice_num}" />
+				</present>  
+				</div>
+			</div>
+			<div class="form-group fleft-all">
+				<label class="col-sm-2 control-label">发票联系地址</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="invoice_address" value="{$info.invoice_address}" />
+				 <present name="change.invoice_address">
+					 <input type="text" class="form-control red" value="{$change.invoice_address}" />
+				</present>  
+				</div>
+			</div>
+			<div class="form-group fleft-all">
+				<label class="col-sm-2 control-label">发票联系电话</label>
+				<div class="col-md-6 col-sm-10">
+					<input type="text" class="form-control" name="invoice_tel" value="{$info.invoice_tel}" />
+				 <present name="change.invoice_tel">
+					 <input type="text" class="form-control red" value="{$change.invoice_tel}" />
+				</present>  
+				</div>
+			</div>
 			<div class="form-group fleft">
 				<label  class="col-sm-2 control-label">开票类型</label>
 				<div class="col-md-6 col-sm-10">
-				   <select  class="form-control" name="invoice_type" id="">
+				   <select  class="form-control" name="invoice_type" id="invoice_type">
 					<foreach name="invoice_types" item="vo">
-					<option value="{$key}" <if condition="$key eq $info.invoice_type" >selected</if>>{$vo[0]}</option>
+					<option value="{$key}" point="{$vo[1]}" <if condition="$key eq $info.invoice_type" >selected</if>>{$vo[0]}</option>
 					</foreach>
 					</select>
 				 <present name="change.invoice_type">
@@ -272,9 +341,9 @@
 				 </div>
 			</div>
 			 <div class="form-group fleft">
-				<label class="col-sm-2 control-label">税点</label>
+				<label class="col-sm-2 control-label">税点(%)</label>
 				<div class="col-md-6 col-sm-10">
-					<input type="text" class="form-control" name="tax_point" value="{$info.tax_point}" />
+					<input type="number" step="0.01" class="form-control" name="tax_point" id="invoice_point" value="{$info.tax_point}" />
 				 <present name="change.tax_point">
 					 <input type="text" class="form-control red" value="{$change.tax_point}" />
 				</present>  
@@ -591,5 +660,15 @@
 			}
 		},'json');
 	});
- 
+	
+	$('#invoice_type').change(function(){
+		invoice_type_change(); 
+	});
+	function invoice_type_change(){
+		if(($('#invoice_type').val())==0){  
+			$('#invoice_point').val(0);
+			return false;
+		}  
+		$('#invoice_point').val($('#invoice_type option:selected').attr('point'));
+	}
 </script>

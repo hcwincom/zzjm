@@ -1,0 +1,372 @@
+<notempty name="info">
+ <include file="public@aids" /> 
+ </notempty>
+<div class="form-group fleft-all">
+    <label for="" class="col-sm-2 control-label">{$flag}分类</label>
+    <div class="col-md-6 col-sm-10">
+        <include file="public@operation_cate" /> 
+        <present name="change.cid">
+        	 <input type="text" class="form-control red" value="{$change.cname}" />
+        </present>
+    </div>
+</div>
+<div class="form-group fleft-all">
+    <label for="" class="col-sm-2 control-label">{$flag}名称</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" class="form-control" name="name" value="{$info.name}" required/>
+         <present name="change.name">
+        	 <input type="text" class="form-control red" value="{$change.name}" />
+        </present>
+    </div>
+</div>
+<div class="form-group fleft-all">
+	<label  class="col-sm-2 control-label">查找产品</label>
+	<div class="col-md-6 col-sm-10">
+	    <include file="public@cate_goods_mul" />  
+		 <button type="button" id="goods_add">添加</button>
+		 <p class="notice">确定添加前要选中产品添加</p> 
+	</div>
+</div>
+ <div class="form-group fleft-all">
+   <label for="" class="col-sm-2 control-label">运营产品</label>
+   
+</div>
+	 
+<div class="table_goods">
+   <table class="table table-hover table-bordered table-list goods-list" id="goods-list"> 
+	 	<tr class="goods0">
+		 	
+		 	 <td >产品编码</td> 
+		 	 <td >产品名称</td> 
+		 	 <td >供货商用名</td>
+			 <td >供货商型号</td> 
+		 	 <td >客户用名</td>
+			 <td >客户型号</td> 
+		  
+			 <td >包装说明/备注</td> 
+			 <td >排序</td> 
+			 <td width="120">操作</td> 
+	 	</tr> 
+	 	<foreach name="operation_goods" item="vo">
+ 		 <tr class="goods{$vo.goods}">
+		 	<present name="change['goods']['edit'][$key]">
+		 		<assign name="change_edit" value="$change['goods']['edit'][$key]"/>
+		 	<else/>
+		 		<assign name="change_edit" value="[]"/>
+		 	</present>
+		 	 
+		 	 <td >{$vo.code}</td> 
+		 	 <td ><a href="{:url('goods/AdminGoods/edit',['id'=>$vo.goods])}" target="_blank">{$vo.name}</a></td> 
+		 	 
+			 <td class="goods_sname"><input type="text" name="goods_sname[{$vo.goods}]" class="form-control  " value="{$vo.sname}"/></td>
+			 <td class="goods_scate"><input type="text" name="goods_scate[{$vo.goods}]" class="form-control  " value="{$vo.scate}"/></td>
+			 <td class="goods_uname"><input type="text" name="goods_uname[{$vo.goods}]" class="form-control  " value="{$vo.uname}"/></td>
+			 <td class="goods_ucate"><input type="text" name="goods_ucate[{$vo.goods}]" class="form-control  " value="{$vo.ucate}"/></td>
+			 <td class="goods_dsc"><input type="text" name="goods_dsc[{$vo.goods}]" class="form-control" value="{$vo.dsc}"/></td>  
+			 <td class="goods_sort">
+			 <input type="text" name="goods_sort[{$vo.goods}]" class="form-control" value="{$vo.sort}"/>
+			 <present name="change_edit['sort']"> 
+			  <input type="text" class="form-control red" value="{$change_edit['sort']}"/>
+			 </present>
+			 </td>  
+    	   	 
+			 <td >
+			  <input type="hidden" name="goods_id[{$vo.goods}]" class="goods_id" value="{$vo.goods}"/>
+			  <empty name="info1"> 
+			  <button type="button" class="goods_del">删除</button>
+			  </empty> 
+			  <present name="change['goods']['del'][$key]">
+		 		 <span class="red">删除</span>
+		 	  </present>
+			 </td> 
+	 	</tr> 
+	 	</foreach>
+	 <present name="change['goods']['add']">
+	 	<foreach name="change['goods']['add']" item="vo">
+ 		 <tr class="goods{$vo.goods} red">
+		 	  
+		 	 <td >{$vo.code}</td> 
+		 	 <td ><a href="{:url('goods/AdminGoods/edit',['id'=>$vo.goods])}" target="_blank">{$vo.name}</a></td> 
+		 	 
+			 <td class="goods_sname"><input type="text" name="goods_sname[{$vo.goods}]" class="form-control  " value="{$vo.sname}"/></td>
+			 <td class="goods_scate"><input type="text" name="goods_scate[{$vo.goods}]" class="form-control  " value="{$vo.scate}"/></td>
+			 <td class="goods_uname"><input type="text" name="goods_uname[{$vo.goods}]" class="form-control  " value="{$vo.uname}"/></td>
+			 <td class="goods_ucate"><input type="text" name="goods_ucate[{$vo.goods}]" class="form-control  " value="{$vo.ucate}"/></td>
+			 <td class="goods_dsc"><input type="text" name="goods_dsc[{$vo.goods}]" class="form-control" value="{$vo.dsc}"/></td>  
+			 <td class="goods_sort">
+			 <input type="text" name="goods_sort[{$vo.goods}]" class="form-control" value="{$vo.sort}"/>
+			 
+			 </td>  
+    	   	 
+			 <td >
+			  <span class="red">新增</span> 
+			 </td> 
+	 	</tr> 
+	 	</foreach>
+	 </present>
+	</table>
+</div> 
+<div class="form-group fleft-all">
+    <label for="" class="col-sm-2 control-label">关键字</label>
+    <div class="col-md-6 col-sm-10">
+    
+        <textarea name="keywords" class="form-control" id="keywords" rows="5" maxlength="200">
+        {$info.keywords}</textarea>
+        <empty name="info1">
+         <button type="button" id="keywords_add">一键生成关键字</button>
+         </empty>
+        <present name='change.keywords'>
+          <textarea class="form-control red" rows="5" >
+        {$change.keywords}</textarea> 
+        </present>
+    </div>
+</div>
+ <div class="form-group fleft-all">
+   <label for="" class="col-sm-2 control-label">关联线上店铺 
+  </label> 
+   <div class="col-md-6 col-sm-10">
+        <empty name="info1">
+     		<button type="button" id="url_add1">一键生成产品运营链接</button>
+	    </empty>
+    </div>
+  
+</div>
+<div class="table_companys">
+   <table class="table table-hover table-bordered table-list goods-list" id="company-list"> 
+	 	<tr class="company0"> 
+		 	  <td >平台名称 
+		 	  </td> 
+		 	   <td >平台ID</td>
+		 	   <td >确认</td>
+			 <td >平台链接</td> 
+		 	  <td >运营状态</td>
+			 
+	 	</tr> 
+ 		 <foreach name="companys" item="vo">
+ 		 	<present name="change['company']['edit'][$key]">
+		 		<assign name="change_edit" value="$change['company']['edit'][$key]"/>
+		 	<else/>
+		 		<assign name="change_edit" value="[]"/>
+		 	</present>
+		 	 
+ 		 <tr>
+ 		  	 <td >
+ 		  	 <label class="checkbox-line">
+	 		  	 <input type="checkbox" name="company[{$key}]" value="{$key}" <present name="operation_companys[$key]">checked</present> />
+	 		  	 {$vo.name} 
+	 		  	
+ 		  	 </label> 
+ 		  	  <present name="change['company']['add'][$key]">
+		 		<assign name="change_add" value="$change['company']['add'][$key]"/>
+		 		<span class="red">新增</span>
+		 	<else/>
+		 		<assign name="change_add" value="[]"/>
+		 	</present>
+ 		  	 
+ 		  	 <present name="change['company']['del'][$key]">
+ 		  	  	<span class="red">删除</span>
+ 		  	  </present>
+ 		  	 </td> 
+		 	 <td > 
+		 	 	<input type="input" class="code" name="code[{$key}]" value="{$operation_companys[$key]['code']|default=''}" />
+		 	 <present name="change_edit.code">
+		 	 	<input type="input" class="code red"  value="{$change_edit.code}" /> 
+		 	 </present>
+		 	  <present name="change_add.code">
+		 	 	<input type="input" class="code red"  value="{$change_add.code}" /> 
+		 	 </present>
+		 	 </td>
+		 	 <td >
+		 	 <input type="hidden" class="num_url" value="{$vo.goods_url}"/>
+		 	 <button type="button" class="num_click">确认</button>
+		 	 </td>
+			 <td >
+			 	<input type="input" style="width:350px;" class="url" name="url[{$key}]" value="{$operation_companys[$key]['url']|default=''}" /> 
+			  <present name="change_edit.url">
+		 	 	<input type="input" style="width:350px;" class="url red"  value="{$change_edit.url}" /> 
+		 	 </present>
+		 	  <present name="change_add.url">
+		 	 	<input type="input" style="width:350px;" class="url red"  value="{$change_add.url}" /> 
+		 	 </present>
+			 </td> 
+		 	 <td >
+		 	  <label class="checkbox-line">
+				 <input type="checkbox" name="is_end[{$key}]" value="1" <if condition="isset($operation_companys[$key]) && $operation_companys[$key]['is_end']==1">checked</if> />
+			 	完成
+			 	 <present name="change_edit.is_end">
+			 	 	<span class="red">
+			 	 	<eq name="change_edit.is_end" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 	 <present name="change_add.is_end">
+			 	 	<span class="red">
+			 	 	<eq name="change_add.is_end" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 </label>
+			  <label class="checkbox-line">
+				 <input type="checkbox" name="is_online[{$key}]" value="1" <if condition="isset($operation_companys[$key]) && $operation_companys[$key]['is_online']==1">checked</if> />
+			上架
+			 	<present name="change_edit.is_online">
+			 	 	<span class="red">
+			 	 	<eq name="change_edit.is_online" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 	 <present name="change_add.is_online">
+			 	 	<span class="red">
+			 	 	<eq name="change_add.is_online" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 </label>
+			  <label class="checkbox-line">
+				 <input type="checkbox" name="is_foreign[{$key}]" value="1" <if condition="isset($operation_companys[$key]) && $operation_companys[$key]['is_foreign']==1">checked</if> />
+			外贸
+				<present name="change_edit.is_foreign">
+			 	 	<span class="red">
+			 	 	<eq name="change_edit.is_foreign" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 	 <present name="change_add.is_foreign">
+			 	 	<span class="red">
+			 	 	<eq name="change_add.is_foreign" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 </label>
+			  <label class="checkbox-line">
+				 <input type="checkbox" name="is_propagate[{$key}]" value="1" <if condition="isset($operation_companys[$key]) && $operation_companys[$key]['is_propagate']==1">checked</if> />
+			推广
+				<present name="change_edit.is_propagate">
+			 	 	<span class="red">
+			 	 	<eq name="change_edit.is_propagate" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 	 <present name="change_add.is_propagate">
+			 	 	<span class="red">
+			 	 	<eq name="change_add.is_propagate" value="1">有<else/>无</eq>
+			 	 	</span>
+			 	 </present>
+			 </label>
+			 </td>
+		</tr>
+ 		 </foreach>
+	</table>
+</div>
+<div class="form-group fleft-all">
+    <label for="" class="col-sm-2 control-label">参考链接</label>
+    <div class="col-md-6 col-sm-10">
+       <select id="webs" class="form-control short2">
+       	<foreach name="webs" item="vo">
+       		<option value="{$key}" url="{$vo.goods_url}">{$vo.name}</option>
+       	</foreach>
+       </select>
+       <empty name="info1">
+         <button type="button" id="web_add">新增参考链接</button>
+         <button type="button" id="url_add2">一键生成参考产品链接</button> 
+       </empty>
+    </div>
+</div> 
+<div class="form-group fleft-all">
+    <label for="" class="col-sm-2 control-label">参考链接</label>
+    <div class="col-md-6 col-sm-10">
+      <div class="table_webs">
+   <table class="table table-hover table-bordered table-list" id="web-list"> 
+	 	<tr class="web0"> 
+		 	 <td >网站 </td> 
+		 	 <td >产品ID</td>
+		 	 <td >确认</td>
+			 <td >网站链接</td>  
+			  <td >操作</td>  
+	 	</tr> 
+ 		 <foreach name="operation_webs" item="vo">
+ 		 	<present name="change['web']['edit'][$key]">
+		 		<assign name="change_edit" value="$change['web']['edit'][$key]"/>
+		 	<else/>
+		 		<assign name="change_edit" value="[]"/>
+		 	</present>
+ 		 <tr>
+ 		  	 <td >
+ 		  	 {$webs[$vo.web]['name']|default=$vo.web} 
+ 		  	  
+ 		  	 </td> 
+		 	 <td >
+		 	 	<input type="hidden" class="web_id" name="web_id[{$key}]" value="{$vo['web']}" />
+		 	 	<input type="input" class="code" name="web_code[{$key}]" value="{$vo['code']}" />
+		 	 	<present name="change_edit.code" >
+		 	 		<input type="input" class="code red" value="{$change_edit.code}" />
+		 	 	</present>
+		 	 </td>
+		 	 <td >
+		 	 <input type="hidden" class="num_url" value="{$webs[$vo.web]['goods_url']|default=''}"/>
+		 	 <button type="button" class="num_click">确认</button>
+		 	 </td>
+			 <td >
+			 	<input type="input" style="width:350px;" class="url" name="web_url[{$key}]" value="{$vo['url']|default=''}" /> 
+			 	<present name="change_edit.url" >
+		 	 		<input type="input" style="width:350px;" class="url red"   value="{$change_edit.url}" /> 
+			 	
+		 	 	</present>
+			 </td> 
+			 <td >
+			 
+			  <empty name="info1"> 
+			  <button type="button" class="goods_del">删除</button>
+			  </empty> 
+			  <present name="change['web']['del'][$key]">
+		 		 <span class="red">删除</span>
+		 	  </present>
+			 </td>  
+		</tr>
+ 		 </foreach>
+ 	<present name="change['web']['add']">
+ 		  <foreach name="change['web']['add']" item="vo">
+ 		  
+ 		 <tr class="red">
+ 		  	 <td >
+ 		  	 {$webs[$vo.web]['name']|default=$vo.web} 
+ 		  	  
+ 		  	 </td> 
+		 	 <td >
+		 	 	<input type="hidden" class="web_id" name="web_id[{$key}]" value="{$vo['web']}" />
+		 	 	<input type="input" class="code" name="web_code[{$key}]" value="{$vo['code']}" />
+		 	 	 
+		 	 </td>
+		 	 <td >
+		 	 <input type="hidden" class="num_url" value="{$webs[$vo.web]['goods_url']|default=''}"/>
+		 	 <button type="button" class="num_click">确认</button>
+		 	 </td>
+			 <td >
+			 	<input type="input" style="width:350px;" class="url" name="web_url[{$key}]" value="{$vo['url']|default=''}" /> 
+			  
+			 </td> 
+			 <td > 
+		 		 <span class="red">新增</span> 
+			 </td>  
+		</tr>
+ 		 </foreach>
+ 	</present>
+	</table>
+</div>
+    </div>
+</div> 
+<div class="form-group fleft-all">
+    <label for="" class="col-sm-2 control-label">备注</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" class="form-control" name="dsc" value="{$info.dsc}" />
+        
+        <present name='change.dsc'>
+            <input type="text" class="form-control" name="dsc" value="{$info.dsc}" />
+        </present>
+    </div>
+</div>
+<div class="form-group fleft">
+    <label for="" class="col-sm-2 control-label">排序</label>
+    <div class="col-md-6 col-sm-10">
+        <input type="text" class="form-control" name="sort" value="{$info.sort|default=1000}" />
+        <present name='change.sort'>
+            <input type="text" class="red form-control" name="sort"  value="{$change.sort}" />
+        </present>
+    </div>
+</div>
+ 
+
+<include file="public@adsc_fleft" />

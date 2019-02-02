@@ -46,7 +46,18 @@
 	        	<option value="{$key}" <if condition="$key eq $data.type2">selected</if>>{$vo}</option>
 	        </foreach>  
 	        </select> 
-	        
+	          级别<select name="type" class="form-control"  >
+				<option value="0">未选择</option>
+				<foreach name="rates" item="vo">
+					<option value="{$key}" <if condition="$key eq $data.type">selected</if>>{$vo}</option>
+				</foreach>
+	        </select>
+		         省<select name="city1" class="form-control" id="city1"  >
+				<option value="0">选择省</option>
+	        </select>
+        	市<select name="city2"  class="form-control" id="city2"  >
+				<option value="0">选择市</option>
+        	</select>
             <input type="text" class="form-control" name="name" style="width: 120px;" value="{$data.name}">
             <select class="form-control" name="time" id="">
 	        <foreach name="times" item="vo">
@@ -85,6 +96,7 @@
 						<th width="100">{$flag}ID</th>
 						 
 						<th>{$flag}名</th> 
+						 <th>级别</th> 
 						 <th>{$flag}编码</th> 
 						<th>创建人</th>
 						<th>创建时间</th>
@@ -109,6 +121,7 @@
 						{$vo.id}
 						</td>
 						<td><a href="{:url('edit',['id'=>$vo.id])}"  target="{$zztarget['list']}">{$vo.name}</a></td>
+						<td>{$rates[$vo.type]|default=''}</td>
 						 <td>{$vo.code}</td>
 						<td>{$vo.aname|default=$vo.aid}</td>
 						<td>{$vo.atime|date='Y-m-d H:i',###}</td>
@@ -153,6 +166,9 @@
         $(this).parents('form').attr('action',"{:url('del_all')}");
         return is_check('批量删除');
     });
+  //城市选择js初始化 
+   city_js($('#city1'),"{$data.city1|default=0}",$('#city2'),"{$data.city2|default=0}");
+  
 </script>
 </body>
 </html>
