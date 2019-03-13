@@ -29,7 +29,7 @@ class AdminCustomCateController extends AdminInfo0Controller
      *     'parent' => 'custom/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 5,
      *     'icon'   => '',
      *     'remark' => '客户类别列表',
      *     'param'  => ''

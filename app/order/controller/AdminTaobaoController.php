@@ -58,7 +58,7 @@ class AdminTaobaoController extends AdminBaseController
                 'type'=>2,
                 'status'=>2,
             ];
-            $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key,store');
+            $companys=Db::name('company')->where($where)->order('sort asc')->column('id,name,key_account,key_key,store,paytype');
             $order_type=$this->order_type; 
             $log='taobao.log'; 
             $m_store_goods=new StoreGoodsModel(); 
@@ -131,15 +131,17 @@ buyer_nick	String	我在测试	买家昵称
             $oids=$m->where($where)->column('name,id,status,is_back,pay_status,paytype,pay_type,order_amount,pay_time','name');
             $m->startTrans();
             foreach($companys as $k=>$v){
-               
+                if(empty($v['key_account']) || empty($v['key_key'])){
+                   continue;
+                }
                 $client = new Taobao($v['key_account'], $v['key_key']); 
                 $status = ""; 
                 $client->get('/JSB/rest/trade/TradesSoldGetRequest?fields='.$fields.'&start_created='.$start_created.'&end_created='.$end_created.'&status='.$status);
                 
                 $order = $client->getContent(); 
-                zz_log($order);
-                $state=intval($client->status);
                
+                $state=intval($client->status);
+              
                 //返回状态失败
                 if($state!=200){
                     echo '<h2>分公司'.$v['name'].'淘宝同步失败</h2>'; 

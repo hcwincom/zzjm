@@ -1,0 +1,46 @@
+ 
+					 
+					 <foreach name="links0" item="link" key="pid1">
+					 	<tr >
+					 		<td>
+					 		<a href="{$url_goods}/id/{$pid1}" target="{$zztarget.other}">{$link.name}</a>
+					 		 <present name="change['del'][$pid1]">
+					 		 <span class="red">删除</span>
+					 		 </present>
+					 		</td>
+					 	  
+					 		<td>{$link.num}
+					 		 <present name="change['edit'][$pid1]['num']">
+					 		  <span class="red">{$change['edit'][$pid1]['num']}</span>
+					 		 </present>
+					 		</td> 
+					 		<td>
+					 		{$link.dsc}
+					 		 <present name="change['edit'][$pid1]['dsc']">
+					 		  <span class="red">{$change['edit'][$pid1]['dsc']}</span>
+					 		 </present>
+					 		</td> 
+					 	</tr>
+					 </foreach>
+					  <present name="change['add']">
+					   <foreach name="change['add']" item="link" key="pid1">
+					 	<tr class="red">
+					 		<td>
+					 		<a href="{$url_goods}/id/{$pid1}" target="{$zztarget.other}">{$link.name}</a>
+					 		 
+					 		 <span class="red">新增</span>
+					 		 
+					 		</td>
+					 	  
+					 		<td>{$link.num}
+					 		 
+					 		</td> 
+					 		<td>
+					 		{$link.dsc}
+					 		 
+					 		</td> 
+					 	</tr>
+					 </foreach>
+					  </present>
+				 
+				  

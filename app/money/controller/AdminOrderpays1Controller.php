@@ -30,10 +30,10 @@ class AdminOrderpays1Controller extends OrderpaysBaseController
      * 定期结账客户列表
      * @adminMenu(
      *     'name'   => ' 定期结账客户列表',
-     *     'parent' => 'money/AdminIndex/default',
+     *     'parent' =>  'custom/AdminIndex/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 1,
+     *     'order'  => 2,
      *     'icon'   => '',
      *     'remark' => ' 定期结账客户列表',
      *     'param'  => ''

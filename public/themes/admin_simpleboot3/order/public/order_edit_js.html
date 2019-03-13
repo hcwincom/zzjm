@@ -102,7 +102,7 @@ $(document).on('click','.order_break',function(){
 		$('.orders').append(div);
 		$(this).parents('.order').find('.order_pay').clone(true).appendTo('.order'+oid);
 		$order_new=$('.order'+oid);
-	 	 
+		$order_new.find('.send_about').remove(); 
 		$order_new.find('.order_pay .store').attr('name','store0['+oid+']');
 		$order_new.find('.order_pay .freight').attr('name','freight0['+oid+']');
 		$order_new.find('.order_pay .order_weight').attr('name','weight0['+oid+']');
@@ -118,9 +118,8 @@ $(document).on('click','.order_break',function(){
 		$order_new.find('.order_pay .dsc').attr('name','dsc0['+oid+']');
 		$order_new.find('.order_pay .express_no').attr('name','express_no0['+oid+']');
 		
-		$order_new.find('.order_pay select').val(0);
-		$order_new.find('.order_pay input').val(0);
-		$order_new.find('.order_pay select').val(0);
+		 
+		$order_new.find('.order_pay input').val(0); 
 		$order_new.find('.order_pay dsc').val('');
 		 //后续新增的属性
 		$order_new.find('.order_pay .box_out').attr('name','box_out0['+oid+']');

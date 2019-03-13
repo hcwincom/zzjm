@@ -167,13 +167,14 @@
 						<th>下单人</th>
 						<th>所属公司</th>
 						<th>产品数量</th>
-						<th>付款类型</th>
+						<th>付款账户</th>
 						<th>客户</th>
 						<th>总金额</th>
-						<th>支付状态</th>  
+						
 					 
 					    <th>下单时间</th>
 					  <th>{$flag}状态</th>
+					  <th>支付状态</th>  
 					</tr>
 				</thead>
 				<tbody>
@@ -204,7 +205,7 @@
 					 	</td>
 					 	
 					 	<td>{$vo.express_no}</td>
-					  	<td>{$aids[$vo['aid']]['name']|default=$vo['aid']}</td>
+					  	<td>{$aids[$vo['aid']]|default=$vo['aid']}</td>
 					   	<td>{$companys[$vo['company']]|default=$vo['company']}</td>
 					  	<td  class="clickInfo"> 
 							<div style="position:relative;" class="goInfo" data-width="0">
@@ -245,25 +246,7 @@
 					   
 					  	<td><a href="{$order_user_url}/id/{$vo.uid}" target="{$zztarget.other}">{$vo.custom_name}</a></td>
 						<td>{$vo.order_amount}</td>
-						<td>{$pay_status[$vo.pay_status]|default=$vo.pay_status}
-						 <eq name="vo.pay_type" value="3">
-						 {$pay_types[$vo.pay_type]|default=$vo.pay_type}
-						 <else/> 
-							<lt name="vo.status" value="80">
-						 
-							  <switch name="vo.pay_status">
-								 <case value="1">
-								 <a class="js-ajax-dialog-btn  btn btn-primary" data-msg="提交付款吗？" href="{:url('pay_do1',['id'=>$vo.id])}">提交付款</a>
-								  
-								 </case>
-								 <case value="2">
-								  <a class="js-ajax-dialog-btn btn btn-primary" data-msg="确认付款吗？" href="{:url('pay_do2',['id'=>$vo.id])}">确认付款</a> 
-								 </case> 
-							 </switch> 
-						 		 
-					 		</lt>
-				 		</eq>
-						</td>
+						
 					 
 						<td>{$vo.create_time|date='Y-m-d H:i',###}</td>
 					 
@@ -300,6 +283,25 @@
 							 </lt>
 						</eq>
 					 
+						</td>
+						<td>{$pay_status[$vo.pay_status]|default=$vo.pay_status}
+						 <eq name="vo.pay_type" value="3">
+						 {$pay_types[$vo.pay_type]|default=$vo.pay_type}
+						 <else/> 
+							<lt name="vo.status" value="80">
+						 
+							  <switch name="vo.pay_status">
+								 <case value="1">
+								 <a class="js-ajax-dialog-btn  btn btn-primary" data-msg="提交付款吗？" href="{:url('pay_do1',['id'=>$vo.id])}">提交付款</a>
+								  
+								 </case>
+								 <case value="2">
+								  <a class="js-ajax-dialog-btn btn btn-primary" data-msg="确认付款吗？" href="{:url('pay_do2',['id'=>$vo.id])}">确认付款</a> 
+								 </case> 
+							 </switch> 
+						 		 
+					 		</lt>
+				 		</eq>
 						</td>
 					  
 					</tr>

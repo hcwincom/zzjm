@@ -139,7 +139,7 @@
 			<input type="text" class="form-control short red"  value="{$changevv['invoice0_money']}" />
 		</present>
 		</label>
-		 
+		 <div class="send_about">
 		<present name="vv.status">
 	 	 <label class="input-inline">
 	 	   订单状态：<input type="text" class="form-control short" value="{$statuss[$vv.status]|default='未知'}" readonly/> 
@@ -177,6 +177,7 @@
 			 &nbsp;&nbsp;&nbsp;&nbsp;  
 	   		 	   
 	    </if>
+	    </div>
 	   	订单备注：  
 		<input type="text" class="form-control fleft-all dsc" name="dsc0[{$kk}]" value="{$vv.dsc}" /> 
 	<present name="changevv['dsc']">

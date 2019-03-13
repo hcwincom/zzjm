@@ -141,19 +141,21 @@ $('#add').click(function(){
 		'<div class="form-group fleft" style="width:100%"><label class="col-sm-2 control-label">备注</label><div class="col-md-6 col-sm-10"><input type="text" class="form-control" name="dsc['+key+']"  />'+
 		'</div></div><div style="clear:both"></div>';
 	 $('#status').before(append);
-	 province=$('#province'+contacter).val();
-	city=$('#city'+contacter).val();
-	area=$('#area'+contacter).val();
-	postcode=$('#postcode'+contacter).val();
-	street=$('#street'+contacter).val();
-	 city_js1($('#province'+key),province,$('#city'+key),city,$('#area'+key),area);
-	 $('#postcode'+key).val(postcode);
-	 $('#street'+key).val(street);
 	 if(key==1){
 		 $('.checker input').attr("checked",'checked');
 		 $('.contacter input').attr("checked",'checked');
 		 $('.receiver input').attr("checked",'checked');
+		
+	 }else{
+		province=$('#province'+contacter).val();
+		city=$('#city'+contacter).val();
+		area=$('#area'+contacter).val();
+		postcode=$('#postcode'+contacter).val();
+		street=$('#street'+contacter).val(); 
 	 }
+	 city_js1($('#province'+key),province,$('#city'+key),city,$('#area'+key),area);
+	 $('#postcode'+key).val(postcode);
+	 $('#street'+key).val(street);
 });
   
 </script>

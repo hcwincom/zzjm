@@ -1574,7 +1574,7 @@ class OrderBaseController extends AdminBaseController
               1=>['提交下单 ',url('status_do1','',false,false)],
               2=>['确认订单 ',url('status_do2','',false,false)],
               10=>['手动转为待收货 ',url('status_do10','',false,false)],
-              20=>['供货商已发货',url('status_do20','',false,false)],
+              20=>['供货商发货',url('status_do20','',false,false)],
               22=>['准备收货 ',url('status_do22','',false,false)],
               24=>['收货完成 ',url('status_do24','',false,false)],
           ];
@@ -2276,9 +2276,13 @@ class OrderBaseController extends AdminBaseController
                 //不存在新增
                 $content['add'][$void]=[];
                 //添加订单信息
-                
+               
                 foreach($edit_base as $kk=>$vv){
-                    $content['add'][$void][$vv]=$data[$vv.'0'][$void];
+                    if($vv=='express_no'){
+                        $content['add'][$void][$vv]='';
+                    }else{
+                        $content['add'][$void][$vv]=$data[$vv.'0'][$void];
+                    } 
                 }
                 if(isset($data['nums-'.$void])){
                     foreach ($data['nums-'.$void] as $kgoodsid=>$kv){

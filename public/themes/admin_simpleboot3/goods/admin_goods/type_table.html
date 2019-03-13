@@ -1,0 +1,39 @@
+ 
+ <include file="public@cate_goods" />  
+ <button type="button" id="goods_link">确定</button>
+ <table class="table table-hover table-bordered table-list">
+ 	<tr><td>产品</td><td>数量</td><td>备注</td><td>操作</td></tr>
+ <foreach name="id_links" item="link" key="pid1">
+ 	<tr class="">
+ 		<td><a href="{$url_goods}/id/{$pid1}" target="{$zztarget.other}">{$link.name}</a></td>
+ 		<td><input type="text" name="id_links[{$pid1}]" value="{$link.num}"/></td>
+ 		<td><input type="text" name="id_dscs[{$pid1}]" value="{$link.dsc}"/></td>
+ 		<td><button class="del_link" type="button">删除</button></td>
+ 	</tr>
+ </foreach>
+ </table>
+ 
+ <script>
+ $(function(){
+	 var url_goods="{$url_goods}";
+	 //选择关联产品
+	$('#goods_link').click(function(){
+		var $div=$(this).parent();
+		var id=parseInt($div.find('.goods').val());
+		var name=$div.find('.goods option:selected').text();
+		 if(!(id>0)){
+			 return false;
+		 }
+		var tr='<tr class=""><td><a href="'+url_goods+'/id/'+id+'" target="_blank">'+name+
+		'</a></td><td><input type="text" name="id_links['+id+
+			']" value="1"/></td><td><input type="text" name="id_dscs['+id+
+			']" value=""/></td><td><button class="del_link" type="button">删除</button></td></tr>';
+		$div.find('table').append(tr);
+		return false;
+	});
+	$(document).on('click','.del_link',function(){
+		$(this).parents('tr').remove();
+	});
+ });
+ </script>
+					 

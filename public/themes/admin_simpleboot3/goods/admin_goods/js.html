@@ -126,23 +126,7 @@ $('#size1').click(function(){
 	 
 });
  
-//选择关联产品
-$('#goods_link').click(function(){
-	var $div=$(this).parent();
-	var id=parseInt($div.find('.goods').val());
-	var name=$div.find('.goods option:selected').text();
-	 if(!(id>0)){
-		 return false;
-	 }
-	var tr='<tr class=""><td><a href="'+url_goods+'/id/'+id+'" target="_blank">'+name+
-	'</a></td><td><input type="text" name="id_links['+id+
-		']" value="1"/></td><td><button class="del_link" type="button">删除</button></td></tr>';
-	$div.find('table').append(tr);
-	return false;
-});
-$(document).on('click','.del_link',function(){
-	$(this).parents('tr').remove();
-});
+
 
 {//根据初始价格和模板计算价格}
 $('#set_price').click(function(){ 

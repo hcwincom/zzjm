@@ -26,39 +26,14 @@
 				<div class="col-md-6 col-sm-10">
 					 
 					 <table class="table table-hover table-bordered table-list">
-					 	<tr><td>产品</td><td>配件数量</td> </tr>
-					 <foreach name="links0" item="link" key="pid1">
-					 	<tr >
-					 		<td><a href="{$url_goods}/id/{$link.pid1}" target="{$zztarget.other}">{$link.name|default=$pid1}</a></td>
-					 	  
-					 		<td>{$link.num}</td> 
-					 	</tr>
-					 </foreach>
+					 	<tr><td>产品</td><td>关联数量</td><td>备注</td> </tr>
+					   
+					 	 <include file="goods@admin_goods:type_table_info" />
 					 </table>
 				 
 				</div>
 			</div>
-	 <present name="change.id_links">
-	 		<div class="form-group red">
-				<label for="" class="col-sm-2 control-label">产品关联</label>
-				<div class="col-md-6 col-sm-10">
-					 
-					 <table class="table table-hover table-bordered table-list">
-					 	<tr><td>产品</td><td>配件数量</td> </tr>
-					 <foreach name="links1" item="link" key="pid1">
-					 	<tr >
-					 		<td>
-					 			<a href="{$url_goods}/id/{$pid1}" target="{$zztarget.other}">{$links10[$pid1]|default=$pid1}</a>
-					 		</td>
-					 	 
-					 		<td>{$link}</td> 
-					 	</tr>
-					 </foreach>
-					 </table>
-				 
-				</div>
-			</div>
-	 </present>
+	 
 			 
 			<div class="form-group">
 				<label for="input-gender" class="col-sm-2 control-label">{$flag}状态</label>

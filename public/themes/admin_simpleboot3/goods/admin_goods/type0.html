@@ -36,19 +36,7 @@
 			<div class="form-group goods_link">
 				<label for="" class="col-sm-2 control-label">作为配件与设备关联</label>
 				<div class="col-md-6 col-sm-10">
-					 <include file="public@cate_goods" />  
-					 <button type="button" id="goods_link">确定</button>
-					 <table class="table table-hover table-bordered table-list">
-					 	<tr><td>设备</td><td>配件数量</td><td>操作</td></tr>
-					 <foreach name="id_links" item="link" key="pid1">
-					 	<tr class="">
-					 		<td><a href="{$url_goods}/id/{$link.pid0}" target="{$zztarget.other}">{$link.name}</a></td>
-					 	 
-					 		<td><input type="text" name="id_links[{$link.pid0}]" value="{$link.num}"/></td>
-					 		<td><button class="del_link" type="button">删除</button></td>
-					 	</tr>
-					 </foreach>
-					 </table>
+					  <include file="goods@admin_goods/type_table" />
 					 
 				</div>
 			</div>
@@ -68,7 +56,7 @@
 	</div>
 	
 	<script src="__STATIC__/js/admin.js"></script> 
-	  <include file="goods@admin_goods/js" />
+	 
 </body>
 </html>
  

@@ -29,7 +29,7 @@ class AdminSupplierCateController extends AdminInfo0Controller
      *     'parent' => 'custom/AdminSupplier/default',
      *     'display'=> true,
      *     'hasView'=> true,
-     *     'order'  => 2,
+     *     'order'  => 5,
      *     'icon'   => '',
      *     'remark' => '供货商类别列表',
      *     'param'  => ''

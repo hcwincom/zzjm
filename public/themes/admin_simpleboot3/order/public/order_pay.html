@@ -14,7 +14,7 @@
 	  <include file="order@public:order_fee0" />
 	 
 <div class="form-group fleft-all">
-	<label  class="col-sm-2 control-label">付款和发票</label>
+	<label  class="col-sm-2 control-label">结算方式和发票</label>
 	<div class="col-md-6 col-sm-10">
 	  货款结算方式：
 	   <select  class="form-control short-auto" name="pay_type" id="pay_type"   > 
@@ -29,21 +29,7 @@
 		 
 		</select>   
 	 </present>
-	        付款账号：
-	   <select  class="form-control short-auto" name="paytype" id="paytype"  required >
-	   		<option value="0">请选择</option>
-		<foreach name="paytypes" item="vo">
-			<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
-		</foreach>
-		</select> 
-		 
-		
-	 <present name="change.paytype">
-	 	 <select  class="form-control short-auto red" >
-	   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option>
-		 
-		</select>   
-	 </present>
+	      
 	
 		开票类型：
 		 <select  class="form-control short-auto" name="invoice_type" id="invoice_type">
@@ -105,7 +91,27 @@
 	 	<present name="change.pay.location"> 
 	   		<input type="text"  class="form-control red"  value="{$change.pay.location}"/>
 	   	</present>  
-	 
-	 
+	  
 	</div>
+</div> 
+<div class="form-group fleft-all">
+	<label  class="col-sm-2 control-label">店铺账号</label>
+	<div class="col-md-6 col-sm-10">
+	 
+	   <select  class="form-control " name="paytype" id="paytype"  required >
+	   		<option value="0">请选择</option>
+		<foreach name="paytypes" item="vo">
+			<option value="{$key}" <if condition="$key eq $info.paytype">selected</if>>{$vo}</option>
+		</foreach>
+		</select> 
+		 
+		
+	 <present name="change.paytype">
+	 	 <select  class="form-control red" >
+	   		<option value="{$change.paytype}">{$paytypes[$change.paytype]|default='未知'}</option>
+		 
+		</select>   
+	 </present>
+	
+	 </div>
 </div> 

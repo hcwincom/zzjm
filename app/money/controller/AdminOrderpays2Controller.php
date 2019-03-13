@@ -23,14 +23,14 @@ class AdminOrderpays2Controller extends OrderpaysBaseController
         $this->assign('uflag',$this->uflag); 
         $this->assign('oflag',$this->oflag); 
         $this->assign('uurl',url('custom/AdminSupplier/edit','',false,false)); 
-        $this->assign('ourl',url('order/AdminOrdersup/edit','',false,false)); 
+        $this->assign('ourl',url('ordersup/AdminOrdersup/edit','',false,false)); 
         
     }
     /**
      * 定期结账供应商列表
      * @adminMenu(
      *     'name'   => ' 定期结账供应商列表',
-     *     'parent' => 'money/AdminIndex/default',
+     *     'parent' => 'custom/AdminSupplier/default',
      *     'display'=> true,
      *     'hasView'=> true,
      *     'order'  => 2,
